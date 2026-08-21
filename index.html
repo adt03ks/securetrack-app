@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080a0c">
+  <title>SecureTrack | Device Verification</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="brandbar">
+      <div class="logo-mark" aria-hidden="true"><span class="logo-lock"></span></div>
+      <div>
+        <div class="wordmark"><span>Secure</span><span>Track</span></div>
+        <div class="tagline">Asset Accountability & Device Verification</div>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div class="eyebrow">Secure device session</div>
+        <h1>Ready to verify.</h1>
+        <p class="subtle">A registered QR code or NFC tag opened this device record.</p>
+        <div class="status-strip"><span class="status-dot"></span><span id="statusText">Locating device…</span></div>
+      </div>
+
+      <div class="verify-section">
+        <div id="demoBanner" class="demo-banner">Prototype mode: update <strong>config.js</strong> with Supabase credentials and set demoMode to false for live records.</div>
+        <div class="verify-grid">
+          <article class="device-card">
+            <div class="device-image-wrap"><img id="deviceImage" src="assets/device-placeholder.svg" alt="Scanned equipment"></div>
+            <div class="device-meta">
+              <div class="eyebrow">Scanned device</div>
+              <div class="device-name" id="assetCode">Loading…</div>
+              <div class="device-model" id="deviceModel">Loading model…</div>
+              <span class="device-code">Token: <span id="tokenDisplay" style="margin-left:5px"></span></span>
+            </div>
+          </article>
+
+          <article class="verify-card">
+            <div class="eyebrow">Step 1</div>
+            <h2>Verify the device</h2>
+            <p class="subtle">Confirm this is the equipment you intended to scan before creating an accountability record.</p>
+            <button class="verify-btn" id="verifyBtn">Verify Device</button>
+            <div class="verify-note"><span>🔒</span><span>Checkout, inspection, and issue reporting remain disabled until verification succeeds.</span></div>
+            <div id="errorBox" class="result"></div>
+          </article>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="actions-title"><div><div class="eyebrow">Step 2</div><h2 style="margin:5px 0 0">Choose an action</h2></div></div>
+        <div class="actions-grid">
+          <a class="action-card disabled" href="checkout.html" aria-disabled="true">
+            <span class="lock-pill">LOCKED</span><div class="action-icon">⬡</div>
+            <h3>Check Out Item</h3><p>Assign the verified equipment to your custody and create a timestamped checkout record.</p>
+          </a>
+          <a class="action-card disabled" href="inspection.html" aria-disabled="true">
+            <span class="lock-pill">LOCKED</span><div class="action-icon">✓</div>
+            <h3>Record Inspection</h3><p>Document condition, functional checks, and inspection notes against this device.</p>
+          </a>
+          <a class="action-card disabled" href="issue.html" aria-disabled="true">
+            <span class="lock-pill">LOCKED</span><div class="action-icon">!</div>
+            <h3>Report an Issue</h3><p>Record damage, malfunction, missing components, or another accountability concern.</p>
+          </a>
+        </div>
+        <div class="footer-trust"><div><strong>SECURE. ACCOUNTABLE. TRUSTED.</strong><br>Every submitted action is tied to the scanned asset and stored in the audit database.</div><div>◉ NFC &nbsp; ▦ QR</div></div>
+      </div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script><script src="common.js"></script><script src="index.js"></script>
+</body>
+</html>

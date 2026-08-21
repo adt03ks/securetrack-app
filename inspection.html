@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080a0c">
+  <title>SecureTrack | Inspection</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="panel page-panel">
+      <header class="panel-head action-head">
+        <div class="top-nav themed">
+          <div class="brandbar" style="margin:0">
+            <div class="logo-mark" aria-hidden="true"><span class="logo-lock"></span></div>
+            <div>
+              <div class="wordmark"><span>Secure</span><span>Track</span></div>
+              <div class="tagline">Asset Accountability &amp; Device Verification</div>
+            </div>
+          </div>
+          <a class="back-link" href="index.html">← Device actions</a>
+        </div>
+        <div class="action-hero-copy">
+          <div class="eyebrow">Verified device workflow</div>
+          <h1>Record inspection.</h1>
+          <p class="subtle">Document device condition using the same SecureTrack visual language as the landing page. Inspection results, notes, and staff credentials are written back to Supabase.</p>
+          <div class="status-strip"><span class="status-dot success"></span><span>Device verification confirmed. Complete the condition checks below.</span></div>
+        </div>
+      </header>
+
+      <div class="verify-section flow-wrap">
+        <div class="flow-grid branded-flow">
+          <aside class="panel summary-card branded-card" id="deviceSummary">Loading device…</aside>
+
+          <section class="panel form-card branded-card">
+            <div class="eyebrow">Inspection record</div>
+            <h2 class="form-title">Inspect <span data-asset-code>device</span></h2>
+            <p class="subtle">Complete the device checklist below. SecureTrack associates the inspection with the verified device and timestamps the completed record.</p>
+
+            <div class="task-callout">
+              <div class="callout-icon">✓</div>
+              <div>
+                <strong>Inspection instructions</strong>
+                <p>Review each system check carefully, note any defects or abnormalities, and submit your observations to update the device history in real time.</p>
+              </div>
+            </div>
+
+            <form id="inspectionForm">
+              <input id="assetToken" type="hidden">
+              <div class="field-grid">
+                <div class="field">
+                  <label for="employee_number">Employee Number</label>
+                  <input id="employee_number" name="employee_number" autocomplete="off" inputmode="numeric" required>
+                </div>
+                <div class="field">
+                  <label for="badge_number">Badge Number</label>
+                  <input id="badge_number" name="badge_number" autocomplete="off" inputmode="numeric" required>
+                </div>
+              </div>
+              <div class="checklist">
+                <div class="check-row"><strong>Battery / power</strong><select name="battery" required><option value="pass">Pass</option><option value="fail">Fail</option><option value="na">N/A</option></select></div>
+                <div class="check-row"><strong>Cartridge / accessory</strong><select name="cartridge" required><option value="pass">Pass</option><option value="fail">Fail</option><option value="na">N/A</option></select></div>
+                <div class="check-row"><strong>Display / indicators</strong><select name="display" required><option value="pass">Pass</option><option value="fail">Fail</option><option value="na">N/A</option></select></div>
+                <div class="check-row"><strong>Housing / exterior</strong><select name="housing" required><option value="pass">Pass</option><option value="fail">Fail</option><option value="na">N/A</option></select></div>
+                <div class="check-row"><strong>Safety / controls</strong><select name="safety" required><option value="pass">Pass</option><option value="fail">Fail</option><option value="na">N/A</option></select></div>
+                <div class="check-row"><strong>Camera / recording</strong><select name="camera" required><option value="pass">Pass</option><option value="fail">Fail</option><option value="na">N/A</option></select></div>
+              </div>
+              <div class="field">
+                <label for="notes">Inspection Notes</label>
+                <textarea id="notes" name="notes" placeholder="Document defects, condition, corrective action, or other observations"></textarea>
+              </div>
+              <button class="primary-btn" type="submit">Submit Inspection</button>
+              <div id="result" class="result"></div>
+            </form>
+          </section>
+        </div>
+      </div>
+
+      <div class="actions page-footer-actions">
+        <div class="footer-trust"><div><strong>SECURE. ACCOUNTABLE. TRUSTED.</strong><br>Every inspection check is attached to the verified asset and preserved in the audit history.</div><div>◉ LIVE LOG &nbsp; ▦ SUPABASE</div></div>
+      </div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script src="action-pages.js"></script>
+  <script src="inspection.js"></script>
+</body>
+</html>

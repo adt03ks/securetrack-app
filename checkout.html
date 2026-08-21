@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080a0c">
+  <title>SecureTrack | Checkout</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="panel page-panel">
+      <header class="panel-head action-head">
+        <div class="top-nav themed">
+          <div class="brandbar" style="margin:0">
+            <div class="logo-mark" aria-hidden="true"><span class="logo-lock"></span></div>
+            <div>
+              <div class="wordmark"><span>Secure</span><span>Track</span></div>
+              <div class="tagline">Asset Accountability &amp; Device Verification</div>
+            </div>
+          </div>
+          <a class="back-link" href="index.html">← Device actions</a>
+        </div>
+        <div class="action-hero-copy">
+          <div class="eyebrow">Verified device workflow</div>
+          <h1>Check out equipment.</h1>
+          <p class="subtle">Create a professional custody record for the verified device. Officer identity, timestamp, device information, and notes are recorded through Supabase.</p>
+          <div class="status-strip"><span class="status-dot success"></span><span>Device verification confirmed. Complete the checkout form below.</span></div>
+        </div>
+      </header>
+
+      <div class="verify-section flow-wrap">
+        <div class="flow-grid branded-flow">
+          <aside class="panel summary-card branded-card" id="deviceSummary">Loading device…</aside>
+
+          <section class="panel form-card branded-card">
+            <div class="eyebrow">Custody record</div>
+            <h2 class="form-title">Check out <span data-asset-code>device</span></h2>
+            <p class="subtle">Enter your employee and badge numbers to establish custody of this verified item and record the handoff to your accountability history.</p>
+
+            <div class="task-callout">
+              <div class="callout-icon">⬡</div>
+              <div>
+                <strong>Checkout instructions</strong>
+                <p>Confirm your employee credentials, review the device shown, and submit any assignment or shift notes before finalizing checkout.</p>
+              </div>
+            </div>
+
+            <form id="checkoutForm">
+              <input id="assetToken" type="hidden">
+              <div class="field-grid">
+                <div class="field">
+                  <label for="employee_number">Employee Number</label>
+                  <input id="employee_number" name="employee_number" autocomplete="off" inputmode="numeric" required>
+                </div>
+                <div class="field">
+                  <label for="badge_number">Badge Number</label>
+                  <input id="badge_number" name="badge_number" autocomplete="off" inputmode="numeric" required>
+                </div>
+              </div>
+              <div class="field">
+                <label for="notes">Checkout Notes <span class="subtle">(optional)</span></label>
+                <textarea id="notes" name="notes" placeholder="Shift assignment, deployment area, special condition, or other note"></textarea>
+              </div>
+              <button class="primary-btn" type="submit">Confirm Checkout</button>
+              <div id="result" class="result"></div>
+            </form>
+          </section>
+        </div>
+      </div>
+
+      <div class="actions page-footer-actions">
+        <div class="footer-trust"><div><strong>SECURE. ACCOUNTABLE. TRUSTED.</strong><br>Every checkout is tied to the verified asset, the submitting officer, and the recorded timestamp.</div><div>◉ LIVE LOG &nbsp; ▦ SUPABASE</div></div>
+      </div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script src="action-pages.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>
