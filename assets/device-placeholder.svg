@@ -1,1 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" role="img" aria-label="SecureTrack device placeholder">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#444b53"/><stop offset="1" stop-color="#161a1f"/>
+    </linearGradient>
+    <filter id="s"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-opacity=".45"/></filter>
+  </defs>
+  <rect width="520" height="360" rx="28" fill="#0d0f12"/>
+  <circle cx="260" cy="180" r="132" fill="none" stroke="#ff7a00" stroke-width="3" opacity=".35"/>
+  <circle cx="260" cy="180" r="102" fill="none" stroke="#7b838d" stroke-width="2" opacity=".3"/>
+  <g filter="url(#s)" transform="translate(104 85)">
+    <path d="M52 16h196c20 0 36 16 36 36v74c0 20-16 36-36 36h-46l-26 66H98l20-66H52c-20 0-36-16-36-36V52c0-20 16-36 36-36Z" fill="url(#g)" stroke="#868e97" stroke-width="5"/>
+    <rect x="55" y="48" width="105" height="68" rx="10" fill="#101317" stroke="#ff7a00" stroke-width="4"/>
+    <circle cx="216" cy="82" r="24" fill="#0f1215" stroke="#a1a7ae" stroke-width="4"/>
+    <path d="M116 162h74l-22 54h-69z" fill="#252a31" stroke="#676f78" stroke-width="4"/>
+  </g>
+  <text x="260" y="323" text-anchor="middle" fill="#8f98a2" font-family="Arial, sans-serif" font-size="18" letter-spacing="3">DEVICE IMAGE</text>
+</svg>
 
