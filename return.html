@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080a0c">
+  <title>SecureTrack | Return Equipment</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="panel page-panel">
+      <header class="panel-head action-head">
+        <div class="top-nav themed">
+          <div class="brandbar" style="margin:0">
+            <div class="logo-mark" aria-hidden="true"><span class="logo-lock"></span></div>
+            <div>
+              <div class="wordmark"><span>Secure</span><span>Track</span></div>
+              <div class="tagline">Asset Accountability &amp; Device Verification</div>
+            </div>
+          </div>
+          <a class="back-link" href="index.html">← Device actions</a>
+        </div>
+
+        <div class="action-hero-copy">
+          <div class="eyebrow">Verified device workflow</div>
+          <h1>Return equipment.</h1>
+          <p class="subtle">Release the verified device from your custody and create a permanent timestamped return record.</p>
+          <div class="status-strip">
+            <span class="status-dot success"></span>
+            <span>Device verification confirmed. Verify your employee credentials to complete the return.</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="verify-section flow-wrap">
+        <div class="flow-grid branded-flow">
+          <aside class="panel summary-card branded-card" id="deviceSummary">Loading device…</aside>
+
+          <section class="panel form-card branded-card">
+            <div class="eyebrow">Custody release</div>
+            <h2 class="form-title">Return <span data-asset-code>device</span></h2>
+            <p class="subtle">SecureTrack will verify that the device is currently assigned to you before releasing custody.</p>
+
+            <div class="task-callout">
+              <div class="callout-icon">↩</div>
+              <div>
+                <strong>Return instructions</strong>
+                <p>Confirm the device shown is the equipment you are physically returning. Enter your employee and badge numbers, add any return-condition notes, then submit the return.</p>
+              </div>
+            </div>
+
+            <form id="returnForm">
+              <input id="assetToken" type="hidden">
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="employee_number">Employee Number</label>
+                  <input id="employee_number" name="employee_number" autocomplete="off" inputmode="numeric" required>
+                </div>
+
+                <div class="field">
+                  <label for="badge_number">Badge Number</label>
+                  <input id="badge_number" name="badge_number" autocomplete="off" inputmode="numeric" required>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="notes">Return Notes <span class="subtle">(optional)</span></label>
+                <textarea id="notes" name="notes" placeholder="Return condition, battery level, equipment handoff note, or other observation"></textarea>
+              </div>
+
+              <button class="primary-btn" type="submit">Confirm Return</button>
+              <div id="result" class="result"></div>
+            </form>
+          </section>
+        </div>
+      </div>
+
+      <div class="actions page-footer-actions">
+        <div class="footer-trust">
+          <div><strong>SECURE. ACCOUNTABLE. TRUSTED.</strong><br>Every return creates a custody transaction and immediately updates the asset to Available.</div>
+          <div>◉ LIVE LOG &nbsp; ▦ SUPABASE</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script src="action-pages.js"></script>
+  <script src="return.js"></script>
+</body>
+</html>
