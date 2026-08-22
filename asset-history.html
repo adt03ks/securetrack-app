@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080a0c">
+  <title>SecureTrack | Asset History</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="shell">
+  <section class="panel manager-console">
+    <header class="panel-head manager-header">
+      <div class="manager-header-row">
+        <div class="brandbar">
+          <div class="logo-mark" aria-hidden="true"><span class="logo-lock"></span></div>
+          <div>
+            <div class="wordmark"><span>Secure</span><span>Track</span></div>
+            <div class="tagline">Asset History & Accountability</div>
+          </div>
+        </div>
+        <div class="manager-user-area">
+          <a class="back-link" href="manager.html">← Manager Dashboard</a>
+          <button id="logoutButton" class="back-link" type="button">Sign Out</button>
+        </div>
+      </div>
+
+      <div class="eyebrow">Chain of Custody</div>
+      <h1 id="historyTitle">Loading asset…</h1>
+      <p id="historySubtitle" class="subtle">Retrieving SecureTrack accountability history.</p>
+      <div class="status-strip"><span class="status-dot success"></span><span id="historyRealtimeStatus">Connecting to live asset history…</span></div>
+    </header>
+
+    <section class="asset-history-overview">
+      <article class="panel history-device-card">
+        <div class="device-image-wrap history-image-wrap">
+          <img id="historyDeviceImage" src="assets/device-placeholder.svg" alt="Equipment">
+        </div>
+        <div class="history-device-meta">
+          <div class="eyebrow">Verified Asset</div>
+          <h2 id="historyAssetCode">—</h2>
+          <div id="historyModel" class="subtle">—</div>
+          <div class="history-details-grid">
+            <div class="history-detail"><span>Status</span><strong id="historyStatus">—</strong></div>
+            <div class="history-detail"><span>Custodian</span><strong id="historyCustodian">—</strong></div>
+            <div class="history-detail"><span>Serial</span><strong id="historySerial">—</strong></div>
+            <div class="history-detail"><span>Attention</span><strong id="historyAttention">—</strong></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel history-summary-card">
+        <div class="eyebrow">Lifetime Record</div>
+        <h2>Accountability Summary</h2>
+        <div class="history-count-grid">
+          <div><span>Custody Events</span><strong id="transactionCount">0</strong></div>
+          <div><span>Inspections</span><strong id="inspectionCount">0</strong></div>
+          <div><span>Issues</span><strong id="issueCount">0</strong></div>
+          <div><span>Open Issues</span><strong id="openIssueCount">0</strong></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="manager-section">
+      <div class="manager-section-header history-section-head">
+        <div>
+          <div class="eyebrow">Complete Device Record</div>
+          <h2>Asset Timeline</h2>
+        </div>
+        <div class="history-filters" role="group" aria-label="Filter asset history">
+          <button class="history-filter active" type="button" data-filter="all">All</button>
+          <button class="history-filter" type="button" data-filter="transaction">Custody</button>
+          <button class="history-filter" type="button" data-filter="inspection">Inspections</button>
+          <button class="history-filter" type="button" data-filter="issue">Issues</button>
+        </div>
+      </div>
+      <div id="historyTimeline" class="history-timeline">Loading asset history…</div>
+    </section>
+
+    <div class="actions">
+      <div class="footer-trust">
+        <div><strong>SECURE. ACCOUNTABLE. TRUSTED.</strong><br>Asset history is read-only from this management view.</div>
+        <div>◉ REALTIME</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="manager-common.js"></script>
+<script src="asset-history.js"></script>
+</body>
+</html>
