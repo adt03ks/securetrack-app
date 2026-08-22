@@ -146,50 +146,88 @@
       const row =
         document.createElement("tr");
 
-      row.innerHTML = `
+      const historyUrl =
+  `asset-history.html?device=${encodeURIComponent(asset.id)}`;
 
-        <td>
-          <strong>
-            ${asset.asset_code}
-          </strong>
-        </td>
+row.className = "asset-row";
+row.tabIndex = 0;
 
-        <td>
-          ${
-            [
-              asset.manufacturer,
-              asset.model
-            ]
-            .filter(Boolean)
-            .join(" ")
-          }
-        </td>
+row.innerHTML = `
 
-        <td>
-          <span class="asset-status ${asset.status}">
-            ${statusLabel(asset.status)}
-          </span>
-        </td>
+  <td>
+    <strong>
+      ${asset.asset_code}
+    </strong>
+  </td>
 
-        <td>
-          ${
-            employee
-              ? `${employee.display_name} #${employee.employee_number}`
-              : "—"
-          }
-        </td>
+  <td>
+    ${
+      [
+        asset.manufacturer,
+        asset.model
+      ]
+      .filter(Boolean)
+      .join(" ")
+    }
+  </td>
 
-        <td>
-          ${
-            asset.attention_required
-              ? "⚠ REVIEW"
-              : "—"
-          }
-        </td>
+  <td>
+    <span class="asset-status ${asset.status}">
+      ${statusLabel(asset.status)}
+    </span>
+  </td>
 
-      `;
+  <td>
+    ${
+      employee
+        ? `${employee.display_name} #${employee.employee_number}`
+        : "—"
+    }
+  </td>
 
-      body.appendChild(row);
+  <td>
+    ${
+      asset.attention_required
+        ? "⚠ REVIEW"
+        : "—"
+    }
+  </td>
+
+  <td>
+    <a
+      class="history-link"
+      href="${historyUrl}"
+    >
+      View History →
+    </a>
+  </td>
+
+`;
+
+row.addEventListener("click", (event) => {
+
+  if (
+    event.target.closest("a") ||
+    event.target.closest("button")
+  ) {
+    return;
+  }
+
+  window.location.href = historyUrl;
+});
+
+row.addEventListener("keydown", (event) => {
+
+  if (
+    event.key === "Enter" ||
+    event.key === " "
+  ) {
+    window.location.href = historyUrl;
+  }
+
+});
+
+body.appendChild(row);
 
     });
 
