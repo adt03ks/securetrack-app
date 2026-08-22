@@ -66,7 +66,7 @@
                 <div class="check-row"><strong>Safety / controls</strong><select name="safety" required><option value="pass">Pass</option><option value="fail">Fail</option><option value="na">N/A</option></select></div>
               </div>
               <div class="field">
-               <div
+              <div
   id="failedNotesAlert"
   class="inspection-note-alert"
   role="alert"
@@ -78,19 +78,19 @@
     If any inspection item is marked FAIL, notes describing the condition must be entered before the inspection can be submitted.
   </span>
 </div>
-                <label for="notes">Inspection Notes</label>
-                <textarea id="notes" name="notes" placeholder="Document defects, condition, corrective action, or other observations"<div
-  id="failedNotesAlert"
-  class="inspection-note-alert"
-  role="alert"
-  aria-live="polite"
->
-  <strong>Failed Item Documentation Required</strong>
 
-  <span id="failedNotesMessage">
-    If any inspection item is marked FAIL, notes describing the condition must be entered before the inspection can be submitted.
-  </span>
-</div> ></textarea>
+<div class="field">
+  <label for="inspectionNotes">
+    Inspection Notes
+  </label>
+
+  <textarea
+    id="inspectionNotes"
+    name="notes"
+    rows="4"
+    placeholder="Enter inspection notes or describe any failed item..."
+  ></textarea>
+</div>
               </div>
               <button class="primary-btn" type="submit">Submit Inspection</button>
               <div id="result" class="result"></div>
