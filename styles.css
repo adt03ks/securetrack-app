@@ -710,3 +710,78 @@ h2.form-title { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.08; margin-b
   }
 
 }
+/* =========================================================
+   INSPECTION FAILED ITEM DOCUMENTATION
+   ========================================================= */
+
+.inspection-note-alert {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  margin: 18px 0 12px;
+  padding: 14px 16px;
+
+  border: 1px solid #3a4148;
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  color: #aab1b9;
+
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    color .2s ease;
+}
+
+
+.inspection-note-alert strong {
+  color: #d7dce1;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+
+.inspection-note-alert span {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+/* FAILED ITEM — NOTES STILL REQUIRED */
+
+.inspection-note-alert.required {
+  border-color:
+    rgba(255, 120, 0, .75);
+
+  background:
+    rgba(255, 120, 0, .09);
+
+  color: #ffc387;
+}
+
+
+.inspection-note-alert.required strong {
+  color: var(--orange);
+}
+
+
+/* FAILED ITEM — DOCUMENTATION COMPLETED */
+
+.inspection-note-alert.satisfied {
+  border-color:
+    rgba(42, 190, 116, .6);
+
+  background:
+    rgba(42, 190, 116, .08);
+
+  color: #9be0ba;
+}
+
+
+.inspection-note-alert.satisfied strong {
+  color: #62d89a;
+}
