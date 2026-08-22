@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#080a0c">
+
+  <title>
+    SecureTrack | Manager Reports
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+</head>
+
+
+<body>
+
+<main class="shell">
+
+  <section class="panel manager-console">
+
+    <!-- =======================================
+         HEADER
+         ======================================= -->
+
+    <header class="panel-head manager-header">
+
+      <div class="manager-header-row">
+
+        <div class="brandbar">
+
+          <div class="logo-mark">
+            <span class="logo-lock"></span>
+          </div>
+
+          <div>
+
+            <div class="wordmark">
+              <span>Secure</span><span>Track</span>
+            </div>
+
+            <div class="tagline">
+              Management Console
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="manager-user-area">
+
+          <span id="managerName">
+            Manager
+          </span>
+
+          <a
+            href="manager.html"
+            class="back-link"
+          >
+            Dashboard
+          </a>
+
+          <button
+            id="logoutButton"
+            class="back-link"
+            type="button"
+          >
+            Sign Out
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="eyebrow">
+        Historical Accountability
+      </div>
+
+      <h1>
+        Manager Reports
+      </h1>
+
+      <p class="subtle">
+        Review SecureTrack activity by date,
+        transaction type, inspection, or reported issue.
+      </p>
+
+    </header>
+
+
+    <!-- =======================================
+         REPORT FILTERS
+         ======================================= -->
+
+    <section class="manager-section">
+
+      <div class="eyebrow">
+        Report Parameters
+      </div>
+
+      <h2>
+        Select Reporting Period
+      </h2>
+
+
+      <div class="report-quick-buttons">
+
+        <button
+          type="button"
+          class="report-quick-btn"
+          data-range="today"
+        >
+          Today
+        </button>
+
+        <button
+          type="button"
+          class="report-quick-btn"
+          data-range="7"
+        >
+          Last 7 Days
+        </button>
+
+        <button
+          type="button"
+          class="report-quick-btn"
+          data-range="30"
+        >
+          Last 30 Days
+        </button>
+
+      </div>
+
+
+      <form id="reportForm">
+
+        <div class="report-filter-grid">
+
+          <div class="field">
+
+            <label for="startDate">
+              Start Date
+            </label>
+
+            <input
+              id="startDate"
+              name="startDate"
+              type="date"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="endDate">
+              End Date
+            </label>
+
+            <input
+              id="endDate"
+              name="endDate"
+              type="date"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="reportType">
+              Report Type
+            </label>
+
+            <select
+              id="reportType"
+              name="reportType"
+            >
+
+              <option value="all">
+                All Activity
+              </option>
+
+              <option value="transaction">
+                Checkouts & Returns
+              </option>
+
+              <option value="inspection">
+                Inspections
+              </option>
+
+              <option value="issue">
+                Issues
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <button
+          class="primary-btn"
+          type="submit"
+          id="generateButton"
+        >
+          Generate Report
+        </button>
+
+      </form>
+
+
+      <div
+        id="reportError"
+        class="result"
+      ></div>
+
+    </section>
+
+
+    <!-- =======================================
+         SUMMARY
+         ======================================= -->
+
+    <section class="manager-summary-grid">
+
+      <article class="manager-stat">
+
+        <span>
+          Total Records
+        </span>
+
+        <strong id="totalRecords">
+          0
+        </strong>
+
+      </article>
+
+
+      <article class="manager-stat">
+
+        <span>
+          Checkouts / Returns
+        </span>
+
+        <strong id="transactionRecords">
+          0
+        </strong>
+
+      </article>
+
+
+      <article class="manager-stat">
+
+        <span>
+          Inspections
+        </span>
+
+        <strong id="inspectionRecords">
+          0
+        </strong>
+
+      </article>
+
+
+      <article class="manager-stat warning">
+
+        <span>
+          Issues
+        </span>
+
+        <strong id="issueRecords">
+          0
+        </strong>
+
+      </article>
+
+    </section>
+
+
+    <!-- =======================================
+         REPORT RESULTS
+         ======================================= -->
+
+    <section class="manager-section">
+
+      <div class="manager-section-header">
+
+        <div>
+
+          <div class="eyebrow">
+            Report Results
+          </div>
+
+          <h2 id="reportTitle">
+            Activity Report
+          </h2>
+
+          <p
+            id="reportPeriod"
+            class="subtle"
+          >
+            Select a date range to begin.
+          </p>
+
+        </div>
+
+
+        <div class="report-actions">
+
+          <button
+            type="button"
+            id="csvButton"
+            class="back-link"
+            disabled
+          >
+            Export CSV
+          </button>
+
+          <button
+            type="button"
+            id="printButton"
+            class="back-link"
+            disabled
+          >
+            Print
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table class="manager-table report-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Date / Time
+              </th>
+
+              <th>
+                Asset
+              </th>
+
+              <th>
+                Activity
+              </th>
+
+              <th>
+                Employee
+              </th>
+
+              <th>
+                Result / Status
+              </th>
+
+              <th>
+                Details
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="reportTableBody">
+
+            <tr>
+
+              <td colspan="6">
+                Generate a report to view activity.
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <div class="actions">
+
+      <div class="footer-trust">
+
+        <div>
+
+          <strong>
+            SECURE. ACCOUNTABLE. TRUSTED.
+          </strong>
+
+          <br>
+
+          SecureTrack Historical Reporting
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="config.js"></script>
+
+<script src="manager-common.js"></script>
+
+<script src="reports.js"></script>
+
+
+</body>
+
+</html>
