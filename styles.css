@@ -183,3 +183,226 @@ h2.form-title { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.08; margin-b
   .panel-head, .verify-section, .actions { padding-left:16px; padding-right:16px; }
   .footer-trust { flex-direction:column; align-items:flex-start; }
 }
+/* =========================================================
+   SECURETRACK MANAGER PORTAL
+   ========================================================= */
+
+.manager-login-shell {
+  max-width: 650px;
+}
+
+.manager-login-card {
+  border: 1px solid #343a41;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(26,30,35,.98),
+      rgba(8,10,12,.99)
+    );
+  border-radius: 22px;
+  padding: 32px;
+  box-shadow: var(--shadow);
+}
+
+.manager-login-title {
+  font-size: 42px;
+  margin-top: 8px;
+}
+
+.manager-console {
+  overflow: hidden;
+}
+
+.manager-header {
+  padding-bottom: 28px;
+}
+
+.manager-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.manager-user-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.manager-summary-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 14px;
+  padding: 24px;
+}
+
+.manager-stat {
+  border: 1px solid #343a41;
+  background: #0b0e11;
+  border-radius: 17px;
+  padding: 20px;
+}
+
+.manager-stat span {
+  color: #9ba3ad;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 11px;
+}
+
+.manager-stat strong {
+  display: block;
+  font-size: 36px;
+  margin-top: 7px;
+}
+
+.manager-stat.warning strong {
+  color: var(--orange);
+}
+
+.manager-section {
+  border-top: 1px solid #2d3339;
+  padding: 24px;
+}
+
+.manager-section h2 {
+  font-size: 28px;
+  margin: 5px 0 18px;
+}
+
+.manager-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.manager-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.manager-table th {
+  color: #9099a2;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 11px;
+  padding: 12px;
+  border-bottom: 1px solid #353b42;
+}
+
+.manager-table td {
+  padding: 15px 12px;
+  border-bottom: 1px solid #252a30;
+}
+
+.manager-table tbody tr:hover {
+  background:
+    rgba(255,120,0,.035);
+}
+
+.asset-status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.asset-status.available {
+  color: #60db9c;
+  background:
+    rgba(25,182,106,.12);
+}
+
+.asset-status.checked_out {
+  color: #ffad61;
+  background:
+    rgba(255,120,0,.12);
+}
+
+.asset-status.maintenance {
+  color: #ffc5c7;
+  background:
+    rgba(229,72,77,.12);
+}
+
+.activity-feed {
+  display: grid;
+  gap: 10px;
+}
+
+.activity-item {
+  border: 1px solid #30363d;
+  border-radius: 14px;
+  padding: 15px;
+  background: #0c0f12;
+}
+
+.activity-item > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.activity-action,
+.inspection-result,
+.issue-severity {
+  color: var(--orange);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.inspection-result.pass {
+  color: var(--green-2);
+}
+
+.inspection-result.fail {
+  color: #ff767a;
+}
+
+.issue-severity.critical,
+.issue-severity.high {
+  color: #ff767a;
+}
+
+.activity-time {
+  color: #7d858e;
+  margin-top: 7px;
+  font-size: 12px;
+}
+
+@media (max-width: 850px) {
+
+  .manager-summary-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .manager-header-row {
+    flex-direction: column;
+  }
+
+}
+
+@media (max-width: 500px) {
+
+  .manager-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .manager-user-area {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+}
