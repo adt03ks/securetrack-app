@@ -432,14 +432,17 @@ if (recoveriesResult.error) {
   throw recoveriesResult.error;
 }
 
-      const transactions =
-        transactionsResult.data || [];
+     const transactions =
+  transactionsResult.data || [];
 
-      const inspections =
-        inspectionsResult.data || [];
+const inspections =
+  inspectionsResult.data || [];
 
-      const issues =
-        issuesResult.data || [];
+const issues =
+  issuesResult.data || [];
+
+const recoveries =
+  recoveriesResult.data || [];
 
       document
         .getElementById("historyTitle")
