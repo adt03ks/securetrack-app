@@ -147,14 +147,14 @@
 
 
       if (
-        password.length < 12
+        password.length < 8
       ) {
 
         result.className =
           "result show error";
 
         result.textContent =
-          "Your new password must contain at least 12 characters.";
+          "Your new password must contain at least 8 characters.";
 
         return;
 
