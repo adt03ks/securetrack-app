@@ -3,30 +3,25 @@
   const STM =
     window.SecureTrackManager;
 
-
   const form =
     document.getElementById(
       "resetPasswordForm"
     );
-
 
   const newPassword =
     document.getElementById(
       "newPassword"
     );
 
-
   const confirmPassword =
     document.getElementById(
       "confirmPassword"
     );
 
-
   const button =
     document.getElementById(
       "updatePasswordButton"
     );
-
 
   const result =
     document.getElementById(
@@ -34,52 +29,101 @@
     );
 
 
-  // ==================================================
-  // WAIT FOR SUPABASE RECOVERY SESSION
-  // ==================================================
+  let recoveryReady = false;
 
-  let recoveryReady =
-    false;
 
+  // ==========================================
+  // CLEAR POSSIBLE BROWSER AUTOFILL
+  // ==========================================
+
+  setTimeout(() => {
+
+    newPassword.value = "";
+    confirmPassword.value = "";
+
+  }, 200);
+
+
+  // ==========================================
+  // WATCH SPECIFICALLY FOR PASSWORD RECOVERY
+  // ==========================================
 
   const {
-    data: {
-      session
-    }
+    data: authListener
   } =
-    await STM.db.auth
-      .getSession();
+    STM.db.auth.onAuthStateChange(
+      (event) => {
+
+        console.log(
+          "SecureTrack auth event:",
+          event
+        );
 
 
-  if (session) {
+        if (
+          event ===
+          "PASSWORD_RECOVERY"
+        ) {
 
-    recoveryReady =
-      true;
+          recoveryReady = true;
+
+          result.className =
+            "result show success";
+
+          result.textContent =
+            "Recovery link verified. Enter a new password for your SecureTrack manager account.";
+
+        }
+
+      }
+    );
+
+
+  // Give Supabase a moment to process
+  // the recovery credentials from the URL.
+
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        500
+      )
+  );
+
+
+  // ==========================================
+  // CHECK RECOVERY URL
+  // ==========================================
+
+  const hash =
+    new URLSearchParams(
+      window.location.hash.substring(1)
+    );
+
+
+  const query =
+    new URLSearchParams(
+      window.location.search
+    );
+
+
+  const recoveryType =
+    hash.get("type") ||
+    query.get("type");
+
+
+  if (
+    recoveryType === "recovery"
+  ) {
+
+    recoveryReady = true;
 
   }
 
 
-  STM.db.auth.onAuthStateChange(
-    (event, session) => {
-
-      if (
-        event ===
-          "PASSWORD_RECOVERY" ||
-        session
-      ) {
-
-        recoveryReady =
-          true;
-
-      }
-
-    }
-  );
-
-
-  // ==================================================
-  // UPDATE PASSWORD
-  // ==================================================
+  // ==========================================
+  // RESET PASSWORD
+  // ==========================================
 
   form.addEventListener(
     "submit",
@@ -96,11 +140,10 @@
 
 
       const password =
-        newPassword.value;
-
+        newPassword.value.trim();
 
       const confirmation =
-        confirmPassword.value;
+        confirmPassword.value.trim();
 
 
       if (
@@ -127,20 +170,22 @@
           "result show error";
 
         result.textContent =
-          "The passwords do not match.";
+          "The new passwords do not match.";
 
         return;
 
       }
 
 
-      if (!recoveryReady) {
+      if (
+        !recoveryReady
+      ) {
 
         result.className =
           "result show error";
 
         result.textContent =
-          "This password recovery link is invalid or has expired. Please request a new reset email.";
+          "This password recovery link is invalid or has expired. Return to Manager Login and request a new password reset email.";
 
         return;
 
@@ -157,32 +202,81 @@
       try {
 
         const {
+          data,
           error
         } =
           await STM.db.auth
             .updateUser({
-              password
+              password:
+                password
             });
 
 
         if (error) {
+
+          /*
+            Supabase will reject reuse of
+            the account's existing password.
+          */
+
+          if (
+            String(
+              error.message
+            )
+              .toLowerCase()
+              .includes(
+                "different from the old password"
+              )
+          ) {
+
+            throw new Error(
+              "That password matches the current password on this account. Enter a completely new password that has not just been used for this manager account."
+            );
+
+          }
+
+
           throw error;
+
         }
 
+
+        // ======================================
+        // PASSWORD SUCCESSFULLY CHANGED
+        // ======================================
 
         result.className =
           "result show success";
 
 
         result.textContent =
-          "Your SecureTrack password has been updated successfully. Returning to manager sign in…";
+          "Password updated successfully. You will now return to the SecureTrack Manager Login.";
 
 
         /*
-          Sign out the recovery session so
-          the manager explicitly signs in
-          with the new password.
+          Immediately clear the password
+          fields so browser/password-manager
+          autofill cannot accidentally submit
+          the new value again.
         */
+
+        newPassword.value =
+          "";
+
+        confirmPassword.value =
+          "";
+
+
+        button.disabled =
+          true;
+
+        button.textContent =
+          "✓ Password Updated";
+
+
+        // ======================================
+        // END TEMPORARY RECOVERY SESSION
+        // ======================================
 
         await STM.db.auth
           .signOut();
@@ -203,7 +297,7 @@
       } catch (error) {
 
         console.error(
-          "SecureTrack password update error:",
+          "SecureTrack password reset error:",
           error
         );
 
@@ -216,7 +310,6 @@
           error.message ||
           "Unable to update the password.";
 
-      } finally {
 
         button.disabled =
           false;
