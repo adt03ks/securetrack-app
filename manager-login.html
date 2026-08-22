@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#080a0c">
+
+  <title>SecureTrack | Manager Login</title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<main class="shell manager-login-shell">
+
+  <section class="manager-login-card">
+
+    <div class="brandbar">
+
+      <div class="logo-mark" aria-hidden="true">
+        <span class="logo-lock"></span>
+      </div>
+
+      <div>
+
+        <div class="wordmark">
+          <span>Secure</span><span>Track</span>
+        </div>
+
+        <div class="tagline">
+          Asset Accountability & Device Verification
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="eyebrow">
+      Authorized Access
+    </div>
+
+    <h1 class="manager-login-title">
+      Management Console
+    </h1>
+
+    <p class="subtle">
+      Sign in to review asset accountability, inspections,
+      checkout activity, and reported equipment issues.
+    </p>
+
+    <form id="managerLoginForm">
+
+      <div class="field">
+
+        <label for="email">
+          Manager Email
+        </label>
+
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="username"
+          required
+        >
+
+      </div>
+
+      <div class="field">
+
+        <label for="password">
+          Password
+        </label>
+
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
+
+      </div>
+
+      <button
+        class="primary-btn"
+        type="submit"
+        id="loginButton"
+      >
+        Sign In to SecureTrack
+      </button>
+
+      <div
+        id="loginResult"
+        class="result"
+      ></div>
+
+    </form>
+
+    <div class="footer-trust">
+
+      <div>
+        <strong>
+          SECURE. ACCOUNTABLE. TRUSTED.
+        </strong>
+
+        <br>
+
+        Management access is authenticated and controlled.
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="manager-common.js"></script>
+<script src="manager-login.js"></script>
+
+</body>
+</html>
