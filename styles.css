@@ -590,3 +590,123 @@ h2.form-title { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.08; margin-b
   .history-count-grid { grid-template-columns: 1fr; }
   .history-event-top { flex-direction: column; gap: 6px; }
 }
+/* =========================================================
+   SECURETRACK MANAGER REPORTS
+   ========================================================= */
+
+
+.report-filter-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+
+.report-quick-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+
+.report-quick-btn {
+  border: 1px solid #343a41;
+  background: #0c0f12;
+  color: #d9dde2;
+  border-radius: 999px;
+  padding: 9px 15px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+
+.report-quick-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+
+.report-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.report-actions button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+
+.report-table td {
+  vertical-align: top;
+}
+
+
+.report-table td:first-child {
+  white-space: nowrap;
+}
+
+
+@media print {
+
+  body {
+    background: white;
+    color: black;
+  }
+
+
+  .brandbar,
+  .manager-user-area,
+  .report-quick-buttons,
+  #reportForm,
+  #reportError,
+  .report-actions,
+  .footer-trust {
+    display: none !important;
+  }
+
+
+  .panel,
+  .manager-section {
+    border: none;
+    box-shadow: none;
+    background: white;
+    color: black;
+  }
+
+
+  .manager-table th,
+  .manager-table td {
+    color: black;
+    border-color: #aaa;
+  }
+
+}
+
+
+@media (
+  max-width: 800px
+) {
+
+  .report-filter-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .manager-section-header {
+    align-items:
+      flex-start;
+  }
+
+
+  .report-actions {
+    flex-wrap: wrap;
+  }
+
+}
