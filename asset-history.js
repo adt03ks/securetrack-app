@@ -416,17 +416,21 @@
           )
       ]);
 
-      if (transactionsResult.error) {
-        throw transactionsResult.error;
-      }
+     if (transactionsResult.error) {
+  throw transactionsResult.error;
+}
 
-      if (inspectionsResult.error) {
-        throw inspectionsResult.error;
-      }
+if (inspectionsResult.error) {
+  throw inspectionsResult.error;
+}
 
-      if (issuesResult.error) {
-        throw issuesResult.error;
-      }
+if (issuesResult.error) {
+  throw issuesResult.error;
+}
+
+if (recoveriesResult.error) {
+  throw recoveriesResult.error;
+}
 
       const transactions =
         transactionsResult.data || [];
