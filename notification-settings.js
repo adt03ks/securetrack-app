@@ -851,10 +851,6 @@
         updateControls();
 
 
-        // =======================================
-        // SUCCESS MESSAGE
-        // =======================================
-
        // =======================================
 // SUCCESS MESSAGE
 // =======================================
@@ -889,26 +885,6 @@ if (
   showResult(
     "Notification preferences saved. SMS messaging is disabled and no active SMS consent is recorded."
   );
-
-}
-
-          showResult(
-            "Notification preferences saved. SecureTrack SMS notifications are enabled for this mobile number."
-          );
-
-        } else if (
-          settings.sms_consent
-        ) {
-
-          showResult(
-            "Notification preferences saved. SMS consent is recorded, but text notifications are currently disabled."
-          );
-
-        } else {
-
-          showResult(
-            "Notification preferences saved. SMS messaging is disabled and no active SMS consent is recorded."
-          );
 
         }
 
