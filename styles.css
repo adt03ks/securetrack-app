@@ -873,3 +873,83 @@ h2.form-title { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.08; margin-b
 .inspection-note-alert.satisfied strong {
   color: #62d89a;
 }
+/* =========================================================
+   SECURETRACK PASSWORD RECOVERY
+   ========================================================= */
+
+
+.forgot-password-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -5px;
+  margin-bottom: 18px;
+}
+
+
+.forgot-password-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--orange-2);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+
+.forgot-password-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+
+.forgot-password-panel {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid #30363d;
+}
+
+
+.forgot-password-panel[hidden] {
+  display: none;
+}
+
+
+.forgot-password-panel h2 {
+  margin: 5px 0 8px;
+  font-size: 26px;
+}
+
+
+.forgot-cancel {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  text-align: center;
+}
+
+
+.password-requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  margin: -3px 0 16px;
+  padding: 12px 14px;
+
+  border: 1px solid #343a41;
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  color: #9da5ad;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+
+.password-requirements strong {
+  color: #d5dae0;
+  font-size: 12px;
+}
