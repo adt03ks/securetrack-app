@@ -129,6 +129,166 @@
   </section>
 </main>
 
+<div
+  id="recoveryModal"
+  class="recovery-modal"
+  hidden
+>
+
+  <div class="recovery-modal-backdrop"></div>
+
+
+  <section
+    class="recovery-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="recoveryTitle"
+  >
+
+    <div class="eyebrow">
+      Administrative Custody Recovery
+    </div>
+
+
+    <h2 id="recoveryTitle">
+      Recover / Force Return
+    </h2>
+
+
+    <p class="subtle">
+      This action removes the currently assigned
+      officer from custody of this device and
+      records a manager administrative recovery.
+    </p>
+
+
+    <div class="recovery-critical-note">
+
+      <strong>
+        The equipment must be physically present.
+      </strong>
+
+      <span>
+        Do not use this function simply because an
+        officer cannot be reached if the physical
+        location of the device is unknown.
+      </span>
+
+    </div>
+
+
+    <form id="recoveryForm">
+
+
+      <label class="recovery-confirm-row">
+
+        <input
+          id="devicePhysicallyPresent"
+          type="checkbox"
+          required
+        >
+
+        <span>
+          I have confirmed this device is physically
+          present and available for administrative
+          recovery.
+        </span>
+
+      </label>
+
+
+
+      <div class="field">
+
+        <label for="recoveryReason">
+          Recovery Reason
+        </label>
+
+        <select
+          id="recoveryReason"
+          required
+        >
+
+          <option value="">
+            Select reason
+          </option>
+
+          <option value="left_end_of_shift">
+            Left at end of shift
+          </option>
+
+          <option value="found_unattended">
+            Device found unattended
+          </option>
+
+          <option value="officer_unavailable">
+            Officer unavailable
+          </option>
+
+          <option value="administrative_recovery">
+            Administrative recovery
+          </option>
+
+          <option value="other">
+            Other
+          </option>
+
+        </select>
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label for="recoveryNotes">
+          Recovery Notes
+        </label>
+
+        <textarea
+          id="recoveryNotes"
+          rows="4"
+          placeholder="Document circumstances surrounding the administrative recovery..."
+        ></textarea>
+
+      </div>
+
+
+
+      <div class="recovery-actions">
+
+        <button
+          type="button"
+          id="cancelRecoveryButton"
+          class="secondary-btn"
+        >
+          Cancel
+        </button>
+
+
+        <button
+          type="submit"
+          id="confirmRecoveryButton"
+          class="recovery-confirm-btn"
+        >
+          Confirm Administrative Return
+        </button>
+
+      </div>
+
+
+      <div
+        id="recoveryResult"
+        class="result"
+      ></div>
+
+
+    </form>
+
+  </section>
+
+</div>
+  
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="manager-common.js"></script>
