@@ -1,53 +1,169 @@
-document.getElementById("inspectionForm").addEventListener("submit", async (ev) => {
-  ev.preventDefault();
+document
+  .getElementById("inspectionForm")
+  .addEventListener("submit", async (ev) => {
 
-  const formEl = ev.currentTarget;
-  const ST = window.SecureTrack;
-  const result = document.getElementById("result");
-  const submit = formEl.querySelector("button[type=submit]");
-  const form = new FormData(formEl);
-  const checklist = {};
+    ev.preventDefault();
 
-  ["battery", "cartridge", "display", "housing", "safety", "camera"].forEach(
-    (k) => (checklist[k] = form.get(k))
-  );
+    const formEl = ev.currentTarget;
+    const ST = window.SecureTrack;
+    const result = document.getElementById("result");
+    const submit = formEl.querySelector("button[type=submit]");
+    const form = new FormData(formEl);
 
-  const values = Object.values(checklist);
-  const overall = values.includes("fail")
-    ? "fail"
-    : values.every((v) => v === "na")
-      ? "not_applicable"
-      : "pass";
+    const checklist = {};
 
-  submit.disabled = true;
-  submit.textContent = "Saving inspection…";
 
-  try {
-    await ST.rpc("record_device_inspection", {
-      p_public_token: ST.assetToken(),
-      p_employee_number: String(form.get("employee_number") || "").trim(),
-      p_badge_number: String(form.get("badge_number") || "").trim(),
-      p_checklist: checklist,
-      p_overall_result: overall,
-      p_notes: String(form.get("notes") || "").trim() || null
+    // ==========================================
+    // COLLECT INSPECTION RESPONSES
+    // ==========================================
+
+    [
+      "battery",
+      "cartridge",
+      "display",
+      "housing",
+      "safety"
+    ].forEach((key) => {
+
+      checklist[key] =
+        form.get(key);
+
     });
 
-    ST.showResult(
-      result,
-      `Inspection recorded. Overall result: ${overall.replace("_", " ").toUpperCase()}.`
-    );
 
-    formEl.reset();
+    // ==========================================
+    // DETERMINE OVERALL INSPECTION RESULT
+    // ==========================================
+    //
+    // SecureTrack Rule:
+    //
+    // The inspection passes regardless of other
+    // checklist responses or remarks.
+    //
+    // ONLY a failed Cartridge Accessory
+    // causes the overall inspection to FAIL.
+    // ==========================================
 
-  } catch (e) {
-    ST.showResult(
-      result,
-      e.message || "Inspection could not be recorded.",
-      "error"
-    );
+    const cartridgeResult =
+      checklist.cartridge;
 
-  } finally {
-    submit.disabled = false;
-    submit.textContent = "Submit Inspection";
-  }
-});
+
+    const overall =
+      cartridgeResult === "fail"
+        ? "fail"
+        : "pass";
+
+
+    submit.disabled = true;
+
+    submit.textContent =
+      "Saving inspection…";
+
+
+    try {
+
+      await ST.rpc(
+        "record_device_inspection",
+        {
+
+          p_public_token:
+            ST.assetToken(),
+
+          p_employee_number:
+            String(
+              form.get("employee_number") || ""
+            ).trim(),
+
+          p_badge_number:
+            String(
+              form.get("badge_number") || ""
+            ).trim(),
+
+          p_checklist:
+            checklist,
+
+          p_overall_result:
+            overall,
+
+          p_notes:
+            String(
+              form.get("notes") || ""
+            ).trim() || null
+
+        }
+      );
+
+
+      // ========================================
+      // SUCCESS MESSAGE
+      // ========================================
+
+      ST.showResult(
+        result,
+        `Inspection recorded. Overall result: ${overall.toUpperCase()}.`
+      );
+
+
+      formEl.reset();
+
+
+      // ========================================
+      // PASS = RETURN TO DEVICE FOR CHECKOUT
+      // ========================================
+
+      if (overall === "pass") {
+
+        submit.textContent =
+          "✓ Inspection Passed";
+
+        submit.disabled =
+          true;
+
+
+        setTimeout(() => {
+
+          window.location.href =
+            `index.html?asset=${encodeURIComponent(
+              ST.assetToken()
+            )}`;
+
+        }, 1200);
+
+      }
+
+
+      // ========================================
+      // FAIL = CARTRIDGE ACCESSORY FAILED
+      // ========================================
+
+      if (overall === "fail") {
+
+        submit.textContent =
+          "Inspection Failed";
+
+        submit.disabled =
+          false;
+
+      }
+
+
+    } catch (e) {
+
+      ST.showResult(
+        result,
+        e.message ||
+          "Inspection could not be recorded.",
+        "error"
+      );
+
+
+      submit.disabled =
+        false;
+
+
+      submit.textContent =
+        "Submit Inspection";
+
+    }
+
+  });
