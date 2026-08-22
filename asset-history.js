@@ -569,7 +569,57 @@ const recoveries =
           actor:
             employeeLabel(item.employees)
         }))
+         ...recoveries.map((item) => ({
 
+    ...item,
+
+    type:
+      "recovery",
+
+    title:
+      "Administrative Recovery / Force Return",
+
+    actor:
+      "SecureTrack Manager",
+
+    previous_custodian_label:
+      item.previous_custodian_label ||
+      "Previously Assigned Officer"
+
+  }))
+
+
+].sort(
+
+  (a, b) =>
+    new Date(b.occurred_at) -
+    new Date(a.occurred_at)
+
+);
+
+The important thing is the comma here:
+
+})),
+
+at the end of the issues.map() section. That allows the new:
+
+...recoveries.map(...)
+
+block to follow it.
+
+Your file should now flow like:
+
+transactions
+      ↓
+inspections
+      ↓
+issues
+      ↓
+recoveries          ← NEW
+      ↓
+.sort(...)
+      ↓
+renderTimeline()
       ].sort(
         (a, b) =>
           new Date(b.occurred_at) -
