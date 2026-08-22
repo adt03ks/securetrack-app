@@ -6,9 +6,17 @@ document
 
     const formEl = ev.currentTarget;
     const ST = window.SecureTrack;
-    const result = document.getElementById("result");
-    const submit = formEl.querySelector("button[type=submit]");
-    const form = new FormData(formEl);
+
+    const result =
+      document.getElementById("result");
+
+    const submit =
+      formEl.querySelector(
+        "button[type=submit]"
+      );
+
+    const form =
+      new FormData(formEl);
 
     const checklist = {};
 
@@ -32,16 +40,59 @@ document
 
 
     // ==========================================
-    // DETERMINE OVERALL INSPECTION RESULT
+    // FIND FAILED ITEMS
     // ==========================================
+
+    const failedItems =
+      Object.entries(checklist)
+        .filter(
+          ([key, value]) =>
+            value === "fail"
+        )
+        .map(
+          ([key]) =>
+            humanizeInspectionItem(key)
+        );
+
+
+    const notes =
+      String(
+        form.get("notes") || ""
+      ).trim();
+
+
+    // ==========================================
+    // REQUIRE NOTES FOR ANY FAILED ITEM
+    // ==========================================
+
+    if (
+      failedItems.length > 0 &&
+      !notes
+    ) {
+
+      ST.showResult(
+        result,
+        `Notes are required for failed inspection item(s): ${failedItems.join(", ")}.`,
+        "error"
+      );
+
+      updateFailedNotesRequirement();
+
+      document
+        .getElementById(
+          "inspectionNotes"
+        )
+        ?.focus();
+
+      return;
+    }
+
+
+    // ==========================================
+    // OVERALL INSPECTION RESULT
     //
-    // SecureTrack Rule:
-    //
-    // The inspection passes regardless of other
-    // checklist responses or remarks.
-    //
-    // ONLY a failed Cartridge Accessory
-    // causes the overall inspection to FAIL.
+    // ONLY CARTRIDGE ACCESSORY FAIL
+    // MAKES THE OVERALL INSPECTION FAIL.
     // ==========================================
 
     const cartridgeResult =
@@ -54,7 +105,8 @@ document
         : "pass";
 
 
-    submit.disabled = true;
+    submit.disabled =
+      true;
 
     submit.textContent =
       "Saving inspection…";
@@ -71,12 +123,16 @@ document
 
           p_employee_number:
             String(
-              form.get("employee_number") || ""
+              form.get(
+                "employee_number"
+              ) || ""
             ).trim(),
 
           p_badge_number:
             String(
-              form.get("badge_number") || ""
+              form.get(
+                "badge_number"
+              ) || ""
             ).trim(),
 
           p_checklist:
@@ -86,17 +142,11 @@ document
             overall,
 
           p_notes:
-            String(
-              form.get("notes") || ""
-            ).trim() || null
+            notes || null
 
         }
       );
 
-
-      // ========================================
-      // SUCCESS MESSAGE
-      // ========================================
 
       ST.showResult(
         result,
@@ -106,12 +156,16 @@ document
 
       formEl.reset();
 
+      updateFailedNotesRequirement();
+
 
       // ========================================
-      // PASS = RETURN TO DEVICE FOR CHECKOUT
+      // PASS = RETURN TO DEVICE
       // ========================================
 
-      if (overall === "pass") {
+      if (
+        overall === "pass"
+      ) {
 
         submit.textContent =
           "✓ Inspection Passed";
@@ -136,7 +190,9 @@ document
       // FAIL = CARTRIDGE ACCESSORY FAILED
       // ========================================
 
-      if (overall === "fail") {
+      if (
+        overall === "fail"
+      ) {
 
         submit.textContent =
           "Inspection Failed";
@@ -167,3 +223,233 @@ document
     }
 
   });
+
+
+// ==================================================
+// INSPECTION ITEM LABELS
+// ==================================================
+
+function humanizeInspectionItem(key) {
+
+  const labels = {
+
+    battery:
+      "Battery",
+
+    cartridge:
+      "Cartridge Accessory",
+
+    display:
+      "Display",
+
+    housing:
+      "Housing",
+
+    safety:
+      "Safety"
+
+  };
+
+
+  return labels[key] || key;
+}
+
+
+// ==================================================
+// FAILED ITEM NOTES REQUIREMENT
+// ==================================================
+
+function updateFailedNotesRequirement() {
+
+  const form =
+    document.getElementById(
+      "inspectionForm"
+    );
+
+  const alert =
+    document.getElementById(
+      "failedNotesAlert"
+    );
+
+  const message =
+    document.getElementById(
+      "failedNotesMessage"
+    );
+
+  const notes =
+    document.getElementById(
+      "inspectionNotes"
+    );
+
+  const submit =
+    form?.querySelector(
+      "button[type=submit]"
+    );
+
+
+  if (
+    !form ||
+    !alert ||
+    !message ||
+    !notes ||
+    !submit
+  ) {
+    return;
+  }
+
+
+  const failedKeys = [
+
+    "battery",
+    "cartridge",
+    "display",
+    "housing",
+    "safety"
+
+  ].filter((key) => {
+
+    const selected =
+      form.querySelector(
+        `input[name="${key}"]:checked`
+      );
+
+    return (
+      selected?.value ===
+      "fail"
+    );
+
+  });
+
+
+  const failedNames =
+    failedKeys.map(
+      humanizeInspectionItem
+    );
+
+
+  const hasFailure =
+    failedNames.length > 0;
+
+
+  const hasNotes =
+    notes.value.trim().length > 0;
+
+
+  // ==========================================
+  // NO FAILED ITEMS
+  // ==========================================
+
+  if (!hasFailure) {
+
+    alert.classList.remove(
+      "required",
+      "satisfied"
+    );
+
+    message.textContent =
+      "If any inspection item is marked FAIL, notes describing the condition must be entered before the inspection can be submitted.";
+
+    notes.required =
+      false;
+
+    submit.disabled =
+      false;
+
+    return;
+  }
+
+
+  // ==========================================
+  // FAILED ITEM + NO NOTES
+  // ==========================================
+
+  if (
+    hasFailure &&
+    !hasNotes
+  ) {
+
+    alert.classList.add(
+      "required"
+    );
+
+    alert.classList.remove(
+      "satisfied"
+    );
+
+
+    message.textContent =
+      `Notes required before submission. Failed item(s): ${failedNames.join(", ")}.`;
+
+
+    notes.required =
+      true;
+
+
+    submit.disabled =
+      true;
+
+    return;
+  }
+
+
+  // ==========================================
+  // FAILED ITEM + NOTES ENTERED
+  // ==========================================
+
+  alert.classList.remove(
+    "required"
+  );
+
+  alert.classList.add(
+    "satisfied"
+  );
+
+
+  message.textContent =
+    `Documentation entered for failed item(s): ${failedNames.join(", ")}.`;
+
+
+  notes.required =
+    true;
+
+
+  submit.disabled =
+    false;
+
+}
+
+
+// ==================================================
+// WATCH INSPECTION RESPONSES
+// ==================================================
+
+document
+  .querySelectorAll(
+    '#inspectionForm input[type="radio"]'
+  )
+  .forEach((input) => {
+
+    input.addEventListener(
+      "change",
+      updateFailedNotesRequirement
+    );
+
+  });
+
+
+// ==================================================
+// WATCH NOTES FIELD
+// ==================================================
+
+document
+  .getElementById(
+    "inspectionNotes"
+  )
+  ?.addEventListener(
+    "input",
+    updateFailedNotesRequirement
+  );
+
+
+// Initial state
+updateFailedNotesRequirement();
