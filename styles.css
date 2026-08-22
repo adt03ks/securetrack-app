@@ -1572,3 +1572,31 @@ h2.form-title { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.08; margin-b
   }
 
 }
+.recovery-custodian-notice {
+
+  margin: 14px 0 4px;
+
+  padding: 12px 14px;
+
+  border: 1px solid #343a41;
+
+  border-radius: 11px;
+
+  background: #111519;
+
+  color: #929ba4;
+
+  font-size: 12px;
+}
+
+
+.recovery-custodian-notice strong {
+
+  display: block;
+
+  margin-top: 4px;
+
+  color: #f0f2f4;
+
+  font-size: 15px;
+}
