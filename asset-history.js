@@ -253,11 +253,109 @@
         custodian = data;
       }
 
-      const [
-        transactionsResult,
-        inspectionsResult,
-        issuesResult
-      ] = await Promise.all([
+     const [
+  transactionsResult,
+  inspectionsResult,
+  issuesResult,
+  recoveriesResult
+] = await Promise.all([
+
+
+  // =========================================================
+  // TRANSACTIONS
+  // =========================================================
+
+  db
+    .from("device_transactions")
+    .select(`
+      id,
+      action,
+      notes,
+      occurred_at,
+      employees(
+        display_name,
+        employee_number
+      )
+    `)
+    .eq("device_id", deviceId)
+    .order(
+      "occurred_at",
+      { ascending: false }
+    ),
+
+
+  // =========================================================
+  // INSPECTIONS
+  // =========================================================
+
+  db
+    .from("device_inspections")
+    .select(`
+      id,
+      checklist,
+      overall_result,
+      notes,
+      occurred_at,
+      employees(
+        display_name,
+        employee_number
+      )
+    `)
+    .eq("device_id", deviceId)
+    .order(
+      "occurred_at",
+      { ascending: false }
+    ),
+
+
+  // =========================================================
+  // ISSUES
+  // =========================================================
+
+  db
+    .from("device_issues")
+    .select(`
+      id,
+      category,
+      severity,
+      description,
+      status,
+      occurred_at,
+      resolved_at,
+      employees(
+        display_name,
+        employee_number
+      )
+    `)
+    .eq("device_id", deviceId)
+    .order(
+      "occurred_at",
+      { ascending: false }
+    ),
+
+
+  // =========================================================
+  // MANAGER RECOVERIES / FORCE RETURNS
+  // =========================================================
+
+  db
+    .from("device_recoveries")
+    .select(`
+      id,
+      previous_custodian_id,
+      recovered_by_user_id,
+      reason,
+      notes,
+      physically_present,
+      occurred_at
+    `)
+    .eq("device_id", deviceId)
+    .order(
+      "occurred_at",
+      { ascending: false }
+    )
+
+]);
 
         db
           .from("device_transactions")
