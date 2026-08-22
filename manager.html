@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#080a0c">
+
+  <title>SecureTrack | Management Console</title>
+
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+
+<main class="shell">
+
+  <section class="panel manager-console">
+
+    <header class="panel-head manager-header">
+
+      <div class="manager-header-row">
+
+        <div class="brandbar">
+
+          <div class="logo-mark">
+            <span class="logo-lock"></span>
+          </div>
+
+          <div>
+
+            <div class="wordmark">
+              <span>Secure</span><span>Track</span>
+            </div>
+
+            <div class="tagline">
+              Management Console
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="manager-user-area">
+
+          <span id="managerName">
+            Manager
+          </span>
+
+          <button
+            id="logoutButton"
+            class="back-link"
+          >
+            Sign Out
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="eyebrow">
+        Real-Time Asset Accountability
+      </div>
+
+      <h1>
+        Security Equipment Dashboard
+      </h1>
+
+      <p class="subtle">
+        Live equipment status, custody,
+        inspections, and reported issues.
+      </p>
+
+      <div class="status-strip">
+
+        <span class="status-dot success"></span>
+
+        <span id="realtimeStatus">
+          Connecting to SecureTrack Live…
+        </span>
+
+      </div>
+
+    </header>
+
+
+    <!-- SUMMARY CARDS -->
+
+    <section class="manager-summary-grid">
+
+      <article class="manager-stat">
+
+        <span>
+          Total Assets
+        </span>
+
+        <strong id="totalAssets">
+          —
+        </strong>
+
+      </article>
+
+      <article class="manager-stat">
+
+        <span>
+          Available
+        </span>
+
+        <strong id="availableAssets">
+          —
+        </strong>
+
+      </article>
+
+      <article class="manager-stat">
+
+        <span>
+          Checked Out
+        </span>
+
+        <strong id="checkedOutAssets">
+          —
+        </strong>
+
+      </article>
+
+      <article class="manager-stat warning">
+
+        <span>
+          Attention Required
+        </span>
+
+        <strong id="attentionAssets">
+          —
+        </strong>
+
+      </article>
+
+    </section>
+
+
+    <!-- ALL ASSETS -->
+
+    <section class="manager-section">
+
+      <div class="manager-section-header">
+
+        <div>
+
+          <div class="eyebrow">
+            Equipment Control
+          </div>
+
+          <h2>
+            All Assets
+          </h2>
+
+        </div>
+
+        <button
+          class="back-link"
+          id="refreshButton"
+        >
+          Refresh
+        </button>
+
+      </div>
+
+      <div class="table-wrap">
+
+        <table class="manager-table">
+
+          <thead>
+
+            <tr>
+
+              <th>Asset</th>
+              <th>Model</th>
+              <th>Status</th>
+              <th>Custodian</th>
+              <th>Attention</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="assetTableBody">
+
+            <tr>
+
+              <td colspan="5">
+                Loading assets…
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- ACTIVITY -->
+
+    <section class="manager-section">
+
+      <div class="eyebrow">
+        Accountability Log
+      </div>
+
+      <h2>
+        Recent Activity
+      </h2>
+
+      <div
+        id="activityFeed"
+        class="activity-feed"
+      >
+        Loading activity…
+      </div>
+
+    </section>
+
+
+    <!-- INSPECTIONS -->
+
+    <section class="manager-section">
+
+      <div class="eyebrow">
+        Device Condition
+      </div>
+
+      <h2>
+        Recent Inspections
+      </h2>
+
+      <div
+        id="inspectionFeed"
+        class="activity-feed"
+      >
+        Loading inspections…
+      </div>
+
+    </section>
+
+
+    <!-- ISSUES -->
+
+    <section class="manager-section">
+
+      <div class="eyebrow">
+        Supervisor Attention
+      </div>
+
+      <h2>
+        Open Issues
+      </h2>
+
+      <div
+        id="issueFeed"
+        class="activity-feed"
+      >
+        Loading issues…
+      </div>
+
+    </section>
+
+
+    <div class="actions">
+
+      <div class="footer-trust">
+
+        <div>
+
+          <strong>
+            SECURE. ACCOUNTABLE. TRUSTED.
+          </strong>
+
+          <br>
+
+          SecureTrack Management Console
+
+        </div>
+
+        <div>
+          ◉ REALTIME
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="manager-common.js"></script>
+<script src="manager.js"></script>
+
+</body>
+</html>
