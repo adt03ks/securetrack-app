@@ -88,6 +88,18 @@
 
       </div>
 
+      <div class="forgot-password-row">
+
+  <button
+    type="button"
+    id="forgotPasswordButton"
+    class="forgot-password-link"
+  >
+    Forgot Password?
+  </button>
+
+</div>
+      
       <button
         class="primary-btn"
         type="submit"
@@ -102,7 +114,70 @@
       ></div>
 
     </form>
+<div
+  id="forgotPasswordPanel"
+  class="forgot-password-panel"
+  hidden
+>
 
+  <div class="eyebrow">
+    Password Recovery
+  </div>
+
+  <h2>
+    Reset Manager Password
+  </h2>
+
+  <p class="subtle">
+    Enter the email address associated with your
+    SecureTrack manager account.
+  </p>
+
+  <form id="forgotPasswordForm">
+
+    <div class="field">
+
+      <label for="resetEmail">
+        Manager Email
+      </label>
+
+      <input
+        id="resetEmail"
+        name="resetEmail"
+        type="email"
+        autocomplete="email"
+        required
+      >
+
+    </div>
+
+
+    <button
+      type="submit"
+      id="sendResetButton"
+      class="primary-btn"
+    >
+      Send Password Reset Email
+    </button>
+
+
+    <button
+      type="button"
+      id="cancelResetButton"
+      class="back-link forgot-cancel"
+    >
+      Back to Sign In
+    </button>
+
+
+    <div
+      id="resetRequestResult"
+      class="result"
+    ></div>
+
+  </form>
+
+</div>
     <div class="footer-trust">
 
       <div>
