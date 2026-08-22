@@ -1,0 +1,564 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#080a0c"
+  >
+
+  <title>
+    SecureTrack | Notification Settings
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+</head>
+
+
+<body>
+
+<main class="shell">
+
+  <section class="panel manager-console">
+
+
+    <!-- =========================================
+         HEADER
+         ========================================= -->
+
+    <header class="panel-head manager-header">
+
+      <div class="manager-header-row">
+
+        <div class="brandbar">
+
+          <div
+            class="logo-mark"
+            aria-hidden="true"
+          >
+            <span class="logo-lock"></span>
+          </div>
+
+
+          <div>
+
+            <div class="wordmark">
+              <span>Secure</span><span>Track</span>
+            </div>
+
+            <div class="tagline">
+              Management Console
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="manager-user-area">
+
+          <span id="managerName">
+            Manager
+          </span>
+
+          <a
+            href="manager.html"
+            class="back-link"
+          >
+            Dashboard
+          </a>
+
+          <button
+            id="logoutButton"
+            class="back-link"
+            type="button"
+          >
+            Sign Out
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="eyebrow">
+        Communication Preferences
+      </div>
+
+
+      <h1>
+        Notification Settings
+      </h1>
+
+
+      <p class="subtle">
+        Manage your SecureTrack mobile alert preferences
+        and SMS consent.
+      </p>
+
+    </header>
+
+
+    <!-- =========================================
+         SETTINGS CONTENT
+         ========================================= -->
+
+    <section class="manager-section notification-settings-section">
+
+      <div class="notification-settings-grid">
+
+
+        <!-- =====================================
+             LEFT SIDE — SETTINGS FORM
+             ===================================== -->
+
+        <section class="form-card notification-form-card">
+
+          <div class="eyebrow">
+            SMS Notifications
+          </div>
+
+          <h2 class="form-title">
+            Mobile Alert Settings
+          </h2>
+
+          <p class="subtle">
+            SecureTrack can send important equipment
+            accountability and safety alerts directly
+            to your mobile device.
+          </p>
+
+
+          <!-- ===================================
+               LOADING STATE
+               =================================== -->
+
+          <div
+            id="settingsLoading"
+            class="notification-loading"
+          >
+            Loading notification settings…
+          </div>
+
+
+          <!-- ===================================
+               SETTINGS FORM
+               =================================== -->
+
+          <form
+            id="notificationSettingsForm"
+            hidden
+          >
+
+
+            <!-- MOBILE NUMBER -->
+
+            <div class="field">
+
+              <label for="notificationPhone">
+                Mobile Number
+              </label>
+
+              <input
+                id="notificationPhone"
+                name="notificationPhone"
+                type="tel"
+                autocomplete="tel"
+                placeholder="+13465551234"
+                required
+              >
+
+              <div class="notification-field-help">
+                Enter your mobile number in international
+                format, including +1 for U.S. numbers.
+              </div>
+
+            </div>
+
+
+            <!-- =================================
+                 SMS CONSENT
+                 ================================= -->
+
+            <div class="notification-consent-card">
+
+              <label class="notification-checkbox-row">
+
+                <input
+                  id="smsConsent"
+                  name="smsConsent"
+                  type="checkbox"
+                >
+
+                <span class="notification-checkbox-copy">
+
+                  <strong>
+                    I agree to receive SecureTrack text messages.
+                  </strong>
+
+                  <span>
+                    I consent to receive equipment accountability,
+                    failed inspection, safety, and other selected
+                    operational alert text messages from SecureTrack
+                    at the mobile number provided.
+                  </span>
+
+                </span>
+
+              </label>
+
+
+              <div class="notification-disclosure">
+
+                Message frequency varies. Message and data
+                rates may apply. Reply STOP to opt out or
+                HELP for help.
+
+              </div>
+
+            </div>
+
+
+            <!-- =================================
+                 SMS ENABLED
+                 ================================= -->
+
+            <div class="notification-option-card">
+
+              <label class="notification-checkbox-row">
+
+                <input
+                  id="smsEnabled"
+                  name="smsEnabled"
+                  type="checkbox"
+                >
+
+                <span class="notification-checkbox-copy">
+
+                  <strong>
+                    Enable SMS Notifications
+                  </strong>
+
+                  <span>
+                    Allow SecureTrack to send the alert
+                    categories selected below.
+                  </span>
+
+                </span>
+
+              </label>
+
+            </div>
+
+
+            <!-- =================================
+                 ALERT TYPES
+                 ================================= -->
+
+            <div class="notification-category-heading">
+
+              <div class="eyebrow">
+                Alert Categories
+              </div>
+
+              <h3>
+                Choose Your Alerts
+              </h3>
+
+              <p class="subtle">
+                Select which events should generate
+                a text notification.
+              </p>
+
+            </div>
+
+
+            <!-- FAILED INSPECTIONS -->
+
+            <div class="notification-option-card">
+
+              <label class="notification-checkbox-row">
+
+                <input
+                  id="failedInspectionAlerts"
+                  name="failedInspectionAlerts"
+                  type="checkbox"
+                >
+
+                <span class="notification-checkbox-copy">
+
+                  <strong>
+                    Failed Inspection Alerts
+                  </strong>
+
+                  <span>
+                    Receive an alert when a device records
+                    an overall failed inspection and checkout
+                    is blocked.
+                  </span>
+
+                </span>
+
+              </label>
+
+            </div>
+
+
+            <!-- CRITICAL ISSUES -->
+
+            <div class="notification-option-card">
+
+              <label class="notification-checkbox-row">
+
+                <input
+                  id="criticalIssueAlerts"
+                  name="criticalIssueAlerts"
+                  type="checkbox"
+                >
+
+                <span class="notification-checkbox-copy">
+
+                  <strong>
+                    Critical Equipment Issues
+                  </strong>
+
+                  <span>
+                    Receive an alert when a critical equipment
+                    issue is reported in SecureTrack.
+                  </span>
+
+                </span>
+
+              </label>
+
+            </div>
+
+
+            <!-- =================================
+                 CONSENT STATUS
+                 ================================= -->
+
+            <div
+              id="consentStatusCard"
+              class="notification-consent-status"
+            >
+
+              <div>
+
+                <span class="notification-status-label">
+                  SMS Consent Status
+                </span>
+
+                <strong id="consentStatusText">
+                  Not Yet Recorded
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span class="notification-status-label">
+                  Consent Date
+                </span>
+
+                <strong id="consentDateText">
+                  —
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- =================================
+                 SAVE BUTTON
+                 ================================= -->
+
+            <button
+              type="submit"
+              id="saveNotificationButton"
+              class="primary-btn"
+            >
+              Save Notification Preferences
+            </button>
+
+
+            <div
+              id="notificationResult"
+              class="result"
+            ></div>
+
+
+          </form>
+
+        </section>
+
+
+        <!-- =====================================
+             RIGHT SIDE — INFORMATION
+             ===================================== -->
+
+        <aside class="notification-info-column">
+
+
+          <!-- SECURE MESSAGE CARD -->
+
+          <section class="form-card notification-info-card">
+
+            <div class="callout-icon">
+              SMS
+            </div>
+
+            <div>
+
+              <div class="eyebrow">
+                Secure Messaging
+              </div>
+
+              <h3>
+                Important Alerts Only
+              </h3>
+
+              <p class="subtle">
+                SecureTrack SMS notifications are intended
+                for important operational events rather than
+                routine checkout and return activity.
+              </p>
+
+            </div>
+
+          </section>
+
+
+          <!-- FAILED INSPECTION EXAMPLE -->
+
+          <section class="form-card notification-preview-card">
+
+            <div class="eyebrow">
+              Example Alert
+            </div>
+
+            <h3>
+              Failed Inspection
+            </h3>
+
+
+            <div class="sms-preview">
+
+              <div class="sms-preview-header">
+                SecureTrack
+              </div>
+
+              <p>
+                <strong>SECURETRACK ALERT:</strong>
+                CEW-014 failed its required equipment
+                inspection. Checkout has been blocked.
+                Sign in to the SecureTrack Manager Portal
+                for details.
+              </p>
+
+            </div>
+
+
+            <p class="notification-preview-note">
+              Detailed inspection notes, badge numbers,
+              and sensitive personnel information are
+              intentionally excluded from SMS messages.
+            </p>
+
+          </section>
+
+
+          <!-- PRIVACY / OPT OUT -->
+
+          <section class="form-card notification-info-card">
+
+            <div class="eyebrow">
+              Your Control
+            </div>
+
+            <h3>
+              Opt In or Opt Out
+            </h3>
+
+            <p class="subtle">
+              You may disable SecureTrack SMS notifications
+              through this page at any time.
+            </p>
+
+            <p class="subtle">
+              SMS consent is recorded separately from your
+              manager account access.
+            </p>
+
+          </section>
+
+
+        </aside>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================================
+         FOOTER
+         ========================================= -->
+
+    <div class="actions">
+
+      <div class="footer-trust">
+
+        <div>
+
+          <strong>
+            SECURE. ACCOUNTABLE. TRUSTED.
+          </strong>
+
+          <br>
+
+          SecureTrack Manager Notification Preferences
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- =============================================
+     SCRIPTS
+     ============================================= -->
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="config.js"></script>
+
+<script src="manager-common.js"></script>
+
+<script src="notification-settings.js"></script>
+
+
+</body>
+
+</html>
