@@ -1,200 +1,459 @@
 (async function () {
-  const ST = window.SecureTrack;
-  const token = ST.assetToken();
 
-  const img = document.getElementById("deviceImage");
-  const assetCode = document.getElementById("assetCode");
-  const model = document.getElementById("deviceModel");
-  const tokenEl = document.getElementById("tokenDisplay");
-  const verifyBtn = document.getElementById("verifyBtn");
-  const statusText = document.getElementById("statusText");
-  const errorBox = document.getElementById("errorBox");
+  const ST =
+    window.SecureTrack;
 
-  const actions = [
-    ...document.querySelectorAll(".action-card")
-  ];
+  const token =
+    ST.assetToken();
 
-  const custodyAction = actions[0];
+
+  const img =
+    document.getElementById(
+      "deviceImage"
+    );
+
+  const assetCode =
+    document.getElementById(
+      "assetCode"
+    );
+
+  const model =
+    document.getElementById(
+      "deviceModel"
+    );
+
+  const tokenEl =
+    document.getElementById(
+      "tokenDisplay"
+    );
+
+  const verifyBtn =
+    document.getElementById(
+      "verifyBtn"
+    );
+
+  const statusText =
+    document.getElementById(
+      "statusText"
+    );
+
+  const errorBox =
+    document.getElementById(
+      "errorBox"
+    );
+
+
+  const inspectionAction =
+    document.getElementById(
+      "inspectionAction"
+    );
+
+  const custodyAction =
+    document.getElementById(
+      "custodyAction"
+    );
+
+  const issueAction =
+    document.getElementById(
+      "issueAction"
+    );
+
 
   let currentDevice = null;
 
 
-  function configureCustodyAction(device) {
+  // ==========================================
+  // CARD STATE
+  // ==========================================
 
-    if (!custodyAction || !device) {
+  function setCardState(
+    card,
+    enabled,
+    label
+  ) {
+
+    if (!card) {
       return;
     }
 
+
+    card.classList.toggle(
+      "disabled",
+      !enabled
+    );
+
+    card.classList.toggle(
+      "active",
+      enabled
+    );
+
+
+    card.setAttribute(
+      "aria-disabled",
+      String(!enabled)
+    );
+
+
+    const pill =
+      card.querySelector(
+        ".lock-pill"
+      );
+
+
+    if (pill) {
+
+      pill.textContent =
+        label ||
+        (
+          enabled
+            ? "READY"
+            : "LOCKED"
+        );
+
+    }
+  }
+
+
+  // ==========================================
+  // CHECKOUT READINESS
+  // ==========================================
+
+  async function getCheckoutReadiness() {
+
+    return await ST.rpc(
+      "get_checkout_readiness",
+      {
+        p_public_token:
+          token
+      }
+    );
+  }
+
+
+  // ==========================================
+  // CONFIGURE CUSTODY CARD
+  // ==========================================
+
+  async function configureCustodyAction() {
+
+    if (
+      !custodyAction ||
+      !currentDevice
+    ) {
+      return;
+    }
+
+
     const title =
-      custodyAction.querySelector("h3");
+      custodyAction.querySelector(
+        "h3"
+      );
 
     const description =
-      custodyAction.querySelector("p");
+      custodyAction.querySelector(
+        "p"
+      );
 
     const icon =
-      custodyAction.querySelector(".action-icon");
+      custodyAction.querySelector(
+        ".action-icon"
+      );
 
 
-    // ==========================================
-    // DEVICE IS CURRENTLY CHECKED OUT
-    // ==========================================
+    // ========================================
+    // DEVICE CHECKED OUT = RETURN
+    // ========================================
 
-    if (device.status === "checked_out") {
+    if (
+      currentDevice.status ===
+      "checked_out"
+    ) {
 
-      custodyAction.href = "return.html";
+      custodyAction.href =
+        "return.html";
+
 
       if (title) {
-        title.textContent = "Return Item";
+        title.textContent =
+          "Return Item";
       }
+
 
       if (description) {
         description.textContent =
           "Release this verified equipment from your custody and create a timestamped return record.";
       }
 
+
       if (icon) {
-        icon.textContent = "↩";
+        icon.textContent =
+          "↩";
       }
+
+
+      setCardState(
+        custodyAction,
+        true,
+        "READY"
+      );
+
 
       return;
     }
 
 
-    // ==========================================
-    // DEVICE IS AVAILABLE
-    // ==========================================
+    // ========================================
+    // NOT AVAILABLE
+    // ========================================
 
-    custodyAction.href = "checkout.html";
+    if (
+      currentDevice.status !==
+      "available"
+    ) {
+
+      setCardState(
+        custodyAction,
+        false,
+        "UNAVAILABLE"
+      );
+
+
+      return;
+    }
+
+
+    // ========================================
+    // AVAILABLE = CHECK INSPECTION
+    // ========================================
+
+    custodyAction.href =
+      "checkout.html";
+
 
     if (title) {
-      title.textContent = "Check Out Item";
+      title.textContent =
+        "Check Out Item";
     }
 
-    if (description) {
-      description.textContent =
-        "Assign the verified equipment to your custody and create a timestamped checkout record.";
-    }
 
     if (icon) {
-      icon.textContent = "⬡";
+      icon.textContent =
+        "⬡";
     }
-  }
 
 
-  function setActionState(active) {
+    try {
 
-    actions.forEach((card, index) => {
-
-      /*
-        The first action is the custody action.
-
-        It should only activate when the device
-        is either:
-
-        available
-        OR
-        checked_out
-
-        Maintenance or retired equipment cannot
-        be checked out or returned through the
-        normal officer workflow.
-      */
-
-      const custodyAllowed =
-        index !== 0 ||
-        [
-          "available",
-          "checked_out"
-        ].includes(currentDevice?.status);
+      const readiness =
+        await getCheckoutReadiness();
 
 
-      const shouldActivate =
-        active && custodyAllowed;
+      if (
+        readiness?.ready === true
+      ) {
+
+        if (description) {
+          description.textContent =
+            "Inspection passed. This equipment is ready for checkout.";
+        }
 
 
-      card.classList.toggle(
-        "disabled",
-        !shouldActivate
-      );
-
-      card.classList.toggle(
-        "active",
-        shouldActivate
-      );
+        setCardState(
+          custodyAction,
+          true,
+          "READY"
+        );
 
 
-      card.setAttribute(
-        "aria-disabled",
-        String(!shouldActivate)
-      );
-
-
-      const pill =
-        card.querySelector(".lock-pill");
-
-
-      if (pill) {
-
-        pill.textContent =
-          shouldActivate
-            ? "READY"
-            : active && index === 0
-              ? "UNAVAILABLE"
-              : "LOCKED";
+        return;
       }
-    });
+
+
+      // ======================================
+      // INSPECTION FAILED
+      // ======================================
+
+      if (
+        readiness?.reason ===
+        "inspection_failed"
+      ) {
+
+        if (description) {
+          description.textContent =
+            "Latest inspection did not pass. Resolve the equipment condition before checkout.";
+        }
+
+
+        setCardState(
+          custodyAction,
+          false,
+          "INSPECTION FAILED"
+        );
+
+
+        return;
+      }
+
+
+      // ======================================
+      // INSPECTION REQUIRED
+      // ======================================
+
+      if (description) {
+
+        description.textContent =
+          "A passing device inspection is required before checkout.";
+
+      }
+
+
+      setCardState(
+        custodyAction,
+        false,
+        "INSPECTION REQUIRED"
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Checkout readiness error:",
+        error
+      );
+
+
+      setCardState(
+        custodyAction,
+        false,
+        "INSPECTION REQUIRED"
+      );
+
+    }
+
   }
 
 
-  function setVerified() {
+  // ==========================================
+  // VERIFIED DEVICE STATE
+  // ==========================================
+
+  async function setVerified() {
 
     verifyBtn.classList.add(
       "verified"
     );
 
-    verifyBtn.disabled = true;
+    verifyBtn.disabled =
+      true;
 
     verifyBtn.textContent =
       "✓ Device Verified";
 
 
-    statusText.textContent =
-      "Device verified. Select an action to continue.";
+    // Inspection is always available
+    // after verification.
+
+    setCardState(
+      inspectionAction,
+      true,
+      "READY"
+    );
 
 
-    setActionState(true);
+    // Issues can also always be reported.
+
+    setCardState(
+      issueAction,
+      true,
+      "READY"
+    );
+
+
+    // Checkout depends upon inspection.
+    // Return does not.
+
+    await configureCustodyAction();
+
+
+    if (
+      currentDevice.status ===
+      "available"
+    ) {
+
+      const readiness =
+        await getCheckoutReadiness();
+
+
+      statusText.textContent =
+        readiness?.ready
+          ? "Device verified and inspection passed. Equipment is ready for checkout."
+          : "Device verified. Complete and pass the device inspection before checkout.";
+
+    } else if (
+      currentDevice.status ===
+      "checked_out"
+    ) {
+
+      statusText.textContent =
+        "Device verified. Equipment is currently checked out and may be returned, inspected, or reported.";
+
+    } else {
+
+      statusText.textContent =
+        "Device verified. Select an available action to continue.";
+
+    }
+
   }
 
 
   // ==========================================
-  // INITIAL PAGE STATE
+  // INITIAL LOCKED STATE
   // ==========================================
 
-  setActionState(false);
+  setCardState(
+    inspectionAction,
+    false,
+    "LOCKED"
+  );
+
+  setCardState(
+    custodyAction,
+    false,
+    "LOCKED"
+  );
+
+  setCardState(
+    issueAction,
+    false,
+    "LOCKED"
+  );
+
 
   tokenEl.textContent =
     token || "No token";
 
 
+  // ==========================================
+  // LOAD DEVICE
+  // ==========================================
+
   try {
 
-    // ========================================
-    // GET DEVICE FROM SUPABASE
-    // ========================================
-
     const device =
-      await ST.getDevice(token);
+      await ST.getDevice(
+        token
+      );
 
 
-    currentDevice = device;
+    currentDevice =
+      device;
 
-
-    // ========================================
-    // SHOW DEVICE INFORMATION
-    // ========================================
 
     img.src =
-      ST.imageFor(device);
+      ST.imageFor(
+        device
+      );
 
 
     assetCode.textContent =
@@ -202,67 +461,67 @@
 
 
     model.textContent =
-      ST.modelFor(device);
+      ST.modelFor(
+        device
+      );
 
-
-    // ========================================
-    // CONFIGURE CHECKOUT OR RETURN BUTTON
-    // ========================================
-
-    configureCustodyAction(device);
-
-
-    // ========================================
-    // SHOW CURRENT DEVICE STATUS
-    // ========================================
 
     if (
-      device.status ===
-      "checked_out"
-    ) {
-
-      statusText.textContent =
-        "Device found and currently checked out. Verify it to return, inspect, or report an issue.";
-
-    } else if (
       device.status ===
       "available"
     ) {
 
       statusText.textContent =
-        "Device found and available. Verify it before recording any activity.";
+        "Device found. Verify it, then complete an inspection before checkout.";
+
+    } else if (
+      device.status ===
+      "checked_out"
+    ) {
+
+      statusText.textContent =
+        "Device found and currently checked out. Verify it to continue.";
 
     } else {
 
       statusText.textContent =
         `Device found with status: ${
-          String(device.status)
-            .replaceAll("_", " ")
-        }. Verify it to continue.`;
+          String(
+            device.status
+          ).replaceAll(
+            "_",
+            " "
+          )
+        }.`;
+
     }
 
 
     // ========================================
-    // DEVICE WAS ALREADY VERIFIED THIS SESSION
+    // ALREADY VERIFIED THIS SESSION
     // ========================================
 
     if (
-      ST.isVerified(token)
+      ST.isVerified(
+        token
+      )
     ) {
 
-      setVerified();
+      await setVerified();
+
     }
 
 
     // ========================================
-    // VERIFY DEVICE BUTTON
+    // VERIFY BUTTON
     // ========================================
 
     verifyBtn.addEventListener(
       "click",
       async () => {
 
-        verifyBtn.disabled = true;
+        verifyBtn.disabled =
+          true;
 
         verifyBtn.textContent =
           "Verifying…";
@@ -280,18 +539,13 @@
             verifiedDevice;
 
 
-          configureCustodyAction(
-            verifiedDevice
-          );
+          await setVerified();
 
 
-          setVerified();
-
-        } catch (e) {
+        } catch (error) {
 
           verifyBtn.disabled =
             false;
-
 
           verifyBtn.textContent =
             "Verify Device";
@@ -299,20 +553,18 @@
 
           ST.showResult(
             errorBox,
-            e.message ||
+            error.message ||
               "Unable to verify the device.",
             "error"
           );
+
         }
+
       }
     );
 
 
-  } catch (e) {
-
-    // ========================================
-    // DEVICE LOOKUP FAILED
-    // ========================================
+  } catch (error) {
 
     img.src =
       "assets/device-placeholder.svg";
@@ -332,9 +584,10 @@
 
     ST.showResult(
       errorBox,
-      e.message,
+      error.message,
       "error"
     );
+
   }
 
 })();
