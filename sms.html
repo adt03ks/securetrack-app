@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SecureTrack OP SMS Alerts opt-in and A2P verification information." />
+  <title>SecureTrack OP | SMS Alerts</title>
+
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --panel: #11151a;
+      --panel-2: #171b21;
+      --border: #2e343c;
+      --text: #f7f7f7;
+      --muted: #aeb6c2;
+      --orange: #ff7a00;
+      --orange-soft: #ff9a3c;
+      --success: #84d39b;
+      --max: 1120px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(255,122,0,.08), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--orange-soft);
+      text-decoration: none;
+    }
+
+    a:hover,
+    a:focus {
+      text-decoration: underline;
+    }
+
+    .wrap {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(11,13,16,.92);
+    }
+
+    .nav {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: .3px;
+      font-size: 1.15rem;
+    }
+
+    .brand span { color: var(--orange); }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: .95rem;
+    }
+
+    .hero {
+      padding: 72px 0 46px;
+    }
+
+    .eyebrow {
+      color: var(--orange);
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 1.4px;
+      font-size: .82rem;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2.35rem, 5vw, 4.5rem);
+      line-height: 1.05;
+    }
+
+    h2 {
+      font-size: clamp(1.65rem, 3vw, 2.3rem);
+      margin: 0 0 16px;
+    }
+
+    h3 {
+      margin-top: 0;
+      font-size: 1.15rem;
+    }
+
+    p { color: var(--muted); }
+
+    .hero-copy {
+      max-width: 820px;
+      font-size: 1.08rem;
+    }
+
+    .notice {
+      margin-top: 28px;
+      border: 1px solid rgba(255,122,0,.45);
+      background: rgba(255,122,0,.07);
+      border-radius: 16px;
+      padding: 18px 20px;
+      color: #f7d2ae;
+    }
+
+    section {
+      padding: 34px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    .steps {
+      counter-reset: step;
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .step {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 18px 18px 58px;
+      color: var(--muted);
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 18px;
+      top: 16px;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--orange);
+      color: #111;
+      font-weight: 900;
+    }
+
+    .consent-box {
+      border: 1px solid rgba(255,122,0,.55);
+      background: #0e1115;
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 18px;
+    }
+
+    .checkbox-line {
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .checkbox {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #8e969f;
+      border-radius: 3px;
+      vertical-align: -2px;
+      margin-right: 8px;
+      background: transparent;
+    }
+
+    .fineprint {
+      font-size: .92rem;
+      color: var(--muted);
+    }
+
+    .screenshot {
+      width: 100%;
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-top: 20px;
+      background: #090b0e;
+    }
+
+    .caption {
+      font-size: .9rem;
+      color: #8d96a1;
+      margin-top: 10px;
+    }
+
+    .alert-sample {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #090b0e;
+      border-left: 4px solid var(--orange);
+      border-radius: 10px;
+      padding: 18px;
+      color: #e9edf1;
+      margin-top: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(132,211,155,.12);
+      border: 1px solid rgba(132,211,155,.35);
+      color: var(--success);
+      font-size: .78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+    }
+
+    .legal-links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .button-link {
+      display: inline-block;
+      border: 1px solid var(--orange);
+      border-radius: 10px;
+      padding: 11px 15px;
+      font-weight: 800;
+      color: #fff;
+      background: rgba(255,122,0,.08);
+    }
+
+    footer {
+      margin-top: 28px;
+      border-top: 1px solid var(--border);
+      padding: 28px 0 40px;
+      color: #8d96a1;
+      font-size: .9rem;
+    }
+
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+      .nav { align-items: flex-start; padding: 18px 0; flex-direction: column; }
+      .hero { padding-top: 50px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">SECURETRACK <span>OP</span></div>
+      <nav class="nav-links" aria-label="SMS legal links">
+        <a href="#opt-in">How Opt-In Works</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">SMS Terms</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="eyebrow">SMS Program Information</div>
+        <h1>SecureTrack OP SMS Alerts</h1>
+        <p class="hero-copy">
+          SecureTrack OP provides low-volume operational and transactional SMS alerts to
+          authorized managers who voluntarily opt in through the SecureTrack OP Manager Portal.
+          Messages may include failed equipment inspections, critical equipment issues,
+          recovery notifications, device status changes, and other equipment-accountability alerts.
+        </p>
+
+        <div class="notice">
+          <strong>Important:</strong> Managers are not automatically enrolled. SMS consent is
+          obtained separately inside Notification Settings and the consent checkbox is unchecked
+          by default. This public page documents the private manager-portal enrollment process
+          for verification and compliance purposes.
+        </div>
+      </div>
+    </section>
+
+    <section id="opt-in">
+      <div class="wrap">
+        <div class="eyebrow">Call to Action / Opt-In</div>
+        <h2>How managers enroll in SMS alerts</h2>
+
+        <div class="steps">
+          <div class="step">An authorized manager signs in to the SecureTrack OP Manager Portal using their assigned credentials.</div>
+          <div class="step">The manager opens <strong>Notification Settings</strong>.</div>
+          <div class="step">The manager enters or confirms the mobile number where they want to receive operational alerts.</div>
+          <div class="step">The manager affirmatively checks the SMS consent checkbox. The checkbox is not pre-selected.</div>
+          <div class="step">The manager enables SMS notifications, selects the desired operational alert categories, and saves the notification preferences.</div>
+          <div class="step">SecureTrack OP records the manager's SMS consent status and consent date. The manager may later disable SMS in Notification Settings or reply STOP to a message.</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="grid">
+          <div class="card">
+            <div class="eyebrow">Consent Disclosure</div>
+            <h2>Exact opt-in language</h2>
+            <p>The following disclosure is shown with the SMS consent control:</p>
+
+            <div class="consent-box">
+              <div class="checkbox-line">
+                <span class="checkbox" aria-hidden="true"></span>
+                I agree to receive SecureTrack OP text messages.
+              </div>
+              <div class="fineprint">
+                I consent to receive operational and transactional equipment-accountability,
+                failed-inspection, safety, critical-equipment-issue, recovery, device-status,
+                and other selected alert text messages from SecureTrack OP at the mobile number provided.
+                Message frequency varies. Message and data rates may apply. Reply STOP to opt out or
+                HELP for help. Consent is voluntary and is not a condition of purchase.
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="eyebrow">Message Content</div>
+            <h2>Example alert</h2>
+            <span class="badge">Operational / Transactional</span>
+            <div class="alert-sample">
+              <strong>SECURETRACK OP ALERT:</strong> CEW-014 failed its required equipment inspection.
+              Checkout has been blocked. Sign in to the SecureTrack OP Manager Portal for details.
+              Reply STOP to opt out or HELP for help.
+            </div>
+            <p class="fineprint">
+              SecureTrack OP SMS messages are used for operational equipment-management events,
+              not advertising or third-party promotional marketing.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="eyebrow">Portal Verification</div>
+        <h2>Manager Notification Settings screen</h2>
+        <p>
+          The screenshot below shows the private manager-portal interface where the mobile number,
+          affirmative SMS consent, notification toggle, alert categories, consent status, and consent
+          date are presented to the authorized manager.
+        </p>
+
+        <img
+          class="screenshot"
+          src="assets/manager-sms-opt-in.jpeg"
+          alt="SecureTrack OP Manager Notification Settings showing the mobile number field, unchecked SMS consent checkbox, SMS enable control, alert categories, consent status, consent date, and save button."
+        />
+        <p class="caption">
+          Screenshot provided for A2P verification. Access to the operational manager portal itself is restricted to authorized personnel.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="grid">
+          <div class="card">
+            <div class="eyebrow">Opt-Out</div>
+            <h3>User control</h3>
+            <p>
+              SMS recipients may opt out at any time by replying <strong>STOP</strong>.
+              Authorized managers may also disable SMS notifications through Notification Settings.
+              Opting out of SMS does not prevent use of other SecureTrack OP functions that do not require text messaging.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="eyebrow">Help</div>
+            <h3>Assistance</h3>
+            <p>
+              Recipients may reply <strong>HELP</strong> to a SecureTrack OP text message for assistance.
+              Additional support is available through the SecureTrack OP application administrator.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="eyebrow">Frequency & Rates</div>
+            <h3>Message frequency varies</h3>
+            <p>
+              Message frequency depends on equipment activity and the operational notification categories selected by the manager.
+              Message and data rates may apply according to the recipient's wireless plan.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="eyebrow">Privacy</div>
+            <h3>Mobile data protection</h3>
+            <p>
+              Mobile information will not be sold or shared with third parties or affiliates for marketing or promotional purposes.
+              Text messaging originator opt-in data and consent will not be shared with third parties or affiliates for marketing or promotional purposes.
+            </p>
+          </div>
+        </div>
+
+        <div class="legal-links">
+          <a class="button-link" href="privacy.html">View Privacy Policy</a>
+          <a class="button-link" href="terms.html">View SMS Terms &amp; Conditions</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <strong>SecureTrack OP</strong><br />
+      Secure equipment accountability and operational alerting.<br />
+      This page documents the SecureTrack OP SMS enrollment process for authorized users.
+    </div>
+  </footer>
+</body>
+</html>
