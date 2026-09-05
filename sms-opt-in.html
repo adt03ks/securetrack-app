@@ -1,0 +1,537 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#080a0c"
+  >
+
+  <meta
+    name="description"
+    content="SecureTrack SMS notification opt-in information for authorized managers."
+  >
+
+  <title>
+    SecureTrack | SMS Notification Opt-In
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+</head>
+
+
+<body>
+
+<main class="shell sms-optin-shell">
+
+  <section class="panel sms-optin-panel">
+
+
+    <!-- =====================================================
+         BRAND
+         ===================================================== -->
+
+    <header class="sms-optin-header">
+
+      <div class="brandbar">
+
+        <div
+          class="logo-mark"
+          aria-hidden="true"
+        >
+          <span class="logo-lock"></span>
+        </div>
+
+
+        <div>
+
+          <div class="wordmark">
+            <span>Secure</span><span>Track</span>
+          </div>
+
+          <div class="tagline">
+            Asset Accountability & Device Verification
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="eyebrow">
+        SMS Notification Enrollment
+      </div>
+
+
+      <h1>
+        SecureTrack SMS Opt-In
+      </h1>
+
+
+      <p class="sms-optin-intro">
+        Authorized SecureTrack managers may choose to receive
+        operational equipment accountability and safety alerts
+        by text message.
+      </p>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
+
+    <div class="sms-optin-grid">
+
+
+      <!-- ===================================================
+           OPT-IN PREVIEW
+           =================================================== -->
+
+      <section class="sms-optin-card">
+
+        <div class="eyebrow">
+          SMS Notifications
+        </div>
+
+
+        <h2>
+          Mobile Alert Settings
+        </h2>
+
+
+        <p class="subtle">
+          The following selections are available to authorized
+          managers after signing in to the SecureTrack Manager
+          Portal.
+        </p>
+
+
+
+        <!-- MOBILE NUMBER -->
+
+        <div class="field">
+
+          <label for="publicOptInPhone">
+            Mobile Number
+          </label>
+
+          <input
+            id="publicOptInPhone"
+            type="tel"
+            placeholder="+1 346 555 1234"
+            autocomplete="tel"
+          >
+
+          <div class="sms-optin-field-help">
+            Managers provide the mobile number at which they
+            wish to receive SecureTrack alerts.
+          </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             CONSENT
+             ================================================= -->
+
+        <div class="sms-optin-consent-card">
+
+          <label class="sms-optin-checkbox-row">
+
+            <input
+              type="checkbox"
+              id="publicSmsConsent"
+            >
+
+            <span class="sms-optin-checkbox-copy">
+
+              <strong>
+                I agree to receive SecureTrack text messages.
+              </strong>
+
+              <span>
+                I consent to receive equipment accountability,
+                failed inspection, safety, and other selected
+                operational alert text messages from SecureTrack
+                at the mobile number provided.
+              </span>
+
+            </span>
+
+          </label>
+
+
+          <div class="sms-optin-disclosure">
+
+            Message frequency varies based on equipment activity
+            and selected notification preferences. Message and
+            data rates may apply.
+
+            <br><br>
+
+            Reply <strong>STOP</strong> to opt out or
+            <strong>HELP</strong> for help.
+
+          </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             ENABLE SMS
+             ================================================= -->
+
+        <div class="sms-optin-option-card">
+
+          <label class="sms-optin-checkbox-row">
+
+            <input
+              type="checkbox"
+              id="publicSmsEnabled"
+            >
+
+            <span class="sms-optin-checkbox-copy">
+
+              <strong>
+                Enable SMS Notifications
+              </strong>
+
+              <span>
+                Allow SecureTrack to send selected operational
+                alert categories to the mobile number provided.
+              </span>
+
+            </span>
+
+          </label>
+
+        </div>
+
+
+
+        <!-- =================================================
+             ALERT CATEGORIES
+             ================================================= -->
+
+        <div class="sms-optin-category-heading">
+
+          <div class="eyebrow">
+            Alert Categories
+          </div>
+
+          <h3>
+            Choose Your Alerts
+          </h3>
+
+        </div>
+
+
+
+        <!-- FAILED INSPECTIONS -->
+
+        <div class="sms-optin-option-card">
+
+          <label class="sms-optin-checkbox-row">
+
+            <input
+              type="checkbox"
+              id="publicFailedInspection"
+            >
+
+            <span class="sms-optin-checkbox-copy">
+
+              <strong>
+                Failed Inspection Alerts
+              </strong>
+
+              <span>
+                Receive an alert when equipment records an
+                overall failed inspection and checkout is
+                blocked.
+              </span>
+
+            </span>
+
+          </label>
+
+        </div>
+
+
+
+        <!-- CRITICAL ISSUES -->
+
+        <div class="sms-optin-option-card">
+
+          <label class="sms-optin-checkbox-row">
+
+            <input
+              type="checkbox"
+              id="publicCriticalIssues"
+            >
+
+            <span class="sms-optin-checkbox-copy">
+
+              <strong>
+                Critical Equipment Issues
+              </strong>
+
+              <span>
+                Receive an alert when a critical equipment
+                issue requiring manager review is reported.
+              </span>
+
+            </span>
+
+          </label>
+
+        </div>
+
+
+
+        <!-- =================================================
+             SIGN IN
+             ================================================= -->
+
+        <div class="sms-optin-signin">
+
+          <p>
+            SMS enrollment is available only to authorized
+            SecureTrack managers.
+          </p>
+
+
+          <a
+            href="manager-login.html"
+            class="primary-btn sms-optin-login-btn"
+          >
+            Sign In to Complete SMS Opt-In
+          </a>
+
+        </div>
+
+
+
+        <!-- =================================================
+             DISCLOSURES
+             ================================================= -->
+
+        <div class="sms-optin-legal">
+
+          <p>
+            Consent to receive SecureTrack SMS messages is
+            voluntary and is not a condition of purchase.
+          </p>
+
+          <p>
+            SecureTrack SMS messages are operational and
+            non-marketing in nature.
+          </p>
+
+          <p>
+            Sensitive personnel details, badge numbers,
+            inspection notes, and patient information are
+            not intended to be transmitted through SMS.
+          </p>
+
+        </div>
+
+
+      </section>
+
+
+
+      <!-- ===================================================
+           RIGHT COLUMN
+           =================================================== -->
+
+      <aside class="sms-optin-info-column">
+
+
+        <!-- EXAMPLE ALERT -->
+
+        <section class="sms-optin-info-card">
+
+          <div class="eyebrow">
+            Example Message
+          </div>
+
+          <h3>
+            Failed Inspection Alert
+          </h3>
+
+
+          <div class="sms-preview">
+
+            <div class="sms-preview-header">
+              SecureTrack
+            </div>
+
+            <p>
+              <strong>
+                SECURETRACK ALERT:
+              </strong>
+
+              CEW-014 failed its required equipment inspection.
+              Checkout has been blocked. Sign in to the
+              SecureTrack Manager Portal for details. Reply
+              STOP to opt out or HELP for help.
+            </p>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- OPT-IN CONFIRMATION -->
+
+        <section class="sms-optin-info-card">
+
+          <div class="eyebrow">
+            Opt-In Confirmation
+          </div>
+
+          <h3>
+            Confirmation Message
+          </h3>
+
+
+          <div class="sms-preview">
+
+            <div class="sms-preview-header">
+              SecureTrack
+            </div>
+
+            <p>
+              <strong>
+                SECURETRACK:
+              </strong>
+
+              You opted in to receive equipment accountability
+              and safety alerts. Message frequency varies.
+              Msg &amp; data rates may apply. Reply STOP to
+              opt out or HELP for help.
+            </p>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- OPT OUT -->
+
+        <section class="sms-optin-info-card">
+
+          <div class="eyebrow">
+            Recipient Control
+          </div>
+
+          <h3>
+            Opt Out at Any Time
+          </h3>
+
+          <p class="subtle">
+            Recipients may reply
+            <strong>STOP</strong>
+            to discontinue SecureTrack SMS notifications.
+          </p>
+
+          <p class="subtle">
+            Recipients may reply
+            <strong>START</strong>
+            to re-subscribe after opting out.
+          </p>
+
+          <p class="subtle">
+            Reply
+            <strong>HELP</strong>
+            for messaging assistance.
+          </p>
+
+        </section>
+
+
+
+        <!-- PRIVACY -->
+
+        <section class="sms-optin-info-card">
+
+          <div class="eyebrow">
+            Privacy & Terms
+          </div>
+
+          <h3>
+            Program Information
+          </h3>
+
+          <p class="subtle">
+            Review SecureTrack's SMS program terms and privacy
+            information before enrolling.
+          </p>
+
+
+          <div class="sms-optin-policy-links">
+
+            <a href="privacy.html">
+              Privacy Policy
+            </a>
+
+            <a href="terms.html">
+              SMS Terms &amp; Conditions
+            </a>
+
+          </div>
+
+        </section>
+
+
+      </aside>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <footer class="sms-optin-footer">
+
+      <strong>
+        SECURE. ACCOUNTABLE. TRUSTED.
+      </strong>
+
+      <span>
+        SecureTrack Operational Equipment Management
+      </span>
+
+    </footer>
+
+
+  </section>
+
+</main>
+
+
+</body>
+
+</html>
