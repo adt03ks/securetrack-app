@@ -1600,3 +1600,363 @@ h2.form-title { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.08; margin-b
 
   font-size: 15px;
 }
+/* =========================================================
+   SECURETRACK PUBLIC SMS OPT-IN PAGE
+   ========================================================= */
+
+
+.sms-optin-shell {
+  max-width: 1180px;
+}
+
+
+.sms-optin-panel {
+  overflow: hidden;
+}
+
+
+.sms-optin-header {
+  padding: 28px;
+  border-bottom: 1px solid #2d333a;
+}
+
+
+.sms-optin-header h1 {
+  margin: 6px 0 8px;
+  font-size: clamp(30px, 5vw, 46px);
+}
+
+
+.sms-optin-intro {
+  max-width: 700px;
+  margin: 0;
+
+  color: #9ba4ad;
+
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+
+.sms-optin-grid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.25fr)
+    minmax(300px, .75fr);
+
+  gap: 20px;
+
+  padding: 24px;
+}
+
+
+.sms-optin-card,
+.sms-optin-info-card {
+  border: 1px solid #30363d;
+  border-radius: 15px;
+
+  background: #0c0f12;
+}
+
+
+.sms-optin-card {
+  padding: 26px;
+}
+
+
+.sms-optin-card h2 {
+  margin: 6px 0 8px;
+}
+
+
+.sms-optin-field-help {
+  margin-top: 7px;
+
+  color: #818a93;
+
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+
+.sms-optin-consent-card,
+.sms-optin-option-card {
+  margin-bottom: 12px;
+  padding: 16px;
+
+  border: 1px solid #343a41;
+  border-radius: 14px;
+
+  background:
+    rgba(255, 255, 255, .025);
+}
+
+
+.sms-optin-consent-card {
+  margin-top: 18px;
+
+  border-color:
+    rgba(255, 120, 0, .45);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 120, 0, .08),
+      rgba(255, 255, 255, .018)
+    );
+}
+
+
+.sms-optin-checkbox-row {
+  display: grid;
+
+  grid-template-columns:
+    24px 1fr;
+
+  gap: 12px;
+
+  align-items: flex-start;
+
+  cursor: pointer;
+}
+
+
+.sms-optin-checkbox-row input {
+  width: 19px;
+  height: 19px;
+
+  margin-top: 2px;
+
+  accent-color:
+    var(--orange);
+}
+
+
+.sms-optin-checkbox-copy {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  color: #abb2b9;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+.sms-optin-checkbox-copy strong {
+  color: #eef1f4;
+
+  font-size: 14px;
+}
+
+
+.sms-optin-disclosure {
+  margin-top: 14px;
+  margin-left: 36px;
+  padding-top: 13px;
+
+  border-top:
+    1px solid rgba(255, 120, 0, .18);
+
+  color: #959da5;
+
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+
+.sms-optin-disclosure strong {
+  color: #e5e9ec;
+}
+
+
+.sms-optin-category-heading {
+  margin: 28px 0 14px;
+}
+
+
+.sms-optin-category-heading h3 {
+  margin: 5px 0 0;
+}
+
+
+.sms-optin-signin {
+  margin-top: 24px;
+  padding: 18px;
+
+  border: 1px solid rgba(255, 120, 0, .35);
+  border-radius: 14px;
+
+  background:
+    rgba(255, 120, 0, .045);
+
+  text-align: center;
+}
+
+
+.sms-optin-signin p {
+  margin:
+    0 0 13px;
+
+  color: #a7afb7;
+
+  font-size: 13px;
+}
+
+
+.sms-optin-login-btn {
+  display: block;
+
+  width: 100%;
+
+  text-decoration: none;
+
+  text-align: center;
+}
+
+
+.sms-optin-legal {
+  margin-top: 18px;
+  padding-top: 16px;
+
+  border-top:
+    1px solid #2e343a;
+
+  color: #808991;
+
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+
+.sms-optin-legal p {
+  margin:
+    0 0 8px;
+}
+
+
+.sms-optin-info-column {
+  display: grid;
+
+  gap: 14px;
+
+  align-content: start;
+}
+
+
+.sms-optin-info-card {
+  padding: 20px;
+}
+
+
+.sms-optin-info-card h3 {
+  margin: 6px 0 9px;
+
+  font-size: 20px;
+}
+
+
+.sms-optin-policy-links {
+  display: grid;
+
+  gap: 8px;
+
+  margin-top: 14px;
+}
+
+
+.sms-optin-policy-links a {
+  display: block;
+
+  padding: 11px 12px;
+
+  border: 1px solid #343a41;
+  border-radius: 10px;
+
+  background: #111519;
+
+  color: var(--orange);
+
+  text-decoration: none;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+.sms-optin-policy-links a:hover {
+  border-color:
+    rgba(255, 120, 0, .55);
+}
+
+
+.sms-optin-footer {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 20px 28px;
+
+  border-top:
+    1px solid #2d333a;
+
+  color: #7e8790;
+
+  font-size: 11px;
+}
+
+
+.sms-optin-footer strong {
+  color: var(--orange);
+
+  letter-spacing: .07em;
+}
+
+
+/* =========================================================
+   PUBLIC SMS OPT-IN MOBILE
+   ========================================================= */
+
+
+@media (max-width: 850px) {
+
+  .sms-optin-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .sms-optin-header,
+  .sms-optin-grid {
+    padding: 18px;
+  }
+
+
+  .sms-optin-card {
+    padding: 18px;
+  }
+
+
+  .sms-optin-disclosure {
+    margin-left: 0;
+  }
+
+
+  .sms-optin-footer {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    padding: 18px;
+  }
+
+}
