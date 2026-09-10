@@ -953,7 +953,7 @@ if (
       } finally {
 
         window.location.replace(
-          "manager-login.html"
+          "login.html"
         );
 
       }
