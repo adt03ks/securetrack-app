@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080a0c">
+  <title>SecureTrack | Operations Hub Login</title>
+  <link rel="stylesheet" href="hub.css">
+</head>
+<body data-page="login">
+  <main class="hub-shell hub-shell-narrow">
+    <header class="hub-brand">
+      <div class="hub-logo" aria-hidden="true"><span class="hub-lock"></span></div>
+      <div>
+        <div class="hub-wordmark"><span>Secure</span><strong>Track</strong></div>
+        <div class="hub-tagline">OPERATIONS HUB</div>
+      </div>
+    </header>
+
+    <section class="hub-panel login-panel" aria-labelledby="loginTitle">
+      <div class="eyebrow">Authorized Personnel</div>
+      <h1 id="loginTitle">Secure access.</h1>
+      <p class="muted">Sign in with the SecureTrack account issued to you by Security leadership.</p>
+
+      <form id="loginForm" class="login-form">
+        <label><span>Email</span><input id="email" name="email" type="email" autocomplete="username" required></label>
+        <label><span>Password</span><input id="password" name="password" type="password" autocomplete="current-password" required></label>
+        <button id="loginButton" class="hub-primary" type="submit">SIGN IN</button>
+        <div id="loginMessage" class="hub-message" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="login-security-note"><strong>Restricted system.</strong> Access and activity may be logged. Do not share your credentials.</div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="hub-auth.js"></script>
+</body>
+</html>

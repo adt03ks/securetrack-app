@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080a0c">
+  <title>SecureTrack | Operations Hub</title>
+  <link rel="stylesheet" href="hub.css">
+</head>
+<body data-page="hub">
+  <main class="hub-shell">
+    <header class="hub-topbar">
+      <div class="hub-brand">
+        <div class="hub-logo" aria-hidden="true"><span class="hub-lock"></span></div>
+        <div><div class="hub-wordmark"><span>Secure</span><strong>Track</strong></div><div class="hub-tagline">OPERATIONS HUB</div></div>
+      </div>
+      <div class="user-area">
+        <div><div id="userName" class="user-name">Loading…</div><div id="userRoles" class="user-roles">Verifying access</div></div>
+        <button id="logoutButton" class="hub-secondary" type="button">Sign Out</button>
+      </div>
+    </header>
+
+    <section class="hub-hero">
+      <div><div class="eyebrow">Security Operations</div><h1>Choose a function.</h1><p class="muted">Your available tools are based on your SecureTrack permissions.</p></div>
+      <div class="status-chip"><span></span>Authenticated Session</div>
+    </section>
+
+    <section id="loadingPanel" class="hub-panel loading-panel" aria-live="polite">Loading your SecureTrack permissions…</section>
+
+    <section id="moduleGrid" class="module-grid" hidden>
+      <a class="module-card" data-module="devices" href="index.html"><div class="module-icon">DV</div><div><div class="module-kicker">Equipment Accountability</div><h2>Device Management</h2><p>Verify, inspect, check out, return, and report equipment issues.</p></div><span class="module-arrow">→</span></a>
+      <a class="module-card" data-module="incidents" href="incidents/index.html"><div class="module-icon">AL</div><div><div class="module-kicker">Real-Time Reporting</div><h2>Security Alerts</h2><p>Record Code Green, Taser Pull, CTW, officer injury, and staffing incidents.</p></div><span class="module-arrow">→</span></a>
+      <a class="module-card" data-module="property" href="property/index.html"><div class="module-icon">PR</div><div><div class="module-kicker">Property Accountability</div><h2>Property / Belongings</h2><p>Log received property and maintain an accountable chain of custody.</p></div><span class="module-arrow">→</span></a>
+      <a class="module-card" data-module="assignments" href="assignments/index.html"><div class="module-icon">DS</div><div><div class="module-kicker">Shift Operations</div><h2>Duty Station Assignment</h2><p>Generate and manage history-aware officer duty station rotations.</p></div><span class="module-arrow">→</span></a>
+      <a class="module-card" data-module="overtime" href="overtime/index.html"><div class="module-icon">OT</div><div><div class="module-kicker">Staffing</div><h2>Overtime Opportunities</h2><p>View open overtime opportunities and manage signup requests.</p></div><span class="module-arrow">→</span></a>
+      <a class="module-card manager-card" data-module="manager" href="manager.html"><div class="module-icon">MP</div><div><div class="module-kicker">Leadership Oversight</div><h2>Manager Portal</h2><p>View equipment, incidents, staffing, property, approvals, and operational history.</p></div><span class="module-arrow">→</span></a>
+    </section>
+
+    <section id="hubError" class="hub-message error" role="alert" hidden></section>
+    <footer class="hub-footer">SecureTrack Operations Hub • Authorized security personnel only</footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="hub-auth.js"></script>
+</body>
+</html>
