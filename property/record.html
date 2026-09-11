@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d10">
+  <title>SecureTrack | Property Record</title>
+  <link rel="stylesheet" href="property.css">
+</head>
+
+<body data-securetrack-roles="officer,dispatcher,senior_officer,team_lead,manager,admin">
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="brand">SECURE<span>TRACK</span></div>
+        <div class="eyebrow">PROPERTY ACCOUNTABILITY</div>
+        <h1>Property Record</h1>
+        <p class="subtitle">Review the current storage status and complete chain of custody.</p>
+      </div>
+
+      <div class="top-actions">
+        <a class="button secondary" href="index.html">← Property Search</a>
+        <a class="button secondary" href="../hub.html">Operations Hub</a>
+        <button id="signOutButton" class="button ghost" type="button">Sign Out</button>
+      </div>
+    </header>
+
+    <section class="user-strip">
+      <span>Signed in as</span>
+      <strong id="currentUserName">Loading…</strong>
+      <span id="currentUserRole" class="role-pill"></span>
+    </section>
+
+    <div id="pageMessage" class="message" role="status" aria-live="polite"></div>
+
+    <section id="recordContent" hidden>
+      <div class="record-grid">
+        <article class="record-card">
+          <div class="record-title-row">
+            <div>
+              <div class="eyebrow">PROPERTY ID</div>
+              <h2 id="propertyNumber" class="record-number">—</h2>
+            </div>
+            <span id="statusPill" class="status-pill">—</span>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span>DG Number</span>
+              <strong id="dgNumber">—</strong>
+            </div>
+            <div class="detail-item">
+              <span>MRN Number</span>
+              <strong id="mrnNumber">—</strong>
+            </div>
+            <div class="detail-item full">
+              <span>Description</span>
+              <div id="description">—</div>
+            </div>
+            <div class="detail-item">
+              <span>Category</span>
+              <strong id="category">—</strong>
+            </div>
+            <div class="detail-item">
+              <span>Current Storage</span>
+              <strong id="storageLocation">—</strong>
+            </div>
+            <div class="detail-item">
+              <span>Location Received</span>
+              <strong id="locationReceived">—</strong>
+            </div>
+            <div class="detail-item">
+              <span>Date / Time Received</span>
+              <strong id="receivedAt">—</strong>
+            </div>
+            <div class="detail-item">
+              <span>Receiving Officer</span>
+              <strong id="receivedBy">—</strong>
+            </div>
+            <div class="detail-item full">
+              <span>Initial Notes</span>
+              <div id="notes">—</div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="action-card">
+          <div class="eyebrow">ACTIONS</div>
+          <h3>Property Actions</h3>
+          <p id="actionHelp">Actions are recorded automatically in the chain of custody.</p>
+
+          <div class="action-stack">
+            <button id="moveButton" class="button secondary action-button" type="button">Move / Transfer Property</button>
+            <button id="releaseButton" class="button primary action-button" type="button">Release Property</button>
+            <button id="disposeButton" class="button action-button danger hidden" type="button">Dispose Property</button>
+          </div>
+
+          <div id="actionResult" class="message" role="status" aria-live="polite"></div>
+        </aside>
+      </div>
+
+      <article class="timeline-card">
+        <div class="eyebrow">AUDIT HISTORY</div>
+        <h2>Chain of Custody</h2>
+        <div id="timeline" class="timeline">
+          <div class="empty-cell">Loading chain of custody…</div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div id="moveModal" class="modal-backdrop" aria-hidden="true">
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="moveTitle">
+      <div class="eyebrow">CHAIN OF CUSTODY</div>
+      <h2 id="moveTitle">Move / Transfer Property</h2>
+      <p>Enter the new secured storage location. The current location and new location will both be retained in the audit history.</p>
+      <form id="moveForm">
+        <label>
+          <span>New Storage / Bin <b>*</b></span>
+          <input id="moveToLocation" type="text" required placeholder="Example: Property Locker C-12">
+        </label>
+        <label>
+          <span>Notes</span>
+          <textarea id="moveNotes" rows="3" placeholder="Optional transfer notes"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button id="confirmMoveButton" class="button primary" type="submit">Record Move</button>
+          <button class="button secondary modal-cancel" type="button">Cancel</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div id="releaseModal" class="modal-backdrop" aria-hidden="true">
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="releaseTitle">
+      <div class="eyebrow">FINAL CUSTODY EVENT</div>
+      <h2 id="releaseTitle">Release Property</h2>
+      <p>Record who received the property. Once released, this property can no longer be moved through the normal workflow.</p>
+      <form id="releaseForm">
+        <label>
+          <span>Released To <b>*</b></span>
+          <input id="releasedTo" type="text" required placeholder="Name / approved identifier">
+        </label>
+        <label>
+          <span>Witness</span>
+          <input id="releaseWitness" type="text" placeholder="Optional witness">
+        </label>
+        <label>
+          <span>Notes</span>
+          <textarea id="releaseNotes" rows="3" placeholder="Optional release notes"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button id="confirmReleaseButton" class="button primary" type="submit">Confirm Release</button>
+          <button class="button secondary modal-cancel" type="button">Cancel</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div id="disposeModal" class="modal-backdrop" aria-hidden="true">
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="disposeTitle">
+      <div class="eyebrow">MANAGER / ADMIN</div>
+      <h2 id="disposeTitle">Dispose Property</h2>
+      <p>This closes the property record as disposed. A reason is required and the action is written to the chain of custody.</p>
+      <form id="disposeForm">
+        <label>
+          <span>Witness</span>
+          <input id="disposeWitness" type="text" placeholder="Optional witness">
+        </label>
+        <label>
+          <span>Disposal Reason / Notes <b>*</b></span>
+          <textarea id="disposeNotes" rows="4" required placeholder="Required disposal reason"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button id="confirmDisposeButton" class="button danger" type="submit">Confirm Disposal</button>
+          <button class="button secondary modal-cancel" type="button">Cancel</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../secure-page.js"></script>
+  <script src="record.js"></script>
+</body>
+</html>
