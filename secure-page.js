@@ -1,7 +1,6 @@
 (() => {
   "use strict";
 
-  // Hide protected content immediately while the session/role check runs.
   document.documentElement.classList.add("securetrack-auth-pending");
 
   const style = document.createElement("style");
@@ -14,18 +13,39 @@
 
   const config = window.SECURETRACK_CONFIG;
 
-  function currentRelativeUrl() {
-    const path = window.location.pathname.split("/").pop() || "index.html";
-    return `${path}${window.location.search}${window.location.hash}`;
+  // Determine the SecureTrack app root from where secure-page.js itself lives.
+  // This allows the same guard to work on root pages AND nested module pages
+  // such as property/index.html, incidents/index.html, etc.
+  const guardScriptUrl = document.currentScript?.src
+    ? new URL(document.currentScript.src, window.location.href)
+    : new URL("secure-page.js", window.location.href);
+
+  const appRootUrl = new URL("./", guardScriptUrl);
+
+  function currentAppRelativeUrl() {
+    const current = new URL(window.location.href);
+    const rootPath = appRootUrl.pathname.endsWith("/")
+      ? appRootUrl.pathname
+      : `${appRootUrl.pathname}/`;
+
+    let relativePath = current.pathname.startsWith(rootPath)
+      ? current.pathname.slice(rootPath.length)
+      : current.pathname.split("/").pop() || "index.html";
+
+    if (!relativePath) relativePath = "index.html";
+
+    return `${relativePath}${current.search}${current.hash}`;
   }
 
   function goToLogin() {
-    const next = encodeURIComponent(currentRelativeUrl());
-    window.location.replace(`login.html?next=${next}`);
+    const next = encodeURIComponent(currentAppRelativeUrl());
+    const loginUrl = new URL("login.html", appRootUrl);
+    loginUrl.search = `?next=${next}`;
+    window.location.replace(loginUrl.href);
   }
 
   function goToHub() {
-    window.location.replace("hub.html");
+    window.location.replace(new URL("hub.html", appRootUrl).href);
   }
 
   function reveal() {
@@ -41,8 +61,11 @@
     goToHub();
   }
 
-  if (!window.supabase?.createClient || !config?.supabaseUrl || !config?.supabaseAnonKey) {
-    // If configuration is broken, do not reveal a protected page.
+  if (
+    !window.supabase?.createClient ||
+    !config?.supabaseUrl ||
+    !config?.supabaseAnonKey
+  ) {
     console.error("SecureTrack auth guard could not initialize.");
     goToLogin();
     return;
@@ -60,9 +83,6 @@
     }
   );
 
-  // Example:
-  // <body data-securetrack-roles="manager,admin">
-  // If omitted, ANY active SecureTrack role may enter.
   const requestedRoles = String(
     document.body?.dataset?.securetrackRoles || ""
   )
@@ -71,7 +91,8 @@
     .filter(Boolean);
 
   async function authorize() {
-    const { data: sessionData, error: sessionError } = await db.auth.getSession();
+    const { data: sessionData, error: sessionError } =
+      await db.auth.getSession();
 
     if (sessionError || !sessionData.session?.user) {
       goToLogin();
@@ -83,7 +104,7 @@
     const [profileResult, rolesResult] = await Promise.all([
       db
         .from("profiles")
-        .select("id, is_active")
+        .select("id, display_name, employee_number, email, is_active")
         .eq("id", user.id)
         .single(),
 
@@ -124,14 +145,21 @@
       return;
     }
 
-    // Expose the authenticated context for page scripts that may need it later.
     window.SecureTrackAuth = {
       user,
+      profile: profileResult.data,
       roles: userRoles,
-      db
+      db,
+      appRootUrl: appRootUrl.href
     };
 
     reveal();
+
+    document.dispatchEvent(
+      new CustomEvent("securetrack:authorized", {
+        detail: window.SecureTrackAuth
+      })
+    );
   }
 
   authorize().catch(error => {
