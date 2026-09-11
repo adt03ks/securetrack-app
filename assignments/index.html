@@ -1,1 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d10">
+  <title>SecureTrack | Duty Station Assignment</title>
+  <link rel="stylesheet" href="assignments.css">
+</head>
 
+<body data-securetrack-roles="senior_officer,team_lead,manager,admin">
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="brand">SECURE<span>TRACK</span></div>
+        <div class="eyebrow">OPERATIONS HUB</div>
+        <h1>Duty Station Assignment</h1>
+        <p class="subtitle">Confirm staffing, generate balanced assignments, review, lock, and publish.</p>
+      </div>
+
+      <div class="top-actions">
+        <a class="button secondary" href="../hub.html">Operations Hub</a>
+        <button id="signOutButton" class="button ghost" type="button">Sign Out</button>
+      </div>
+    </header>
+
+    <section class="user-strip">
+      <span>Signed in as</span>
+      <strong id="currentUserName">Loading…</strong>
+      <span id="currentUserRole" class="role-pill"></span>
+    </section>
+
+    <div id="pageMessage" class="message" role="status" aria-live="polite"></div>
+
+    <section class="grid">
+      <article class="card">
+        <div class="eyebrow">STEP 1</div>
+        <h2>Open Shift</h2>
+
+        <form id="shiftForm">
+          <div class="field-grid">
+            <label>
+              <span>Shift Date <b>*</b></span>
+              <input id="shiftDate" type="date" required>
+            </label>
+
+            <label>
+              <span>Shift Name <b>*</b></span>
+              <select id="shiftName" required>
+                <option value="">Select shift</option>
+                <option>Days</option>
+                <option>Evenings</option>
+                <option>Nights</option>
+              </select>
+            </label>
+          </div>
+
+          <button id="openShiftButton" class="button primary" type="submit">
+            Open Shift
+          </button>
+        </form>
+
+        <div id="shiftStatus" class="shift-status" hidden>
+          <span>Current Shift</span>
+          <strong id="shiftStatusText">—</strong>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="eyebrow">STEP 2</div>
+        <h2>Who’s Here Today?</h2>
+        <p class="muted">Only employees marked present can be assigned.</p>
+
+        <div id="attendanceList" class="attendance-list">
+          <div class="empty">Open a shift first.</div>
+        </div>
+
+        <button id="saveAttendanceButton" class="button secondary" type="button" disabled>
+          Save Attendance
+        </button>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">STEP 3</div>
+          <h2>Generate Assignments</h2>
+          <p class="muted">Locked assignments are preserved. Recent station history is used to reduce repeats.</p>
+        </div>
+
+        <button id="generateButton" class="button primary" type="button" disabled>
+          Generate Assignments
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="assignment-table">
+          <thead>
+            <tr>
+              <th>Station</th>
+              <th>Officer</th>
+              <th>Source</th>
+              <th>Lock</th>
+              <th>Manual Change</th>
+            </tr>
+          </thead>
+          <tbody id="assignmentBody">
+            <tr>
+              <td colspan="5" class="empty">Open a shift to begin.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="publish-row">
+        <div>
+          <span class="muted">Publishing finalizes the roster for the shift.</span>
+        </div>
+        <button id="publishButton" class="button primary" type="button" disabled>
+          Publish Assignments
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">STATION SETUP</div>
+      <h2>Active Duty Stations</h2>
+      <p class="muted">These are pulled from Supabase. Add your real post names there before production use.</p>
+      <div id="stationList" class="station-list">
+        <div class="empty">Loading stations…</div>
+      </div>
+    </section>
+  </main>
+
+  <div id="manualModal" class="modal-backdrop" aria-hidden="true">
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="manualTitle">
+      <div class="eyebrow">MANUAL CHANGE</div>
+      <h2 id="manualTitle">Assign Officer to Station</h2>
+      <form id="manualForm">
+        <input id="manualStationId" type="hidden">
+
+        <label>
+          <span>Officer <b>*</b></span>
+          <select id="manualUserId" required></select>
+        </label>
+
+        <label>
+          <span>Reason</span>
+          <textarea id="manualReason" rows="3" placeholder="Optional reason / note"></textarea>
+        </label>
+
+        <div class="modal-actions">
+          <button id="confirmManualButton" class="button primary" type="submit">
+            Save Assignment
+          </button>
+          <button class="button secondary modal-cancel" type="button">Cancel</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../secure-page.js"></script>
+  <script src="assignments.js"></script>
+</body>
+</html>
