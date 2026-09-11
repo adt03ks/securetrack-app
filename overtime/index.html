@@ -1,1 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d10">
+  <title>SecureTrack | Overtime</title>
+  <link rel="stylesheet" href="overtime.css">
+</head>
 
+<body data-securetrack-roles="officer,dispatcher,senior_officer,team_lead,manager,admin">
+  <main class="shell">
+
+    <header class="topbar">
+      <div>
+        <div class="brand">SECURE<span>TRACK</span></div>
+        <div class="eyebrow">OPERATIONS HUB</div>
+        <h1>Overtime</h1>
+        <p class="subtitle">View available overtime, submit requests, and manage approvals.</p>
+      </div>
+
+      <div class="top-actions">
+        <a class="button secondary" href="../hub.html">Operations Hub</a>
+        <button id="signOutButton" class="button ghost" type="button">Sign Out</button>
+      </div>
+    </header>
+
+    <section class="user-strip">
+      <span>Signed in as</span>
+      <strong id="currentUserName">Loading…</strong>
+      <span id="currentUserRole" class="role-pill"></span>
+    </section>
+
+    <div id="pageMessage" class="message" role="status" aria-live="polite"></div>
+
+    <section class="stats">
+      <article class="stat-card">
+        <span>Open Opportunities</span>
+        <strong id="openCount">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>My Pending Requests</span>
+        <strong id="myPendingCount">0</strong>
+      </article>
+      <article id="managerPendingStat" class="stat-card" hidden>
+        <span>Pending Manager Review</span>
+        <strong id="managerPendingCount">0</strong>
+      </article>
+    </section>
+
+    <section id="managerCreateSection" class="card" hidden>
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">MANAGER / ADMIN</div>
+          <h2>Create Overtime Opportunity</h2>
+        </div>
+      </div>
+
+      <form id="createOpportunityForm">
+        <div class="field-grid four">
+          <label>
+            <span>Date <b>*</b></span>
+            <input id="opportunityDate" type="date" required>
+          </label>
+
+          <label>
+            <span>Shift <b>*</b></span>
+            <input id="opportunityShift" type="text" required placeholder="Example: Nights">
+          </label>
+
+          <label>
+            <span>Start Time</span>
+            <input id="startTime" type="time">
+          </label>
+
+          <label>
+            <span>End Time</span>
+            <input id="endTime" type="time">
+          </label>
+        </div>
+
+        <div class="field-grid two">
+          <label>
+            <span>Location <b>*</b></span>
+            <input id="opportunityLocation" type="text" required placeholder="Example: Emergency Center">
+          </label>
+
+          <label>
+            <span>Number of Openings <b>*</b></span>
+            <input id="totalOpenings" type="number" min="1" value="1" required>
+          </label>
+        </div>
+
+        <div class="field-grid two">
+          <label>
+            <span>Requirements</span>
+            <textarea id="requirements" rows="3" placeholder="Example: Taser certified"></textarea>
+          </label>
+
+          <label>
+            <span>Notes</span>
+            <textarea id="opportunityNotes" rows="3" placeholder="Optional manager notes"></textarea>
+          </label>
+        </div>
+
+        <button id="createOpportunityButton" class="button primary" type="submit">
+          Create Opportunity
+        </button>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">AVAILABLE</div>
+          <h2>Open Overtime Opportunities</h2>
+        </div>
+
+        <button id="refreshButton" class="button secondary" type="button">Refresh</button>
+      </div>
+
+      <div id="opportunityList" class="opportunity-grid">
+        <div class="empty">Loading overtime opportunities…</div>
+      </div>
+    </section>
+
+    <section id="myRequestsSection" class="card">
+      <div class="eyebrow">MY OVERTIME</div>
+      <h2>My Requests</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Shift</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Requested</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="myRequestsBody">
+            <tr>
+              <td colspan="6" class="empty">No overtime requests.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="managerReviewSection" class="card" hidden>
+      <div class="eyebrow">MANAGER / ADMIN</div>
+      <h2>Pending Requests</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Date</th>
+              <th>Shift</th>
+              <th>Location</th>
+              <th>Requested</th>
+              <th>Decision</th>
+            </tr>
+          </thead>
+          <tbody id="pendingReviewBody">
+            <tr>
+              <td colspan="6" class="empty">No pending overtime requests.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="managerManageSection" class="card" hidden>
+      <div class="eyebrow">MANAGER / ADMIN</div>
+      <h2>Manage Opportunities</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Shift</th>
+              <th>Location</th>
+              <th>Filled</th>
+              <th>Status</th>
+              <th>Manage</th>
+            </tr>
+          </thead>
+          <tbody id="manageOpportunityBody">
+            <tr>
+              <td colspan="6" class="empty">No opportunities found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="reviewModal" class="modal-backdrop" aria-hidden="true">
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+      <div class="eyebrow">OVERTIME REVIEW</div>
+      <h2 id="reviewModalTitle">Review Request</h2>
+      <p id="reviewSummary" class="muted"></p>
+
+      <form id="reviewForm">
+        <input id="reviewSignupId" type="hidden">
+        <input id="reviewDecision" type="hidden">
+
+        <label>
+          <span>Manager Notes</span>
+          <textarea id="reviewNotes" rows="4" placeholder="Optional review notes"></textarea>
+        </label>
+
+        <div class="modal-actions">
+          <button id="confirmReviewButton" class="button primary" type="submit">Confirm</button>
+          <button id="cancelReviewButton" class="button secondary" type="button">Cancel</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../secure-page.js"></script>
+  <script src="overtime.js"></script>
+</body>
+</html>

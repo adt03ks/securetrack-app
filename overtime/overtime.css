@@ -1,0 +1,361 @@
+
+:root {
+  --bg: #090b0e;
+  --card: #13171c;
+  --border: #30363d;
+  --text: #f4f6f8;
+  --muted: #98a2ad;
+  --orange: #ff7800;
+  --green: #5fe09b;
+  --red: #ff7b80;
+  --shadow: 0 18px 50px rgba(0,0,0,.28);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top right, rgba(255,120,0,.08), transparent 28%),
+    var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button, input, select, textarea { font: inherit; }
+
+.shell {
+  width: min(1180px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 26px 0 54px;
+}
+
+.topbar,
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 22px;
+  align-items: flex-start;
+}
+
+.brand {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.brand span { color: var(--orange); }
+
+.eyebrow {
+  margin-top: 10px;
+  color: var(--orange);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+
+h1 {
+  font-size: clamp(34px,5vw,56px);
+  margin: 8px 0 6px;
+}
+
+h2 { margin: 6px 0 12px; }
+
+.subtitle, .muted {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.top-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.button {
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 10px 14px;
+  background: #171b20;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) { transform: translateY(-1px); }
+.button:disabled { opacity: .45; cursor: not-allowed; }
+
+.button.primary {
+  background: var(--orange);
+  color: #111;
+  border-color: var(--orange);
+}
+
+.button.secondary { background: #171b20; }
+.button.ghost { background: transparent; }
+
+.button.approve {
+  background: rgba(95,224,155,.12);
+  border-color: rgba(95,224,155,.35);
+  color: var(--green);
+}
+
+.button.deny,
+.button.danger {
+  background: rgba(255,123,128,.08);
+  border-color: rgba(255,123,128,.35);
+  color: var(--red);
+}
+
+.button.small {
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+.user-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: #0e1115;
+  border-radius: 13px;
+  padding: 11px 14px;
+  margin: 18px 0;
+  color: var(--muted);
+}
+
+.user-strip strong { color: #fff; }
+
+.role-pill {
+  text-transform: capitalize;
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: rgba(255,120,0,.12);
+  color: #ffad61;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.stat-card,
+.card {
+  background: linear-gradient(145deg, rgba(23,27,32,.98), rgba(10,12,15,.99));
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.stat-card { padding: 18px; }
+
+.stat-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stat-card strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 30px;
+}
+
+.card {
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.field-grid {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.field-grid.four {
+  grid-template-columns: repeat(4,minmax(0,1fr));
+}
+
+.field-grid.two {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+}
+
+label span {
+  display: block;
+  margin-bottom: 7px;
+  color: #cfd5dc;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+label b { color: var(--orange); }
+
+input, select, textarea {
+  width: 100%;
+  border: 1px solid #343b43;
+  border-radius: 10px;
+  background: #0c0f12;
+  color: #fff;
+  padding: 11px 12px;
+}
+
+textarea { resize: vertical; }
+
+.opportunity-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.opportunity-card {
+  border: 1px solid #2d343b;
+  border-radius: 16px;
+  background: #0c0f12;
+  padding: 18px;
+}
+
+.opportunity-card h3 {
+  margin: 4px 0 10px;
+}
+
+.opportunity-meta {
+  display: grid;
+  gap: 6px;
+  color: #c8cfd6;
+  font-size: 13px;
+}
+
+.opportunity-openings {
+  margin-top: 12px;
+  font-weight: 900;
+}
+
+.opportunity-actions { margin-top: 16px; }
+
+.status-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: capitalize;
+  background: #1c2228;
+  color: #d4dbe2;
+}
+
+.status-pill.pending { color: #ffbf73; }
+.status-pill.approved { color: var(--green); }
+.status-pill.denied,
+.status-pill.cancelled { color: var(--red); }
+
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #292f35;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 10px;
+}
+
+td { font-size: 14px; }
+
+.inline-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 20px;
+}
+
+.message {
+  display: none;
+  margin-bottom: 14px;
+  border-radius: 11px;
+  padding: 11px 13px;
+}
+
+.message.show { display: block; }
+
+.message.success {
+  background: rgba(95,224,155,.10);
+  border: 1px solid rgba(95,224,155,.30);
+}
+
+.message.error {
+  background: rgba(255,123,128,.10);
+  border: 1px solid rgba(255,123,128,.30);
+}
+
+.message.info {
+  background: rgba(255,120,0,.10);
+  border: 1px solid rgba(255,120,0,.28);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0,0,0,.72);
+}
+
+.modal-backdrop.show { display: grid; }
+
+.modal-card {
+  width: min(540px,100%);
+  border: 1px solid #394049;
+  border-radius: 18px;
+  background: #111419;
+  padding: 22px;
+  box-shadow: 0 25px 80px rgba(0,0,0,.6);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .field-grid.four,
+  .field-grid.two,
+  .opportunity-grid,
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar,
+  .section-head {
+    display: block;
+  }
+
+  .top-actions,
+  .section-head .button {
+    margin-top: 12px;
+  }
+}
