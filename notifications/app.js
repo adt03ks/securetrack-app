@@ -294,17 +294,12 @@
   }
 
 
-  async function openSetup() {
+async function openSetup() {
 
   clearMessage();
 
-
-  elements.setupButton.disabled =
-    true;
-
-  elements.setupButton.textContent =
-    "Loading Setup...";
-
+  elements.setupButton.disabled = true;
+  elements.setupButton.textContent = "Opening Push Setup...";
 
   try {
 
@@ -318,8 +313,7 @@
           "securetrack-push-setup",
           {
             body: {
-              action:
-                "get_setup"
+              action: "get_setup"
             }
           }
         );
@@ -327,7 +321,15 @@
 
     if (error) {
 
-      throw error;
+      console.error(
+        "securetrack-push-setup invoke error:",
+        error
+      );
+
+      throw new Error(
+        error.message ||
+        "Push setup request failed."
+      );
     }
 
 
@@ -343,47 +345,39 @@
     }
 
 
-    const topic =
-      data.topic;
-
-
     const server =
-      data.server ||
-      "https://ntfy.sh";
+      String(
+        data.server ||
+        "https://ntfy.sh"
+      )
+      .replace(/\/$/, "");
 
 
-    const copyText =
-      topic;
+    const topic =
+      String(
+        data.topic
+      ).trim();
 
 
-    try {
+    const subscriptionUrl =
+      `${server}/${encodeURIComponent(topic)}`;
 
-      await navigator
-        .clipboard
-        .writeText(
-          copyText
-        );
 
-    } catch (
-      clipboardError
-    ) {
+    // Turn on SecureTrack's push preference.
+    elements.pushEnabled.checked = true;
 
-      console.warn(
-        "Topic could not be copied automatically:",
-        clipboardError
-      );
-    }
+    refreshStatus();
 
 
     showMessage(
-      `Your SecureTrack notification topic has been copied. Open ntfy, choose Subscribe to topic, paste "${topic}", and subscribe. Then return here and select Send Test Alert.`,
+      "SecureTrack is opening your notification subscription. Subscribe to the topic, then return here and select Send Test Alert.",
       "success"
     );
 
 
-    // Open ntfy in a new tab.
+    // Open the exact SecureTrack topic.
     window.open(
-      server,
+      subscriptionUrl,
       "_blank",
       "noopener,noreferrer"
     );
@@ -399,15 +393,14 @@
 
     showMessage(
       error.message ||
-      "SecureTrack could not start push notification setup.",
+      "SecureTrack could not open push notification setup.",
       "error"
     );
 
 
   } finally {
 
-    elements.setupButton.disabled =
-      false;
+    elements.setupButton.disabled = false;
 
     elements.setupButton.textContent =
       setupConfirmed
