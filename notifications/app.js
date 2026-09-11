@@ -142,8 +142,8 @@
           ? "Review Push Setup"
           : "Enable Push Alerts";
 
-      elements.testButton.disabled =
-        true;
+     elements.testButton.disabled =
+  !elements.pushEnabled.checked;
     }
   }
 
@@ -294,36 +294,218 @@
   }
 
 
-  function openSetup() {
+  async function openSetup() {
 
-    /*
-      The next step will connect this button
-      to the one-time ntfy onboarding flow.
+  clearMessage();
 
-      We are intentionally NOT exposing
-      NTFY_TOPIC in browser JavaScript.
-    */
+
+  elements.setupButton.disabled =
+    true;
+
+  elements.setupButton.textContent =
+    "Loading Setup...";
+
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await db
+        .functions
+        .invoke(
+          "securetrack-push-setup",
+          {
+            body: {
+              action:
+                "get_setup"
+            }
+          }
+        );
+
+
+    if (error) {
+
+      throw error;
+    }
+
+
+    if (
+      !data?.ok ||
+      !data?.topic
+    ) {
+
+      throw new Error(
+        data?.error ||
+        "Push setup information is unavailable."
+      );
+    }
+
+
+    const topic =
+      data.topic;
+
+
+    const server =
+      data.server ||
+      "https://ntfy.sh";
+
+
+    const copyText =
+      topic;
+
+
+    try {
+
+      await navigator
+        .clipboard
+        .writeText(
+          copyText
+        );
+
+    } catch (
+      clipboardError
+    ) {
+
+      console.warn(
+        "Topic could not be copied automatically:",
+        clipboardError
+      );
+    }
+
 
     showMessage(
-      "Push setup is ready for the next integration step.",
-      ""
+      `Your SecureTrack notification topic has been copied. Open ntfy, choose Subscribe to topic, paste "${topic}", and subscribe. Then return here and select Send Test Alert.`,
+      "success"
     );
-  }
 
 
-  function sendTestAlert() {
+    // Open ntfy in a new tab.
+    window.open(
+      server,
+      "_blank",
+      "noopener,noreferrer"
+    );
 
-    /*
-      The next step will connect this button
-      to a protected Supabase Edge Function
-      that sends a sanitized SecureTrack test.
-    */
+
+  } catch (error) {
+
+    console.error(
+      "Push setup error:",
+      error
+    );
+
 
     showMessage(
-      "Test Alert delivery will be activated in the next step.",
-      ""
+      error.message ||
+      "SecureTrack could not start push notification setup.",
+      "error"
     );
+
+
+  } finally {
+
+    elements.setupButton.disabled =
+      false;
+
+    elements.setupButton.textContent =
+      setupConfirmed
+        ? "Review Push Setup"
+        : "Enable Push Alerts";
   }
+}
+
+
+ async function sendTestAlert() {
+
+  clearMessage();
+
+
+  elements.testButton.disabled =
+    true;
+
+  elements.testButton.textContent =
+    "Sending...";
+
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await db
+        .functions
+        .invoke(
+          "securetrack-push-setup",
+          {
+            body: {
+              action:
+                "send_test"
+            }
+          }
+        );
+
+
+    if (error) {
+
+      throw error;
+    }
+
+
+    if (
+      !data?.ok
+    ) {
+
+      throw new Error(
+        data?.error ||
+        "Test alert failed."
+      );
+    }
+
+
+    setupConfirmed =
+      true;
+
+
+    elements.pushEnabled.checked =
+      true;
+
+
+    refreshStatus();
+
+
+    showMessage(
+      "Test alert sent. If the notification appeared on your device, SecureTrack Push is now active.",
+      "success"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Test notification error:",
+      error
+    );
+
+
+    showMessage(
+      error.message ||
+      "SecureTrack could not send the test alert.",
+      "error"
+    );
+
+
+  } finally {
+
+    elements.testButton.disabled =
+      false;
+
+    elements.testButton.textContent =
+      "Send Test Alert";
+  }
+}
 
 
   async function start() {
