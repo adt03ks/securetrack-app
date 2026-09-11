@@ -224,6 +224,136 @@
     </section>
   </div>
 
+  <div id="detailModal" class="modal-backdrop" aria-hidden="true">
+    <section class="modal-card modal-wide" role="dialog" aria-modal="true"
+      aria-labelledby="detailModalTitle">
+
+      <div class="modal-header">
+        <div>
+          <div class="eyebrow">OVERTIME DETAIL</div>
+          <h2 id="detailModalTitle">Opportunity Details</h2>
+          <p id="detailSummary" class="muted"></p>
+        </div>
+
+        <button id="closeDetailButton" class="button secondary" type="button">
+          Close
+        </button>
+      </div>
+
+      <section class="detail-section">
+        <h3>Opportunity Information</h3>
+        <div id="detailInfo" class="detail-grid"></div>
+      </section>
+
+      <section class="detail-section">
+        <h3>Requests</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Status</th>
+                <th>Requested</th>
+                <th>Reviewed By</th>
+                <th>Notes</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="detailSignupBody">
+              <tr>
+                <td colspan="6" class="empty">No requests.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="detail-section">
+        <h3>Activity History</h3>
+        <div id="historyList" class="history-list">
+          <div class="empty">No history found.</div>
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <div id="editModal" class="modal-backdrop" aria-hidden="true">
+    <section class="modal-card modal-wide" role="dialog" aria-modal="true"
+      aria-labelledby="editModalTitle">
+
+      <div class="modal-header">
+        <div>
+          <div class="eyebrow">MANAGER / ADMIN</div>
+          <h2 id="editModalTitle">Edit Overtime Opportunity</h2>
+        </div>
+
+        <button id="closeEditButton" class="button secondary" type="button">
+          Close
+        </button>
+      </div>
+
+      <form id="editOpportunityForm">
+        <input id="editOpportunityId" type="hidden">
+
+        <div class="field-grid four">
+          <label>
+            <span>Date <b>*</b></span>
+            <input id="editOpportunityDate" type="date" required>
+          </label>
+
+          <label>
+            <span>Shift <b>*</b></span>
+            <input id="editOpportunityShift" type="text" required>
+          </label>
+
+          <label>
+            <span>Start Time</span>
+            <input id="editStartTime" type="time">
+          </label>
+
+          <label>
+            <span>End Time</span>
+            <input id="editEndTime" type="time">
+          </label>
+        </div>
+
+        <div class="field-grid two">
+          <label>
+            <span>Location <b>*</b></span>
+            <input id="editOpportunityLocation" type="text" required>
+          </label>
+
+          <label>
+            <span>Number of Openings <b>*</b></span>
+            <input id="editTotalOpenings" type="number" min="1" required>
+          </label>
+        </div>
+
+        <div class="field-grid two">
+          <label>
+            <span>Requirements</span>
+            <textarea id="editRequirements" rows="3"></textarea>
+          </label>
+
+          <label>
+            <span>Notes</span>
+            <textarea id="editOpportunityNotes" rows="3"></textarea>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button id="saveEditButton" class="button primary" type="submit">
+            Save Changes
+          </button>
+          <button id="cancelEditButton" class="button secondary" type="button">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config.js"></script>
   <script src="../secure-page.js"></script>
