@@ -378,41 +378,18 @@
   // VERIFY MANAGER SESSION
   // =========================================================
 
-  async function requireSession() {
+ async function requireSession() {
 
-    const {
-      data,
-      error
-    } =
-      await db.auth
-        .getSession();
+  const manager =
+    await STM.requireManager();
 
-
-    if (error) {
-      throw error;
-    }
-
-
-    const session =
-      data?.session;
-
-
-    if (!session) {
-
-      window.location.replace(
-        "manager-login.html"
-      );
-
-      return null;
-
-    }
-
-
-    return session;
-
+  if (!manager) {
+    return null;
   }
 
+  return manager.session;
 
+}
   // =========================================================
   // LOAD NOTIFICATION SETTINGS
   // =========================================================
@@ -933,34 +910,20 @@ if (
   // =========================================================
   // SIGN OUT
   // =========================================================
+logoutButton.addEventListener(
+  "click",
+  async () => {
 
-  logoutButton.addEventListener(
-    "click",
-    async () => {
+    logoutButton.disabled =
+      true;
 
-      logoutButton.disabled =
-        true;
+    logoutButton.textContent =
+      "Signing Out…";
 
-      logoutButton.textContent =
-        "Signing Out…";
+    await STM.signOut();
 
-
-      try {
-
-        await db.auth
-          .signOut();
-
-      } finally {
-
-        window.location.replace(
-          "login.html"
-        );
-
-      }
-
-    }
-  );
-
+  }
+);
 
   // =========================================================
   // INITIALIZE PAGE
