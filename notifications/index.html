@@ -1,1 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    SecureTrack Notification Settings
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+</head>
+
+
+<body
+  data-securetrack-roles="
+    officer
+    dispatcher
+    senior_officer
+    team_lead
+    manager
+    admin
+  "
+>
+
+  <main class="page-shell">
+
+    <header class="page-header">
+
+      <div>
+        <div class="eyebrow">
+          SECURETRACK OPERATIONS HUB
+        </div>
+
+        <h1>
+          Notification Settings
+        </h1>
+
+        <p class="subtitle">
+          Manage the Security Alerts you want
+          delivered to your device.
+        </p>
+      </div>
+
+      <a
+        class="back-button"
+        href="../hub.html"
+      >
+        Back to Hub
+      </a>
+
+    </header>
+
+
+    <section class="status-card">
+
+      <div class="status-top">
+
+        <div>
+
+          <h2>
+            Push Notifications
+          </h2>
+
+          <p>
+            SecureTrack uses push notifications
+            to notify you of selected security
+            events.
+          </p>
+
+        </div>
+
+
+        <div
+          id="pushStatus"
+          class="status-badge inactive"
+        >
+          Not Configured
+        </div>
+
+      </div>
+
+
+      <label class="master-toggle">
+
+        <div>
+
+          <strong>
+            Enable Push Alerts
+          </strong>
+
+          <span>
+            Receive SecureTrack security
+            notifications on your device.
+          </span>
+
+        </div>
+
+
+        <input
+          type="checkbox"
+          id="pushEnabled"
+        >
+
+      </label>
+
+    </section>
+
+
+    <section class="settings-card">
+
+      <div class="section-heading">
+
+        <h2>
+          Security Alert Preferences
+        </h2>
+
+        <p>
+          Choose which alerts you want to
+          receive.
+        </p>
+
+      </div>
+
+
+      <div class="alert-list">
+
+
+        <label class="alert-row">
+
+          <div class="alert-info">
+
+            <strong>
+              Code Green
+            </strong>
+
+            <span>
+              Security response notification.
+            </span>
+
+          </div>
+
+          <input
+            type="checkbox"
+            id="codeGreen"
+          >
+
+        </label>
+
+
+        <label class="alert-row">
+
+          <div class="alert-info">
+
+            <strong>
+              Taser Pull
+            </strong>
+
+            <span>
+              Notification when a Taser
+              deployment event is submitted.
+            </span>
+
+          </div>
+
+          <input
+            type="checkbox"
+            id="taserPull"
+          >
+
+        </label>
+
+
+        <label class="alert-row">
+
+          <div class="alert-info">
+
+            <strong>
+              CTW
+            </strong>
+
+            <span>
+              Criminal trespass warning
+              notification.
+            </span>
+
+          </div>
+
+          <input
+            type="checkbox"
+            id="ctw"
+          >
+
+        </label>
+
+
+        <label class="alert-row">
+
+          <div class="alert-info">
+
+            <strong>
+              Officer Injury
+            </strong>
+
+            <span>
+              High-priority officer injury
+              notification.
+            </span>
+
+          </div>
+
+          <input
+            type="checkbox"
+            id="officerInjury"
+          >
+
+        </label>
+
+
+        <label class="alert-row">
+
+          <div class="alert-info">
+
+            <strong>
+              Insufficient Staffing
+            </strong>
+
+            <span>
+              Notification when staffing falls
+              below operational requirements.
+            </span>
+
+          </div>
+
+          <input
+            type="checkbox"
+            id="insufficientStaffing"
+          >
+
+        </label>
+
+
+      </div>
+
+    </section>
+
+
+    <section class="setup-card">
+
+      <div>
+
+        <h2>
+          Device Setup
+        </h2>
+
+        <p id="setupMessage">
+          Push notification setup has not yet
+          been confirmed for this account.
+        </p>
+
+      </div>
+
+
+      <div class="setup-actions">
+
+        <button
+          id="setupButton"
+          class="primary-button"
+          type="button"
+        >
+          Enable Push Alerts
+        </button>
+
+
+        <button
+          id="testButton"
+          class="secondary-button"
+          type="button"
+          disabled
+        >
+          Send Test Alert
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <section class="save-card">
+
+      <div
+        id="messageBox"
+        class="message-box"
+        hidden
+      ></div>
+
+
+      <button
+        id="saveButton"
+        class="save-button"
+        type="button"
+      >
+        Save Notification Settings
+      </button>
+
+    </section>
+
+  </main>
+
+
+  <script src="../config.js"></script>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="../secure-page.js"></script>
+
+  <script src="app.js"></script>
+
+</body>
+</html>
