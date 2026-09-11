@@ -383,12 +383,13 @@
 
       if (error) throw error;
 
-      currentShift = {
-        id: data.shift_id,
-        shift_date: data.shift_date,
-        shift_name: data.shift_name,
-        status: "draft"
-      };
+     currentShift = {
+  id: data.shift_id,
+  shift_date: data.shift_date,
+  shift_name: data.shift_name,
+  status: data.status || "draft",
+  published_at: data.published_at || null
+};
 
       shiftStatus.hidden = false;
       shiftStatusText.textContent = formatShift(currentShift);
