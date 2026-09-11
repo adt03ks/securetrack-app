@@ -1,1 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d10">
+  <title>SecureTrack | Property / Belongings</title>
+  <link rel="stylesheet" href="property.css">
+</head>
 
+<body data-securetrack-roles="officer,dispatcher,senior_officer,team_lead,manager,admin">
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="brand">SECURE<span>TRACK</span></div>
+        <div class="eyebrow">PROPERTY ACCOUNTABILITY</div>
+        <h1>Property / Belongings</h1>
+        <p class="subtitle">Log, locate, and track patient belongings with accountable chain-of-custody records.</p>
+      </div>
+
+      <div class="top-actions">
+        <a class="button secondary" href="../hub.html">← Operations Hub</a>
+        <button id="signOutButton" class="button ghost" type="button">Sign Out</button>
+      </div>
+    </header>
+
+    <section class="user-strip" aria-label="Current user">
+      <span>Signed in as</span>
+      <strong id="currentUserName">Loading…</strong>
+      <span id="currentUserRole" class="role-pill"></span>
+    </section>
+
+    <section class="summary-grid" aria-label="Property summary">
+      <article class="summary-card">
+        <span>Stored</span>
+        <strong id="storedCount">—</strong>
+      </article>
+      <article class="summary-card">
+        <span>Released</span>
+        <strong id="releasedCount">—</strong>
+      </article>
+      <article class="summary-card">
+        <span>Disposed</span>
+        <strong id="disposedCount">—</strong>
+      </article>
+      <article class="summary-card">
+        <span>Total Records</span>
+        <strong id="totalCount">—</strong>
+      </article>
+    </section>
+
+    <nav class="tabs" aria-label="Property functions">
+      <button class="tab active" type="button" data-panel="intakePanel">Log New Property</button>
+      <button class="tab" type="button" data-panel="searchPanel">Search Property</button>
+    </nav>
+
+    <section id="intakePanel" class="panel active">
+      <div class="panel-heading">
+        <div>
+          <div class="eyebrow">NEW RECORD</div>
+          <h2>Log New Property</h2>
+        </div>
+        <div class="auto-id">Property ID is generated automatically</div>
+      </div>
+
+      <form id="propertyIntakeForm" autocomplete="off">
+        <div class="form-grid two-col">
+          <label>
+            <span>DG Number</span>
+            <input id="dgNumber" name="dgNumber" type="text" inputmode="numeric" autocomplete="off" placeholder="DG number from physical form">
+          </label>
+
+          <label>
+            <span>MRN Number</span>
+            <input id="mrnNumber" name="mrnNumber" type="text" inputmode="numeric" autocomplete="off" placeholder="MRN from physical form">
+          </label>
+        </div>
+
+        <label>
+          <span>Property Description <b>*</b></span>
+          <textarea id="description" name="description" rows="3" required placeholder="Example: Black backpack containing clothing and phone charger"></textarea>
+        </label>
+
+        <div class="form-grid two-col">
+          <label>
+            <span>Category <b>*</b></span>
+            <select id="category" name="category" required>
+              <option value="">Select category</option>
+              <option>Personal Belongings</option>
+              <option>Electronics</option>
+              <option>Wallet / Identification</option>
+              <option>Keys</option>
+              <option>Clothing</option>
+              <option>Jewelry / Valuables</option>
+              <option>Cash</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Date / Time Received <b>*</b></span>
+            <input id="receivedAt" name="receivedAt" type="datetime-local" required>
+          </label>
+        </div>
+
+        <div class="form-grid two-col">
+          <label>
+            <span>Location Received <b>*</b></span>
+            <input id="locationReceived" name="locationReceived" type="text" required placeholder="Example: Emergency Center">
+          </label>
+
+          <label>
+            <span>Storage / Bin <b>*</b></span>
+            <input id="storageLocation" name="storageLocation" type="text" required placeholder="Example: Property Locker B-04">
+          </label>
+        </div>
+
+        <label>
+          <span>Receiving Officer</span>
+          <input id="receivingOfficer" type="text" readonly>
+        </label>
+
+        <label>
+          <span>Notes</span>
+          <textarea id="notes" name="notes" rows="3" placeholder="Optional operational notes"></textarea>
+        </label>
+
+        <div id="intakeResult" class="message" role="status" aria-live="polite"></div>
+
+        <div class="form-actions">
+          <button id="savePropertyButton" class="button primary" type="submit">Create Property Record</button>
+          <button id="clearPropertyButton" class="button secondary" type="button">Clear Form</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="searchPanel" class="panel">
+      <div class="panel-heading">
+        <div>
+          <div class="eyebrow">LOOKUP</div>
+          <h2>Search Property</h2>
+        </div>
+      </div>
+
+      <form id="propertySearchForm" class="search-bar">
+        <input id="propertySearchInput" type="search" autocomplete="off" placeholder="Property ID, DG, MRN, description, category, or storage location">
+        <button id="propertySearchButton" class="button primary" type="submit">Search</button>
+      </form>
+
+      <p class="privacy-note">DG and MRN are displayed only inside the authenticated SecureTrack property module.</p>
+
+      <div id="searchMessage" class="message" role="status" aria-live="polite"></div>
+
+      <div class="table-wrap">
+        <table class="property-table">
+          <thead>
+            <tr>
+              <th>Property ID</th>
+              <th>DG</th>
+              <th>MRN</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Storage</th>
+              <th>Status</th>
+              <th>Received</th>
+            </tr>
+          </thead>
+          <tbody id="propertyResultsBody">
+            <tr>
+              <td colspan="8" class="empty-cell">Search for a property record above.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../secure-page.js"></script>
+  <script src="property.js"></script>
+</body>
+</html>
