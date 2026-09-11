@@ -145,10 +145,13 @@
     const allowed = new Set(
       (roleRows || [])
         .filter(row =>
-          ["officer","dispatcher","senior_officer","team_lead","manager","admin"].includes(row.role)
-        )
-        .map(row => row.user_id)
-    );
+  [
+    "officer",
+    "dispatcher",
+    "senior_officer",
+    "team_lead"
+  ].includes(row.role)
+);
 
     if (!allowed.size) {
       staff = [];
