@@ -120,7 +120,7 @@
     if (!rows.length) {
       const tr = document.createElement("tr");
       const td = document.createElement("td");
-      td.colSpan = 8;
+      td.colSpan = 9;
       td.className = "empty-cell";
       td.textContent = "No matching property records found.";
       tr.appendChild(td);
@@ -157,6 +157,20 @@
       const dateTd = document.createElement("td");
       dateTd.textContent = formatDate(item.received_at);
       tr.appendChild(dateTd);
+
+      const actionTd = document.createElement("td");
+      const openLink = document.createElement("a");
+      openLink.className = "button secondary compact";
+      openLink.href = `record.html?id=${encodeURIComponent(item.id)}`;
+      openLink.textContent = "Open";
+      actionTd.appendChild(openLink);
+      tr.appendChild(actionTd);
+
+      tr.classList.add("clickable-row");
+      tr.addEventListener("dblclick", event => {
+        if (event.target.closest("a,button")) return;
+        window.location.href = openLink.href;
+      });
 
       resultsBody.appendChild(tr);
     });
