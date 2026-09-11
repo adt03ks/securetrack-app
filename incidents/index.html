@@ -1,1 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#111820" />
+  <title>SecureTrack | Security Alerts</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-securetrack-roles="dispatcher,manager,admin">
+  <main class="page-shell">
+    <section class="app-card" aria-labelledby="form-title">
+      <img
+        class="alert-banner"
+        src="assets/security-leadership-alert.png"
+        alt="Security Leadership Alert"
+      />
 
+      <div class="form-header">
+        <div>
+          <p class="eyebrow">SECURETRACK SECURITY DISPATCH</p>
+          <h1 id="form-title">Real-Time Incident Notification</h1>
+          <p class="intro">
+            Record a qualifying security incident as it occurs. The full incident is stored in SecureTrack.
+            Push notifications contain only minimum operational information and direct authorized users back to SecureTrack for protected details.
+          </p>
+        </div>
+
+        <div class="header-actions">
+          <div class="status-chip" aria-label="Notification workflow status">
+            <span class="status-dot"></span>
+            ntfy Push Enabled
+          </div>
+          <a class="secondary-button nav-button" href="../hub.html">Operations Hub</a>
+          <button id="sign-out-button" type="button" class="secondary-button nav-button">Sign Out</button>
+        </div>
+      </div>
+
+      <div class="signed-in-strip">
+        <span>Submitted by authenticated SecureTrack user:</span>
+        <strong id="signed-in-user">Loading…</strong>
+        <span id="signed-in-role" class="role-badge"></span>
+      </div>
+
+      <div id="system-message" class="system-message hidden" role="status" aria-live="polite"></div>
+
+      <form id="incident-form" novalidate>
+        <section class="form-section">
+          <div class="section-heading">
+            <span class="section-number">1</span>
+            <div>
+              <h2>Incident Type</h2>
+              <p>Select the event being reported. The required incident fields will appear automatically.</p>
+            </div>
+          </div>
+
+          <div class="field full-width">
+            <label for="incident_type">Occurring Incident <span aria-hidden="true">*</span></label>
+            <select id="incident_type" name="incident_type" required>
+              <option value="">Select an incident...</option>
+              <option value="code_green">Code Green</option>
+              <option value="taser_pull">Taser Pull</option>
+              <option value="ctw">CTW (Criminal Trespass Warning)</option>
+              <option value="officer_injury">Officer Injury</option>
+              <option value="insufficient_staffing">Insufficient Staffing</option>
+            </select>
+            <p class="field-error" data-error-for="incident_type"></p>
+          </div>
+        </section>
+
+        <section id="incident-details-section" class="form-section hidden">
+          <div class="section-heading">
+            <span class="section-number">2</span>
+            <div>
+              <h2>Incident Details</h2>
+              <p id="incident-help">Complete the information below.</p>
+            </div>
+          </div>
+
+          <div id="dynamic-fields" class="field-grid"></div>
+        </section>
+
+        <section id="dispatch-section" class="form-section hidden">
+          <div class="section-heading">
+            <span class="section-number">3</span>
+            <div>
+              <h2>Dispatch Record</h2>
+              <p>Your SecureTrack account is recorded automatically as the submitting user.</p>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label>Dispatch Officer / Submitted By</label>
+              <div class="readonly-value" id="submitted-by-display">Loading…</div>
+            </div>
+
+            <div class="field">
+              <label for="dispatch_unit">Dispatch Desk / Unit <span class="optional">Optional</span></label>
+              <input id="dispatch_unit" name="dispatch_unit" type="text" maxlength="120" placeholder="Example: Main Security Dispatch" />
+            </div>
+
+            <div class="field full-width">
+              <label for="additional_notes">Additional Dispatch Notes <span class="optional">Optional</span></label>
+              <textarea id="additional_notes" name="additional_notes" rows="4" maxlength="1500" placeholder="Enter only information necessary for the incident record."></textarea>
+              <div class="privacy-note">
+                <strong>Minimum necessary information:</strong> do not place diagnoses, unrelated medical details, Social Security numbers, MRNs, DG numbers, or other unnecessary sensitive information in push-alert content. Protected incident details remain inside SecureTrack.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="submit-section" class="submit-section hidden">
+          <div class="submit-copy">
+            <strong>Ready to record and alert?</strong>
+            <span>The incident will be saved first. SecureTrack will then attempt the ntfy push alert separately.</span>
+          </div>
+          <button id="submit-button" type="submit" class="primary-button">
+            <span class="button-label">Submit Incident &amp; Send Push Alert</span>
+            <span class="button-spinner hidden" aria-hidden="true"></span>
+          </button>
+        </section>
+      </form>
+
+      <section id="success-panel" class="success-panel hidden" aria-live="polite">
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <div>
+          <p class="eyebrow">INCIDENT RECORDED</p>
+          <h2 id="success-heading">Security incident saved</h2>
+          <p id="success-message">The incident has been recorded.</p>
+          <p id="incident-reference" class="reference"></p>
+          <button id="new-report-button" type="button" class="secondary-button">Start New Incident Report</button>
+        </div>
+      </section>
+
+      <footer class="form-footer">
+        <span>SecureTrack Security Dispatch</span>
+        <span>Operational use should follow your organization’s approved privacy, notification, and incident-reporting policies.</span>
+      </footer>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../secure-page.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
