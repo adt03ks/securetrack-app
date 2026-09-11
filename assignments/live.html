@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d10">
+  <title>SecureTrack | Live Duty Board</title>
+  <link rel="stylesheet" href="assignments.css">
+</head>
+
+<body data-securetrack-roles="officer,dispatcher,senior_officer,team_lead,manager,admin">
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="brand">SECURE<span>TRACK</span></div>
+        <div class="eyebrow">LIVE OPERATIONS</div>
+        <h1>Duty Station Board</h1>
+        <p class="subtitle">Published staffing assignments for the selected shift.</p>
+      </div>
+
+      <div class="top-actions">
+        <a id="assignmentAdminLink" class="button secondary" href="index.html" hidden>Assignment Setup</a>
+        <a class="button secondary" href="../hub.html">Operations Hub</a>
+        <button id="signOutButton" class="button ghost" type="button">Sign Out</button>
+      </div>
+    </header>
+
+    <section class="user-strip">
+      <span>Signed in as</span>
+      <strong id="currentUserName">Loading…</strong>
+      <span id="currentUserRole" class="role-pill"></span>
+      <span id="liveIndicator" class="live-indicator">● Live</span>
+    </section>
+
+    <div id="pageMessage" class="message" role="status" aria-live="polite"></div>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">PUBLISHED SHIFT</div>
+          <h2>View Duty Assignments</h2>
+        </div>
+
+        <div class="board-filters">
+          <label>
+            <span>Shift Date</span>
+            <input id="boardDate" type="date">
+          </label>
+
+          <label>
+            <span>Shift</span>
+            <select id="boardShift">
+              <option value="">Select published shift</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div id="publishedShiftInfo" class="shift-status" hidden>
+        <span>Published Shift</span>
+        <strong id="publishedShiftText">—</strong>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">CURRENT COVERAGE</div>
+          <h2>Station Assignments</h2>
+        </div>
+        <button id="refreshButton" class="button secondary" type="button">Refresh</button>
+      </div>
+
+      <div id="dutyBoard" class="duty-board">
+        <div class="empty">Choose a published shift.</div>
+      </div>
+    </section>
+
+    <section id="managerOverrideCard" class="card" hidden>
+      <div class="eyebrow">MANAGER / ADMIN</div>
+      <h2>Manager Override</h2>
+      <p class="muted">
+        Use Override on a station card to make an operational change after publication.
+        A reason is required and the change is written to assignment history.
+      </p>
+    </section>
+  </main>
+
+  <div id="overrideModal" class="modal-backdrop" aria-hidden="true">
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="overrideTitle">
+      <div class="eyebrow">MANAGER OVERRIDE</div>
+      <h2 id="overrideTitle">Change Published Assignment</h2>
+      <p id="overrideStationText" class="muted"></p>
+
+      <form id="overrideForm">
+        <input id="overrideStationId" type="hidden">
+
+        <label>
+          <span>Assign Officer <b>*</b></span>
+          <select id="overrideUserId" required></select>
+        </label>
+
+        <label>
+          <span>Override Reason <b>*</b></span>
+          <textarea id="overrideReason" rows="4" required
+            placeholder="Example: Officer reassigned for coverage need"></textarea>
+        </label>
+
+        <div class="modal-actions">
+          <button id="confirmOverrideButton" class="button primary" type="submit">
+            Confirm Override
+          </button>
+          <button id="cancelOverrideButton" class="button secondary" type="button">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../secure-page.js"></script>
+  <script src="live.js"></script>
+</body>
+</html>
