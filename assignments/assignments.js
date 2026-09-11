@@ -393,11 +393,44 @@
 
       shiftStatus.hidden = false;
       shiftStatusText.textContent = formatShift(currentShift);
-      saveAttendanceButton.disabled = false;
-      generateButton.disabled = false;
+      const isDraft =
+  currentShift.status === "draft";
 
-      await Promise.all([loadAttendance(), loadAssignments()]);
-      showMessage("Shift opened successfully.", "success");
+saveAttendanceButton.disabled =
+  !isDraft;
+
+generateButton.disabled =
+  !isDraft;
+
+await Promise.all([
+  loadAttendance(),
+  loadAssignments()
+]);
+
+if (data.created) {
+
+  showMessage(
+    "New shift created successfully.",
+    "success"
+  );
+
+} else if (
+  currentShift.status === "published"
+) {
+
+  showMessage(
+    "Existing published shift loaded. Published shifts cannot be regenerated from this screen.",
+    "info"
+  );
+
+} else {
+
+  showMessage(
+    "Existing draft shift loaded successfully.",
+    "success"
+  );
+
+}
     } catch (error) {
       console.error("Open shift error:", error);
       showMessage(error.message || "Unable to open shift.", "error");
