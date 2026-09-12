@@ -1363,10 +1363,11 @@ async function loadPlannedUnavailability() {
       );
 
 
-    await Promise.all([
-      loadAttendance(),
-      loadAssignments()
-    ]);
+   await Promise.all([
+  loadAttendance(),
+  loadAssignments(),
+  loadPlannedUnavailability()
+]);
 
 
     saveAttendanceButton.disabled =
