@@ -394,48 +394,351 @@ let plannedUnavailability = [];
       }));
 
 
-  renderAttendance();
-}
+  function renderAttendance() {
+
+  attendanceList.innerHTML = "";
 
 
-    const {
-      data: profiles,
-      error: profileError
-    } = await db
+  if (!currentShift) {
 
-      .from("profiles")
+    attendanceList.innerHTML =
+      '<div class="empty">Open a shift first.</div>';
 
-      .select(
-        "id, display_name, employee_number, is_active"
-      )
+    return;
+  }
 
-      .eq(
-        "is_active",
-        true
-      )
 
-      .order(
-        "display_name"
+  /*
+    Only show personnel whose normal
+    roster matches the shift being opened.
+  */
+
+  const shiftStaff =
+    staff.filter(person =>
+      person.shift_name ===
+      currentShift.shift_name
+    );
+
+
+  if (!shiftStaff.length) {
+
+    attendanceList.innerHTML =
+      `
+        <div class="empty">
+          No active officers are assigned to
+          ${currentShift.shift_name}.
+        </div>
+      `;
+
+    return;
+  }
+
+
+  const attendanceMap =
+    new Map(
+      attendance.map(row => [
+        row.user_id,
+        row
+      ])
+    );
+
+
+  const absenceMap =
+    new Map(
+      plannedUnavailability.map(row => [
+        row.user_id,
+        row
+      ])
+    );
+
+
+  shiftStaff.forEach(person => {
+
+    const existing =
+      attendanceMap.get(
+        person.id
+      );
+
+    const planned =
+      absenceMap.get(
+        person.id
       );
 
 
-    if (profileError) {
-      throw profileError;
+    const row =
+      document.createElement(
+        "label"
+      );
+
+    row.className =
+      "attendance-row";
+
+
+    const checkbox =
+      document.createElement(
+        "input"
+      );
+
+    checkbox.type =
+      "checkbox";
+
+    checkbox.dataset.userId =
+      person.id;
+
+
+    /*
+      Existing attendance always wins.
+
+      Otherwise a planned absence defaults
+      the officer OUT.
+
+      Officers without an attendance record
+      remain unchecked until attendance is
+      actually confirmed.
+    */
+
+    checkbox.checked =
+      existing
+        ? Boolean(
+            existing.is_present
+          )
+        : false;
+
+
+    const text =
+      document.createElement(
+        "div"
+      );
+
+    text.style.flex =
+      "1";
+
+
+    const name =
+      document.createElement(
+        "strong"
+      );
+
+    name.textContent =
+      person.display_name;
+
+
+    const employee =
+      document.createElement(
+        "small"
+      );
+
+    employee.textContent =
+      person.employee_number
+        ? `Employee # ${person.employee_number}`
+        : "SecureTrack user";
+
+
+    text.append(
+      name,
+      employee
+    );
+
+
+    // =======================================================
+    // PLANNED ABSENCE DISPLAY
+    // =======================================================
+
+    let statusBadge = null;
+    let reasonText = null;
+    let addOnSiteButton = null;
+
+
+    if (planned) {
+
+      row.dataset.plannedOut =
+        "true";
+
+
+      statusBadge =
+        document.createElement(
+          "span"
+        );
+
+      statusBadge.style.display =
+        "inline-block";
+
+      statusBadge.style.marginTop =
+        "6px";
+
+      statusBadge.style.padding =
+        "4px 8px";
+
+      statusBadge.style.borderRadius =
+        "999px";
+
+      statusBadge.style.fontSize =
+        "10px";
+
+      statusBadge.style.fontWeight =
+        "800";
+
+      statusBadge.style.letterSpacing =
+        ".04em";
+
+
+      reasonText =
+        document.createElement(
+          "small"
+        );
+
+      reasonText.style.display =
+        "block";
+
+      reasonText.style.marginTop =
+        "5px";
+
+
+      const typeLabel =
+        String(
+          planned.absence_type ||
+          "other"
+        )
+          .replaceAll("_", " ")
+          .replace(
+            /\b\w/g,
+            char =>
+              char.toUpperCase()
+          );
+
+
+      reasonText.textContent =
+        planned.notes
+          ? `${typeLabel}: ${planned.notes}`
+          : typeLabel;
+
+
+      addOnSiteButton =
+        document.createElement(
+          "button"
+        );
+
+      addOnSiteButton.type =
+        "button";
+
+      addOnSiteButton.className =
+        "button secondary";
+
+      addOnSiteButton.style.marginLeft =
+        "12px";
+
+      addOnSiteButton.style.whiteSpace =
+        "nowrap";
+
+
+      function updatePlannedAppearance() {
+
+        if (checkbox.checked) {
+
+          row.style.opacity =
+            "1";
+
+          row.style.background =
+            "rgba(255,120,0,.07)";
+
+          statusBadge.textContent =
+            "ON SITE OVERRIDE";
+
+          statusBadge.style.background =
+            "rgba(255,120,0,.14)";
+
+          statusBadge.style.color =
+            "#ffb36b";
+
+          addOnSiteButton.textContent =
+            "Marked On Site";
+
+          addOnSiteButton.disabled =
+            true;
+
+        } else {
+
+          row.style.opacity =
+            ".58";
+
+          row.style.background =
+            "rgba(125,135,145,.08)";
+
+          statusBadge.textContent =
+            `SCHEDULED OUT • ${typeLabel.toUpperCase()}`;
+
+          statusBadge.style.background =
+            "rgba(125,135,145,.14)";
+
+          statusBadge.style.color =
+            "#c1c7ce";
+
+          addOnSiteButton.textContent =
+            "Add On Site";
+
+          addOnSiteButton.disabled =
+            currentShift.status !==
+            "draft";
+
+        }
+
+      }
+
+
+      addOnSiteButton.addEventListener(
+        "click",
+        event => {
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          checkbox.checked =
+            true;
+
+          updatePlannedAppearance();
+
+        }
+      );
+
+
+      checkbox.addEventListener(
+        "change",
+        updatePlannedAppearance
+      );
+
+
+      text.append(
+        statusBadge,
+        reasonText
+      );
+
+
+      updatePlannedAppearance();
+
     }
 
 
-    staff =
-      (profiles || [])
-        .filter(
-          person =>
-            allowed.has(
-              person.id
-            )
-        );
+    row.append(
+      checkbox,
+      text
+    );
 
 
-    renderAttendance();
-  }
+    if (addOnSiteButton) {
+
+      row.appendChild(
+        addOnSiteButton
+      );
+
+    }
+
+
+    attendanceList.appendChild(
+      row
+    );
+
+  });
+}
 
 
   async function loadAttendance() {
