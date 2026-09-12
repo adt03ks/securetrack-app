@@ -1,25 +1,20 @@
 (async function () {
-
   "use strict";
 
-
   // =========================================================
-  // SECURETRACK MANAGER AUTH
+  // SECURETRACK
+  // TIME OFF / TRAINING
+  // COMMAND-AWARE MANAGEMENT
   // =========================================================
 
-  const STM =
-    window.SecureTrackManager;
+  const STM = window.SecureTrackManager;
 
   if (!STM) {
-
     console.error(
-      "SecureTrack Manager authentication is not available."
+      "SecureTrackManager is not available."
     );
-
     return;
-
   }
-
 
   const manager =
     await STM.requireManager();
@@ -28,239 +23,352 @@
     return;
   }
 
+  const db = STM.db;
 
-  const db =
-    STM.db;
+  const currentUserId =
+    manager.session.user.id;
+
+  const currentRoles =
+    manager.roles || [];
+
+  const isAdmin =
+    currentRoles.includes("admin");
+
+  const isDirector =
+    currentRoles.includes("director");
+
+  const systemWideAuthority =
+    isAdmin || isDirector;
+
+  const ALL_SHIFTS = [
+    "Alpha",
+    "Bravo",
+    "Charlie",
+    "Delta"
+  ];
 
 
   // =========================================================
-  // PAGE ELEMENTS
+  // ELEMENT HELPERS
   // =========================================================
 
-  const logoutButton =
-    document.getElementById(
-      "logoutButton"
-    );
+  function byId(...ids) {
+
+    for (const id of ids) {
+
+      const element =
+        document.getElementById(id);
+
+      if (element) {
+        return element;
+      }
+
+    }
+
+    return null;
+  }
 
 
-  const officerSearch =
-    document.getElementById(
-      "officerSearch"
-    );
+  const elements = {
 
-  const shiftFilter =
-    document.getElementById(
-      "shiftFilter"
-    );
+    logoutButton:
+      byId("logoutButton"),
 
-  const officerPicker =
-    document.getElementById(
-      "officerPicker"
-    );
+    managerName:
+      byId(
+        "managerName",
+        "currentManagerName",
+        "userName"
+      ),
 
-  const selectedOfficer =
-    document.getElementById(
-      "selectedOfficer"
-    );
+    search:
+      byId(
+        "officerSearch",
+        "staffSearch",
+        "availabilitySearch"
+      ),
 
-  const selectedOfficerName =
-    document.getElementById(
-      "selectedOfficerName"
-    );
+    shiftFilter:
+      byId(
+        "shiftFilter",
+        "officerShiftFilter",
+        "availabilityShiftFilter"
+      ),
 
-  const selectedOfficerDetails =
-    document.getElementById(
-      "selectedOfficerDetails"
-    );
+    officerList:
+      byId(
+        "officerList",
+        "staffList",
+        "availabilityOfficerList"
+      ),
 
+    selectedOfficerName:
+      byId(
+        "selectedOfficerName",
+        "absenceOfficerName",
+        "currentOfficerName"
+      ),
 
-  const unavailabilityForm =
-    document.getElementById(
-      "unavailabilityForm"
-    );
+    selectedEmployeeNumber:
+      byId(
+        "selectedEmployeeNumber",
+        "officerEmployeeNumber"
+      ),
 
-  const absenceType =
-    document.getElementById(
-      "absenceType"
-    );
+    currentShift:
+      byId(
+        "currentShift",
+        "normalShift",
+        "selectedOfficerShift"
+      ),
 
-  const startDate =
-    document.getElementById(
-      "startDate"
-    );
+    normalShiftSelect:
+      byId(
+        "normalShiftSelect",
+        "officerShift",
+        "newShift"
+      ),
 
-  const endDate =
-    document.getElementById(
-      "endDate"
-    );
+    saveShiftButton:
+      byId(
+        "saveShiftButton",
+        "updateShiftButton",
+        "changeShiftButton"
+      ),
 
-  const absenceShift =
-    document.getElementById(
-      "absenceShift"
-    );
+    shiftMessage:
+      byId(
+        "shiftMessage",
+        "normalShiftMessage"
+      ),
 
-  const absenceNotes =
-    document.getElementById(
-      "absenceNotes"
-    );
+    absenceForm:
+      byId(
+        "absenceForm",
+        "unavailabilityForm"
+      ),
 
-  const saveAbsenceButton =
-    document.getElementById(
-      "saveAbsenceButton"
-    );
+    absenceType:
+      byId(
+        "absenceType",
+        "unavailabilityType"
+      ),
 
-  const formMessage =
-    document.getElementById(
-      "formMessage"
-    );
+    startDate:
+      byId(
+        "startDate",
+        "absenceStartDate"
+      ),
 
+    endDate:
+      byId(
+        "endDate",
+        "absenceEndDate"
+      ),
 
-  const reviewDate =
-    document.getElementById(
-      "reviewDate"
-    );
+    absenceShift:
+      byId(
+        "absenceShift",
+        "absenceShiftName"
+      ),
 
-  const reviewShift =
-    document.getElementById(
-      "reviewShift"
-    );
+    notes:
+      byId(
+        "absenceNotes",
+        "unavailabilityNotes",
+        "notes"
+      ),
 
-  const outCount =
-    document.getElementById(
-      "outCount"
-    );
+    saveAbsenceButton:
+      byId(
+        "saveAbsenceButton",
+        "addUnavailabilityButton",
+        "saveUnavailabilityButton"
+      ),
 
-  const trainingCount =
-    document.getElementById(
-      "trainingCount"
-    );
+    absenceMessage:
+      byId(
+        "absenceMessage",
+        "unavailabilityMessage",
+        "formMessage"
+      ),
 
-  const timeOffCount =
-    document.getElementById(
-      "timeOffCount"
-    );
+    reviewFromDate:
+      byId(
+        "reviewFromDate",
+        "fromDate"
+      ),
 
-  const absenceTableBody =
-    document.getElementById(
-      "absenceTableBody"
-    );
+    reviewToDate:
+      byId(
+        "reviewToDate",
+        "toDate"
+      ),
 
+    reviewShiftFilter:
+      byId(
+        "reviewShiftFilter",
+        "recordShiftFilter"
+      ),
 
-  const rosterOfficer =
-    document.getElementById(
-      "rosterOfficer"
-    );
+    recordsBody:
+      byId(
+        "unavailabilityTableBody",
+        "absenceTableBody",
+        "reviewTableBody",
+        "unavailabilityList",
+        "absenceList"
+      ),
 
-  const rosterShift =
-    document.getElementById(
-      "rosterShift"
-    );
+    refreshButton:
+      byId(
+        "refreshButton",
+        "refreshAvailabilityButton"
+      ),
 
-  const knownShiftNames =
-    document.getElementById(
-      "knownShiftNames"
-    );
+    officerCount:
+      byId(
+        "officerCount",
+        "managedOfficerCount",
+        "visibleOfficerCount"
+      ),
 
-  const saveRosterButton =
-    document.getElementById(
-      "saveRosterButton"
-    );
+    activeCount:
+      byId(
+        "activeAbsenceCount",
+        "absenceCount",
+        "unavailabilityCount"
+      ),
 
-  const rosterMessage =
-    document.getElementById(
-      "rosterMessage"
-    );
+    timeOffCount:
+      byId("timeOffCount"),
+
+    trainingCount:
+      byId("trainingCount"),
+
+    otherCount:
+      byId("otherCount"),
+
+    outTodayCount:
+      byId(
+        "outTodayCount",
+        "officersOutCount",
+        "outCount"
+      )
+
+  };
 
 
   // =========================================================
   // STATE
   // =========================================================
 
-  let staff = [];
+  const state = {
 
-  let roster = [];
+    supervisors: [],
 
-  let absences = [];
+    managedShifts: [],
 
-  let shiftNames = [];
+    officers: [],
 
-  let selectedOfficerId =
-    null;
+    records: [],
+
+    selectedOfficer: null
+
+  };
 
 
   // =========================================================
-  // HELPERS
+  // GENERAL HELPERS
   // =========================================================
 
-  function todayLocal() {
-
-    const date =
-      new Date();
-
-    const offset =
-      date.getTimezoneOffset();
-
-    return new Date(
-      date.getTime() -
-      offset * 60000
-    )
-      .toISOString()
-      .slice(0, 10);
-
-  }
-
-
-  function normalizeText(value) {
+  function escapeHTML(value) {
 
     return String(
-      value || ""
+      value ?? ""
     )
-      .trim()
-      .toLowerCase();
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
 
   }
 
 
-  function titleCaseType(value) {
-
-    switch (value) {
-
-      case "time_off":
-        return "Time Off";
-
-      case "training":
-        return "Training";
-
-      case "other":
-        return "Other";
-
-      default:
-        return value || "—";
-
-    }
-
-  }
-
-
-  function formatDate(value) {
+  function humanize(value) {
 
     if (!value) {
       return "—";
     }
 
-    const parts =
-      value.split("-");
+    return String(value)
+      .replaceAll("_", " ")
+      .replace(/\b\w/g, char =>
+        char.toUpperCase()
+      );
 
-    if (parts.length !== 3) {
-      return value;
+  }
+
+
+  function localDateString(date) {
+
+    const year =
+      date.getFullYear();
+
+    const month =
+      String(
+        date.getMonth() + 1
+      ).padStart(2, "0");
+
+    const day =
+      String(
+        date.getDate()
+      ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+
+  }
+
+
+  function addDays(
+    dateString,
+    numberOfDays
+  ) {
+
+    const date =
+      new Date(
+        `${dateString}T12:00:00`
+      );
+
+    date.setDate(
+      date.getDate() +
+      numberOfDays
+    );
+
+    return localDateString(date);
+
+  }
+
+
+  function formatDate(dateString) {
+
+    if (!dateString) {
+      return "—";
     }
 
     const date =
       new Date(
-        Number(parts[0]),
-        Number(parts[1]) - 1,
-        Number(parts[2])
+        `${dateString}T12:00:00`
       );
+
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+      return dateString;
+    }
 
     return date.toLocaleDateString(
       undefined,
@@ -274,633 +382,521 @@
   }
 
 
-  function formatDateRange(
-    start,
-    end
-  ) {
-
-    if (!start) {
-      return "—";
-    }
-
-    if (
-      !end ||
-      start === end
-    ) {
-
-      return formatDate(start);
-
-    }
-
-    return (
-      `${formatDate(start)} – ` +
-      `${formatDate(end)}`
-    );
-
-  }
-
-
-  function getRosterForUser(
-    userId
-  ) {
-
-    return roster.find(
-      row =>
-        row.user_id === userId &&
-        row.is_active !== false
-    ) || null;
-
-  }
-
-
-  function getStaffMember(
-    userId
-  ) {
-
-    return staff.find(
-      person =>
-        person.id === userId
-    ) || null;
-
-  }
-
-
   function showMessage(
     element,
     message,
     type = "success"
   ) {
 
+    if (!element) {
+      return;
+    }
+
     element.textContent =
       message;
 
-    element.className =
-      `staffing-message show ${type}`;
+    element.classList.remove(
+      "success",
+      "error"
+    );
+
+    element.classList.add(
+      "show",
+      type
+    );
 
   }
 
 
-  function clearMessage(
-    element
+  function clearMessage(element) {
+
+    if (!element) {
+      return;
+    }
+
+    element.textContent = "";
+
+    element.classList.remove(
+      "show",
+      "success",
+      "error"
+    );
+
+  }
+
+
+  function getToday() {
+
+    return localDateString(
+      new Date()
+    );
+
+  }
+
+
+  function recordCoversDate(
+    record,
+    date
   ) {
 
-    element.textContent =
-      "";
-
-    element.className =
-      "staffing-message";
+    return (
+      record.start_date <= date &&
+      record.end_date >= date
+    );
 
   }
 
 
   // =========================================================
-  // LOAD ELIGIBLE STAFF
+  // PAGE HEADER
   // =========================================================
 
-  async function loadStaff() {
+  if (elements.managerName) {
 
-    /*
-      Use the same operational roles as
-      Duty Station Assignment.
-    */
+    elements.managerName.textContent =
+      manager.profile?.display_name ||
+      manager.session.user.email ||
+      "Manager";
 
-    const {
-      data: roleRows,
-      error: roleError
-    } =
-      await db
-        .from("user_roles")
-        .select("user_id, role");
+  }
 
 
-    if (roleError) {
-      throw roleError;
-    }
+  if (elements.logoutButton) {
 
+    elements.logoutButton
+      .addEventListener(
+        "click",
+        async () => {
 
-    const operationalRoles =
-      new Set([
-        "officer",
-        "dispatcher",
-        "senior_officer",
-        "team_lead"
-      ]);
+          elements.logoutButton.disabled =
+            true;
 
+          elements.logoutButton.textContent =
+            "Signing Out…";
 
-    const allowedIds =
-      new Set(
-        (roleRows || [])
-          .filter(
-            row =>
-              operationalRoles.has(
-                row.role
-              )
-          )
-          .map(
-            row =>
-              row.user_id
-          )
+          await STM.signOut();
+
+        }
       );
 
-
-    if (!allowedIds.size) {
-
-      staff = [];
-
-      renderOfficerPicker();
-      renderRosterOfficerSelect();
-
-      return;
-
-    }
+  }
 
 
-    const {
-      data: profileRows,
-      error: profileError
-    } =
-      await db
-        .from("profiles")
-        .select(
-          "id, display_name, employee_number, email, is_active"
-        )
-        .eq(
-          "is_active",
-          true
-        )
-        .order(
-          "display_name"
-        );
+  // =========================================================
+  // DEFAULT DATE RANGE
+  // =========================================================
+
+  const today =
+    getToday();
+
+  if (
+    elements.startDate &&
+    !elements.startDate.value
+  ) {
+
+    elements.startDate.value =
+      today;
+
+  }
 
 
-    if (profileError) {
-      throw profileError;
-    }
+  if (
+    elements.endDate &&
+    !elements.endDate.value
+  ) {
+
+    elements.endDate.value =
+      today;
+
+  }
 
 
-    staff =
-      (profileRows || [])
-        .filter(
-          person =>
-            allowedIds.has(
-              person.id
-            )
-        )
-        .sort(
-          (a, b) =>
-            String(
-              a.display_name || ""
-            )
-              .localeCompare(
-                String(
-                  b.display_name || ""
-                )
-              )
-        );
+  if (
+    elements.reviewFromDate &&
+    !elements.reviewFromDate.value
+  ) {
+
+    elements.reviewFromDate.value =
+      today;
+
+  }
 
 
-    renderOfficerPicker();
+  if (
+    elements.reviewToDate &&
+    !elements.reviewToDate.value
+  ) {
 
-    renderRosterOfficerSelect();
+    elements.reviewToDate.value =
+      addDays(
+        today,
+        90
+      );
 
   }
 
 
   // =========================================================
-  // LOAD NORMAL SHIFT ROSTER
+  // LOAD SHIFT SUPERVISORS
   // =========================================================
 
-  async function loadRoster() {
+  async function loadSupervisors() {
 
     const {
       data,
       error
     } =
       await db
-        .from(
-          "officer_shift_roster"
-        )
+        .from("shift_supervisors")
         .select(
-          "user_id, shift_name, is_active, updated_at"
+          "shift_name, manager_user_id, is_active"
         );
 
 
     if (error) {
+
       throw error;
+
     }
 
 
-    roster =
+    state.supervisors =
+      (data || [])
+        .filter(row =>
+          row.is_active !== false
+        );
+
+
+    if (systemWideAuthority) {
+
+      state.managedShifts =
+        [...ALL_SHIFTS];
+
+    } else {
+
+      state.managedShifts =
+        state.supervisors
+          .filter(row =>
+            row.manager_user_id ===
+            currentUserId
+          )
+          .map(row =>
+            row.shift_name
+          )
+          .filter(
+            shift =>
+              ALL_SHIFTS.includes(
+                shift
+              )
+          );
+
+    }
+
+  }
+
+
+  // =========================================================
+  // SHIFT DROPDOWN OPTIONS
+  // =========================================================
+
+  function setShiftOptions(
+    select,
+    includeAllOption = true
+  ) {
+
+    if (!select) {
+      return;
+    }
+
+    const previousValue =
+      select.value;
+
+
+    const permittedShifts =
+      systemWideAuthority
+        ? ALL_SHIFTS
+        : state.managedShifts;
+
+
+    select.innerHTML = "";
+
+
+    if (includeAllOption) {
+
+      const all =
+        document.createElement(
+          "option"
+        );
+
+      all.value = "";
+
+      all.textContent =
+        systemWideAuthority
+          ? "All Shifts"
+          : "All Managed Shifts";
+
+      select.appendChild(all);
+
+    }
+
+
+    permittedShifts
+      .forEach(shift => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          shift;
+
+        option.textContent =
+          shift;
+
+        select.appendChild(
+          option
+        );
+
+      });
+
+
+    if (
+      [...select.options]
+        .some(
+          option =>
+            option.value ===
+            previousValue
+        )
+    ) {
+
+      select.value =
+        previousValue;
+
+    }
+
+  }
+
+
+  // =========================================================
+  // LOAD OFFICER DIRECTORY
+  // =========================================================
+
+  async function loadOfficers() {
+
+    const {
+      data,
+      error
+    } =
+      await db.rpc(
+        "get_officer_directory"
+      );
+
+
+    if (error) {
+
+      throw error;
+
+    }
+
+
+    let officers =
       data || [];
 
-  }
-
-
-  // =========================================================
-  // DISCOVER KNOWN SHIFT NAMES
-  // =========================================================
-
-  async function loadShiftNames() {
-
-    const names =
-      new Set();
-
 
     /*
-      First pull any shifts managers have
-      assigned to officers.
+      get_officer_directory also allows
+      managers to see certain incoming
+      transfer records.
+
+      Time Off / Training is stricter:
+      managers may manage only officers
+      CURRENTLY assigned to their command.
     */
 
-    roster.forEach(
-      row => {
+    if (!systemWideAuthority) {
 
-        if (
-          row.is_active !== false &&
-          row.shift_name
-        ) {
-
-          names.add(
-            row.shift_name.trim()
-          );
-
-        }
-
-      }
-    );
-
-
-    /*
-      Also attempt to use historical
-      Shift Operations names.
-
-      If the current database policy does
-      not allow this read, the page still
-      works using roster shift names.
-    */
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-        await db
-          .from(
-            "shift_instances"
-          )
-          .select(
-            "shift_name"
-          );
-
-
-      if (!error) {
-
-        (data || [])
-          .forEach(
-            row => {
-
-              if (row.shift_name) {
-
-                names.add(
-                  row.shift_name.trim()
-                );
-
-              }
-
-            }
-          );
-
-      }
-
-    } catch (error) {
-
-      console.warn(
-        "Existing shift names could not be loaded:",
-        error
-      );
+      officers =
+        officers.filter(
+          officer =>
+            officer.shift_name &&
+            state.managedShifts.includes(
+              officer.shift_name
+            )
+        );
 
     }
 
 
-    /*
-      Existing active absence records may
-      contain additional shift names.
-    */
+    officers.sort(
+      (a, b) => {
 
-    absences.forEach(
-      row => {
+        const aName =
+          a.last_name ||
+          a.display_name ||
+          "";
 
-        if (row.shift_name) {
+        const bName =
+          b.last_name ||
+          b.display_name ||
+          "";
 
-          names.add(
-            row.shift_name.trim()
-          );
-
-        }
+        return aName.localeCompare(
+          bName
+        );
 
       }
     );
 
 
-    shiftNames =
-      [...names]
-        .filter(Boolean)
-        .sort(
-          (a, b) =>
-            a.localeCompare(b)
-        );
+    state.officers =
+      officers;
 
 
-    renderShiftOptions();
+    if (
+      state.selectedOfficer
+    ) {
+
+      state.selectedOfficer =
+        state.officers.find(
+          officer =>
+            officer.user_id ===
+            state.selectedOfficer.user_id
+        ) ||
+        null;
+
+    }
+
+
+    renderOfficerList();
+
+    renderSelectedOfficer();
+
+    updateCounts();
 
   }
 
 
   // =========================================================
-  // RENDER SHIFT FILTERS / OPTIONS
+  // FILTER OFFICERS
   // =========================================================
 
-  function renderShiftOptions() {
-
-    const currentFilter =
-      shiftFilter.value;
-
-    const currentAbsence =
-      absenceShift.value;
-
-    const currentReview =
-      reviewShift.value;
-
-
-    shiftFilter.innerHTML =
-      "";
-
-    absenceShift.innerHTML =
-      "";
-
-    reviewShift.innerHTML =
-      "";
-
-    knownShiftNames.innerHTML =
-      "";
-
-
-    const filterAll =
-      document.createElement(
-        "option"
-      );
-
-    filterAll.value =
-      "";
-
-    filterAll.textContent =
-      "All Shifts";
-
-    shiftFilter.appendChild(
-      filterAll
-    );
-
-
-    const absenceAll =
-      document.createElement(
-        "option"
-      );
-
-    absenceAll.value =
-      "";
-
-    absenceAll.textContent =
-      "All / Any Shift";
-
-    absenceShift.appendChild(
-      absenceAll
-    );
-
-
-    const reviewAll =
-      document.createElement(
-        "option"
-      );
-
-    reviewAll.value =
-      "";
-
-    reviewAll.textContent =
-      "All Shifts";
-
-    reviewShift.appendChild(
-      reviewAll
-    );
-
-
-    shiftNames.forEach(
-      shiftName => {
-
-        const filterOption =
-          document.createElement(
-            "option"
-          );
-
-        filterOption.value =
-          shiftName;
-
-        filterOption.textContent =
-          shiftName;
-
-        shiftFilter.appendChild(
-          filterOption
-        );
-
-
-        const absenceOption =
-          document.createElement(
-            "option"
-          );
-
-        absenceOption.value =
-          shiftName;
-
-        absenceOption.textContent =
-          shiftName;
-
-        absenceShift.appendChild(
-          absenceOption
-        );
-
-
-        const reviewOption =
-          document.createElement(
-            "option"
-          );
-
-        reviewOption.value =
-          shiftName;
-
-        reviewOption.textContent =
-          shiftName;
-
-        reviewShift.appendChild(
-          reviewOption
-        );
-
-
-        const dataOption =
-          document.createElement(
-            "option"
-          );
-
-        dataOption.value =
-          shiftName;
-
-        knownShiftNames.appendChild(
-          dataOption
-        );
-
-      }
-    );
-
-
-    if (
-      [...shiftFilter.options]
-        .some(
-          option =>
-            option.value === currentFilter
-        )
-    ) {
-
-      shiftFilter.value =
-        currentFilter;
-
-    }
-
-
-    if (
-      [...absenceShift.options]
-        .some(
-          option =>
-            option.value === currentAbsence
-        )
-    ) {
-
-      absenceShift.value =
-        currentAbsence;
-
-    }
-
-
-    if (
-      [...reviewShift.options]
-        .some(
-          option =>
-            option.value === currentReview
-        )
-    ) {
-
-      reviewShift.value =
-        currentReview;
-
-    }
-
-
-    renderOfficerPicker();
-
-  }
-
-
-  // =========================================================
-  // OFFICER PICKER
-  // =========================================================
-
-  function renderOfficerPicker() {
-
-    officerPicker.innerHTML =
-      "";
-
+  function getFilteredOfficers() {
 
     const search =
-      normalizeText(
-        officerSearch.value
-      );
-
-    const selectedShift =
-      normalizeText(
-        shiftFilter.value
-      );
+      String(
+        elements.search?.value ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
 
 
-    const filtered =
-      staff.filter(
-        person => {
-
-          const rosterRow =
-            getRosterForUser(
-              person.id
-            );
-
-          const personName =
-            normalizeText(
-              person.display_name
-            );
-
-          const employeeNumber =
-            normalizeText(
-              person.employee_number
-            );
-
-          const matchesSearch =
-            !search ||
-            personName.includes(
-              search
-            ) ||
-            employeeNumber.includes(
-              search
-            );
+    const shift =
+      elements.shiftFilter?.value ||
+      "";
 
 
-          const matchesShift =
-            !selectedShift ||
-            normalizeText(
-              rosterRow?.shift_name
-            ) === selectedShift;
+    return state.officers.filter(
+      officer => {
 
-
-          return (
-            matchesSearch &&
-            matchesShift
-          );
-
+        if (
+          shift &&
+          officer.shift_name !== shift
+        ) {
+          return false;
         }
-      );
 
 
-    if (!filtered.length) {
+        if (!search) {
+          return true;
+        }
 
-      const empty =
-        document.createElement(
-          "div"
+
+        const haystack =
+          [
+            officer.display_name,
+            officer.first_name,
+            officer.last_name,
+            officer.nickname,
+            officer.employee_number,
+            officer.shift_name
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+
+        return haystack.includes(
+          search
         );
 
-      empty.className =
-        "staffing-empty";
+      }
+    );
 
-      empty.textContent =
-        "No officers match the current search and shift filter.";
+  }
 
-      officerPicker.appendChild(
-        empty
-      );
+
+  // =========================================================
+  // OFFICER CURRENT ABSENCE
+  // =========================================================
+
+  function getOfficerCurrentRecord(
+    officerId
+  ) {
+
+    return state.records.find(
+      record =>
+        record.user_id ===
+          officerId &&
+        recordCoversDate(
+          record,
+          today
+        )
+    );
+
+  }
+
+
+  // =========================================================
+  // RENDER OFFICER LIST
+  // =========================================================
+
+  function renderOfficerList() {
+
+    if (!elements.officerList) {
+      return;
+    }
+
+
+    const officers =
+      getFilteredOfficers();
+
+
+    elements.officerList.innerHTML =
+      "";
+
+
+    if (!officers.length) {
+
+      elements.officerList.innerHTML =
+        `
+          <div class="directory-empty">
+            No officers match the current filters.
+          </div>
+        `;
 
       return;
 
     }
 
 
-    filtered.forEach(
-      person => {
+    officers.forEach(
+      officer => {
 
-        const rosterRow =
-          getRosterForUser(
-            person.id
+        const activeRecord =
+          getOfficerCurrentRecord(
+            officer.user_id
           );
 
 
@@ -913,12 +909,12 @@
           "button";
 
         button.className =
-          "officer-option";
+          "officer-row";
 
 
         if (
-          selectedOfficerId ===
-          person.id
+          state.selectedOfficer?.user_id ===
+          officer.user_id
         ) {
 
           button.classList.add(
@@ -928,81 +924,89 @@
         }
 
 
-        const name =
-          document.createElement(
-            "strong"
-          );
+        button.innerHTML =
+          `
+            <div class="officer-main">
 
-        name.textContent =
-          person.display_name ||
-          "SecureTrack Officer";
+              <div class="officer-name">
+                ${escapeHTML(
+                  officer.display_name ||
+                  "Officer"
+                )}
+              </div>
 
+              <div class="officer-meta">
 
-        const details =
-          document.createElement(
-            "small"
-          );
+                ${
+                  officer.employee_number
+                    ? `#${escapeHTML(
+                        officer.employee_number
+                      )} • `
+                    : ""
+                }
 
+                ${
+                  escapeHTML(
+                    officer.shift_name ||
+                    "Unassigned"
+                  )
+                }
 
-        const detailParts =
-          [];
+              </div>
 
+              ${
+                activeRecord
+                  ? `
+                    <div class="subtle">
+                      OUT:
+                      ${escapeHTML(
+                        humanize(
+                          activeRecord.absence_type
+                        )
+                      )}
+                      ${
+                        activeRecord.notes
+                          ? ` — ${escapeHTML(
+                              activeRecord.notes
+                            )}`
+                          : ""
+                      }
+                    </div>
+                  `
+                  : ""
+              }
 
-        if (
-          person.employee_number
-        ) {
-
-          detailParts.push(
-            `Employee # ${person.employee_number}`
-          );
-
-        }
-
-
-        if (
-          rosterRow?.shift_name
-        ) {
-
-          detailParts.push(
-            rosterRow.shift_name
-          );
-
-        } else {
-
-          detailParts.push(
-            "Shift not assigned"
-          );
-
-        }
-
-
-        details.textContent =
-          detailParts.join(
-            " • "
-          );
-
-
-        button.append(
-          name,
-          details
-        );
+            </div>
+          `;
 
 
         button.addEventListener(
           "click",
           () => {
 
-            selectOfficer(
-              person.id
+            state.selectedOfficer =
+              officer;
+
+            renderOfficerList();
+
+            renderSelectedOfficer();
+
+            clearMessage(
+              elements.absenceMessage
+            );
+
+            clearMessage(
+              elements.shiftMessage
             );
 
           }
         );
 
 
-        officerPicker.appendChild(
-          button
-        );
+        elements.officerList
+          .appendChild(
+            button
+          );
 
       }
     );
@@ -1011,138 +1015,64 @@
 
 
   // =========================================================
-  // SELECT OFFICER
+  // RENDER SELECTED OFFICER
   // =========================================================
 
-  function selectOfficer(
-    userId
-  ) {
+  function renderSelectedOfficer() {
 
-    const person =
-      getStaffMember(
-        userId
-      );
-
-
-    if (!person) {
-      return;
-    }
-
-
-    selectedOfficerId =
-      userId;
-
-
-    const rosterRow =
-      getRosterForUser(
-        userId
-      );
-
-
-    selectedOfficerName.textContent =
-      person.display_name ||
-      "SecureTrack Officer";
-
-
-    const detailParts =
-      [];
+    const officer =
+      state.selectedOfficer;
 
 
     if (
-      person.employee_number
+      elements.selectedOfficerName
     ) {
 
-      detailParts.push(
-        `Employee # ${person.employee_number}`
-      );
+      elements.selectedOfficerName
+        .textContent =
+          officer?.display_name ||
+          "Select an officer";
 
     }
 
-
-    detailParts.push(
-      rosterRow?.shift_name ||
-      "Normal shift not assigned"
-    );
-
-
-    selectedOfficerDetails.textContent =
-      detailParts.join(
-        " • "
-      );
-
-
-    selectedOfficer.hidden =
-      false;
-
-
-    /*
-      If the officer has a normal shift and
-      the manager has not already selected
-      another shift, prefill that shift.
-    */
 
     if (
-      rosterRow?.shift_name &&
-      [...absenceShift.options]
-        .some(
-          option =>
-            option.value ===
-            rosterRow.shift_name
-        )
+      elements.selectedEmployeeNumber
     ) {
 
-      absenceShift.value =
-        rosterRow.shift_name;
+      elements.selectedEmployeeNumber
+        .textContent =
+          officer?.employee_number
+            ? `#${officer.employee_number}`
+            : "—";
 
     }
 
 
-    rosterOfficer.value =
-      userId;
+    if (
+      elements.currentShift
+    ) {
+
+      elements.currentShift
+        .textContent =
+          officer?.shift_name ||
+          "Unassigned";
+
+    }
 
 
-    rosterShift.value =
-      rosterRow?.shift_name ||
-      "";
+    if (
+      elements.absenceShift
+    ) {
 
+      if (
+        elements.absenceShift
+          .tagName ===
+        "SELECT"
+      ) {
 
-    renderOfficerPicker();
-
-  }
-
-
-  // =========================================================
-  // ROSTER OFFICER DROPDOWN
-  // =========================================================
-
-  function renderRosterOfficerSelect() {
-
-    const current =
-      rosterOfficer.value;
-
-
-    rosterOfficer.innerHTML =
-      "";
-
-
-    const placeholder =
-      document.createElement(
-        "option"
-      );
-
-    placeholder.value =
-      "";
-
-    placeholder.textContent =
-      "Select officer";
-
-    rosterOfficer.appendChild(
-      placeholder
-    );
-
-
-    staff.forEach(
-      person => {
+        elements.absenceShift
+          .innerHTML = "";
 
         const option =
           document.createElement(
@@ -1150,29 +1080,108 @@
           );
 
         option.value =
-          person.id;
+          officer?.shift_name ||
+          "";
 
         option.textContent =
-          person.display_name ||
-          "SecureTrack Officer";
+          officer?.shift_name ||
+          "Unassigned";
 
-        rosterOfficer.appendChild(
-          option
-        );
+        elements.absenceShift
+          .appendChild(
+            option
+          );
+
+      } else {
+
+        elements.absenceShift.value =
+          officer?.shift_name ||
+          "";
+
+        elements.absenceShift
+          .textContent =
+          officer?.shift_name ||
+          "Unassigned";
+
+      }
+
+    }
+
+
+    renderNormalShiftControls();
+
+  }
+
+
+  // =========================================================
+  // OPTIONAL NORMAL SHIFT CONTROLS
+  // =========================================================
+
+  function renderNormalShiftControls() {
+
+    if (
+      !elements.normalShiftSelect
+    ) {
+      return;
+    }
+
+
+    const officer =
+      state.selectedOfficer;
+
+
+    elements.normalShiftSelect
+      .innerHTML = "";
+
+
+    const permitted =
+      systemWideAuthority
+        ? ALL_SHIFTS
+        : state.managedShifts;
+
+
+    permitted.forEach(
+      shift => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          shift;
+
+        option.textContent =
+          shift;
+
+        elements.normalShiftSelect
+          .appendChild(
+            option
+          );
 
       }
     );
 
 
     if (
-      staff.some(
-        person =>
-          person.id === current
+      officer &&
+      permitted.includes(
+        officer.shift_name
       )
     ) {
 
-      rosterOfficer.value =
-        current;
+      elements.normalShiftSelect.value =
+        officer.shift_name;
+
+    }
+
+
+    if (
+      elements.saveShiftButton
+    ) {
+
+      elements.saveShiftButton.disabled =
+        !officer;
 
     }
 
@@ -1180,388 +1189,211 @@
 
 
   // =========================================================
-  // LOAD ACTIVE ABSENCES
+  // CHANGE NORMAL SHIFT
   // =========================================================
 
-  async function loadAbsences() {
+  if (
+    elements.saveShiftButton &&
+    elements.normalShiftSelect
+  ) {
+
+    elements.saveShiftButton
+      .addEventListener(
+        "click",
+        async () => {
+
+          const officer =
+            state.selectedOfficer;
+
+
+          if (!officer) {
+
+            showMessage(
+              elements.shiftMessage,
+              "Select an officer first.",
+              "error"
+            );
+
+            return;
+
+          }
+
+
+          const destination =
+            elements.normalShiftSelect
+              .value;
+
+
+          if (!destination) {
+
+            showMessage(
+              elements.shiftMessage,
+              "Select a shift.",
+              "error"
+            );
+
+            return;
+
+          }
+
+
+          elements.saveShiftButton
+            .disabled =
+              true;
+
+
+          try {
+
+            const {
+              error
+            } =
+              await db.rpc(
+                "set_officer_shift",
+                {
+                  p_user_id:
+                    officer.user_id,
+
+                  p_shift_name:
+                    destination
+                }
+              );
+
+
+            if (error) {
+              throw error;
+            }
+
+
+            showMessage(
+              elements.shiftMessage,
+              `Shift updated to ${destination}.`
+            );
+
+
+            await loadOfficers();
+
+
+          } catch (error) {
+
+            console.error(
+              "SecureTrack shift update error:",
+              error
+            );
+
+
+            showMessage(
+              elements.shiftMessage,
+              error.message ||
+              "Shift could not be updated.",
+              "error"
+            );
+
+
+          } finally {
+
+            elements.saveShiftButton
+              .disabled =
+                false;
+
+          }
+
+        }
+      );
+
+  }
+
+
+  // =========================================================
+  // LOAD UNAVAILABILITY
+  // =========================================================
+
+  async function loadRecords() {
+
+    const fromDate =
+      elements.reviewFromDate?.value ||
+      today;
+
+
+    const toDate =
+      elements.reviewToDate?.value ||
+      addDays(
+        today,
+        90
+      );
+
 
     const {
       data,
       error
     } =
-      await db
-        .from(
-          "officer_unavailability"
-        )
-        .select(
-          "id, user_id, absence_type, start_date, end_date, shift_name, notes, status, created_at"
-        )
-        .eq(
-          "status",
-          "active"
-        )
-        .order(
-          "start_date",
-          {
-            ascending: true
-          }
-        );
+      await db.rpc(
+        "get_managed_unavailability",
+        {
+          p_from_date:
+            fromDate,
+
+          p_to_date:
+            toDate,
+
+          /*
+            Load all records available to
+            this manager.
+
+            Filtering by shift happens
+            in the browser after the
+            secure RPC has already scoped
+            the command.
+          */
+          p_shift_name:
+            null
+        }
+      );
 
 
     if (error) {
+
       throw error;
+
     }
 
 
-    absences =
+    state.records =
       data || [];
 
 
-    renderAbsenceReview();
+    renderRecords();
+
+    renderOfficerList();
+
+    updateCounts();
 
   }
 
 
   // =========================================================
-  // REVIEW FILTER
+  // FILTER RECORDS
   // =========================================================
 
-  function absenceAppliesToReview(
-    absence
-  ) {
-
-    const date =
-      reviewDate.value;
+  function getFilteredRecords() {
 
     const shift =
-      normalizeText(
-        reviewShift.value
-      );
-
-
-    if (!date) {
-      return true;
-    }
-
-
-    const dateMatches =
-      date >= absence.start_date &&
-      date <= absence.end_date;
-
-
-    if (!dateMatches) {
-      return false;
-    }
-
-
-    /*
-      An absence with no shift selected
-      applies to every shift.
-    */
-
-    const absenceShiftName =
-      normalizeText(
-        absence.shift_name
-      );
-
-
-    const shiftMatches =
-      !shift ||
-      !absenceShiftName ||
-      shift === absenceShiftName;
-
-
-    return shiftMatches;
-
-  }
-
-
-  // =========================================================
-  // RENDER ABSENCE REVIEW
-  // =========================================================
-
-  function renderAbsenceReview() {
-
-    absenceTableBody.innerHTML =
+      elements.reviewShiftFilter?.value ||
+      elements.shiftFilter?.value ||
       "";
 
 
-    const filtered =
-      absences.filter(
-        absence =>
-          absenceAppliesToReview(
-            absence
-          )
-      );
-
-
-    /*
-      Count officers, not records.
-
-      If someone somehow has overlapping
-      active records on the same date,
-      the "Officers Out" total should
-      still count that person once.
-    */
-
-    const uniqueOut =
-      new Set(
-        filtered.map(
-          row =>
-            row.user_id
-        )
-      );
-
-
-    const uniqueTraining =
-      new Set(
-        filtered
-          .filter(
-            row =>
-              row.absence_type ===
-              "training"
-          )
-          .map(
-            row =>
-              row.user_id
-          )
-      );
-
-
-    const uniqueTimeOff =
-      new Set(
-        filtered
-          .filter(
-            row =>
-              row.absence_type ===
-              "time_off"
-          )
-          .map(
-            row =>
-              row.user_id
-          )
-      );
-
-
-    outCount.textContent =
-      String(
-        uniqueOut.size
-      );
-
-
-    trainingCount.textContent =
-      String(
-        uniqueTraining.size
-      );
-
-
-    timeOffCount.textContent =
-      String(
-        uniqueTimeOff.size
-      );
-
-
-    if (!filtered.length) {
-
-      const tr =
-        document.createElement(
-          "tr"
-        );
-
-      const td =
-        document.createElement(
-          "td"
-        );
-
-      td.colSpan =
-        6;
-
-      td.className =
-        "staffing-empty";
-
-      td.textContent =
-        "No planned absences match this date and shift.";
-
-      tr.appendChild(
-        td
-      );
-
-      absenceTableBody.appendChild(
-        tr
-      );
-
-      return;
-
-    }
-
-
-    filtered.forEach(
-      absence => {
-
-        const person =
-          getStaffMember(
-            absence.user_id
-          );
-
-
-        const tr =
-          document.createElement(
-            "tr"
-          );
-
-
-        // Officer
-        const officerTd =
-          document.createElement(
-            "td"
-          );
-
-        const officerName =
-          document.createElement(
-            "strong"
-          );
-
-        officerName.textContent =
-          person?.display_name ||
-          "SecureTrack Officer";
-
-        officerTd.appendChild(
-          officerName
-        );
-
+    return state.records.filter(
+      record => {
 
         if (
-          person?.employee_number
+          shift &&
+          record.shift_name !== shift
         ) {
-
-          const employee =
-            document.createElement(
-              "div"
-            );
-
-          employee.className =
-            "subtle";
-
-          employee.textContent =
-            `Employee # ${person.employee_number}`;
-
-          officerTd.appendChild(
-            employee
-          );
-
+          return false;
         }
 
 
-        // Type
-        const typeTd =
-          document.createElement(
-            "td"
-          );
-
-        const badge =
-          document.createElement(
-            "span"
-          );
-
-        badge.className =
-          `absence-type ${absence.absence_type}`;
-
-        badge.textContent =
-          titleCaseType(
-            absence.absence_type
-          );
-
-        typeTd.appendChild(
-          badge
-        );
-
-
-        // Dates
-        const dateTd =
-          document.createElement(
-            "td"
-          );
-
-        dateTd.textContent =
-          formatDateRange(
-            absence.start_date,
-            absence.end_date
-          );
-
-
-        // Shift
-        const shiftTd =
-          document.createElement(
-            "td"
-          );
-
-        shiftTd.textContent =
-          absence.shift_name ||
-          "Any Shift";
-
-
-        // Notes
-        const notesTd =
-          document.createElement(
-            "td"
-          );
-
-        notesTd.textContent =
-          absence.notes ||
-          "—";
-
-
-        // Action
-        const actionTd =
-          document.createElement(
-            "td"
-          );
-
-        const cancelButton =
-          document.createElement(
-            "button"
-          );
-
-        cancelButton.type =
-          "button";
-
-        cancelButton.className =
-          "small-button danger";
-
-        cancelButton.textContent =
-          "Cancel Entry";
-
-
-        cancelButton.addEventListener(
-          "click",
-          () => {
-
-            cancelAbsence(
-              absence
-            );
-
-          }
-        );
-
-
-        actionTd.appendChild(
-          cancelButton
-        );
-
-
-        tr.append(
-          officerTd,
-          typeTd,
-          dateTd,
-          shiftTd,
-          notesTd,
-          actionTd
-        );
-
-
-        absenceTableBody.appendChild(
-          tr
-        );
+        return true;
 
       }
     );
@@ -1570,250 +1402,478 @@
 
 
   // =========================================================
-  // SAVE TIME OFF / TRAINING
+  // RENDER UNAVAILABILITY
   // =========================================================
 
-  unavailabilityForm.addEventListener(
-    "submit",
-    async event => {
+  function renderRecords() {
 
-      event.preventDefault();
-
-      clearMessage(
-        formMessage
-      );
+    if (!elements.recordsBody) {
+      return;
+    }
 
 
-      if (!selectedOfficerId) {
-
-        showMessage(
-          formMessage,
-          "Select an officer before marking the officer out.",
-          "error"
-        );
-
-        officerSearch.focus();
-
-        return;
-
-      }
+    const records =
+      getFilteredRecords();
 
 
-      if (!absenceType.value) {
+    elements.recordsBody.innerHTML =
+      "";
 
-        showMessage(
-          formMessage,
-          "Select Time Off, Training, or Other.",
-          "error"
-        );
 
-        absenceType.focus();
-
-        return;
-
-      }
-
+    if (!records.length) {
 
       if (
-        !startDate.value ||
-        !endDate.value
+        elements.recordsBody.tagName ===
+        "TBODY"
       ) {
 
-        showMessage(
-          formMessage,
-          "Select the start and end dates.",
-          "error"
-        );
+        elements.recordsBody.innerHTML =
+          `
+            <tr>
+              <td colspan="7">
+                No active time-off or training records
+                were found for this period.
+              </td>
+            </tr>
+          `;
 
-        return;
+      } else {
 
-      }
-
-
-      if (
-        endDate.value <
-        startDate.value
-      ) {
-
-        showMessage(
-          formMessage,
-          "The end date cannot be before the start date.",
-          "error"
-        );
-
-        endDate.focus();
-
-        return;
+        elements.recordsBody.innerHTML =
+          `
+            <div class="directory-empty">
+              No active time-off or training records
+              were found for this period.
+            </div>
+          `;
 
       }
 
-
-      const person =
-        getStaffMember(
-          selectedOfficerId
-        );
-
-
-      saveAbsenceButton.disabled =
-        true;
-
-      saveAbsenceButton.textContent =
-        "Saving…";
-
-
-      try {
-
-        const {
-          data,
-          error
-        } =
-          await db.rpc(
-            "create_officer_unavailability",
-            {
-
-              p_user_id:
-                selectedOfficerId,
-
-              p_absence_type:
-                absenceType.value,
-
-              p_start_date:
-                startDate.value,
-
-              p_end_date:
-                endDate.value,
-
-              p_shift_name:
-                absenceShift.value ||
-                null,
-
-              p_notes:
-                absenceNotes.value
-                  .trim() ||
-                null
-
-            }
-          );
-
-
-        if (error) {
-          throw error;
-        }
-
-
-        await loadAbsences();
-
-        await loadShiftNames();
-
-
-        /*
-          Move the review screen to the
-          date just entered so the manager
-          immediately sees the impact.
-        */
-
-        reviewDate.value =
-          startDate.value;
-
-
-        if (
-          absenceShift.value &&
-          [...reviewShift.options]
-            .some(
-              option =>
-                option.value ===
-                absenceShift.value
-            )
-        ) {
-
-          reviewShift.value =
-            absenceShift.value;
-
-        }
-
-
-        renderAbsenceReview();
-
-
-        showMessage(
-          formMessage,
-          `${person?.display_name || "Officer"} has been marked out successfully.`,
-          "success"
-        );
-
-
-        absenceType.value =
-          "";
-
-        absenceNotes.value =
-          "";
-
-
-        /*
-          Keep the officer and dates selected
-          to make consecutive manager entries
-          faster if necessary.
-        */
-
-
-        console.log(
-          "SecureTrack unavailability saved:",
-          data
-        );
-
-
-      } catch (error) {
-
-        console.error(
-          "SecureTrack unavailability save error:",
-          error
-        );
-
-
-        showMessage(
-          formMessage,
-          error.message ||
-          "Unable to save Time Off / Training.",
-          "error"
-        );
-
-
-      } finally {
-
-        saveAbsenceButton.disabled =
-          false;
-
-        saveAbsenceButton.textContent =
-          "Mark Officer Out";
-
-      }
+      return;
 
     }
-  );
+
+
+    records.forEach(
+      record => {
+
+        if (
+          elements.recordsBody.tagName ===
+          "TBODY"
+        ) {
+
+          const row =
+            document.createElement(
+              "tr"
+            );
+
+
+          row.innerHTML =
+            `
+              <td>
+                <strong>
+                  ${escapeHTML(
+                    record.display_name
+                  )}
+                </strong>
+
+                ${
+                  record.employee_number
+                    ? `<div class="subtle">
+                        #${escapeHTML(
+                          record.employee_number
+                        )}
+                       </div>`
+                    : ""
+                }
+              </td>
+
+              <td>
+                ${escapeHTML(
+                  record.shift_name ||
+                  "—"
+                )}
+              </td>
+
+              <td>
+                ${escapeHTML(
+                  humanize(
+                    record.absence_type
+                  )
+                )}
+              </td>
+
+              <td>
+                ${escapeHTML(
+                  formatDate(
+                    record.start_date
+                  )
+                )}
+              </td>
+
+              <td>
+                ${escapeHTML(
+                  formatDate(
+                    record.end_date
+                  )
+                )}
+              </td>
+
+              <td>
+                ${
+                  record.notes
+                    ? escapeHTML(
+                        record.notes
+                      )
+                    : "—"
+                }
+              </td>
+
+              <td>
+                <button
+                  type="button"
+                  class="back-link cancel-unavailability"
+                  data-unavailability-id="${escapeHTML(
+                    record.unavailability_id
+                  )}"
+                >
+                  Cancel
+                </button>
+              </td>
+            `;
+
+
+          elements.recordsBody
+            .appendChild(
+              row
+            );
+
+
+        } else {
+
+          const card =
+            document.createElement(
+              "article"
+            );
+
+          card.className =
+            "activity-item";
+
+
+          card.innerHTML =
+            `
+              <div>
+
+                <strong>
+                  ${escapeHTML(
+                    record.display_name
+                  )}
+                </strong>
+
+                <span class="shift-pill">
+                  ${escapeHTML(
+                    record.shift_name ||
+                    "—"
+                  )}
+                </span>
+
+              </div>
+
+              <div>
+                ${escapeHTML(
+                  humanize(
+                    record.absence_type
+                  )
+                )}
+              </div>
+
+              <div class="subtle">
+                ${escapeHTML(
+                  formatDate(
+                    record.start_date
+                  )
+                )}
+                →
+                ${escapeHTML(
+                  formatDate(
+                    record.end_date
+                  )
+                )}
+              </div>
+
+              ${
+                record.notes
+                  ? `
+                    <div class="subtle">
+                      ${escapeHTML(
+                        record.notes
+                      )}
+                    </div>
+                  `
+                  : ""
+              }
+
+              <button
+                type="button"
+                class="back-link cancel-unavailability"
+                data-unavailability-id="${escapeHTML(
+                  record.unavailability_id
+                )}"
+              >
+                Cancel Planned Absence
+              </button>
+            `;
+
+
+          elements.recordsBody
+            .appendChild(
+              card
+            );
+
+        }
+
+      }
+    );
+
+  }
 
 
   // =========================================================
-  // CANCEL TIME OFF / TRAINING
+  // CANCEL UNAVAILABILITY
   // =========================================================
 
-  async function cancelAbsence(
-    absence
+  if (elements.recordsBody) {
+
+    elements.recordsBody
+      .addEventListener(
+        "click",
+        async event => {
+
+          const button =
+            event.target.closest(
+              ".cancel-unavailability"
+            );
+
+
+          if (!button) {
+            return;
+          }
+
+
+          const id =
+            button.dataset
+              .unavailabilityId;
+
+
+          if (!id) {
+            return;
+          }
+
+
+          const confirmed =
+            window.confirm(
+              "Cancel this planned time-off/training record?"
+            );
+
+
+          if (!confirmed) {
+            return;
+          }
+
+
+          button.disabled =
+            true;
+
+          button.textContent =
+            "Cancelling…";
+
+
+          try {
+
+            const {
+              error
+            } =
+              await db.rpc(
+                "cancel_officer_unavailability",
+                {
+                  p_unavailability_id:
+                    id
+                }
+              );
+
+
+            if (error) {
+              throw error;
+            }
+
+
+            await loadRecords();
+
+
+          } catch (error) {
+
+            console.error(
+              "SecureTrack cancellation error:",
+              error
+            );
+
+
+            window.alert(
+              error.message ||
+              "The record could not be cancelled."
+            );
+
+
+            button.disabled =
+              false;
+
+            button.textContent =
+              "Cancel";
+
+          }
+
+        }
+      );
+
+  }
+
+
+  // =========================================================
+  // CREATE TIME OFF / TRAINING
+  // =========================================================
+
+  async function submitAbsence(
+    event
   ) {
 
-    const person =
-      getStaffMember(
-        absence.user_id
+    event?.preventDefault();
+
+
+    clearMessage(
+      elements.absenceMessage
+    );
+
+
+    const officer =
+      state.selectedOfficer;
+
+
+    if (!officer) {
+
+      showMessage(
+        elements.absenceMessage,
+        "Select an officer first.",
+        "error"
       );
 
-
-    const confirmed =
-      window.confirm(
-        `Cancel the ${titleCaseType(absence.absence_type)} entry for ${person?.display_name || "this officer"}?`
-      );
-
-
-    if (!confirmed) {
       return;
+
+    }
+
+
+    const absenceType =
+      elements.absenceType?.value ||
+      "";
+
+
+    const startDate =
+      elements.startDate?.value ||
+      "";
+
+
+    const endDate =
+      elements.endDate?.value ||
+      "";
+
+
+    const notes =
+      String(
+        elements.notes?.value ||
+        ""
+      ).trim();
+
+
+    if (
+      ![
+        "time_off",
+        "training",
+        "other"
+      ].includes(
+        absenceType
+      )
+    ) {
+
+      showMessage(
+        elements.absenceMessage,
+        "Select Time Off, Training, or Other.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if (
+      !startDate ||
+      !endDate
+    ) {
+
+      showMessage(
+        elements.absenceMessage,
+        "Enter both the start and end dates.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if (
+      endDate <
+      startDate
+    ) {
+
+      showMessage(
+        elements.absenceMessage,
+        "The end date cannot be before the start date.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if (
+      !systemWideAuthority &&
+      !officer.shift_name
+    ) {
+
+      showMessage(
+        elements.absenceMessage,
+        "The officer must have a shift assignment before planned unavailability can be recorded.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if (
+      elements.saveAbsenceButton
+    ) {
+
+      elements.saveAbsenceButton
+        .disabled =
+          true;
+
+      elements.saveAbsenceButton
+        .textContent =
+          "Saving…";
+
     }
 
 
@@ -1823,10 +1883,27 @@
         error
       } =
         await db.rpc(
-          "cancel_officer_unavailability",
+          "create_officer_unavailability",
           {
-            p_unavailability_id:
-              absence.id
+            p_user_id:
+              officer.user_id,
+
+            p_absence_type:
+              absenceType,
+
+            p_start_date:
+              startDate,
+
+            p_end_date:
+              endDate,
+
+            p_shift_name:
+              officer.shift_name ||
+              null,
+
+            p_notes:
+              notes ||
+              null
           }
         );
 
@@ -1836,373 +1913,422 @@
       }
 
 
-      await loadAbsences();
+      showMessage(
+        elements.absenceMessage,
+        `${humanize(
+          absenceType
+        )} recorded for ${officer.display_name}.`
+      );
+
+
+      if (elements.notes) {
+
+        elements.notes.value =
+          "";
+
+      }
+
+
+      await loadRecords();
 
 
     } catch (error) {
 
       console.error(
-        "SecureTrack absence cancellation error:",
+        "SecureTrack time-off/training save error:",
         error
       );
 
 
-      window.alert(
+      showMessage(
+        elements.absenceMessage,
         error.message ||
-        "Unable to cancel this entry."
-      );
-
-    }
-
-  }
-
-
-  // =========================================================
-  // SAVE NORMAL OFFICER SHIFT
-  // =========================================================
-
-  saveRosterButton.addEventListener(
-    "click",
-    async () => {
-
-      clearMessage(
-        rosterMessage
+        "The record could not be saved.",
+        "error"
       );
 
 
-      const userId =
-        rosterOfficer.value;
-
-      const shiftName =
-        rosterShift.value.trim();
-
-
-      if (!userId) {
-
-        showMessage(
-          rosterMessage,
-          "Select an officer.",
-          "error"
-        );
-
-        rosterOfficer.focus();
-
-        return;
-
-      }
-
-
-      if (!shiftName) {
-
-        showMessage(
-          rosterMessage,
-          "Enter the officer's normal shift.",
-          "error"
-        );
-
-        rosterShift.focus();
-
-        return;
-
-      }
-
-
-      saveRosterButton.disabled =
-        true;
-
-      saveRosterButton.textContent =
-        "Saving…";
-
-
-      try {
-
-        const {
-          error
-        } =
-          await db.rpc(
-            "set_officer_shift",
-            {
-
-              p_user_id:
-                userId,
-
-              p_shift_name:
-                shiftName
-
-            }
-          );
-
-
-        if (error) {
-          throw error;
-        }
-
-
-        await loadRoster();
-
-        await loadShiftNames();
-
-
-        const person =
-          getStaffMember(
-            userId
-          );
-
-
-        /*
-          Keep the main selected officer
-          display in sync if it is the same
-          officer.
-        */
-
-        if (
-          selectedOfficerId ===
-          userId
-        ) {
-
-          selectOfficer(
-            userId
-          );
-
-        }
-
-
-        showMessage(
-          rosterMessage,
-          `${person?.display_name || "Officer"} is assigned to ${shiftName}.`,
-          "success"
-        );
-
-
-      } catch (error) {
-
-        console.error(
-          "SecureTrack roster save error:",
-          error
-        );
-
-
-        showMessage(
-          rosterMessage,
-          error.message ||
-          "Unable to save the officer's normal shift.",
-          "error"
-        );
-
-
-      } finally {
-
-        saveRosterButton.disabled =
-          false;
-
-        saveRosterButton.textContent =
-          "Save Officer Shift";
-
-      }
-
-    }
-  );
-
-
-  // =========================================================
-  // ROSTER OFFICER CHANGED
-  // =========================================================
-
-  rosterOfficer.addEventListener(
-    "change",
-    () => {
-
-      clearMessage(
-        rosterMessage
-      );
-
-
-      const userId =
-        rosterOfficer.value;
-
-
-      if (!userId) {
-
-        rosterShift.value =
-          "";
-
-        return;
-
-      }
-
-
-      const rosterRow =
-        getRosterForUser(
-          userId
-        );
-
-
-      rosterShift.value =
-        rosterRow?.shift_name ||
-        "";
-
-    }
-  );
-
-
-  // =========================================================
-  // OFFICER SEARCH / FILTER EVENTS
-  // =========================================================
-
-  officerSearch.addEventListener(
-    "input",
-    renderOfficerPicker
-  );
-
-
-  shiftFilter.addEventListener(
-    "change",
-    renderOfficerPicker
-  );
-
-
-  // =========================================================
-  // REVIEW FILTER EVENTS
-  // =========================================================
-
-  reviewDate.addEventListener(
-    "change",
-    renderAbsenceReview
-  );
-
-
-  reviewShift.addEventListener(
-    "change",
-    renderAbsenceReview
-  );
-
-
-  // =========================================================
-  // DATE RANGE CONVENIENCE
-  // =========================================================
-
-  startDate.addEventListener(
-    "change",
-    () => {
+    } finally {
 
       if (
-        !endDate.value ||
-        endDate.value <
-        startDate.value
+        elements.saveAbsenceButton
       ) {
 
-        endDate.value =
-          startDate.value;
+        elements.saveAbsenceButton
+          .disabled =
+            false;
+
+        elements.saveAbsenceButton
+          .textContent =
+            "Save";
 
       }
 
     }
-  );
-
-
-  // =========================================================
-  // SIGN OUT
-  // =========================================================
-
-  logoutButton.addEventListener(
-    "click",
-    async () => {
-
-      logoutButton.disabled =
-        true;
-
-      logoutButton.textContent =
-        "Signing Out…";
-
-
-      await STM.signOut();
-
-    }
-  );
-
-
-  // =========================================================
-  // INITIALIZE PAGE
-  // =========================================================
-
-  const today =
-    todayLocal();
-
-
-  startDate.value =
-    today;
-
-  endDate.value =
-    today;
-
-  reviewDate.value =
-    today;
-
-
-  try {
-
-    /*
-      Load the officer directory first,
-      then roster information, then
-      planned absences.
-
-      The second render after roster load
-      adds the normal shift next to each
-      officer's name.
-    */
-
-    await loadStaff();
-
-    await loadRoster();
-
-    renderOfficerPicker();
-
-    renderRosterOfficerSelect();
-
-    await loadAbsences();
-
-    await loadShiftNames();
-
-    renderAbsenceReview();
-
-
-  } catch (error) {
-
-    console.error(
-      "SecureTrack Time Off / Training initialization error:",
-      error
-    );
-
-
-    officerPicker.innerHTML =
-      "";
-
-
-    const errorBox =
-      document.createElement(
-        "div"
-      );
-
-    errorBox.className =
-      "staffing-empty";
-
-    errorBox.textContent =
-      error.message ||
-      "Time Off / Training could not be loaded.";
-
-    officerPicker.appendChild(
-      errorBox
-    );
-
-
-    showMessage(
-      formMessage,
-      error.message ||
-      "Time Off / Training could not be loaded.",
-      "error"
-    );
 
   }
 
+
+  if (elements.absenceForm) {
+
+    elements.absenceForm
+      .addEventListener(
+        "submit",
+        submitAbsence
+      );
+
+  } else if (
+    elements.saveAbsenceButton
+  ) {
+
+    elements.saveAbsenceButton
+      .addEventListener(
+        "click",
+        submitAbsence
+      );
+
+  }
+
+
+  // =========================================================
+  // COUNTS
+  // =========================================================
+
+  function updateCounts() {
+
+    const records =
+      getFilteredRecords();
+
+
+    if (elements.officerCount) {
+
+      elements.officerCount
+        .textContent =
+          getFilteredOfficers()
+            .length;
+
+    }
+
+
+    if (elements.activeCount) {
+
+      elements.activeCount
+        .textContent =
+          records.length;
+
+    }
+
+
+    if (elements.timeOffCount) {
+
+      elements.timeOffCount
+        .textContent =
+          records.filter(
+            record =>
+              record.absence_type ===
+              "time_off"
+          ).length;
+
+    }
+
+
+    if (elements.trainingCount) {
+
+      elements.trainingCount
+        .textContent =
+          records.filter(
+            record =>
+              record.absence_type ===
+              "training"
+          ).length;
+
+    }
+
+
+    if (elements.otherCount) {
+
+      elements.otherCount
+        .textContent =
+          records.filter(
+            record =>
+              record.absence_type ===
+              "other"
+          ).length;
+
+    }
+
+
+    if (elements.outTodayCount) {
+
+      const uniqueOfficers =
+        new Set(
+          records
+            .filter(record =>
+              recordCoversDate(
+                record,
+                today
+              )
+            )
+            .map(record =>
+              record.user_id
+            )
+        );
+
+
+      elements.outTodayCount
+        .textContent =
+          uniqueOfficers.size;
+
+    }
+
+  }
+
+
+  // =========================================================
+  // FILTER EVENTS
+  // =========================================================
+
+  if (elements.search) {
+
+    elements.search
+      .addEventListener(
+        "input",
+        () => {
+
+          renderOfficerList();
+
+          updateCounts();
+
+        }
+      );
+
+  }
+
+
+  if (elements.shiftFilter) {
+
+    elements.shiftFilter
+      .addEventListener(
+        "change",
+        () => {
+
+          renderOfficerList();
+
+          renderRecords();
+
+          updateCounts();
+
+        }
+      );
+
+  }
+
+
+  if (
+    elements.reviewShiftFilter
+  ) {
+
+    elements.reviewShiftFilter
+      .addEventListener(
+        "change",
+        () => {
+
+          renderRecords();
+
+          updateCounts();
+
+        }
+      );
+
+  }
+
+
+  if (
+    elements.reviewFromDate
+  ) {
+
+    elements.reviewFromDate
+      .addEventListener(
+        "change",
+        loadRecords
+      );
+
+  }
+
+
+  if (
+    elements.reviewToDate
+  ) {
+
+    elements.reviewToDate
+      .addEventListener(
+        "change",
+        loadRecords
+      );
+
+  }
+
+
+  if (
+    elements.startDate &&
+    elements.endDate
+  ) {
+
+    elements.startDate
+      .addEventListener(
+        "change",
+        () => {
+
+          if (
+            !elements.endDate.value ||
+            elements.endDate.value <
+            elements.startDate.value
+          ) {
+
+            elements.endDate.value =
+              elements.startDate.value;
+
+          }
+
+        }
+      );
+
+  }
+
+
+  // =========================================================
+  // REFRESH
+  // =========================================================
+
+  async function refreshAll() {
+
+    try {
+
+      if (
+        elements.refreshButton
+      ) {
+
+        elements.refreshButton
+          .disabled =
+            true;
+
+      }
+
+
+      await loadSupervisors();
+
+
+      setShiftOptions(
+        elements.shiftFilter,
+        true
+      );
+
+
+      setShiftOptions(
+        elements.reviewShiftFilter,
+        true
+      );
+
+
+      await loadOfficers();
+
+      await loadRecords();
+
+
+    } catch (error) {
+
+      console.error(
+        "SecureTrack Time Off / Training initialization error:",
+        error
+      );
+
+
+      showMessage(
+        elements.absenceMessage,
+        error.message ||
+        "Time Off / Training could not be loaded.",
+        "error"
+      );
+
+
+    } finally {
+
+      if (
+        elements.refreshButton
+      ) {
+
+        elements.refreshButton
+          .disabled =
+            false;
+
+      }
+
+    }
+
+  }
+
+
+  if (
+    elements.refreshButton
+  ) {
+
+    elements.refreshButton
+      .addEventListener(
+        "click",
+        refreshAll
+      );
+
+  }
+
+
+  // =========================================================
+  // INITIALIZE
+  // =========================================================
+
+  await refreshAll();
+
+
+  // =========================================================
+  // REALTIME REFRESH
+  // =========================================================
+
+  db.channel(
+    "securetrack-time-off-training"
+  )
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "officer_unavailability"
+      },
+      async () => {
+
+        try {
+          await loadRecords();
+        } catch (error) {
+          console.error(error);
+        }
+
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "officer_shift_roster"
+      },
+      async () => {
+
+        try {
+          await loadOfficers();
+        } catch (error) {
+          console.error(error);
+        }
+
+      }
+    )
+    .subscribe();
 
 })();
