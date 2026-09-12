@@ -597,6 +597,39 @@ let plannedUnavailability = [];
     );
   }
 
+async function loadPlannedUnavailability() {
+
+  if (!currentShift) {
+    plannedUnavailability = [];
+    renderAttendance();
+    return;
+  }
+
+
+  const { data, error } =
+    await db.rpc(
+      "get_shift_unavailability",
+      {
+        p_shift_date:
+          currentShift.shift_date,
+
+        p_shift_name:
+          currentShift.shift_name
+      }
+    );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  plannedUnavailability =
+    data || [];
+
+
+  renderAttendance();
+}
 
   async function loadAssignments() {
 
