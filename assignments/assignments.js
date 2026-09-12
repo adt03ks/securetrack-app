@@ -1477,10 +1477,11 @@ async function loadPlannedUnavailability() {
           !isDraft;
 
 
-        await Promise.all([
-          loadAttendance(),
-          loadAssignments()
-        ]);
+       await Promise.all([
+  loadAttendance(),
+  loadAssignments(),
+  loadPlannedUnavailability()
+]);
 
 
         if (
