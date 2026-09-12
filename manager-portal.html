@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#080a0c"
+  >
+
+  <title>
+    SecureTrack | Manager Portal
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+  <style>
+
+    .portal-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      padding: 24px;
+    }
+
+    .portal-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+
+      border: 1px solid #343a41;
+      border-radius: 17px;
+
+      padding: 22px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #0b0e11,
+          #11151a
+        );
+
+      transition:
+        transform .15s ease,
+        border-color .15s ease;
+    }
+
+    .portal-card:hover {
+      transform: translateY(-2px);
+      border-color: #ff7800;
+    }
+
+    .portal-card h2 {
+      margin: 7px 0 8px;
+    }
+
+    .portal-card p {
+      margin-bottom: 0;
+    }
+
+    .portal-arrow {
+      display: block;
+      margin-top: 18px;
+
+      color: #ff8c1a;
+      font-weight: 800;
+    }
+
+    @media (max-width: 700px) {
+
+      .portal-grid {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body
+  data-securetrack-roles="manager,director,admin"
+>
+
+<main class="shell">
+
+  <section class="panel manager-console">
+
+
+    <header class="panel-head manager-header">
+
+      <div class="manager-header-row">
+
+        <div class="brandbar">
+
+          <div
+            class="logo-mark"
+            aria-hidden="true"
+          >
+            <span class="logo-lock"></span>
+          </div>
+
+          <div>
+
+            <div class="wordmark">
+              <span>Secure</span><span>Track</span>
+            </div>
+
+            <div class="tagline">
+              Operations Management
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="manager-user-area">
+
+          <a
+            class="back-link"
+            href="hub.html"
+          >
+            ← Operations Hub
+          </a>
+
+          <button
+            id="logoutButton"
+            class="back-link"
+            type="button"
+          >
+            Sign Out
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="eyebrow">
+        Management Command Center
+      </div>
+
+      <h1>
+        Manager Portal
+      </h1>
+
+      <p class="subtle">
+        Personnel, staffing, equipment and
+        operational management from one location.
+      </p>
+
+    </header>
+
+
+    <section class="portal-grid">
+
+
+      <a
+        class="portal-card"
+        href="officer-directory.html"
+      >
+
+        <div class="eyebrow">
+          Personnel
+        </div>
+
+        <h2>
+          Officer Directory
+        </h2>
+
+        <p class="subtle">
+          Officer profiles, shift assignments,
+          armed qualifications and command transfers.
+        </p>
+
+        <span class="portal-arrow">
+          Open Officer Directory →
+        </span>
+
+      </a>
+
+
+      <a
+        class="portal-card"
+        href="time-off-training.html"
+      >
+
+        <div class="eyebrow">
+          Staffing
+        </div>
+
+        <h2>
+          Time Off & Training
+        </h2>
+
+        <p class="subtle">
+          Record planned absences, training and
+          expected staffing availability.
+        </p>
+
+        <span class="portal-arrow">
+          Manage Availability →
+        </span>
+
+      </a>
+
+
+      <a
+        class="portal-card"
+        href="assignments.html"
+      >
+
+        <div class="eyebrow">
+          Shift Operations
+        </div>
+
+        <h2>
+          Duty Station Assignments
+        </h2>
+
+        <p class="subtle">
+          Attendance, staffing and daily
+          duty station assignments.
+        </p>
+
+        <span class="portal-arrow">
+          Open Shift Operations →
+        </span>
+
+      </a>
+
+
+      <a
+        class="portal-card"
+        href="manager.html"
+      >
+
+        <div class="eyebrow">
+          Equipment
+        </div>
+
+        <h2>
+          Security Equipment
+        </h2>
+
+        <p class="subtle">
+          Device status, custody, inspections,
+          issues and equipment accountability.
+        </p>
+
+        <span class="portal-arrow">
+          Open Equipment Dashboard →
+        </span>
+
+      </a>
+
+
+    </section>
+
+
+    <div class="actions">
+
+      <div class="footer-trust">
+
+        <div>
+
+          <strong>
+            SECURE. ACCOUNTABLE. CONNECTED.
+          </strong>
+
+          <br>
+
+          SecureTrack Operations Management
+
+        </div>
+
+        <div>
+          ◉ MANAGEMENT
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </section>
+
+</main>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="config.js"></script>
+<script src="secure-page.js"></script>
+<script src="manager-common.js"></script>
+
+<script>
+
+(async function () {
+
+  const STM =
+    window.SecureTrackManager;
+
+  if (!STM) {
+    return;
+  }
+
+  const manager =
+    await STM.requireManager();
+
+  if (!manager) {
+    return;
+  }
+
+  document
+    .getElementById("logoutButton")
+    .addEventListener(
+      "click",
+      async () => {
+
+        await STM.signOut();
+
+      }
+    );
+
+})();
+
+</script>
+
+</body>
+</html>
