@@ -1,1 +1,915 @@
+<!doctype html>
+<html lang="en">
 
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#080a0c"
+  >
+
+  <title>
+    SecureTrack | Time Off & Training
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+  <style>
+
+    .staffing-page {
+      padding-bottom: 30px;
+    }
+
+    .staffing-intro {
+      padding: 24px;
+      border-top: 1px solid #2d3339;
+    }
+
+    .staffing-intro p {
+      max-width: 850px;
+    }
+
+    .staffing-grid {
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1fr)
+        minmax(320px, .8fr);
+      gap: 20px;
+      padding: 24px;
+      border-top: 1px solid #2d3339;
+    }
+
+    .staffing-card {
+      border: 1px solid #343a41;
+      border-radius: 17px;
+      background: #0b0e11;
+      padding: 22px;
+    }
+
+    .staffing-card h2 {
+      margin-top: 4px;
+    }
+
+    .staffing-field {
+      margin-bottom: 16px;
+    }
+
+    .staffing-field label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #b7bec6;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .staffing-field input,
+    .staffing-field select,
+    .staffing-field textarea {
+      width: 100%;
+      box-sizing: border-box;
+      background: #090c0f;
+      border: 1px solid #343a41;
+      color: #f3f5f7;
+      border-radius: 11px;
+      padding: 12px 13px;
+      font: inherit;
+    }
+
+    .staffing-field textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .staffing-field input:focus,
+    .staffing-field select:focus,
+    .staffing-field textarea:focus {
+      outline: 2px solid rgba(255,120,0,.32);
+      border-color: #ff7800;
+    }
+
+    .staffing-two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .officer-picker {
+      border: 1px solid #30363d;
+      border-radius: 13px;
+      max-height: 310px;
+      overflow-y: auto;
+      background: #080b0e;
+    }
+
+    .officer-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      border-bottom: 1px solid #252a30;
+      background: transparent;
+      color: #e9edf1;
+      padding: 13px 14px;
+      cursor: pointer;
+    }
+
+    .officer-option:last-child {
+      border-bottom: 0;
+    }
+
+    .officer-option:hover {
+      background: rgba(255,120,0,.06);
+    }
+
+    .officer-option.selected {
+      background: rgba(255,120,0,.12);
+      box-shadow:
+        inset 3px 0 0 #ff7800;
+    }
+
+    .officer-option strong,
+    .officer-option small {
+      display: block;
+    }
+
+    .officer-option small {
+      color: #8e979f;
+      margin-top: 3px;
+    }
+
+    .selected-officer {
+      margin-top: 12px;
+      border: 1px solid rgba(255,120,0,.35);
+      background: rgba(255,120,0,.07);
+      border-radius: 12px;
+      padding: 13px 14px;
+    }
+
+    .selected-officer strong {
+      display: block;
+    }
+
+    .selected-officer span {
+      color: #aab2bb;
+      font-size: 12px;
+    }
+
+    .staffing-summary-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .staffing-summary {
+      border: 1px solid #30363d;
+      border-radius: 13px;
+      padding: 15px;
+      background: #0c0f12;
+    }
+
+    .staffing-summary span {
+      color: #8f98a2;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-size: 10px;
+    }
+
+    .staffing-summary strong {
+      display: block;
+      font-size: 28px;
+      margin-top: 5px;
+    }
+
+    .staffing-summary.warning strong {
+      color: #ff9b45;
+    }
+
+    .absence-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .absence-table th,
+    .absence-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #292f35;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .absence-table th {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #929ba4;
+    }
+
+    .absence-type {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .absence-type.training {
+      color: #ffd2a9;
+      background: rgba(255,120,0,.12);
+    }
+
+    .absence-type.time_off {
+      color: #b9d7ff;
+      background: rgba(70,130,220,.14);
+    }
+
+    .absence-type.other {
+      color: #d1d5da;
+      background: rgba(170,180,190,.12);
+    }
+
+    .small-button {
+      border: 1px solid #444c54;
+      border-radius: 9px;
+      background: #11151a;
+      color: #e9edf1;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .small-button:hover {
+      border-color: #ff7800;
+    }
+
+    .small-button.danger {
+      color: #ff9da0;
+      border-color:
+        rgba(229,72,77,.35);
+    }
+
+    .staffing-message {
+      display: none;
+      margin-top: 14px;
+      border-radius: 11px;
+      padding: 12px 14px;
+    }
+
+    .staffing-message.show {
+      display: block;
+    }
+
+    .staffing-message.success {
+      background: rgba(25,182,106,.12);
+      border: 1px solid rgba(25,182,106,.4);
+      color: #baf2d4;
+    }
+
+    .staffing-message.error {
+      background: rgba(229,72,77,.1);
+      border: 1px solid rgba(229,72,77,.35);
+      color: #ffc5c7;
+    }
+
+    .staffing-empty {
+      border: 1px dashed #343a41;
+      border-radius: 12px;
+      padding: 20px;
+      color: #929aa3;
+      text-align: center;
+    }
+
+    @media (max-width: 850px) {
+
+      .staffing-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .staffing-two-column {
+        grid-template-columns: 1fr;
+      }
+
+      .staffing-summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body
+  data-securetrack-roles="manager,admin"
+>
+
+<main class="shell staffing-page">
+
+  <section class="panel manager-console">
+
+
+    <!-- =============================================
+         HEADER
+         ============================================= -->
+
+    <header class="panel-head manager-header">
+
+      <div class="manager-header-row">
+
+        <div class="brandbar">
+
+          <div
+            class="logo-mark"
+            aria-hidden="true"
+          >
+            <span class="logo-lock"></span>
+          </div>
+
+          <div>
+
+            <div class="wordmark">
+              <span>Secure</span><span>Track</span>
+            </div>
+
+            <div class="tagline">
+              Staffing Operations
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="manager-user-area">
+
+          <a
+            class="back-link"
+            href="manager.html"
+          >
+            ← Manager Dashboard
+          </a>
+
+          <button
+            id="logoutButton"
+            class="back-link"
+            type="button"
+          >
+            Sign Out
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="eyebrow">
+        Manager Staffing Control
+      </div>
+
+      <h1>
+        Time Off & Training
+      </h1>
+
+      <p class="subtle">
+        Pre-mark officers who are expected to be unavailable
+        before Shift Operations begins.
+      </p>
+
+    </header>
+
+
+    <!-- =============================================
+         INTRO
+         ============================================= -->
+
+    <section class="staffing-intro">
+
+      <div class="eyebrow">
+        Planned Staffing Exceptions
+      </div>
+
+      <h2>
+        Officer Availability
+      </h2>
+
+      <p class="subtle">
+        Time off and training entered here will appear
+        automatically when the applicable shift is opened.
+        The officer will be shown as scheduled out until
+        Shift Operations confirms otherwise.
+      </p>
+
+    </section>
+
+
+    <!-- =============================================
+         MAIN GRID
+         ============================================= -->
+
+    <section class="staffing-grid">
+
+
+      <!-- ===========================================
+           LEFT: OFFICER LOOKUP
+           =========================================== -->
+
+      <article class="staffing-card">
+
+        <div class="eyebrow">
+          Step 1
+        </div>
+
+        <h2>
+          Find Officer
+        </h2>
+
+
+        <div class="staffing-field">
+
+          <label for="officerSearch">
+            Search by Name
+          </label>
+
+          <input
+            id="officerSearch"
+            type="search"
+            placeholder="Start typing an officer's name..."
+            autocomplete="off"
+          >
+
+        </div>
+
+
+        <div class="staffing-field">
+
+          <label for="shiftFilter">
+            Filter by Normal Shift
+          </label>
+
+          <select id="shiftFilter">
+
+            <option value="">
+              All Shifts
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div
+          id="officerPicker"
+          class="officer-picker"
+        >
+          Loading officers…
+        </div>
+
+
+        <div
+          id="selectedOfficer"
+          class="selected-officer"
+          hidden
+        >
+
+          <strong id="selectedOfficerName">
+            —
+          </strong>
+
+          <span id="selectedOfficerDetails">
+            —
+          </span>
+
+        </div>
+
+      </article>
+
+
+      <!-- ===========================================
+           RIGHT: ABSENCE ENTRY
+           =========================================== -->
+
+      <article class="staffing-card">
+
+        <div class="eyebrow">
+          Step 2
+        </div>
+
+        <h2>
+          Mark Officer Out
+        </h2>
+
+
+        <form id="unavailabilityForm">
+
+
+          <div class="staffing-field">
+
+            <label for="absenceType">
+              Type
+            </label>
+
+            <select
+              id="absenceType"
+              required
+            >
+
+              <option value="">
+                Select type
+              </option>
+
+              <option value="time_off">
+                Time Off
+              </option>
+
+              <option value="training">
+                Training
+              </option>
+
+              <option value="other">
+                Other
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="staffing-two-column">
+
+            <div class="staffing-field">
+
+              <label for="startDate">
+                Start Date
+              </label>
+
+              <input
+                id="startDate"
+                type="date"
+                required
+              >
+
+            </div>
+
+
+            <div class="staffing-field">
+
+              <label for="endDate">
+                End Date
+              </label>
+
+              <input
+                id="endDate"
+                type="date"
+                required
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="staffing-field">
+
+            <label for="absenceShift">
+              Applies to Shift
+            </label>
+
+            <select id="absenceShift">
+
+              <option value="">
+                All / Any Shift
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="staffing-field">
+
+            <label for="absenceNotes">
+              Notes / Reason
+            </label>
+
+            <textarea
+              id="absenceNotes"
+              placeholder="Optional. This note will be visible in Shift Operations when the officer is shown as scheduled out."
+            ></textarea>
+
+          </div>
+
+
+          <button
+            id="saveAbsenceButton"
+            class="primary-btn"
+            type="submit"
+          >
+            Mark Officer Out
+          </button>
+
+
+          <div
+            id="formMessage"
+            class="staffing-message"
+          ></div>
+
+        </form>
+
+      </article>
+
+    </section>
+
+
+    <!-- =============================================
+         STAFFING SUMMARY
+         ============================================= -->
+
+    <section class="manager-section">
+
+      <div class="manager-section-header">
+
+        <div>
+
+          <div class="eyebrow">
+            Staffing Impact
+          </div>
+
+          <h2>
+            Planned Absences
+          </h2>
+
+        </div>
+
+
+        <div class="staffing-two-column">
+
+          <div class="staffing-field">
+
+            <label for="reviewDate">
+              Review Date
+            </label>
+
+            <input
+              id="reviewDate"
+              type="date"
+            >
+
+          </div>
+
+
+          <div class="staffing-field">
+
+            <label for="reviewShift">
+              Shift
+            </label>
+
+            <select id="reviewShift">
+
+              <option value="">
+                All Shifts
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="staffing-summary-grid">
+
+        <div class="staffing-summary warning">
+
+          <span>
+            Officers Out
+          </span>
+
+          <strong id="outCount">
+            0
+          </strong>
+
+        </div>
+
+
+        <div class="staffing-summary">
+
+          <span>
+            Training
+          </span>
+
+          <strong id="trainingCount">
+            0
+          </strong>
+
+        </div>
+
+
+        <div class="staffing-summary">
+
+          <span>
+            Time Off
+          </span>
+
+          <strong id="timeOffCount">
+            0
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table class="absence-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Officer
+              </th>
+
+              <th>
+                Type
+              </th>
+
+              <th>
+                Dates
+              </th>
+
+              <th>
+                Shift
+              </th>
+
+              <th>
+                Notes
+              </th>
+
+              <th>
+                Action
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="absenceTableBody">
+
+            <tr>
+
+              <td
+                colspan="6"
+                class="staffing-empty"
+              >
+                Loading planned absences…
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =============================================
+         SHIFT ROSTER
+         ============================================= -->
+
+    <section class="manager-section">
+
+      <div class="eyebrow">
+        Officer Directory
+      </div>
+
+      <h2>
+        Normal Shift Assignment
+      </h2>
+
+      <p class="subtle">
+        Assigning an officer's normal shift allows managers
+        to filter the officer directory and helps SecureTrack
+        match staffing exceptions to Shift Operations.
+      </p>
+
+
+      <div class="staffing-two-column">
+
+        <div class="staffing-field">
+
+          <label for="rosterOfficer">
+            Officer
+          </label>
+
+          <select id="rosterOfficer">
+
+            <option value="">
+              Select officer
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="staffing-field">
+
+          <label for="rosterShift">
+            Normal Shift
+          </label>
+
+          <input
+            id="rosterShift"
+            type="text"
+            placeholder="Example: Day Shift"
+            list="knownShiftNames"
+          >
+
+          <datalist id="knownShiftNames">
+          </datalist>
+
+        </div>
+
+      </div>
+
+
+      <button
+        id="saveRosterButton"
+        class="primary-btn"
+        type="button"
+      >
+        Save Officer Shift
+      </button>
+
+
+      <div
+        id="rosterMessage"
+        class="staffing-message"
+      ></div>
+
+    </section>
+
+
+    <div class="actions">
+
+      <div class="footer-trust">
+
+        <div>
+          <strong>
+            SECURE. ACCOUNTABLE. STAFFED.
+          </strong>
+          <br>
+          Planned absences remain separate from actual
+          shift attendance.
+        </div>
+
+        <div>
+          ◉ STAFFING
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="config.js"></script>
+
+<script src="secure-page.js"></script>
+
+<script src="manager-common.js"></script>
+
+<script src="time-off-training.js"></script>
+
+</body>
+
+</html>
