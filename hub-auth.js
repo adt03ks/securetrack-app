@@ -80,7 +80,7 @@
       "manager",
       "admin"
     ],
-    manager: ["manager", "admin"]
+ manager: ["manager","director","admin"]
   };
 
   function hasAnyRole(userRoles, allowedRoles) {
