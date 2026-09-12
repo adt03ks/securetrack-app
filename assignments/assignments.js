@@ -1582,8 +1582,43 @@ async function loadPlannedUnavailability() {
               p_is_present:
                 checkbox.checked,
 
-              p_notes:
-                null
+             p_notes: (() => {
+
+  const planned =
+    plannedUnavailability.find(
+      item =>
+        item.user_id ===
+        checkbox.dataset.userId
+    );
+
+
+  if (!planned) {
+    return null;
+  }
+
+
+  const typeLabel =
+    String(
+      planned.absence_type ||
+      "other"
+    )
+      .replaceAll("_", " ");
+
+
+  if (checkbox.checked) {
+
+    return planned.notes
+      ? `On site override — planned ${typeLabel}: ${planned.notes}`
+      : `On site override — planned ${typeLabel}`;
+
+  }
+
+
+  return planned.notes
+    ? `Scheduled out — ${typeLabel}: ${planned.notes}`
+    : `Scheduled out — ${typeLabel}`;
+
+})()
             }
           );
 
