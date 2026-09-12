@@ -1,0 +1,1732 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#080a0c"
+  >
+
+  <title>
+    SecureTrack | Officer Directory
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+
+  <style>
+
+    /* =========================================================
+       OFFICER DIRECTORY
+       ========================================================= */
+
+    .directory-toolbar {
+      display: grid;
+      grid-template-columns:
+        minmax(220px, 1fr)
+        190px
+        190px;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+
+    .directory-toolbar input,
+    .directory-toolbar select,
+    .directory-form input,
+    .directory-form select,
+    .directory-form textarea,
+    .transfer-form select,
+    .transfer-form textarea {
+
+      width: 100%;
+      box-sizing: border-box;
+
+      background: #090c0f;
+
+      border:
+        1px solid #343a41;
+
+      color: #f3f5f7;
+
+      border-radius: 11px;
+
+      padding:
+        12px 13px;
+
+      font: inherit;
+
+    }
+
+
+    .directory-toolbar input:focus,
+    .directory-toolbar select:focus,
+    .directory-form input:focus,
+    .directory-form select:focus,
+    .directory-form textarea:focus,
+    .transfer-form select:focus,
+    .transfer-form textarea:focus {
+
+      outline:
+        2px solid
+        rgba(255,120,0,.28);
+
+      border-color:
+        #ff7800;
+
+    }
+
+
+    .directory-layout {
+
+      display: grid;
+
+      grid-template-columns:
+        minmax(320px, .9fr)
+        minmax(420px, 1.3fr);
+
+      gap: 20px;
+
+      padding:
+        24px;
+
+      border-top:
+        1px solid #2d3339;
+
+    }
+
+
+    .directory-card {
+
+      border:
+        1px solid #343a41;
+
+      border-radius:
+        17px;
+
+      background:
+        #0b0e11;
+
+      padding:
+        20px;
+
+    }
+
+
+    .directory-list {
+
+      max-height:
+        720px;
+
+      overflow-y:
+        auto;
+
+      margin-top:
+        15px;
+
+      border:
+        1px solid #30363d;
+
+      border-radius:
+        13px;
+
+      background:
+        #080b0e;
+
+    }
+
+
+    .officer-row {
+
+      width:
+        100%;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      gap:
+        14px;
+
+      border:
+        0;
+
+      border-bottom:
+        1px solid #252a30;
+
+      background:
+        transparent;
+
+      color:
+        #eef1f4;
+
+      text-align:
+        left;
+
+      padding:
+        14px;
+
+      cursor:
+        pointer;
+
+    }
+
+
+    .officer-row:last-child {
+      border-bottom: 0;
+    }
+
+
+    .officer-row:hover {
+      background:
+        rgba(255,120,0,.05);
+    }
+
+
+    .officer-row.selected {
+
+      background:
+        rgba(255,120,0,.11);
+
+      box-shadow:
+        inset 3px 0 0 #ff7800;
+
+    }
+
+
+    .officer-main {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        10px;
+
+      min-width:
+        0;
+
+    }
+
+
+    .officer-name-wrap {
+      min-width: 0;
+    }
+
+
+    .officer-name {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        7px;
+
+      font-weight:
+        850;
+
+      line-height:
+        1.25;
+
+    }
+
+
+    .officer-meta {
+
+      color:
+        #919aa3;
+
+      font-size:
+        12px;
+
+      margin-top:
+        4px;
+
+    }
+
+
+    .shift-pill,
+    .transfer-pill {
+
+      display:
+        inline-block;
+
+      border-radius:
+        999px;
+
+      padding:
+        5px 9px;
+
+      font-size:
+        10px;
+
+      font-weight:
+        850;
+
+      letter-spacing:
+        .05em;
+
+      text-transform:
+        uppercase;
+
+      white-space:
+        nowrap;
+
+    }
+
+
+    .shift-pill {
+
+      color:
+        #ffd2a9;
+
+      background:
+        rgba(255,120,0,.11);
+
+    }
+
+
+    .shift-pill.unassigned {
+
+      color:
+        #bdc4cb;
+
+      background:
+        rgba(160,170,180,.10);
+
+    }
+
+
+    .transfer-pill {
+
+      color:
+        #ffcf72;
+
+      background:
+        rgba(255,180,60,.11);
+
+      margin-top:
+        5px;
+
+    }
+
+
+    /* =========================================================
+       ARMED SHIELD
+       ========================================================= */
+
+    .armed-shield {
+
+      width:
+        22px;
+
+      height:
+        25px;
+
+      flex:
+        0 0 auto;
+
+      display:
+        inline-grid;
+
+      place-items:
+        center;
+
+      color:
+        #fff;
+
+      font-size:
+        10px;
+
+      font-weight:
+        900;
+
+      background:
+        linear-gradient(
+          135deg,
+          #8a151b 0 50%,
+          #6d7379 50% 100%
+        );
+
+      clip-path:
+        polygon(
+          50% 0,
+          94% 18%,
+          84% 72%,
+          50% 100%,
+          16% 72%,
+          6% 18%
+        );
+
+      filter:
+        drop-shadow(
+          0 2px 3px rgba(0,0,0,.5)
+        );
+
+    }
+
+
+    .armed-shield.large {
+
+      width:
+        32px;
+
+      height:
+        37px;
+
+      font-size:
+        12px;
+
+    }
+
+
+    /* =========================================================
+       PROFILE HEADER
+       ========================================================= */
+
+    .selected-profile-header {
+
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        flex-start;
+
+      gap:
+        18px;
+
+      padding-bottom:
+        18px;
+
+      border-bottom:
+        1px solid #2c3238;
+
+      margin-bottom:
+        20px;
+
+    }
+
+
+    .profile-title-row {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        10px;
+
+    }
+
+
+    .selected-profile-header h2 {
+
+      margin:
+        4px 0;
+
+    }
+
+
+    .profile-badges {
+
+      display:
+        flex;
+
+      flex-wrap:
+        wrap;
+
+      gap:
+        7px;
+
+      margin-top:
+        9px;
+
+    }
+
+
+    /* =========================================================
+       FORMS
+       ========================================================= */
+
+    .directory-form-grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(2, 1fr);
+
+      gap:
+        14px;
+
+    }
+
+
+    .directory-field {
+
+      margin-bottom:
+        15px;
+
+    }
+
+
+    .directory-field.full {
+      grid-column: 1 / -1;
+    }
+
+
+    .directory-field label {
+
+      display:
+        block;
+
+      margin-bottom:
+        7px;
+
+      font-size:
+        11px;
+
+      font-weight:
+        850;
+
+      color:
+        #aab2ba;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .07em;
+
+    }
+
+
+    .directory-field textarea {
+
+      min-height:
+        90px;
+
+      resize:
+        vertical;
+
+    }
+
+
+    .directory-actions {
+
+      display:
+        flex;
+
+      flex-wrap:
+        wrap;
+
+      gap:
+        10px;
+
+      margin-top:
+        8px;
+
+    }
+
+
+    .directory-button {
+
+      border:
+        1px solid #444c54;
+
+      border-radius:
+        10px;
+
+      background:
+        #11151a;
+
+      color:
+        #eef1f4;
+
+      padding:
+        10px 14px;
+
+      font-weight:
+        800;
+
+      cursor:
+        pointer;
+
+    }
+
+
+    .directory-button:hover {
+      border-color: #ff7800;
+    }
+
+
+    .directory-button.primary {
+
+      border:
+        0;
+
+      background:
+        linear-gradient(
+          135deg,
+          #f06b00,
+          #ff8c1a
+        );
+
+      color:
+        #fff;
+
+    }
+
+
+    .directory-button.danger {
+
+      color:
+        #ff9fa2;
+
+      border-color:
+        rgba(229,72,77,.4);
+
+    }
+
+
+    .directory-button:disabled {
+
+      opacity:
+        .4;
+
+      cursor:
+        not-allowed;
+
+    }
+
+
+    /* =========================================================
+       QUALIFICATION
+       ========================================================= */
+
+    .qualification-card {
+
+      margin-top:
+        20px;
+
+      border:
+        1px solid #343a41;
+
+      border-radius:
+        14px;
+
+      padding:
+        16px;
+
+      background:
+        #090c0f;
+
+    }
+
+
+    .qualification-header {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      gap:
+        14px;
+
+    }
+
+
+    .qualification-title {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        10px;
+
+    }
+
+
+    /* =========================================================
+       TRANSFER PANEL
+       ========================================================= */
+
+    .transfer-card {
+
+      margin-top:
+        20px;
+
+      border:
+        1px solid rgba(255,120,0,.3);
+
+      background:
+        rgba(255,120,0,.04);
+
+      border-radius:
+        14px;
+
+      padding:
+        17px;
+
+    }
+
+
+    .transfer-form {
+      margin-top: 14px;
+    }
+
+
+    .incoming-transfer {
+
+      border:
+        1px solid #343a41;
+
+      border-radius:
+        14px;
+
+      padding:
+        16px;
+
+      background:
+        #0b0e11;
+
+      margin-bottom:
+        12px;
+
+    }
+
+
+    .incoming-transfer-top {
+
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        flex-start;
+
+      gap:
+        12px;
+
+    }
+
+
+    .incoming-transfer-actions {
+
+      display:
+        flex;
+
+      flex-wrap:
+        wrap;
+
+      gap:
+        8px;
+
+      margin-top:
+        12px;
+
+    }
+
+
+    /* =========================================================
+       MESSAGES
+       ========================================================= */
+
+    .directory-message {
+
+      display:
+        none;
+
+      margin-top:
+        14px;
+
+      border-radius:
+        11px;
+
+      padding:
+        12px 14px;
+
+    }
+
+
+    .directory-message.show {
+      display: block;
+    }
+
+
+    .directory-message.success {
+
+      color:
+        #baf2d4;
+
+      background:
+        rgba(25,182,106,.12);
+
+      border:
+        1px solid rgba(25,182,106,.4);
+
+    }
+
+
+    .directory-message.error {
+
+      color:
+        #ffc5c7;
+
+      background:
+        rgba(229,72,77,.1);
+
+      border:
+        1px solid rgba(229,72,77,.35);
+
+    }
+
+
+    .directory-empty {
+
+      border:
+        1px dashed #343a41;
+
+      border-radius:
+        13px;
+
+      padding:
+        22px;
+
+      color:
+        #929aa3;
+
+      text-align:
+        center;
+
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @media (
+      max-width: 900px
+    ) {
+
+      .directory-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .directory-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+
+    @media (
+      max-width: 600px
+    ) {
+
+      .directory-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .selected-profile-header {
+        flex-direction: column;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body
+  data-securetrack-roles="manager,director,admin"
+>
+
+
+<main class="shell">
+
+  <section class="panel manager-console">
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header class="panel-head manager-header">
+
+      <div class="manager-header-row">
+
+        <div class="brandbar">
+
+          <div
+            class="logo-mark"
+            aria-hidden="true"
+          >
+            <span class="logo-lock"></span>
+          </div>
+
+
+          <div>
+
+            <div class="wordmark">
+              <span>Secure</span><span>Track</span>
+            </div>
+
+            <div class="tagline">
+              Personnel & Shift Management
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="manager-user-area">
+
+          <a
+            class="back-link"
+            href="manager.html"
+          >
+            ← Manager Dashboard
+          </a>
+
+          <button
+            id="logoutButton"
+            class="back-link"
+            type="button"
+          >
+            Sign Out
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="eyebrow">
+        Staffing Administration
+      </div>
+
+      <h1>
+        Officer Directory
+      </h1>
+
+      <p class="subtle">
+        Manage officer profiles, shift assignments,
+        qualifications and transfer activity.
+      </p>
+
+
+      <div class="directory-toolbar">
+
+        <input
+          id="directorySearch"
+          type="search"
+          placeholder="Search officer or nickname..."
+          autocomplete="off"
+        >
+
+
+        <select id="directoryShiftFilter">
+
+          <option value="">
+            All Shifts
+          </option>
+
+          <option value="Alpha">
+            Alpha
+          </option>
+
+          <option value="Bravo">
+            Bravo
+          </option>
+
+          <option value="Charlie">
+            Charlie
+          </option>
+
+          <option value="Delta">
+            Delta
+          </option>
+
+          <option value="UNASSIGNED">
+            Unassigned
+          </option>
+
+        </select>
+
+
+        <select id="directoryQualificationFilter">
+
+          <option value="">
+            All Qualifications
+          </option>
+
+          <option value="ARMED">
+            Armed
+          </option>
+
+          <option value="UNARMED">
+            Not Armed
+          </option>
+
+          <option value="TRANSFER">
+            Transfer Pending
+          </option>
+
+        </select>
+
+      </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         DIRECTORY + PROFILE
+         ===================================================== -->
+
+    <section class="directory-layout">
+
+
+      <!-- ===================================================
+           LEFT DIRECTORY
+           =================================================== -->
+
+      <article class="directory-card">
+
+        <div class="eyebrow">
+          Personnel
+        </div>
+
+        <h2>
+          Officers
+        </h2>
+
+        <p class="subtle">
+          Select an officer to view or manage the profile.
+        </p>
+
+
+        <div
+          id="directoryList"
+          class="directory-list"
+        >
+
+          <div class="directory-empty">
+            Loading officer directory…
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- ===================================================
+           RIGHT PROFILE
+           =================================================== -->
+
+      <article class="directory-card">
+
+
+        <div
+          id="noOfficerSelected"
+          class="directory-empty"
+        >
+          Select an officer from the directory.
+        </div>
+
+
+        <div
+          id="officerProfilePanel"
+          hidden
+        >
+
+
+          <!-- =================================================
+               PROFILE HEADER
+               ================================================= -->
+
+          <div class="selected-profile-header">
+
+            <div>
+
+              <div class="eyebrow">
+                Officer Profile
+              </div>
+
+
+              <div class="profile-title-row">
+
+                <span
+                  id="profileArmedShield"
+                  class="armed-shield large"
+                  title="Armed Officer"
+                  hidden
+                >
+                  A
+                </span>
+
+
+                <h2 id="profileDisplayName">
+                  —
+                </h2>
+
+              </div>
+
+
+              <div
+                id="profileEmployeeNumber"
+                class="subtle"
+              >
+                —
+              </div>
+
+
+              <div class="profile-badges">
+
+                <span
+                  id="profileShiftBadge"
+                  class="shift-pill unassigned"
+                >
+                  Unassigned
+                </span>
+
+
+                <span
+                  id="profileTransferBadge"
+                  class="transfer-pill"
+                  hidden
+                >
+                  Transfer Pending
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <button
+                id="refreshDirectoryButton"
+                class="directory-button"
+                type="button"
+              >
+                Refresh
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+               PROFILE DETAILS
+               ================================================= -->
+
+          <form
+            id="profileForm"
+            class="directory-form"
+          >
+
+
+            <div class="directory-form-grid">
+
+
+              <div class="directory-field">
+
+                <label for="firstName">
+                  First Name
+                </label>
+
+                <input
+                  id="firstName"
+                  type="text"
+                  required
+                >
+
+              </div>
+
+
+              <div class="directory-field">
+
+                <label for="middleInitial">
+                  Middle Initial
+                </label>
+
+                <input
+                  id="middleInitial"
+                  type="text"
+                  maxlength="1"
+                  placeholder="Optional"
+                >
+
+              </div>
+
+
+              <div class="directory-field">
+
+                <label for="lastName">
+                  Last Name
+                </label>
+
+                <input
+                  id="lastName"
+                  type="text"
+                  required
+                >
+
+              </div>
+
+
+              <div class="directory-field">
+
+                <label for="nickname">
+                  Nickname
+                </label>
+
+                <input
+                  id="nickname"
+                  type="text"
+                  placeholder="Optional"
+                >
+
+              </div>
+
+
+              <div class="directory-field">
+
+                <label for="birthDate">
+                  Birthdate
+                </label>
+
+                <input
+                  id="birthDate"
+                  type="date"
+                >
+
+              </div>
+
+
+              <div class="directory-field">
+
+                <label for="hireDate">
+                  Hire Date
+                </label>
+
+                <input
+                  id="hireDate"
+                  type="date"
+                >
+
+              </div>
+
+
+              <div class="directory-field full">
+
+                <label for="profileEmail">
+                  SecureTrack Login Email
+                </label>
+
+                <input
+                  id="profileEmail"
+                  type="email"
+                  disabled
+                >
+
+              </div>
+
+            </div>
+
+
+            <div class="directory-actions">
+
+              <button
+                id="saveProfileButton"
+                class="directory-button primary"
+                type="submit"
+              >
+                Save Profile
+              </button>
+
+            </div>
+
+
+            <div
+              id="profileMessage"
+              class="directory-message"
+            ></div>
+
+
+          </form>
+
+
+          <!-- =================================================
+               SHIFT ASSIGNMENT
+               ================================================= -->
+
+          <div class="qualification-card">
+
+            <div class="eyebrow">
+              Shift Assignment
+            </div>
+
+            <h3>
+              Current Assignment
+            </h3>
+
+
+            <div class="directory-form-grid">
+
+              <div class="directory-field">
+
+                <label for="currentShift">
+                  Current Shift
+                </label>
+
+                <input
+                  id="currentShift"
+                  type="text"
+                  disabled
+                >
+
+              </div>
+
+
+              <div class="directory-field">
+
+                <label for="newShift">
+                  Change To
+                </label>
+
+                <select id="newShift">
+
+                  <option value="">
+                    Select shift
+                  </option>
+
+                  <option value="Alpha">
+                    Alpha
+                  </option>
+
+                  <option value="Bravo">
+                    Bravo
+                  </option>
+
+                  <option value="Charlie">
+                    Charlie
+                  </option>
+
+                  <option value="Delta">
+                    Delta
+                  </option>
+
+                </select>
+
+              </div>
+
+            </div>
+
+
+            <div class="directory-actions">
+
+              <button
+                id="changeShiftButton"
+                class="directory-button"
+                type="button"
+              >
+                Change Shift
+              </button>
+
+            </div>
+
+
+            <div
+              id="shiftMessage"
+              class="directory-message"
+            ></div>
+
+          </div>
+
+
+          <!-- =================================================
+               ARMED QUALIFICATION
+               ================================================= -->
+
+          <div class="qualification-card">
+
+            <div class="qualification-header">
+
+              <div class="qualification-title">
+
+                <span
+                  class="armed-shield large"
+                  aria-hidden="true"
+                >
+                  A
+                </span>
+
+
+                <div>
+
+                  <div class="eyebrow">
+                    Qualification
+                  </div>
+
+                  <h3>
+                    Armed Officer
+                  </h3>
+
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <strong id="armedStatus">
+                  Not Armed
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="directory-field"
+              style="margin-top:15px;"
+            >
+
+              <label for="armedNotes">
+                Qualification Notes
+              </label>
+
+              <textarea
+                id="armedNotes"
+                placeholder="Optional qualification or status notes."
+              ></textarea>
+
+            </div>
+
+
+            <div class="directory-actions">
+
+              <button
+                id="grantArmedButton"
+                class="directory-button primary"
+                type="button"
+              >
+                Mark Armed
+              </button>
+
+
+              <button
+                id="removeArmedButton"
+                class="directory-button danger"
+                type="button"
+              >
+                Remove Armed Status
+              </button>
+
+            </div>
+
+
+            <div
+              id="armedMessage"
+              class="directory-message"
+            ></div>
+
+          </div>
+
+
+          <!-- =================================================
+               CROSS-COMMAND TRANSFER
+               ================================================= -->
+
+          <div
+            id="transferCard"
+            class="transfer-card"
+          >
+
+            <div class="eyebrow">
+              Command Transfer
+            </div>
+
+            <h3>
+              Request Transfer
+            </h3>
+
+            <p class="subtle">
+              Cross-command transfers require approval
+              from the receiving manager.
+            </p>
+
+
+            <div class="transfer-form">
+
+
+              <div class="directory-field">
+
+                <label for="receivingManager">
+                  Receiving Manager
+                </label>
+
+                <select id="receivingManager">
+
+                  <option value="">
+                    Select receiving manager
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="directory-field">
+
+                <label for="transferReason">
+                  Reason
+                </label>
+
+                <textarea
+                  id="transferReason"
+                  placeholder="Reason for transfer request..."
+                ></textarea>
+
+              </div>
+
+
+              <button
+                id="requestTransferButton"
+                class="directory-button primary"
+                type="button"
+              >
+                Submit Transfer Request
+              </button>
+
+
+              <div
+                id="transferMessage"
+                class="directory-message"
+              ></div>
+
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =====================================================
+         INCOMING TRANSFERS
+         ===================================================== -->
+
+    <section class="manager-section">
+
+      <div class="manager-section-header">
+
+        <div>
+
+          <div class="eyebrow">
+            Transfer Workflow
+          </div>
+
+          <h2>
+            Pending Transfer Requests
+          </h2>
+
+        </div>
+
+
+        <div>
+
+          <strong id="pendingTransferCount">
+            0 Pending
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div id="pendingTransfers">
+
+        <div class="directory-empty">
+          Loading transfer requests…
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SHIFT HISTORY
+         ===================================================== -->
+
+    <section class="manager-section">
+
+      <div class="eyebrow">
+        Accountability
+      </div>
+
+      <h2>
+        Officer Shift History
+      </h2>
+
+
+      <div class="table-wrap">
+
+        <table class="manager-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Date
+              </th>
+
+              <th>
+                From
+              </th>
+
+              <th>
+                To
+              </th>
+
+              <th>
+                Change
+              </th>
+
+              <th>
+                Reason
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="shiftHistoryBody">
+
+            <tr>
+
+              <td
+                colspan="5"
+                class="directory-empty"
+              >
+                Select an officer to view shift history.
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <div class="actions">
+
+      <div class="footer-trust">
+
+        <div>
+
+          <strong>
+            SECURE. ACCOUNTABLE. ORGANIZED.
+          </strong>
+
+          <br>
+
+          Officer changes are controlled
+          by authenticated management roles.
+
+        </div>
+
+
+        <div>
+          ◉ PERSONNEL
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </section>
+
+</main>
+
+
+<!-- =========================================================
+     SCRIPTS
+     ========================================================= -->
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="config.js"></script>
+
+<script src="secure-page.js"></script>
+
+<script src="manager-common.js"></script>
+
+<script src="officer-directory.js"></script>
+
+
+</body>
+
+</html>
