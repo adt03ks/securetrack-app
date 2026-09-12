@@ -92,10 +92,11 @@
 
 
   let currentShift = null;
-  let stations = [];
-  let staff = [];
-  let attendance = [];
-  let assignments = [];
+let stations = [];
+let staff = [];
+let attendance = [];
+let assignments = [];
+let plannedUnavailability = [];
 
 
   function roleLabel(list) {
@@ -310,67 +311,91 @@
 
 
   async function loadEligibleStaff() {
-    const {
-      data: roleRows,
-      error: roleError
-    } = await db
-      .from("user_roles")
+
+  const { data: roleRows, error: roleError } = await db
+    .from("user_roles")
+    .select("user_id, role");
+
+  if (roleError) throw roleError;
+
+
+  const allowed = new Set(
+    (roleRows || [])
+      .filter(row =>
+        [
+          "officer",
+          "dispatcher",
+          "senior_officer",
+          "team_lead"
+        ].includes(row.role)
+      )
+      .map(row => row.user_id)
+  );
+
+
+  if (!allowed.size) {
+    staff = [];
+    renderAttendance();
+    return;
+  }
+
+
+  const [
+    profileResult,
+    rosterResult
+  ] = await Promise.all([
+
+    db
+      .from("profiles")
       .select(
-        "user_id, role"
-      );
+        "id, display_name, employee_number, is_active"
+      )
+      .eq("is_active", true)
+      .order("display_name"),
+
+    db
+      .from("officer_shift_roster")
+      .select(
+        "user_id, shift_name, is_active"
+      )
+      .eq("is_active", true)
+
+  ]);
 
 
-    if (roleError) {
-      throw roleError;
-    }
+  if (profileResult.error) {
+    throw profileResult.error;
+  }
+
+  if (rosterResult.error) {
+    throw rosterResult.error;
+  }
 
 
-    /*
-      Only operational personnel
-      should appear as assignable
-      Duty Station staff.
-
-      Pure Manager/Admin accounts
-      can manage assignments without
-      automatically appearing here.
-    */
-
-    const operationalRoles = [
-      "officer",
-      "dispatcher",
-      "senior_officer",
-      "team_lead"
-    ];
+  const rosterMap = new Map(
+    (rosterResult.data || [])
+      .map(row => [
+        row.user_id,
+        row.shift_name
+      ])
+  );
 
 
-    const allowed =
-      new Set(
-
-        (roleRows || [])
-
-          .filter(
-            row =>
-              operationalRoles.includes(
-                row.role
-              )
-          )
-
-          .map(
-            row =>
-              row.user_id
-          )
-
-      );
+  staff =
+    (profileResult.data || [])
+      .filter(person =>
+        allowed.has(person.id)
+      )
+      .map(person => ({
+        ...person,
+        shift_name:
+          rosterMap.get(person.id) ||
+          null
+      }));
 
 
-    if (!allowed.size) {
-
-      staff = [];
-
-      renderAttendance();
-
-      return;
-    }
+  renderAttendance();
+}
 
 
     const {
