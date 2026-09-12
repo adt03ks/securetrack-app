@@ -36,10 +36,25 @@
   async function requireManager() {
     const session = await getSession();
 
-    if (!session) {
-      window.location.replace("login.html?next=manager.html");
-      return null;
-    }
+   if (!session) {
+
+  const currentPage =
+    window.location.pathname
+      .split("/")
+      .pop() ||
+    "manager-portal.html";
+
+  const next =
+    currentPage +
+    window.location.search;
+
+  window.location.replace(
+    "login.html?next=" +
+    encodeURIComponent(next)
+  );
+
+  return null;
+}
 
     const [profileResult, rolesResult] = await Promise.all([
       managerDB
