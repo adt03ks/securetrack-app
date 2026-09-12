@@ -82,9 +82,10 @@
       return null;
     }
 
-    const hasManagerAccess =
-      roles.includes("manager") ||
-      roles.includes("admin");
+   const hasManagerAccess =
+  roles.includes("manager") ||
+  roles.includes("director") ||
+  roles.includes("admin");
 
     if (!hasManagerAccess) {
       window.location.replace("hub.html");
@@ -93,12 +94,14 @@
 
     return {
       session,
-      profile: {
-        ...profile,
-        role: roles.includes("admin")
-          ? "admin"
-          : "manager"
-      },
+    profile: {
+  ...profile,
+  role: roles.includes("admin")
+    ? "admin"
+    : roles.includes("director")
+      ? "director"
+      : "manager"
+},
       roles
     };
   }
