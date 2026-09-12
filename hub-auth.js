@@ -45,13 +45,14 @@
   );
 
   const ROLE_LABELS = {
-    officer: "Officer",
-    dispatcher: "Dispatcher",
-    senior_officer: "Senior Officer",
-    team_lead: "Team Lead",
-    manager: "Manager",
-    admin: "Administrator"
-  };
+  officer: "Officer",
+  dispatcher: "Dispatcher",
+  senior_officer: "Senior Officer",
+  team_lead: "Team Lead",
+  manager: "Manager",
+  director: "Director",
+  admin: "Administrator"
+};
 
   const MODULE_ACCESS = {
     devices: [
