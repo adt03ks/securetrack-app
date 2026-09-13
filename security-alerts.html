@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#080a0c"
+  >
+
+  <title>
+    SecureTrack | Security Alerts
+  </title>
+
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden],
+    .hidden {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+
+      min-height: 100vh;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at top,
+          #1a2026,
+          #080a0c 55%
+        );
+
+      color:
+        #f5f6f7;
+    }
+
+
+    .page-shell {
+
+      width:
+        min(1050px, calc(100% - 30px));
+
+      margin:
+        0 auto;
+
+      padding:
+        22px 0 50px;
+    }
+
+
+    .topbar {
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      gap: 16px;
+
+      margin-bottom:
+        20px;
+
+      padding:
+        14px 16px;
+
+      border:
+        1px solid #30363d;
+
+      border-radius:
+        14px;
+
+      background:
+        rgba(12,15,18,.95);
+    }
+
+
+    .brand {
+
+      font-size:
+        22px;
+
+      font-weight:
+        900;
+    }
+
+
+    .brand span {
+      color:
+        #ff7800;
+    }
+
+
+    .top-actions {
+
+      display: flex;
+      gap: 9px;
+    }
+
+
+    .secondary-button {
+
+      border:
+        1px solid #3d454d;
+
+      border-radius:
+        9px;
+
+      background:
+        #14191e;
+
+      color:
+        white;
+
+      padding:
+        9px 12px;
+
+      font-weight:
+        800;
+
+      cursor:
+        pointer;
+    }
+
+
+    .alert-card {
+
+      overflow:
+        hidden;
+
+      border:
+        1px solid #343b42;
+
+      border-radius:
+        18px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #0c1014,
+          #11161b
+        );
+
+      box-shadow:
+        0 22px 70px
+        rgba(0,0,0,.42);
+    }
+
+
+    .alert-banner {
+
+      display: block;
+
+      width:
+        100%;
+
+      max-height:
+        230px;
+
+      object-fit:
+        cover;
+    }
+
+
+    .header {
+
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      gap:
+        22px;
+
+      padding:
+        25px;
+
+      border-bottom:
+        1px solid #292f35;
+    }
+
+
+    .eyebrow {
+
+      margin-bottom:
+        5px;
+
+      color:
+        #ff8b20;
+
+      font-size:
+        11px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        .14em;
+
+      text-transform:
+        uppercase;
+    }
+
+
+    h1,
+    h2,
+    h3 {
+
+      margin-top:
+        0;
+    }
+
+
+    h1 {
+
+      margin-bottom:
+        8px;
+
+      font-size:
+        clamp(
+          27px,
+          4vw,
+          40px
+        );
+    }
+
+
+    .muted {
+
+      color:
+        #9ea6ae;
+
+      line-height:
+        1.5;
+    }
+
+
+    .user-chip {
+
+      flex:
+        0 0 auto;
+
+      align-self:
+        flex-start;
+
+      padding:
+        10px 12px;
+
+      border:
+        1px solid #374048;
+
+      border-radius:
+        999px;
+
+      background:
+        #090c0f;
+
+      color:
+        #b9c0c6;
+
+      font-size:
+        12px;
+    }
+
+
+    .user-chip strong {
+
+      color:
+        white;
+    }
+
+
+    .content {
+
+      padding:
+        25px;
+    }
+
+
+    .form-section {
+
+      margin-bottom:
+        23px;
+
+      padding:
+        20px;
+
+      border:
+        1px solid #2d343b;
+
+      border-radius:
+        14px;
+
+      background:
+        #0b0e11;
+    }
+
+
+    .section-heading {
+
+      display: flex;
+
+      gap:
+        13px;
+
+      align-items:
+        flex-start;
+
+      margin-bottom:
+        18px;
+    }
+
+
+    .section-number {
+
+      width:
+        30px;
+
+      height:
+        30px;
+
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      flex:
+        0 0 auto;
+
+      border-radius:
+        50%;
+
+      background:
+        #ff7800;
+
+      color:
+        #111;
+
+      font-weight:
+        900;
+    }
+
+
+    .section-heading h2 {
+
+      margin:
+        1px 0 3px;
+
+      font-size:
+        18px;
+    }
+
+
+    .section-heading p {
+
+      margin:
+        0;
+
+      color:
+        #8f979f;
+
+      font-size:
+        13px;
+    }
+
+
+    .field-grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap:
+        15px;
+    }
+
+
+    .field {
+
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      gap:
+        6px;
+    }
+
+
+    .field.full-width {
+
+      grid-column:
+        1 / -1;
+    }
+
+
+    .field label {
+
+      color:
+        #c3c9ce;
+
+      font-size:
+        12px;
+
+      font-weight:
+        800;
+    }
+
+
+    .field input,
+    .field select,
+    .field textarea {
+
+      width:
+        100%;
+
+      padding:
+        11px 12px;
+
+      border:
+        1px solid #3a424a;
+
+      border-radius:
+        9px;
+
+      background:
+        #06090b;
+
+      color:
+        white;
+
+      font:
+        inherit;
+    }
+
+
+    .field textarea {
+
+      resize:
+        vertical;
+    }
+
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+
+      outline:
+        2px solid
+        rgba(255,120,0,.22);
+
+      border-color:
+        #ff7800;
+    }
+
+
+    .checkbox-row {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        10px;
+
+      min-height:
+        46px;
+
+      padding:
+        10px 12px;
+
+      border:
+        1px solid #343c43;
+
+      border-radius:
+        9px;
+
+      background:
+        #080b0e;
+    }
+
+
+    .checkbox-row input {
+
+      width:
+        18px;
+
+      height:
+        18px;
+    }
+
+
+    .privacy-note {
+
+      margin-top:
+        5px;
+
+      color:
+        #9da4ab;
+
+      font-size:
+        11px;
+
+      line-height:
+        1.5;
+    }
+
+
+    .system-message {
+
+      margin-bottom:
+        18px;
+
+      padding:
+        12px 14px;
+
+      border-radius:
+        10px;
+    }
+
+
+    .system-message.error {
+
+      border:
+        1px solid
+        rgba(222,71,71,.48);
+
+      background:
+        rgba(222,71,71,.08);
+
+      color:
+        #ffabab;
+    }
+
+
+    .system-message.success {
+
+      border:
+        1px solid
+        rgba(73,183,98,.45);
+
+      background:
+        rgba(73,183,98,.08);
+
+      color:
+        #a5e7b4;
+    }
+
+
+    .submit-section {
+
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        center;
+
+      gap:
+        18px;
+
+      padding:
+        20px;
+
+      border-top:
+        1px solid #2c3339;
+
+      background:
+        #090c0f;
+    }
+
+
+    .submit-copy {
+
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      gap:
+        4px;
+
+      color:
+        #a5adb4;
+
+      font-size:
+        12px;
+    }
+
+
+    .submit-copy strong {
+
+      color:
+        white;
+
+      font-size:
+        14px;
+    }
+
+
+    .primary-button {
+
+      border:
+        1px solid #ff7800;
+
+      border-radius:
+        10px;
+
+      padding:
+        12px 16px;
+
+      background:
+        #ff7800;
+
+      color:
+        #111;
+
+      font-weight:
+        900;
+
+      cursor:
+        pointer;
+    }
+
+
+    .primary-button:disabled {
+
+      opacity:
+        .55;
+
+      cursor:
+        wait;
+    }
+
+
+    .success-panel {
+
+      margin:
+        25px;
+
+      padding:
+        24px;
+
+      border:
+        1px solid
+        rgba(77,185,100,.45);
+
+      border-radius:
+        14px;
+
+      background:
+        rgba(77,185,100,.07);
+    }
+
+
+    .success-icon {
+
+      width:
+        44px;
+
+      height:
+        44px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      margin-bottom:
+        12px;
+
+      border-radius:
+        50%;
+
+      background:
+        #4db964;
+
+      color:
+        #071009;
+
+      font-weight:
+        900;
+
+      font-size:
+        24px;
+    }
+
+
+    .reference {
+
+      color:
+        #ff9a3c;
+
+      font-weight:
+        800;
+    }
+
+
+    footer {
+
+      padding:
+        18px 25px;
+
+      border-top:
+        1px solid #292f35;
+
+      color:
+        #747d85;
+
+      font-size:
+        11px;
+    }
+
+
+    @media (
+      max-width: 700px
+    ) {
+
+      .header,
+      .submit-section {
+
+        flex-direction:
+          column;
+
+        align-items:
+          stretch;
+      }
+
+
+      .field-grid {
+
+        grid-template-columns:
+          1fr;
+      }
+
+
+      .field.full-width {
+
+        grid-column:
+          auto;
+      }
+
+
+      .topbar {
+
+        align-items:
+          flex-start;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body
+  data-securetrack-roles="officer,senior_officer,team_lead,manager,director,admin"
+>
+
+
+<main class="page-shell">
+
+
+  <header class="topbar">
+
+    <div>
+
+      <div class="brand">
+        Secure<span>Track</span>
+      </div>
+
+      <div class="eyebrow">
+        Security Operations
+      </div>
+
+    </div>
+
+
+    <div class="top-actions">
+
+      <button
+        id="backToHub"
+        class="secondary-button"
+        type="button"
+      >
+        Operations Hub
+      </button>
+
+      <button
+        id="logoutButton"
+        class="secondary-button"
+        type="button"
+      >
+        Sign Out
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <section class="alert-card">
+
+
+    <img
+      class="alert-banner"
+      src="assets/security-leadership-alert.png"
+      alt="Security Leadership Alert"
+      onerror="this.style.display='none'"
+    >
+
+
+    <header class="header">
+
+      <div>
+
+        <div class="eyebrow">
+          Real-Time Notification
+        </div>
+
+        <h1>
+          Security Leadership Alert
+        </h1>
+
+        <div class="muted">
+
+          Record a qualifying security event and
+          notify leadership through the SecureTrack
+          alert workflow.
+
+        </div>
+
+      </div>
+
+
+      <div class="user-chip">
+
+        Submitted by<br>
+
+        <strong id="currentUserName">
+          Loading...
+        </strong>
+
+      </div>
+
+    </header>
+
+
+    <div class="content">
+
+
+      <div
+        id="systemMessage"
+        class="system-message hidden"
+        role="alert"
+      ></div>
+
+
+      <form
+        id="incidentForm"
+        novalidate
+      >
+
+
+        <!-- INCIDENT TYPE -->
+
+        <section class="form-section">
+
+          <div class="section-heading">
+
+            <span class="section-number">
+              1
+            </span>
+
+            <div>
+
+              <h2>
+                Incident Type
+              </h2>
+
+              <p>
+                Select the event being reported.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="incidentType">
+              Occurring Incident *
+            </label>
+
+            <select
+              id="incidentType"
+              required
+            >
+
+              <option value="">
+                Select an incident...
+              </option>
+
+              <option value="code_green">
+                Code Green
+              </option>
+
+              <option value="taser_pull">
+                Taser Pull
+              </option>
+
+              <option value="ctw">
+                CTW — Criminal Trespass Warning
+              </option>
+
+              <option value="officer_injury">
+                Officer Injury
+              </option>
+
+              <option value="insufficient_staffing">
+                Insufficient Staffing
+              </option>
+
+            </select>
+
+          </div>
+
+        </section>
+
+
+        <!-- DYNAMIC DETAILS -->
+
+        <section
+          id="detailsSection"
+          class="form-section hidden"
+        >
+
+          <div class="section-heading">
+
+            <span class="section-number">
+              2
+            </span>
+
+            <div>
+
+              <h2>
+                Incident Details
+              </h2>
+
+              <p id="incidentHelp">
+                Complete the required information.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="dynamicFields"
+            class="field-grid"
+          ></div>
+
+        </section>
+
+
+        <!-- SUBMISSION DETAILS -->
+
+        <section
+          id="submissionSection"
+          class="form-section hidden"
+        >
+
+          <div class="section-heading">
+
+            <span class="section-number">
+              3
+            </span>
+
+            <div>
+
+              <h2>
+                Submission Details
+              </h2>
+
+              <p>
+                Your SecureTrack identity is recorded
+                automatically.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="field-grid">
+
+
+            <div class="field">
+
+              <label for="dispatchUnit">
+                Duty Station / Dispatch Unit
+              </label>
+
+              <input
+                id="dispatchUnit"
+                type="text"
+                maxlength="180"
+                placeholder="Example: Dispatch, ED, Patrol"
+              >
+
+            </div>
+
+
+            <div class="field full-width">
+
+              <label for="additionalNotes">
+                Additional Notes
+              </label>
+
+              <textarea
+                id="additionalNotes"
+                rows="4"
+                maxlength="1500"
+                placeholder="Enter only information necessary for the security incident."
+              ></textarea>
+
+              <div class="privacy-note">
+
+                <strong>
+                  Minimum necessary information:
+                </strong>
+
+                Do not include diagnoses, Social
+                Security numbers, or unrelated
+                medical information.
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- SUBMIT -->
+
+        <section
+          id="submitSection"
+          class="submit-section hidden"
+        >
+
+          <div class="submit-copy">
+
+            <strong>
+              Ready to notify leadership?
+            </strong>
+
+            <span>
+              Review the information before submitting.
+            </span>
+
+          </div>
+
+
+          <button
+            id="submitButton"
+            class="primary-button"
+            type="submit"
+          >
+            Submit Security Alert
+          </button>
+
+        </section>
+
+
+      </form>
+
+
+    </div>
+
+
+    <!-- SUCCESS -->
+
+    <section
+      id="successPanel"
+      class="success-panel hidden"
+    >
+
+      <div class="success-icon">
+        ✓
+      </div>
+
+      <div class="eyebrow">
+        Alert Recorded
+      </div>
+
+      <h2>
+        Security leadership alert submitted
+      </h2>
+
+      <p id="successMessage">
+        The incident was recorded successfully.
+      </p>
+
+      <p
+        id="incidentReference"
+        class="reference"
+      ></p>
+
+
+      <button
+        id="newReportButton"
+        class="secondary-button"
+        type="button"
+      >
+        Submit Another Alert
+      </button>
+
+    </section>
+
+
+    <footer>
+
+      SecureTrack Security Leadership Alerts •
+      Authorized security personnel only
+
+    </footer>
+
+
+  </section>
+
+
+</main>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="config.js"></script>
+
+<script src="secure-page.js"></script>
+
+<script src="security-alerts.js"></script>
+
+
+</body>
+</html>
