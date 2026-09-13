@@ -1943,52 +1943,348 @@ function rankLabel(
 
 
 
-  async function decoratePersonnelCard(
-    button
+ async function decoratePersonnelCard(
+  button
+) {
+
+  const userId =
+    button.dataset.id;
+
+
+  if (!userId) {
+    return;
+  }
+
+
+  const card =
+    button.closest(
+      [
+        "[data-personnel-card]",
+        ".personnel-card",
+        ".person-card",
+        ".employee-card",
+        ".staff-card",
+        ".personnel-item",
+        "article"
+      ].join(",")
+    );
+
+
+  if (!card) {
+    return;
+  }
+
+
+  // ========================================================
+  // PREVENT DUPLICATE DECORATION
+  // ========================================================
+
+  if (
+    card.dataset.securetrackPhotoDecorated ===
+    userId
+  ) {
+    return;
+  }
+
+
+  card.dataset.securetrackPhotoDecorated =
+    userId;
+
+
+  // ========================================================
+  // REMOVE OLD PHOTO-TOOL AVATARS
+  // ========================================================
+
+  card
+    .querySelectorAll(
+      [
+        ".st-personnel-avatar",
+        ".st-personnel-card-avatar",
+        ".st-card-avatar",
+        ".st-photo-avatar"
+      ].join(",")
+    )
+    .forEach(
+      element =>
+        element.remove()
+    );
+
+
+  const person =
+    await getPersonnel(
+      userId
+    );
+
+
+  if (!person) {
+    return;
+  }
+
+
+  // ========================================================
+  // FIND EXISTING INITIALS CIRCLE
+  //
+  // We are going to REUSE the avatar already created by
+  // personnel-administration.html instead of creating
+  // another circle beside it.
+  // ========================================================
+
+  function findExistingAvatar() {
+
+    const candidates =
+      [
+        ...card.querySelectorAll(
+          "div, span"
+        )
+      ];
+
+
+    for (
+      const element of candidates
+    ) {
+
+      /*
+        Ignore elements that contain other large sections
+        of the card.
+      */
+
+      if (
+        element.children.length >
+        1
+      ) {
+        continue;
+      }
+
+
+      const text =
+        element.textContent
+          .trim();
+
+
+      /*
+        Existing fallback avatars contain things such as:
+        AS
+        TT
+        TW
+        OO
+
+        Do not treat normal card text as an avatar.
+      */
+
+      if (
+        !/^[A-Z]{1,3}$/.test(
+          text
+        )
+      ) {
+        continue;
+      }
+
+
+      const rect =
+        element.getBoundingClientRect();
+
+
+      if (
+        rect.width < 45 ||
+        rect.width > 120 ||
+        rect.height < 45 ||
+        rect.height > 120
+      ) {
+        continue;
+      }
+
+
+      if (
+        Math.abs(
+          rect.width -
+          rect.height
+        ) > 15
+      ) {
+        continue;
+      }
+
+
+      const style =
+        window.getComputedStyle(
+          element
+        );
+
+
+      const radius =
+        parseFloat(
+          style.borderRadius
+        );
+
+
+      if (
+        !Number.isFinite(
+          radius
+        ) ||
+        radius <
+          rect.width * 0.25
+      ) {
+        continue;
+      }
+
+
+      return element;
+
+    }
+
+
+    return null;
+
+  }
+
+
+  const existingAvatar =
+    findExistingAvatar();
+
+
+  // ========================================================
+  // NO PHOTO
+  //
+  // Keep ONE existing initials avatar.
+  // Do not create a question-mark avatar.
+  // ========================================================
+
+  if (
+    !person.profile_photo_path
   ) {
 
-    const userId =
-      button.dataset.id;
+    return;
+
+  }
 
 
-    if (!userId) {
-      return;
-    }
+  // ========================================================
+  // CREATE SIGNED PHOTO URL
+  // ========================================================
 
-
-    const card =
-      findPersonnelCard(
-        button
+  const {
+    data,
+    error
+  } =
+    await STM.db
+      .storage
+      .from(
+        "officer-profile-photos"
+      )
+      .createSignedUrl(
+        person.profile_photo_path,
+        3600
       );
 
 
-    if (!card) {
-      return;
-    }
+  if (
+    error ||
+    !data?.signedUrl
+  ) {
 
+    console.error(
+      "SecureTrack profile photo could not be loaded:",
+      error
+    );
 
     /*
-      Prevent duplicate avatars.
+      IMPORTANT:
+      If the photo fails, leave the original
+      initials avatar in place. Do NOT add ?.
     */
 
-    if (
-      card.querySelector(
-        `[data-st-personnel-avatar="${userId}"]`
-      )
-    ) {
-      return;
-    }
+    return;
+
+  }
 
 
-    const person =
-      await getPersonnel(
-        userId
+  // ========================================================
+  // REPLACE INITIALS WITH PHOTO
+  // ========================================================
+
+  if (
+    existingAvatar
+  ) {
+
+    existingAvatar.textContent =
+      "";
+
+
+    existingAvatar.classList.add(
+      "st-photo-active"
+    );
+
+
+    const image =
+      document.createElement(
+        "img"
       );
 
 
-    if (!person) {
-      return;
-    }
+    image.src =
+      data.signedUrl;
+
+
+    image.alt =
+      (
+        person.display_name ||
+        "Officer"
+      ) +
+      " profile photo";
+
+
+    image.loading =
+      "lazy";
+
+
+    image.style.width =
+      "100%";
+
+
+    image.style.height =
+      "100%";
+
+
+    image.style.objectFit =
+      "cover";
+
+
+    image.style.objectPosition =
+      "center";
+
+
+    image.style.borderRadius =
+      "50%";
+
+
+    image.addEventListener(
+      "error",
+      () => {
+
+        /*
+          If the signed image itself fails,
+          return to initials rather than
+          showing a broken-image icon.
+        */
+
+        image.remove();
+
+
+        existingAvatar.textContent =
+          initialsFor(
+            person
+          );
+
+      }
+    );
+
+
+    existingAvatar.appendChild(
+      image
+    );
+
+  }
+
+}
 
 // ========================================================
 // CORRECT RANK + ARMED STATUS ON CARD
