@@ -174,7 +174,223 @@ let plannedUnavailability = [];
       .toISOString()
       .slice(0, 10);
   }
+// ========================================================
+// SECURETRACK CANONICAL SHIFT SCHEDULE
+// ========================================================
 
+function validShiftsForDate(
+  dateValue
+) {
+
+  if (!dateValue) {
+    return [];
+  }
+
+
+  // Noon prevents timezone conversion from
+  // accidentally moving the selected calendar date.
+
+  const date =
+    new Date(
+      `${dateValue}T12:00:00`
+    );
+
+
+  const day =
+    date.getDay();
+
+  // JavaScript:
+  // 0 = Sunday
+  // 1 = Monday
+  // 2 = Tuesday
+  // 3 = Wednesday
+  // 4 = Thursday
+  // 5 = Friday
+  // 6 = Saturday
+
+
+  // Sunday / Monday / Tuesday
+
+  if (
+    day === 0 ||
+    day === 1 ||
+    day === 2
+  ) {
+
+    return [
+
+      {
+        value: "Alpha",
+        label:
+          "Alpha Shift • 6:37 AM – 7:11 PM"
+      },
+
+      {
+        value: "Charlie",
+        label:
+          "Charlie Shift • 6:37 PM – 7:11 AM"
+      }
+
+    ];
+
+  }
+
+
+  // Wednesday — all four split schedules
+
+  if (
+    day === 3
+  ) {
+
+    return [
+
+      {
+        value: "Delta",
+        label:
+          "Delta Shift • 12:37 AM – 7:11 AM"
+      },
+
+      {
+        value: "Bravo",
+        label:
+          "Bravo Shift • 6:37 AM – 1:11 PM"
+      },
+
+      {
+        value: "Alpha",
+        label:
+          "Alpha Shift • 12:37 PM – 7:11 PM"
+      },
+
+      {
+        value: "Charlie",
+        label:
+          "Charlie Shift • 6:37 PM – 12:11 AM"
+      }
+
+    ];
+
+  }
+
+
+  // Thursday / Friday / Saturday
+
+  return [
+
+    {
+      value: "Bravo",
+      label:
+        "Bravo Shift • 6:37 AM – 7:11 PM"
+    },
+
+    {
+      value: "Delta",
+      label:
+        "Delta Shift • 6:37 PM – 7:11 AM"
+    }
+
+  ];
+
+}
+
+
+// ========================================================
+// REFRESH SHIFT DROPDOWN WHEN DATE CHANGES
+// ========================================================
+
+function refreshShiftChoices() {
+
+  if (
+    !shiftDate ||
+    !shiftName
+  ) {
+    return;
+  }
+
+
+  const previousValue =
+    shiftName.value;
+
+
+  const availableShifts =
+    validShiftsForDate(
+      shiftDate.value
+    );
+
+
+  shiftName.innerHTML =
+    "";
+
+
+  const placeholder =
+    document.createElement(
+      "option"
+    );
+
+
+  placeholder.value =
+    "";
+
+
+  placeholder.textContent =
+    shiftDate.value
+      ? "Select scheduled shift"
+      : "Select date first";
+
+
+  shiftName.appendChild(
+    placeholder
+  );
+
+
+  availableShifts.forEach(
+    shift => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        shift.value;
+
+
+      option.textContent =
+        shift.label;
+
+
+      shiftName.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  // Preserve the current selection only if
+  // it remains valid for the selected date.
+
+  if (
+    availableShifts.some(
+      shift =>
+        shift.value ===
+        previousValue
+    )
+  ) {
+
+    shiftName.value =
+      previousValue;
+
+  }
+  else {
+
+    shiftName.value =
+      "";
+
+  }
+
+}
 
   function setUserDisplay() {
     currentUserName.textContent =
@@ -1901,22 +2117,42 @@ async function loadPlannedUnavailability() {
     }
   );
 
-
-  setUserDisplay();
-
-
-  shiftDate.value =
-    todayLocal();
+setUserDisplay();
 
 
-  try {
+shiftDate.value =
+  todayLocal();
 
-    await Promise.all([
-      loadStations(),
-      loadEligibleStaff()
-    ]);
 
-  } catch (error) {
+// Build the correct shift choices
+// for today's date when the page opens.
+
+refreshShiftChoices();
+
+
+// Rebuild the shift list whenever
+// the user chooses another date.
+
+shiftDate.addEventListener(
+  "change",
+  () => {
+
+    refreshShiftChoices();
+
+    clearMessage();
+
+  }
+);
+
+
+try {
+
+  await Promise.all([
+    loadStations(),
+    loadEligibleStaff()
+  ]);
+
+} catch (error) {
 
     console.error(
       "Duty assignment initialization error:",
