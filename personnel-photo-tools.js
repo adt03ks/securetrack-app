@@ -1613,7 +1613,46 @@
   const personnelCache =
     new Map();
 
+// ========================================================
+// RANK DISPLAY
+// ========================================================
 
+function rankLabel(
+  rank
+) {
+
+  const labels = {
+
+    officer:
+      "Officer",
+
+    senior_officer:
+      "Senior Officer",
+
+    team_lead:
+      "Team Lead",
+
+    dispatcher:
+      "Dispatcher",
+
+    manager:
+      "Manager",
+
+    director:
+      "Director",
+
+    admin:
+      "Administrator"
+
+  };
+
+
+  return (
+    labels[rank] ||
+    "Officer"
+  );
+
+}
   function initialsFor(
     person
   ) {
