@@ -44,7 +44,62 @@
 
 
   style.textContent = `
+.st-personnel-rank-line {
 
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  margin-top: 4px;
+
+  color: #aeb6be;
+
+  font-size: 12px;
+
+  font-weight: 800;
+}
+
+
+.st-personnel-rank-line .st-rank-shield {
+
+  width: 16px;
+
+  height: 18px;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex: 0 0 auto;
+}
+
+
+.st-personnel-rank-line .st-rank-shield svg {
+
+  width: 16px;
+
+  height: 18px;
+
+  display: block;
+
+  fill: #d84b4b;
+
+  stroke: #ff9292;
+
+  stroke-width: 1;
+}
+
+
+.st-personnel-rank-line .st-rank-text {
+
+  color: #c4cbd1;
+
+  letter-spacing: .02em;
+}
     .st-crop-overlay[hidden] {
       display: none !important;
     }
@@ -1938,7 +1993,233 @@ function rankLabel(
       return;
     }
 
+// ========================================================
+// CORRECT RANK + ARMED STATUS ON CARD
+// ========================================================
 
+function addRankDisplay() {
+
+  /*
+    Remove any rank display previously added
+    by this SecureTrack enhancement.
+  */
+
+  card
+    .querySelectorAll(
+      ".st-personnel-rank-line"
+    )
+    .forEach(
+      element =>
+        element.remove()
+    );
+
+
+  /*
+    Remove/replace the old generic "Officer"
+    label if the existing personnel card
+    currently contains one.
+
+    We only target small text elements whose
+    COMPLETE text is exactly "Officer" so we
+    do not accidentally alter names, buttons,
+    or other wording.
+  */
+
+  const possibleLabels =
+    card.querySelectorAll(
+      [
+        ".subtle",
+        ".role",
+        ".rank",
+        ".personnel-role",
+        ".employee-role",
+        "small",
+        "span",
+        "p"
+      ].join(",")
+    );
+
+
+  let oldRoleElement =
+    null;
+
+
+  for (
+    const element of possibleLabels
+  ) {
+
+    if (
+      element.children.length === 0 &&
+      element.textContent.trim()
+        .toLowerCase() ===
+        "officer"
+    ) {
+
+      oldRoleElement =
+        element;
+
+      break;
+
+    }
+
+  }
+
+
+  const rankLine =
+    document.createElement(
+      "div"
+    );
+
+
+  rankLine.className =
+    "st-personnel-rank-line";
+
+
+  // ----------------------------------------
+  // ARMED SHIELD
+  // ----------------------------------------
+
+  if (
+    person.is_armed ===
+    true
+  ) {
+
+    const shield =
+      document.createElement(
+        "span"
+      );
+
+
+    shield.className =
+      "st-rank-shield";
+
+
+    shield.title =
+      "Armed Qualified";
+
+
+    shield.setAttribute(
+      "aria-label",
+      "Armed Qualified"
+    );
+
+
+    shield.innerHTML = `
+      <svg
+        viewBox="0 0 24 28"
+        aria-hidden="true"
+      >
+        <path
+          d="
+            M12 1
+            L22 5
+            V12
+            C22 19
+            17.5 24.5
+            12 27
+            C6.5 24.5
+            2 19
+            2 12
+            V5
+            Z
+          "
+        ></path>
+      </svg>
+    `;
+
+
+    rankLine.appendChild(
+      shield
+    );
+
+  }
+
+
+  // ----------------------------------------
+  // ACTUAL RANK
+  // ----------------------------------------
+
+  const rankText =
+    document.createElement(
+      "span"
+    );
+
+
+  rankText.className =
+    "st-rank-text";
+
+
+  rankText.textContent =
+    rankLabel(
+      person.rank
+    );
+
+
+  rankLine.appendChild(
+    rankText
+  );
+
+
+  /*
+    Preferred behavior:
+    Replace the old generic Officer text.
+  */
+
+  if (oldRoleElement) {
+
+    oldRoleElement.replaceWith(
+      rankLine
+    );
+
+    return;
+
+  }
+
+
+  /*
+    Otherwise place the rank directly under
+    the employee's name.
+  */
+
+  const possibleName =
+    card.querySelector(
+      [
+        "h2",
+        "h3",
+        "h4",
+        ".personnel-name",
+        ".employee-name",
+        ".staff-name",
+        ".card-title"
+      ].join(",")
+    );
+
+
+  if (possibleName) {
+
+    possibleName.insertAdjacentElement(
+      "afterend",
+      rankLine
+    );
+
+  }
+  else {
+
+    /*
+      Safe fallback if the card's name element
+      uses a custom class.
+    */
+
+    card.prepend(
+      rankLine
+    );
+
+  }
+
+}
+
+
+addRankDisplay();
     const avatar =
       document.createElement(
         "div"
