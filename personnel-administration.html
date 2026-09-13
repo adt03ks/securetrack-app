@@ -1264,12 +1264,12 @@
   data,
   error
 } =
-  await db.rpc(
-    "get_personnel_admin_directory",
-    {
-      p_include_terminated: false
-    }
-  );
+ await db.rpc(
+  "get_personnel_admin_directory",
+  {
+    p_include_terminated: false
+  }
+);
 
 
     if (error) {
