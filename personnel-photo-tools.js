@@ -1661,89 +1661,150 @@
 
 
 
-  // ========================================================
-  // EMPLOYEE CARD PHOTOS
+    // ========================================================
+  // EMPLOYEE CARD PHOTOS + RANK DISPLAY
   // ========================================================
 
   const personnelCache =
     new Map();
 
-// ========================================================
-// RANK DISPLAY
-// ========================================================
-
-function rankLabel(
-  rank
-) {
-
-  const labels = {
-
-    officer:
-      "Officer",
-
-    senior_officer:
-      "Senior Officer",
-
-    team_lead:
-      "Team Lead",
-
-    manager:
-      "Manager",
-
-    director:
-      "Director",
-
-    admin:
-      "Administrator"
-
-  };
+  let personnelScanTimer =
+    null;
 
 
-  return (
-    labels[rank] ||
-    "Officer"
-  );
+  // ========================================================
+  // RANK LABEL
+  // ========================================================
 
-}
+  function rankLabel(
+    rank
+  ) {
+
+    const labels = {
+
+      officer:
+        "Officer",
+
+      senior_officer:
+        "Senior Officer",
+
+      team_lead:
+        "Team Lead",
+
+      manager:
+        "Manager",
+
+      director:
+        "Director",
+
+      admin:
+        "Administrator"
+
+    };
+
+
+    return (
+      labels[rank] ||
+      "Rank Unavailable"
+    );
+
+  }
+
+
+  // ========================================================
+  // INITIALS
+  // ========================================================
+
   function initialsFor(
     person
   ) {
 
-    const first =
+    let first =
       String(
         person?.first_name ||
         ""
       ).trim();
 
 
-    const last =
+    let last =
       String(
         person?.last_name ||
         ""
       ).trim();
 
 
-    const initials =
+    /*
+      Some of the older Test Officer records may
+      not have structured first/last names yet.
+
+      Fall back to display_name in those cases.
+    */
+
+    if (
+      !first ||
+      !last
+    ) {
+
+      const parts =
+        String(
+          person?.display_name ||
+          ""
+        )
+          .replace(
+            /"[^"]*"/g,
+            ""
+          )
+          .trim()
+          .split(
+            /\s+/
+          )
+          .filter(
+            Boolean
+          );
+
+
+      if (!first) {
+
+        first =
+          parts[0] ||
+          "";
+
+      }
+
+
+      if (!last) {
+
+        last =
+          parts.length > 1
+            ? parts[
+                parts.length - 1
+              ]
+            : "";
+
+      }
+
+    }
+
+
+    return (
       (
         (first[0] || "") +
         (last[0] || "")
       )
-        .toUpperCase();
-
-
-    return initials || "?";
+        .toUpperCase() ||
+      "?"
+    );
 
   }
 
 
+  // ========================================================
+  // FIND THE CARD FOR AN EDIT BUTTON
+  // ========================================================
 
   function findPersonnelCard(
     button
   ) {
-
-    /*
-      Try known/common card containers first.
-    */
 
     const direct =
       button.closest(
@@ -1760,14 +1821,15 @@ function rankLabel(
 
 
     if (direct) {
+
       return direct;
+
     }
 
 
     /*
-      Fallback:
-      Walk upward until we find the largest
-      container belonging to only this Edit button.
+      Fallback for the current Personnel
+      Administration card structure.
     */
 
     let node =
@@ -1819,6 +1881,9 @@ function rankLabel(
   }
 
 
+  // ========================================================
+  // GET COMPLETE PERSONNEL RECORD
+  // ========================================================
 
   async function getPersonnel(
     userId
@@ -1845,7 +1910,9 @@ function rankLabel(
       !STM ||
       !STM.db
     ) {
+
       return null;
+
     }
 
 
@@ -1865,9 +1932,10 @@ function rankLabel(
     if (error) {
 
       console.warn(
-        "Unable to load personnel photo:",
+        "Unable to load personnel record:",
         error
       );
+
 
       return null;
 
@@ -1885,13 +1953,18 @@ function rankLabel(
   }
 
 
+  // ========================================================
+  // PRIVATE PROFILE PHOTO URL
+  // ========================================================
 
   async function getSignedPhoto(
     path
   ) {
 
     if (!path) {
+
       return null;
+
     }
 
 
@@ -1903,7 +1976,9 @@ function rankLabel(
       !STM ||
       !STM.db
     ) {
+
       return null;
+
     }
 
 
@@ -1929,6 +2004,7 @@ function rankLabel(
         error
       );
 
+
       return null;
 
     }
@@ -1941,744 +2017,512 @@ function rankLabel(
 
   }
 
-function cleanupDuplicateAvatars(
-  card,
-  keepElement
-) {
 
-  const candidates =
+  // ========================================================
+  // FIND OFFICER NAME ON CARD
+  // ========================================================
+
+  function findNameElement(
+    card,
+    person
+  ) {
+
+    const displayName =
+      String(
+        person?.display_name ||
+        ""
+      ).trim();
+
+
+    const selector =
+      [
+        ".personnel-name",
+        ".employee-name",
+        ".staff-name",
+        ".card-title",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "strong"
+      ].join(",");
+
+
+    const candidates =
+      [
+        ...card.querySelectorAll(
+          selector
+        )
+      ];
+
+
+    /*
+      Prefer the element whose text exactly
+      matches this employee.
+    */
+
+    if (displayName) {
+
+      const exact =
+        candidates.find(
+          element =>
+            element.textContent
+              .trim() ===
+            displayName
+        );
+
+
+      if (exact) {
+
+        return exact;
+
+      }
+
+    }
+
+
+    return (
+      candidates[0] ||
+      null
+    );
+
+  }
+
+
+  // ========================================================
+  // RENDER ACTUAL RANK + ARMED SHIELD
+  // ========================================================
+
+  function renderPersonnelRank(
+    card,
+    person
+  ) {
+
+    /*
+      Remove only rank lines created by this
+      SecureTrack enhancement.
+    */
+
+    card
+      .querySelectorAll(
+        ".st-personnel-rank-line"
+      )
+      .forEach(
+        element =>
+          element.remove()
+      );
+
+
+    const nameElement =
+      findNameElement(
+        card,
+        person
+      );
+
+
+    /*
+      Remove the OLD generic OFFICER label
+      generated by the base Personnel page.
+
+      This only removes elements whose entire
+      text is exactly "Officer".
+
+      It will NOT remove names such as:
+      "Officer Test 03"
+    */
+
     [
       ...card.querySelectorAll(
         [
-          ".st-personnel-avatar",
-          ".st-personnel-card-avatar",
-          ".st-card-avatar",
-          ".st-photo-avatar",
-          ".st-personnel-photo-slot"
+          ".role",
+          ".rank",
+          ".personnel-role",
+          ".employee-role",
+          ".subtle",
+          "small",
+          "span",
+          "p",
+          "div"
         ].join(",")
       )
-    ];
+    ].forEach(
+      element => {
+
+        if (
+          element ===
+          nameElement
+        ) {
+
+          return;
+
+        }
 
 
-  candidates.forEach(
-    element => {
+        if (
+          element.closest(
+            "button"
+          )
+        ) {
 
-      if (
-        element ===
-        keepElement
-      ) {
-        return;
-      }
+          return;
 
-
-      element.remove();
-
-    }
-  );
+        }
 
 
-  /*
-    Remove duplicate question-mark circles created
-    by earlier versions of the helper.
-  */
+        if (
+          element.children.length !==
+          0
+        ) {
 
-  [
-    ...card.querySelectorAll(
-      "div, span"
-    )
-  ].forEach(
-    element => {
+          return;
 
-      if (
-        element ===
-        keepElement
-      ) {
-        return;
-      }
+        }
 
 
-      if (
-        element.children.length >
-        0
-      ) {
-        return;
-      }
+        if (
+          element.textContent
+            .trim()
+            .toLowerCase() ===
+          "officer"
+        ) {
 
+          element.remove();
 
-      const text =
-        element.textContent
-          .trim();
-
-
-      if (
-        text !== "?"
-      ) {
-        return;
-      }
-
-
-      const rect =
-        element.getBoundingClientRect();
-
-
-      if (
-        rect.width >= 45 &&
-        rect.width <= 120 &&
-        rect.height >= 45 &&
-        rect.height <= 120
-      ) {
-
-        element.remove();
+        }
 
       }
-
-    }
-  );
-
-}
-
- async function decoratePersonnelCard(
-  button
-) {
-
-  const userId =
-    button.dataset.id;
-
-
-  if (!userId) {
-    return;
-  }
-
-
-  const card =
-    button.closest(
-      [
-        "[data-personnel-card]",
-        ".personnel-card",
-        ".person-card",
-        ".employee-card",
-        ".staff-card",
-        ".personnel-item",
-        "article"
-      ].join(",")
     );
 
 
-  if (!card) {
-    return;
-  }
-
-
-  // ========================================================
-  // PREVENT DUPLICATE DECORATION
-  // ========================================================
-
-  if (
-    card.dataset.securetrackPhotoDecorated ===
-    userId
-  ) {
-    return;
-  }
-
-
-  card.dataset.securetrackPhotoDecorated =
-    userId;
-
-
-  // ========================================================
-  // REMOVE OLD PHOTO-TOOL AVATARS
-  // ========================================================
-async function decoratePersonnelCard(
-  button
-) {
-
-  const userId =
-    button.dataset.id;
-
-
-  if (!userId) {
-    return;
-  }
-
-
-  const card =
-    button.closest(
-      [
-        "[data-personnel-card]",
-        ".personnel-card",
-        ".person-card",
-        ".employee-card",
-        ".staff-card",
-        ".personnel-item",
-        "article"
-      ].join(",")
-    );
-
-
-  if (!card) {
-    return;
-  }
-
-
-  if (
-    card.dataset.securetrackPhotoDecorated ===
-    userId
-  ) {
-    return;
-  }
-
-
-  card.dataset.securetrackPhotoDecorated =
-    userId;
-
-
-  const person =
-    await getPersonnel(
-      userId
-    );
-
-
-  if (!person) {
-    return;
-  }
-
-
-  // ========================================================
-  // FIND EXISTING INITIALS AVATAR
-  // ========================================================
-
-  function findExistingInitialsAvatar() {
-
-    const candidates =
-      [
-        ...card.querySelectorAll(
-          "div, span"
-        )
-      ];
-
-
-    for (
-      const element of candidates
-    ) {
-
-      if (
-        element.querySelector("img")
-      ) {
-        continue;
-      }
-
-
-      if (
-        element.children.length >
-        1
-      ) {
-        continue;
-      }
-
-
-      const text =
-        element.textContent
-          .trim();
-
-
-      if (
-        !/^[A-Z]{1,3}$/.test(
-          text
-        )
-      ) {
-        continue;
-      }
-
-
-      const rect =
-        element.getBoundingClientRect();
-
-
-      if (
-        rect.width < 45 ||
-        rect.width > 120 ||
-        rect.height < 45 ||
-        rect.height > 120
-      ) {
-        continue;
-      }
-
-
-      if (
-        Math.abs(
-          rect.width -
-          rect.height
-        ) > 15
-      ) {
-        continue;
-      }
-
-
-      return element;
-
-    }
-
-
-    return null;
-
-  }
-
-
-  const initialsAvatar =
-    findExistingInitialsAvatar();
-
-
-  // ========================================================
-  // NO SAVED PHOTO
-  //
-  // Keep initials only.
-  // ========================================================
-
-  if (
-    !person.profile_photo_path
-  ) {
-
-    cleanupDuplicateAvatars(
-      card,
-      initialsAvatar
-    );
-
-    return;
-
-  }
-
-
-  // ========================================================
-  // GET SIGNED PHOTO URL
-  // ========================================================
-
-  const {
-    data,
-    error
-  } =
-    await STM.db
-      .storage
-      .from(
-        "officer-profile-photos"
-      )
-      .createSignedUrl(
-        person.profile_photo_path,
-        3600
+    const rankLine =
+      document.createElement(
+        "div"
       );
 
 
-  if (
-    error ||
-    !data?.signedUrl
-  ) {
+    rankLine.className =
+      "st-personnel-rank-line";
 
-    console.error(
-      "SecureTrack profile photo could not be loaded:",
-      error
+
+    // ------------------------------------------------------
+    // ARMED SHIELD
+    // ------------------------------------------------------
+
+    if (
+      person.is_armed ===
+      true
+    ) {
+
+      const shield =
+        document.createElement(
+          "span"
+        );
+
+
+      shield.className =
+        "st-rank-shield";
+
+
+      shield.title =
+        "Armed Qualified";
+
+
+      shield.setAttribute(
+        "aria-label",
+        "Armed Qualified"
+      );
+
+
+      shield.innerHTML = `
+        <svg
+          viewBox="0 0 24 28"
+          aria-hidden="true"
+        >
+          <path
+            d="
+              M12 1
+              L22 5
+              V12
+              C22 19
+              17.5 24.5
+              12 27
+              C6.5 24.5
+              2 19
+              2 12
+              V5
+              Z
+            "
+          ></path>
+        </svg>
+      `;
+
+
+      rankLine.appendChild(
+        shield
+      );
+
+    }
+
+
+    // ------------------------------------------------------
+    // ACTUAL RANK
+    // ------------------------------------------------------
+
+    const rankText =
+      document.createElement(
+        "span"
+      );
+
+
+    rankText.className =
+      "st-rank-text";
+
+
+    rankText.textContent =
+      rankLabel(
+        person.rank
+      );
+
+
+    rankLine.appendChild(
+      rankText
     );
 
 
     /*
-      Do NOT delete initials when photo loading fails.
+      Place rank immediately below the
+      employee name.
     */
 
-    cleanupDuplicateAvatars(
-      card,
-      initialsAvatar
-    );
+    if (
+      nameElement
+    ) {
 
-    return;
+      nameElement.insertAdjacentElement(
+        "afterend",
+        rankLine
+      );
+
+    }
 
   }
 
 
   // ========================================================
-  // PRELOAD IMAGE FIRST
-  //
-  // We do not remove or replace anything until we know
-  // the signed photo actually loads.
+  // DETECT EXISTING INITIALS CIRCLE
   // ========================================================
 
-  const image =
-    new Image();
+  function isCircularAvatarCandidate(
+    element,
+    expectedInitials
+  ) {
+
+    if (
+      !element ||
+      element.children.length >
+      0
+    ) {
+
+      return false;
+
+    }
 
 
-  image.alt =
-    (
-      person.display_name ||
-      "Officer"
-    ) +
-    " profile photo";
+    const text =
+      element.textContent
+        .trim()
+        .toUpperCase();
 
 
-  image.loading =
-    "lazy";
+    if (
+      text !==
+        expectedInitials &&
+      text !==
+        "?"
+    ) {
+
+      return false;
+
+    }
 
 
-  image.style.width =
-    "100%";
+    const rect =
+      element.getBoundingClientRect();
 
 
-  image.style.height =
-    "100%";
+    /*
+      Must look like one of the avatar circles.
+    */
+
+    if (
+      rect.width < 40 ||
+      rect.width > 130 ||
+      rect.height < 40 ||
+      rect.height > 130 ||
+      Math.abs(
+        rect.width -
+        rect.height
+      ) > 18
+    ) {
+
+      return false;
+
+    }
 
 
-  image.style.objectFit =
-    "cover";
-
-
-  image.style.objectPosition =
-    "center";
-
-
-  image.style.borderRadius =
-    "50%";
-
-
-  image.onload =
-    () => {
-
-      // ----------------------------------------------
-      // If an initials circle exists, convert THAT
-      // exact circle into the photo.
-      // ----------------------------------------------
-
-      if (
-        initialsAvatar &&
-        initialsAvatar.isConnected
-      ) {
-
-        initialsAvatar.textContent =
-          "";
-
-
-        initialsAvatar.classList.add(
-          "st-photo-active"
-        );
-
-
-        initialsAvatar.appendChild(
-          image
-        );
-
-
-        cleanupDuplicateAvatars(
-          card,
-          initialsAvatar
-        );
-
-
-        return;
-
-      }
-
-
-      // ----------------------------------------------
-      // Fallback if no initials circle was detected.
-      // Create ONE photo slot only.
-      // ----------------------------------------------
-
-      let photoSlot =
-        card.querySelector(
-          ".st-personnel-photo-slot"
-        );
-
-
-      if (!photoSlot) {
-
-        photoSlot =
-          document.createElement(
-            "div"
-          );
-
-
-        photoSlot.className =
-          "st-personnel-photo-slot";
-
-
-        photoSlot.style.width =
-          "70px";
-
-
-        photoSlot.style.height =
-          "70px";
-
-
-        photoSlot.style.minWidth =
-          "70px";
-
-
-        photoSlot.style.borderRadius =
-          "50%";
-
-
-        photoSlot.style.overflow =
-          "hidden";
-
-
-        photoSlot.style.border =
-          "2px solid #424b54";
-
-
-        photoSlot.style.background =
-          "#161c21";
-
-
-        /*
-          Put it near the beginning of the card.
-        */
-
-        card.prepend(
-          photoSlot
-        );
-
-      }
-
-
-      photoSlot.innerHTML =
-        "";
-
-
-      photoSlot.appendChild(
-        image
+    const radius =
+      parseFloat(
+        window
+          .getComputedStyle(
+            element
+          )
+          .borderRadius
       );
 
 
-      cleanupDuplicateAvatars(
-        card,
-        photoSlot
-      );
+    return (
+      Number.isFinite(
+        radius
+      ) &&
+      radius >=
+        Math.min(
+          rect.width,
+          rect.height
+        ) *
+        0.25
+    );
 
-    };
-
-
-  image.onerror =
-    () => {
-
-      console.error(
-        "SecureTrack signed profile image failed to render for:",
-        person.display_name
-      );
+  }
 
 
-      cleanupDuplicateAvatars(
-        card,
-        initialsAvatar
-      );
-
-    };
-
-
-  /*
-    Setting src LAST starts loading after all
-    handlers are attached.
-  */
-
-  image.src =
-    data.signedUrl;
-
-}
   // ========================================================
-  // FIND EXISTING INITIALS CIRCLE
-  //
-  // We are going to REUSE the avatar already created by
-  // personnel-administration.html instead of creating
-  // another circle beside it.
+  // FIND CURRENT AVATAR
   // ========================================================
 
-  function findExistingAvatar() {
+  function findExistingAvatar(
+    card,
+    person
+  ) {
 
-    const candidates =
+    /*
+      First try known avatar class names.
+    */
+
+    const known =
+      card.querySelector(
+        [
+          "[data-personnel-avatar]",
+          ".personnel-avatar",
+          ".employee-avatar",
+          ".staff-avatar",
+          ".avatar"
+        ].join(",")
+      );
+
+
+    if (known) {
+
+      return known;
+
+    }
+
+
+    /*
+      If the base Personnel page has no
+      avatar class, identify the initials circle.
+    */
+
+    const expectedInitials =
+      initialsFor(
+        person
+      );
+
+
+    return (
       [
         ...card.querySelectorAll(
           "div, span"
         )
-      ];
-
-
-    for (
-      const element of candidates
-    ) {
-
-      /*
-        Ignore elements that contain other large sections
-        of the card.
-      */
-
-      if (
-        element.children.length >
-        1
-      ) {
-        continue;
-      }
-
-
-      const text =
-        element.textContent
-          .trim();
-
-
-      /*
-        Existing fallback avatars contain things such as:
-        AS
-        TT
-        TW
-        OO
-
-        Do not treat normal card text as an avatar.
-      */
-
-      if (
-        !/^[A-Z]{1,3}$/.test(
-          text
-        )
-      ) {
-        continue;
-      }
-
-
-      const rect =
-        element.getBoundingClientRect();
-
-
-      if (
-        rect.width < 45 ||
-        rect.width > 120 ||
-        rect.height < 45 ||
-        rect.height > 120
-      ) {
-        continue;
-      }
-
-
-      if (
-        Math.abs(
-          rect.width -
-          rect.height
-        ) > 15
-      ) {
-        continue;
-      }
-
-
-      const style =
-        window.getComputedStyle(
-          element
-        );
-
-
-      const radius =
-        parseFloat(
-          style.borderRadius
-        );
-
-
-      if (
-        !Number.isFinite(
-          radius
+      ]
+        .find(
+          element =>
+            isCircularAvatarCandidate(
+              element,
+              expectedInitials
+            )
         ) ||
-        radius <
-          rect.width * 0.25
-      ) {
-        continue;
-      }
-
-
-      return element;
-
-    }
-
-
-    return null;
-
-  }
-
-
-  const existingAvatar =
-    findExistingAvatar();
-
-
-  // ========================================================
-  // NO PHOTO
-  //
-  // Keep ONE existing initials avatar.
-  // Do not create a question-mark avatar.
-  // ========================================================
-
-  if (
-    !person.profile_photo_path
-  ) {
-
-    return;
-
-  }
-
-
-  // ========================================================
-  // CREATE SIGNED PHOTO URL
-  // ========================================================
-
-  const {
-    data,
-    error
-  } =
-    await STM.db
-      .storage
-      .from(
-        "officer-profile-photos"
-      )
-      .createSignedUrl(
-        person.profile_photo_path,
-        3600
-      );
-
-
-  if (
-    error ||
-    !data?.signedUrl
-  ) {
-
-    console.error(
-      "SecureTrack profile photo could not be loaded:",
-      error
+      null
     );
 
-    /*
-      IMPORTANT:
-      If the photo fails, leave the original
-      initials avatar in place. Do NOT add ?.
-    */
+  }
 
-    return;
+
+  // ========================================================
+  // REMOVE OLD HELPER DUPLICATES
+  // ========================================================
+
+  function removeHelperAvatarDuplicates(
+    card,
+    keepElement = null
+  ) {
+
+    card
+      .querySelectorAll(
+        [
+          ".st-personnel-card-avatar",
+          ".st-personnel-photo-slot",
+          ".st-personnel-avatar",
+          ".st-card-avatar",
+          ".st-photo-avatar"
+        ].join(",")
+      )
+      .forEach(
+        element => {
+
+          if (
+            element !==
+            keepElement
+          ) {
+
+            element.remove();
+
+          }
+
+        }
+      );
 
   }
 
 
   // ========================================================
-  // REPLACE INITIALS WITH PHOTO
+  // INSTALL REAL IMAGE IN AVATAR
   // ========================================================
 
-  if (
-    existingAvatar
+  function installPhotoInAvatar(
+    avatar,
+    image,
+    person
   ) {
 
-    existingAvatar.textContent =
+    /*
+      This is where the initials disappear.
+    */
+
+    avatar.innerHTML =
       "";
 
 
-    existingAvatar.classList.add(
+    avatar.classList.add(
       "st-photo-active"
     );
 
 
-    const image =
-      document.createElement(
-        "img"
-      );
+    avatar.style.overflow =
+      "hidden";
 
 
-    image.src =
-      data.signedUrl;
+    avatar.style.borderRadius =
+      "50%";
 
 
     image.alt =
@@ -2689,16 +2533,16 @@ async function decoratePersonnelCard(
       " profile photo";
 
 
-    image.loading =
-      "lazy";
-
-
     image.style.width =
       "100%";
 
 
     image.style.height =
       "100%";
+
+
+    image.style.display =
+      "block";
 
 
     image.style.objectFit =
@@ -2713,300 +2557,53 @@ async function decoratePersonnelCard(
       "50%";
 
 
-    image.addEventListener(
-      "error",
-      () => {
-
-        /*
-          If the signed image itself fails,
-          return to initials rather than
-          showing a broken-image icon.
-        */
-
-        image.remove();
-
-
-        existingAvatar.textContent =
-          initialsFor(
-            person
-          );
-
-      }
-    );
-
-
-    existingAvatar.appendChild(
+    avatar.appendChild(
       image
     );
 
   }
 
-}
 
-// ========================================================
-// CORRECT RANK + ARMED STATUS ON CARD
-// ========================================================
+  // ========================================================
+  // RENDER PROFILE PHOTO
+  // ========================================================
 
-function addRankDisplay() {
-
-  /*
-    Remove any rank display previously added
-    by this SecureTrack enhancement.
-  */
-
-  card
-    .querySelectorAll(
-      ".st-personnel-rank-line"
-    )
-    .forEach(
-      element =>
-        element.remove()
-    );
-
-
-  /*
-    Remove/replace the old generic "Officer"
-    label if the existing personnel card
-    currently contains one.
-
-    We only target small text elements whose
-    COMPLETE text is exactly "Officer" so we
-    do not accidentally alter names, buttons,
-    or other wording.
-  */
-
-  const possibleLabels =
-    card.querySelectorAll(
-      [
-        ".subtle",
-        ".role",
-        ".rank",
-        ".personnel-role",
-        ".employee-role",
-        "small",
-        "span",
-        "p"
-      ].join(",")
-    );
-
-
-  let oldRoleElement =
-    null;
-
-
-  for (
-    const element of possibleLabels
+  async function renderPersonnelPhoto(
+    card,
+    person
   ) {
 
-    if (
-      element.children.length === 0 &&
-      element.textContent.trim()
-        .toLowerCase() ===
-        "officer"
-    ) {
-
-      oldRoleElement =
-        element;
-
-      break;
-
-    }
-
-  }
-
-
-  const rankLine =
-    document.createElement(
-      "div"
-    );
-
-
-  rankLine.className =
-    "st-personnel-rank-line";
-
-
-  // ----------------------------------------
-  // ARMED SHIELD
-  // ----------------------------------------
-
-  if (
-    person.is_armed ===
-    true
-  ) {
-
-    const shield =
-      document.createElement(
-        "span"
-      );
-
-
-    shield.className =
-      "st-rank-shield";
-
-
-    shield.title =
-      "Armed Qualified";
-
-
-    shield.setAttribute(
-      "aria-label",
-      "Armed Qualified"
-    );
-
-
-    shield.innerHTML = `
-      <svg
-        viewBox="0 0 24 28"
-        aria-hidden="true"
-      >
-        <path
-          d="
-            M12 1
-            L22 5
-            V12
-            C22 19
-            17.5 24.5
-            12 27
-            C6.5 24.5
-            2 19
-            2 12
-            V5
-            Z
-          "
-        ></path>
-      </svg>
-    `;
-
-
-    rankLine.appendChild(
-      shield
-    );
-
-  }
-
-
-  // ----------------------------------------
-  // ACTUAL RANK
-  // ----------------------------------------
-
-  const rankText =
-    document.createElement(
-      "span"
-    );
-
-
-  rankText.className =
-    "st-rank-text";
-
-
-  rankText.textContent =
-    rankLabel(
-      person.rank
-    );
-
-
-  rankLine.appendChild(
-    rankText
-  );
-
-
-  /*
-    Preferred behavior:
-    Replace the old generic Officer text.
-  */
-
-  if (oldRoleElement) {
-
-    oldRoleElement.replaceWith(
-      rankLine
-    );
-
-    return;
-
-  }
-
-
-  /*
-    Otherwise place the rank directly under
-    the employee's name.
-  */
-
-  const possibleName =
-    card.querySelector(
-      [
-        "h2",
-        "h3",
-        "h4",
-        ".personnel-name",
-        ".employee-name",
-        ".staff-name",
-        ".card-title"
-      ].join(",")
-    );
-
-
-  if (possibleName) {
-
-    possibleName.insertAdjacentElement(
-      "afterend",
-      rankLine
-    );
-
-  }
-  else {
-
-    /*
-      Safe fallback if the card's name element
-      uses a custom class.
-    */
-
-    card.prepend(
-      rankLine
-    );
-
-  }
-
-}
-
-
-addRankDisplay();
-    const avatar =
-      document.createElement(
-        "div"
-      );
-
-
-    avatar.className =
-      "st-personnel-card-avatar";
-
-
-    avatar.dataset
-      .stPersonnelAvatar =
-        userId;
-
-
-    avatar.textContent =
-      initialsFor(
+    const existingAvatar =
+      findExistingAvatar(
+        card,
         person
       );
 
 
-    /*
-      Add immediately so initials are visible
-      even while the private image loads.
-    */
-
-    card.prepend(
-      avatar
-    );
-
+    // ------------------------------------------------------
+    // NO PHOTO SAVED
+    //
+    // Leave original initials in place.
+    // ------------------------------------------------------
 
     if (
       !person.profile_photo_path
     ) {
+
+      removeHelperAvatarDuplicates(
+        card,
+        existingAvatar
+      );
+
+
       return;
+
     }
 
+
+    // ------------------------------------------------------
+    // GET PRIVATE SIGNED URL
+    // ------------------------------------------------------
 
     const signedUrl =
       await getSignedPhoto(
@@ -3015,121 +2612,367 @@ addRankDisplay();
 
 
     if (!signedUrl) {
-      return;
-    }
 
-
-    const img =
-      document.createElement(
-        "img"
+      console.warn(
+        "SecureTrack photo path exists but no signed URL was returned for:",
+        person.display_name
       );
 
 
-    img.src =
-      signedUrl;
+      /*
+        Leave initials visible if Storage
+        cannot provide the image.
+      */
+
+      removeHelperAvatarDuplicates(
+        card,
+        existingAvatar
+      );
 
 
-    img.alt =
-      (
-        person.display_name ||
-        "Employee"
-      ) +
-      " profile photo";
+      return;
+
+    }
 
 
-    img.addEventListener(
-      "error",
-      () => {
+    // ------------------------------------------------------
+    // PRELOAD IMAGE BEFORE REMOVING INITIALS
+    // ------------------------------------------------------
 
-        avatar.innerHTML =
-          "";
+    const image =
+      new Image();
 
-        avatar.textContent =
-          initialsFor(
-            person
+
+    image.decoding =
+      "async";
+
+
+    const loaded =
+      await new Promise(
+        resolve => {
+
+          image.onload =
+            () => {
+
+              resolve(
+                true
+              );
+
+            };
+
+
+          image.onerror =
+            () => {
+
+              resolve(
+                false
+              );
+
+            };
+
+
+          image.src =
+            signedUrl;
+
+        }
+      );
+
+
+    if (!loaded) {
+
+      console.warn(
+        "SecureTrack signed profile photo failed to load for:",
+        person.display_name
+      );
+
+
+      /*
+        Preserve initials on failure.
+      */
+
+      removeHelperAvatarDuplicates(
+        card,
+        existingAvatar
+      );
+
+
+      return;
+
+    }
+
+
+    // ------------------------------------------------------
+    // REUSE EXISTING INITIALS CIRCLE
+    // ------------------------------------------------------
+
+    let avatar =
+      existingAvatar;
+
+
+    /*
+      If the base page somehow has no avatar,
+      create ONE new avatar.
+    */
+
+    if (!avatar) {
+
+      avatar =
+        document.createElement(
+          "div"
+        );
+
+
+      avatar.className =
+        "st-personnel-card-avatar";
+
+
+      avatar.dataset
+        .stPersonnelAvatar =
+          person.user_id ||
+          "photo";
+
+
+      const nameElement =
+        findNameElement(
+          card,
+          person
+        );
+
+
+      if (
+        nameElement &&
+        nameElement.parentElement
+      ) {
+
+        nameElement
+          .parentElement
+          .insertBefore(
+            avatar,
+            nameElement
           );
 
       }
+      else {
+
+        card.prepend(
+          avatar
+        );
+
+      }
+
+    }
+
+
+    /*
+      Replace initials with the photo.
+    */
+
+    installPhotoInAvatar(
+      avatar,
+      image,
+      person
     );
 
 
-    avatar.innerHTML =
-      "";
+    /*
+      Remove any leftover avatars created by
+      older versions of this script.
+    */
 
-    avatar.appendChild(
-      img
+    removeHelperAvatarDuplicates(
+      card,
+      avatar
     );
 
   }
 
 
-
   // ========================================================
-  // SCAN ACTIVE PERSONNEL CARDS
+  // DECORATE ONE PERSONNEL CARD
   // ========================================================
 
- let photoScanTimer =
-  null;
+  async function decoratePersonnelCard(
+    button
+  ) {
+
+    const userId =
+      button.dataset.id;
 
 
-const personnelObserver =
-  new MutationObserver(
-    () => {
+    if (!userId) {
 
-      clearTimeout(
-        photoScanTimer
+      return;
+
+    }
+
+
+    const card =
+      findPersonnelCard(
+        button
       );
 
 
-      photoScanTimer =
-        setTimeout(
-          () => {
+    if (!card) {
 
-            scanPersonnelCards();
-
-          },
-          75
-        );
+      return;
 
     }
-  );
 
 
-personnelObserver.observe(
-  document.body,
-  {
-    childList:
-      true,
+    /*
+      Prevent the MutationObserver from repeatedly
+      decorating its own DOM changes.
+    */
 
-    subtree:
-      true
-  }
-);
-  // ========================================================
-  // WATCH FOR PERSONNEL LIST REFRESH
-  // ========================================================
+    if (
+      card.dataset
+        .securetrackDecoratedUser ===
+        userId ||
+      card.dataset
+        .securetrackDecoratingUser ===
+        userId
+    ) {
 
-  const observer =
-    new MutationObserver(
-      () => {
+      return;
 
-        schedulePersonnelScan();
+    }
+
+
+    card.dataset
+      .securetrackDecoratingUser =
+        userId;
+
+
+    try {
+
+      const person =
+        await getPersonnel(
+          userId
+        );
+
+
+      if (!person) {
+
+        return;
 
       }
+
+
+      /*
+        First correct rank.
+      */
+
+      renderPersonnelRank(
+        card,
+        person
+      );
+
+
+      /*
+        Then install photo / initials.
+      */
+
+      await renderPersonnelPhoto(
+        card,
+        person
+      );
+
+
+      card.dataset
+        .securetrackDecoratedUser =
+          userId;
+
+    }
+    catch (
+      error
+    ) {
+
+      console.error(
+        "SecureTrack personnel card decoration failed:",
+        error
+      );
+
+    }
+    finally {
+
+      delete card.dataset
+        .securetrackDecoratingUser;
+
+    }
+
+  }
+
+
+  // ========================================================
+  // SCAN CURRENT PERSONNEL CARDS
+  // ========================================================
+
+  function scanPersonnelCards() {
+
+    document
+      .querySelectorAll(
+        'button[data-action="edit"][data-id]'
+      )
+      .forEach(
+        button => {
+
+          decoratePersonnelCard(
+            button
+          );
+
+        }
+      );
+
+  }
+
+
+  // ========================================================
+  // DEBOUNCED SCAN
+  // ========================================================
+
+  function schedulePersonnelScan() {
+
+    clearTimeout(
+      personnelScanTimer
     );
 
 
-  observer.observe(
+    personnelScanTimer =
+      setTimeout(
+        scanPersonnelCards,
+        80
+      );
+
+  }
+
+
+  // ========================================================
+  // WATCH PERSONNEL LIST FOR RERENDER
+  // ========================================================
+
+  const personnelObserver =
+    new MutationObserver(
+      schedulePersonnelScan
+    );
+
+
+  personnelObserver.observe(
     document.body,
     {
+
       childList:
         true,
 
       subtree:
         true
+
     }
   );
 
+
+  // ========================================================
+  // INITIAL PAGE SCAN
+  // ========================================================
 
   if (
     document.readyState ===
@@ -3138,7 +2981,11 @@ personnelObserver.observe(
 
     document.addEventListener(
       "DOMContentLoaded",
-      schedulePersonnelScan
+      schedulePersonnelScan,
+      {
+        once:
+          true
+      }
     );
 
   }
@@ -3149,37 +2996,55 @@ personnelObserver.observe(
   }
 
 
-
   // ========================================================
   // PUBLIC REFRESH
   //
-  // Allows us to force a photo refresh later if needed.
+  // personnel-editor.js and personnel-onboarding.js
+  // can call this after a photo or rank change.
   // ========================================================
 
-window.SecureTrackPersonnelPhotos = {
+  window.SecureTrackPersonnelPhotos = {
 
-  refresh() {
+    refresh() {
 
-    personnelCache.clear();
+      /*
+        Force fresh information from Supabase.
+      */
 
-
-    document
-      .querySelectorAll(
-        '[data-securetrack-photo-decorated]'
-      )
-      .forEach(
-        card => {
-
-          delete card.dataset
-            .securetrackPhotoDecorated;
-
-        }
-      );
+      personnelCache.clear();
 
 
-    scanPersonnelCards();
+      /*
+        Allow every currently visible card
+        to be decorated again.
+      */
 
-  }
+      document
+        .querySelectorAll(
+          [
+            "[data-securetrack-decorated-user]",
+            "[data-securetrack-decorating-user]"
+          ].join(",")
+        )
+        .forEach(
+          card => {
 
-};
+            delete card.dataset
+              .securetrackDecoratedUser;
+
+
+            delete card.dataset
+              .securetrackDecoratingUser;
+
+          }
+        );
+
+
+      schedulePersonnelScan();
+
+    }
+
+  };
+
+
 })();
