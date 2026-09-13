@@ -2611,52 +2611,43 @@ addRankDisplay();
   // SCAN ACTIVE PERSONNEL CARDS
   // ========================================================
 
-  let scanScheduled =
-    false;
+ let photoScanTimer =
+  null;
 
 
-  function schedulePersonnelScan() {
+const personnelObserver =
+  new MutationObserver(
+    () => {
 
-    if (scanScheduled) {
-      return;
+      clearTimeout(
+        photoScanTimer
+      );
+
+
+      photoScanTimer =
+        setTimeout(
+          () => {
+
+            scanPersonnelCards();
+
+          },
+          75
+        );
+
     }
+  );
 
 
-    scanScheduled =
-      true;
+personnelObserver.observe(
+  document.body,
+  {
+    childList:
+      true,
 
-
-    setTimeout(
-      async () => {
-
-        scanScheduled =
-          false;
-
-
-        const buttons =
-          document.querySelectorAll(
-            'button[data-action="edit"][data-id]'
-          );
-
-
-        for (
-          const button of buttons
-        ) {
-
-          await decoratePersonnelCard(
-            button
-          );
-
-        }
-
-      },
-      100
-    );
-
+    subtree:
+      true
   }
-
-
-
+);
   // ========================================================
   // WATCH FOR PERSONNEL LIST REFRESH
   // ========================================================
