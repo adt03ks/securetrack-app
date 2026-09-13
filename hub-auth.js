@@ -53,36 +53,84 @@
   admin: "Administrator"
 };
 
-  const MODULE_ACCESS = {
-    devices: [
-      "officer",
-      "senior_officer",
-      "team_lead",
-      "manager",
-      "admin"
-    ],
-    incidents: ["manager", "admin"],
-    property: [
-      "officer",
-      "senior_officer",
-      "team_lead",
-      "manager",
-      "admin"
-    ],
-    assignments: ["senior_officer", "team_lead", "manager", "admin"],
-    overtime: [
-      "officer",
-      "senior_officer",
-      "team_lead",
-      "manager",
-      "admin"
-    ],
- manager: ["manager","director","admin"]
-  };
+ const MODULE_ACCESS = {
 
-  function hasAnyRole(userRoles, allowedRoles) {
-    return allowedRoles.some(role => userRoles.includes(role));
-  }
+  // Device Management
+  devices: [
+    "officer",
+    "senior_officer",
+    "team_lead",
+    "manager",
+    "director",
+    "admin"
+  ],
+
+
+  // Security Leadership Alerts
+  // Any authenticated local officer can submit.
+  incidents: [
+    "officer",
+    "senior_officer",
+    "team_lead",
+    "manager",
+    "director",
+    "admin"
+  ],
+
+
+  // Property / Belongings
+  property: [
+    "officer",
+    "senior_officer",
+    "team_lead",
+    "manager",
+    "director",
+    "admin"
+  ],
+
+
+  // Duty Station / Shift Operations
+  assignments: [
+    "senior_officer",
+    "team_lead",
+    "manager",
+    "director",
+    "admin"
+  ],
+
+
+  // Overtime
+  overtime: [
+    "officer",
+    "senior_officer",
+    "team_lead",
+    "manager",
+    "director",
+    "admin"
+  ],
+
+
+  // Management Command Center
+  manager: [
+    "manager",
+    "director",
+    "admin"
+  ]
+
+};
+
+
+function hasAnyRole(
+  userRoles,
+  allowedRoles
+) {
+
+  return allowedRoles.some(
+    role =>
+      userRoles.includes(role)
+  );
+
+}
 
   function safeNextFromUrl() {
     const params = new URLSearchParams(window.location.search);
