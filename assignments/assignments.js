@@ -1,6 +1,5 @@
 (async function () {
   "use strict";
-
   function waitForAuth() {
     if (window.SecureTrackAuth) return Promise.resolve(window.SecureTrackAuth);
 
@@ -381,21 +380,25 @@ let plannedUnavailability = [];
   );
 
 
-  staff =
-    (profileResult.data || [])
-      .filter(person =>
-        allowed.has(person.id)
-      )
-      .map(person => ({
-        ...person,
-        shift_name:
-          rosterMap.get(person.id) ||
-          null
-      }));
+ staff =
+  (profileResult.data || [])
+    .filter(person =>
+      allowed.has(person.id)
+    )
+    .map(person => ({
+      ...person,
+      shift_name:
+        rosterMap.get(person.id) ||
+        null
+    }));
 
 
-  function renderAttendance() {
+renderAttendance();
 
+}
+
+
+function renderAttendance() {
   attendanceList.innerHTML = "";
 
 
@@ -781,30 +784,6 @@ let plannedUnavailability = [];
 
     renderAttendance();
   }
-
-
-  function renderAttendance() {
-
-    attendanceList.innerHTML =
-      "";
-
-
-    if (!currentShift) {
-
-      attendanceList.innerHTML =
-        '<div class="empty">Open a shift first.</div>';
-
-      return;
-    }
-
-
-    if (!staff.length) {
-
-      attendanceList.innerHTML =
-        '<div class="empty">No active SecureTrack staff profiles are available.</div>';
-
-      return;
-    }
 
 
     const attendanceMap =
