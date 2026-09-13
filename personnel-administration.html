@@ -1260,16 +1260,16 @@
       </div>`;
 
 
-    const {
-      data,
-      error
-    } =
-      await db.rpc(
-        "get_personnel_admin_directory",
-        {
-          p_include_inactive: false
-        }
-      );
+   const {
+  data,
+  error
+} =
+  await db.rpc(
+    "get_personnel_admin_directory",
+    {
+      p_include_terminated: false
+    }
+  );
 
 
     if (error) {
