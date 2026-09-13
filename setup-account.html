@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#080a0c"
+  >
+
+  <title>
+    SecureTrack | Set Up Account
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+  <style>
+
+    .setup-shell {
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 24px;
+    }
+
+    .setup-card {
+      width: min(520px, 100%);
+
+      border:
+        1px solid #343a41;
+
+      border-radius:
+        18px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #0b0e11,
+          #11151a
+        );
+
+      overflow: hidden;
+    }
+
+    .setup-head {
+      padding: 26px;
+
+      border-bottom:
+        1px solid #2d333a;
+    }
+
+    .setup-body {
+      padding: 26px;
+    }
+
+    .setup-field {
+      margin-bottom: 17px;
+    }
+
+    .setup-field label {
+      display: block;
+
+      margin-bottom: 6px;
+
+      color: #c3c8cd;
+
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .setup-field input {
+      width: 100%;
+
+      box-sizing: border-box;
+
+      padding: 12px 13px;
+
+      border:
+        1px solid #343a41;
+
+      border-radius:
+        10px;
+
+      background: #080b0e;
+      color: #fff;
+
+      font: inherit;
+    }
+
+    .setup-field input:focus {
+      outline:
+        2px solid
+        rgba(255,120,0,.25);
+
+      border-color:
+        #ff7800;
+    }
+
+    .password-rules {
+      margin:
+        -5px 0 18px;
+
+      color: #8e969f;
+
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .setup-button {
+      width: 100%;
+
+      padding:
+        12px 15px;
+
+      border:
+        1px solid #ff7800;
+
+      border-radius:
+        10px;
+
+      background:
+        #ff7800;
+
+      color:
+        #111;
+
+      font-weight:
+        900;
+
+      cursor:
+        pointer;
+    }
+
+    .setup-button:disabled {
+      opacity: .5;
+      cursor: wait;
+    }
+
+    .setup-message {
+      display: none;
+
+      margin-top: 16px;
+
+      padding: 12px 14px;
+
+      border-radius:
+        10px;
+
+      font-size:
+        13px;
+    }
+
+    .setup-message.error {
+      display: block;
+
+      color:
+        #ffb0b0;
+
+      border:
+        1px solid
+        rgba(220,70,70,.45);
+
+      background:
+        rgba(220,70,70,.08);
+    }
+
+    .setup-message.success {
+      display: block;
+
+      color:
+        #9adea8;
+
+      border:
+        1px solid
+        rgba(87,187,109,.4);
+
+      background:
+        rgba(87,187,109,.08);
+    }
+
+    .setup-loading {
+      text-align: center;
+
+      padding:
+        28px 0;
+
+      color:
+        #989fa6;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+<main class="setup-shell">
+
+  <section class="setup-card">
+
+    <header class="setup-head">
+
+      <div class="brandbar">
+
+        <div
+          class="logo-mark"
+          aria-hidden="true"
+        >
+          <span class="logo-lock"></span>
+        </div>
+
+        <div>
+
+          <div class="wordmark">
+            <span>Secure</span><span>Track</span>
+          </div>
+
+          <div class="tagline">
+            Operations Management
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="eyebrow"
+        style="margin-top:24px;"
+      >
+        SecureTrack Invitation
+      </div>
+
+      <h1>
+        Set Up Your Account
+      </h1>
+
+      <p class="subtle">
+        Create your SecureTrack password to
+        complete your account activation.
+      </p>
+
+    </header>
+
+
+    <div class="setup-body">
+
+
+      <div
+        id="setupLoading"
+        class="setup-loading"
+      >
+        Verifying your SecureTrack invitation...
+      </div>
+
+
+      <form
+        id="setupForm"
+        hidden
+      >
+
+        <div class="setup-field">
+
+          <label for="setupEmail">
+            SecureTrack Email
+          </label>
+
+          <input
+            id="setupEmail"
+            type="email"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="setup-field">
+
+          <label for="newPassword">
+            Create Password
+          </label>
+
+          <input
+            id="newPassword"
+            type="password"
+            autocomplete="new-password"
+            required
+          >
+
+        </div>
+
+
+        <div class="setup-field">
+
+          <label for="confirmPassword">
+            Confirm Password
+          </label>
+
+          <input
+            id="confirmPassword"
+            type="password"
+            autocomplete="new-password"
+            required
+          >
+
+        </div>
+
+
+        <div class="password-rules">
+          Use at least 8 characters. A longer
+          passphrase with uppercase, lowercase,
+          numbers and symbols is recommended.
+        </div>
+
+
+        <button
+          id="setupButton"
+          class="setup-button"
+          type="submit"
+        >
+          Activate SecureTrack Account
+        </button>
+
+      </form>
+
+
+      <div
+        id="setupMessage"
+        class="setup-message"
+      ></div>
+
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="config.js"></script>
+
+
+<script>
+
+(async function () {
+
+  "use strict";
+
+
+  const cfg =
+    window.SECURETRACK_CONFIG ||
+    {};
+
+
+  const loading =
+    document.getElementById(
+      "setupLoading"
+    );
+
+
+  const form =
+    document.getElementById(
+      "setupForm"
+    );
+
+
+  const emailInput =
+    document.getElementById(
+      "setupEmail"
+    );
+
+
+  const passwordInput =
+    document.getElementById(
+      "newPassword"
+    );
+
+
+  const confirmInput =
+    document.getElementById(
+      "confirmPassword"
+    );
+
+
+  const button =
+    document.getElementById(
+      "setupButton"
+    );
+
+
+  const message =
+    document.getElementById(
+      "setupMessage"
+    );
+
+
+  function showMessage(
+    text,
+    type
+  ) {
+
+    message.textContent =
+      text;
+
+    message.className =
+      "setup-message " +
+      type;
+
+  }
+
+
+  if (
+    !cfg.supabaseUrl ||
+    !cfg.supabaseAnonKey
+  ) {
+
+    loading.hidden =
+      true;
+
+
+    showMessage(
+      "SecureTrack configuration could not be loaded.",
+      "error"
+    );
+
+
+    return;
+
+  }
+
+
+  const db =
+    window.supabase.createClient(
+
+      cfg.supabaseUrl,
+
+      cfg.supabaseAnonKey,
+
+      {
+        auth: {
+
+          persistSession:
+            true,
+
+          autoRefreshToken:
+            true,
+
+          detectSessionInUrl:
+            true
+
+        }
+      }
+
+    );
+
+
+  /*
+    Give Supabase a brief moment to process
+    the invitation tokens returned in the URL.
+  */
+
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        300
+      )
+  );
+
+
+  const {
+    data: {
+      session
+    },
+    error: sessionError
+  } =
+    await db.auth.getSession();
+
+
+  loading.hidden =
+    true;
+
+
+  if (
+    sessionError ||
+    !session
+  ) {
+
+    console.error(
+      "SecureTrack invitation session error:",
+      sessionError
+    );
+
+
+    showMessage(
+      "This invitation is invalid, expired, or has already been used. Please contact your SecureTrack manager for assistance.",
+      "error"
+    );
+
+
+    return;
+
+  }
+
+
+  emailInput.value =
+    session.user.email ||
+    "";
+
+
+  form.hidden =
+    false;
+
+
+  form.addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      message.className =
+        "setup-message";
+
+      message.textContent =
+        "";
+
+
+      const password =
+        passwordInput.value;
+
+
+      const confirmation =
+        confirmInput.value;
+
+
+      if (
+        password.length <
+        8
+      ) {
+
+        showMessage(
+          "Your password must contain at least 8 characters.",
+          "error"
+        );
+
+
+        return;
+
+      }
+
+
+      if (
+        password !==
+        confirmation
+      ) {
+
+        showMessage(
+          "The passwords do not match.",
+          "error"
+        );
+
+
+        return;
+
+      }
+
+
+      button.disabled =
+        true;
+
+      button.textContent =
+        "Activating Account...";
+
+
+      const {
+        error
+      } =
+        await db.auth.updateUser(
+          {
+            password:
+              password
+          }
+        );
+
+
+      if (error) {
+
+        console.error(
+          "SecureTrack password setup failed:",
+          error
+        );
+
+
+        showMessage(
+          error.message ||
+          "Your account could not be activated.",
+          "error"
+        );
+
+
+        button.disabled =
+          false;
+
+        button.textContent =
+          "Activate SecureTrack Account";
+
+
+        return;
+
+      }
+
+
+      showMessage(
+        "Your SecureTrack account has been activated. Redirecting to login...",
+        "success"
+      );
+
+
+      /*
+        End the temporary invitation session.
+        The officer will then sign in normally
+        using the password they just created.
+      */
+
+      await db.auth.signOut();
+
+
+      setTimeout(
+        () => {
+
+          window.location.replace(
+            "login.html"
+          );
+
+        },
+        1400
+      );
+
+    }
+  );
+
+
+})();
+
+</script>
+
+
+</body>
+</html>
