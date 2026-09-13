@@ -1687,9 +1687,6 @@ function rankLabel(
     team_lead:
       "Team Lead",
 
-    dispatcher:
-      "Dispatcher",
-
     manager:
       "Manager",
 
