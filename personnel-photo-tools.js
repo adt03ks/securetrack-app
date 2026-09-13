@@ -2699,31 +2699,30 @@ personnelObserver.observe(
   // Allows us to force a photo refresh later if needed.
   // ========================================================
 
-  window.SecureTrackPersonnelPhotos = {
+window.SecureTrackPersonnelPhotos = {
 
-    refresh() {
+  refresh() {
 
-      personnelCache.clear();
-
-
-      document
-        .querySelectorAll(
-          "[data-st-personnel-avatar]"
-        )
-        .forEach(
-          element => {
-
-            element.remove();
-
-          }
-        );
+    personnelCache.clear();
 
 
-      schedulePersonnelScan();
+    document
+      .querySelectorAll(
+        '[data-securetrack-photo-decorated]'
+      )
+      .forEach(
+        card => {
 
-    }
+          delete card.dataset
+            .securetrackPhotoDecorated;
 
-  };
+        }
+      );
 
 
+    scanPersonnelCards();
+
+  }
+
+};
 })();
