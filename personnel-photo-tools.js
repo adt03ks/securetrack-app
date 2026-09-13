@@ -1941,7 +1941,101 @@ function rankLabel(
 
   }
 
+function cleanupDuplicateAvatars(
+  card,
+  keepElement
+) {
 
+  const candidates =
+    [
+      ...card.querySelectorAll(
+        [
+          ".st-personnel-avatar",
+          ".st-personnel-card-avatar",
+          ".st-card-avatar",
+          ".st-photo-avatar",
+          ".st-personnel-photo-slot"
+        ].join(",")
+      )
+    ];
+
+
+  candidates.forEach(
+    element => {
+
+      if (
+        element ===
+        keepElement
+      ) {
+        return;
+      }
+
+
+      element.remove();
+
+    }
+  );
+
+
+  /*
+    Remove duplicate question-mark circles created
+    by earlier versions of the helper.
+  */
+
+  [
+    ...card.querySelectorAll(
+      "div, span"
+    )
+  ].forEach(
+    element => {
+
+      if (
+        element ===
+        keepElement
+      ) {
+        return;
+      }
+
+
+      if (
+        element.children.length >
+        0
+      ) {
+        return;
+      }
+
+
+      const text =
+        element.textContent
+          .trim();
+
+
+      if (
+        text !== "?"
+      ) {
+        return;
+      }
+
+
+      const rect =
+        element.getBoundingClientRect();
+
+
+      if (
+        rect.width >= 45 &&
+        rect.width <= 120 &&
+        rect.height >= 45 &&
+        rect.height <= 120
+      ) {
+
+        element.remove();
+
+      }
+
+    }
+  );
+
+}
 
  async function decoratePersonnelCard(
   button
@@ -1994,20 +2088,48 @@ function rankLabel(
   // ========================================================
   // REMOVE OLD PHOTO-TOOL AVATARS
   // ========================================================
+async function decoratePersonnelCard(
+  button
+) {
 
-  card
-    .querySelectorAll(
+  const userId =
+    button.dataset.id;
+
+
+  if (!userId) {
+    return;
+  }
+
+
+  const card =
+    button.closest(
       [
-        ".st-personnel-avatar",
-        ".st-personnel-card-avatar",
-        ".st-card-avatar",
-        ".st-photo-avatar"
+        "[data-personnel-card]",
+        ".personnel-card",
+        ".person-card",
+        ".employee-card",
+        ".staff-card",
+        ".personnel-item",
+        "article"
       ].join(",")
-    )
-    .forEach(
-      element =>
-        element.remove()
     );
+
+
+  if (!card) {
+    return;
+  }
+
+
+  if (
+    card.dataset.securetrackPhotoDecorated ===
+    userId
+  ) {
+    return;
+  }
+
+
+  card.dataset.securetrackPhotoDecorated =
+    userId;
 
 
   const person =
@@ -2021,6 +2143,341 @@ function rankLabel(
   }
 
 
+  // ========================================================
+  // FIND EXISTING INITIALS AVATAR
+  // ========================================================
+
+  function findExistingInitialsAvatar() {
+
+    const candidates =
+      [
+        ...card.querySelectorAll(
+          "div, span"
+        )
+      ];
+
+
+    for (
+      const element of candidates
+    ) {
+
+      if (
+        element.querySelector("img")
+      ) {
+        continue;
+      }
+
+
+      if (
+        element.children.length >
+        1
+      ) {
+        continue;
+      }
+
+
+      const text =
+        element.textContent
+          .trim();
+
+
+      if (
+        !/^[A-Z]{1,3}$/.test(
+          text
+        )
+      ) {
+        continue;
+      }
+
+
+      const rect =
+        element.getBoundingClientRect();
+
+
+      if (
+        rect.width < 45 ||
+        rect.width > 120 ||
+        rect.height < 45 ||
+        rect.height > 120
+      ) {
+        continue;
+      }
+
+
+      if (
+        Math.abs(
+          rect.width -
+          rect.height
+        ) > 15
+      ) {
+        continue;
+      }
+
+
+      return element;
+
+    }
+
+
+    return null;
+
+  }
+
+
+  const initialsAvatar =
+    findExistingInitialsAvatar();
+
+
+  // ========================================================
+  // NO SAVED PHOTO
+  //
+  // Keep initials only.
+  // ========================================================
+
+  if (
+    !person.profile_photo_path
+  ) {
+
+    cleanupDuplicateAvatars(
+      card,
+      initialsAvatar
+    );
+
+    return;
+
+  }
+
+
+  // ========================================================
+  // GET SIGNED PHOTO URL
+  // ========================================================
+
+  const {
+    data,
+    error
+  } =
+    await STM.db
+      .storage
+      .from(
+        "officer-profile-photos"
+      )
+      .createSignedUrl(
+        person.profile_photo_path,
+        3600
+      );
+
+
+  if (
+    error ||
+    !data?.signedUrl
+  ) {
+
+    console.error(
+      "SecureTrack profile photo could not be loaded:",
+      error
+    );
+
+
+    /*
+      Do NOT delete initials when photo loading fails.
+    */
+
+    cleanupDuplicateAvatars(
+      card,
+      initialsAvatar
+    );
+
+    return;
+
+  }
+
+
+  // ========================================================
+  // PRELOAD IMAGE FIRST
+  //
+  // We do not remove or replace anything until we know
+  // the signed photo actually loads.
+  // ========================================================
+
+  const image =
+    new Image();
+
+
+  image.alt =
+    (
+      person.display_name ||
+      "Officer"
+    ) +
+    " profile photo";
+
+
+  image.loading =
+    "lazy";
+
+
+  image.style.width =
+    "100%";
+
+
+  image.style.height =
+    "100%";
+
+
+  image.style.objectFit =
+    "cover";
+
+
+  image.style.objectPosition =
+    "center";
+
+
+  image.style.borderRadius =
+    "50%";
+
+
+  image.onload =
+    () => {
+
+      // ----------------------------------------------
+      // If an initials circle exists, convert THAT
+      // exact circle into the photo.
+      // ----------------------------------------------
+
+      if (
+        initialsAvatar &&
+        initialsAvatar.isConnected
+      ) {
+
+        initialsAvatar.textContent =
+          "";
+
+
+        initialsAvatar.classList.add(
+          "st-photo-active"
+        );
+
+
+        initialsAvatar.appendChild(
+          image
+        );
+
+
+        cleanupDuplicateAvatars(
+          card,
+          initialsAvatar
+        );
+
+
+        return;
+
+      }
+
+
+      // ----------------------------------------------
+      // Fallback if no initials circle was detected.
+      // Create ONE photo slot only.
+      // ----------------------------------------------
+
+      let photoSlot =
+        card.querySelector(
+          ".st-personnel-photo-slot"
+        );
+
+
+      if (!photoSlot) {
+
+        photoSlot =
+          document.createElement(
+            "div"
+          );
+
+
+        photoSlot.className =
+          "st-personnel-photo-slot";
+
+
+        photoSlot.style.width =
+          "70px";
+
+
+        photoSlot.style.height =
+          "70px";
+
+
+        photoSlot.style.minWidth =
+          "70px";
+
+
+        photoSlot.style.borderRadius =
+          "50%";
+
+
+        photoSlot.style.overflow =
+          "hidden";
+
+
+        photoSlot.style.border =
+          "2px solid #424b54";
+
+
+        photoSlot.style.background =
+          "#161c21";
+
+
+        /*
+          Put it near the beginning of the card.
+        */
+
+        card.prepend(
+          photoSlot
+        );
+
+      }
+
+
+      photoSlot.innerHTML =
+        "";
+
+
+      photoSlot.appendChild(
+        image
+      );
+
+
+      cleanupDuplicateAvatars(
+        card,
+        photoSlot
+      );
+
+    };
+
+
+  image.onerror =
+    () => {
+
+      console.error(
+        "SecureTrack signed profile image failed to render for:",
+        person.display_name
+      );
+
+
+      cleanupDuplicateAvatars(
+        card,
+        initialsAvatar
+      );
+
+    };
+
+
+  /*
+    Setting src LAST starts loading after all
+    handlers are attached.
+  */
+
+  image.src =
+    data.signedUrl;
+
+}
   // ========================================================
   // FIND EXISTING INITIALS CIRCLE
   //
