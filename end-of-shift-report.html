@@ -1,0 +1,3583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    SecureTrack | End-of-Shift Handoff Report
+  </title>
+
+
+  <style>
+
+    /* =====================================================
+       BASE
+       ===================================================== */
+
+    * {
+      box-sizing: border-box;
+    }
+
+
+    :root {
+
+      --page-bg:
+        #080b0e;
+
+      --panel:
+        #101419;
+
+      --panel-soft:
+        #151a20;
+
+      --line:
+        #2d343c;
+
+      --line-soft:
+        #242a30;
+
+      --text:
+        #f2f4f6;
+
+      --muted:
+        #98a2ac;
+
+      --orange:
+        #ff7800;
+
+      --orange-soft:
+        rgba(255,120,0,.10);
+
+      --orange-border:
+        rgba(255,120,0,.35);
+
+      --green:
+        #65d68a;
+
+      --green-soft:
+        rgba(62,190,105,.11);
+
+      --yellow:
+        #ffc56f;
+
+      --yellow-soft:
+        rgba(255,185,70,.11);
+
+      --red:
+        #ff8b8b;
+
+      --red-soft:
+        rgba(225,75,75,.11);
+
+      --blue:
+        #8ebdff;
+
+      --blue-soft:
+        rgba(75,130,220,.10);
+
+    }
+
+
+    body {
+
+      margin:
+        0;
+
+      min-height:
+        100vh;
+
+      background:
+
+        radial-gradient(
+          circle at top right,
+          rgba(255,120,0,.06),
+          transparent 30%
+        ),
+
+        var(--page-bg);
+
+      color:
+        var(--text);
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      line-height:
+        1.45;
+
+    }
+
+
+    button,
+    input,
+    select,
+    textarea {
+
+      font:
+        inherit;
+
+    }
+
+
+    button {
+
+      cursor:
+        pointer;
+
+    }
+
+
+    .shell {
+
+      width:
+        min(
+          1480px,
+          calc(100% - 32px)
+        );
+
+      margin:
+        28px auto 60px;
+
+    }
+
+
+    /* =====================================================
+       TOP NAVIGATION
+       ===================================================== */
+
+    .topbar {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      gap:
+        20px;
+
+      margin-bottom:
+        18px;
+
+    }
+
+
+    .brand {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        12px;
+
+    }
+
+
+    .brand-mark {
+
+      width:
+        42px;
+
+      height:
+        42px;
+
+      border:
+        2px solid
+        var(--orange);
+
+      border-radius:
+        10px;
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      font-size:
+        20px;
+
+      font-weight:
+        900;
+
+      color:
+        var(--orange);
+
+      background:
+        var(--orange-soft);
+
+    }
+
+
+    .brand-name {
+
+      font-size:
+        21px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        -.02em;
+
+    }
+
+
+    .brand-name span:last-child {
+
+      color:
+        var(--orange);
+
+    }
+
+
+    .brand-subtitle {
+
+      color:
+        var(--muted);
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .11em;
+
+      font-size:
+        9px;
+
+      font-weight:
+        800;
+
+      margin-top:
+        2px;
+
+    }
+
+
+    .top-actions {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        9px;
+
+      flex-wrap:
+        wrap;
+
+      justify-content:
+        flex-end;
+
+    }
+
+
+    .top-link,
+    .ghost-button {
+
+      border:
+        1px solid
+        #39414a;
+
+      background:
+        #11161b;
+
+      color:
+        #e8ebee;
+
+      text-decoration:
+        none;
+
+      border-radius:
+        9px;
+
+      padding:
+        9px 13px;
+
+      font-size:
+        12px;
+
+      font-weight:
+        750;
+
+    }
+
+
+    .top-link:hover,
+    .ghost-button:hover {
+
+      border-color:
+        var(--orange);
+
+    }
+
+
+    /* =====================================================
+       MAIN DOCUMENT
+       ===================================================== */
+
+    .document {
+
+      background:
+        var(--panel);
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius:
+        18px;
+
+      overflow:
+        hidden;
+
+      box-shadow:
+        0 22px 65px
+        rgba(0,0,0,.35);
+
+    }
+
+
+    .document-header {
+
+      position:
+        relative;
+
+      padding:
+        32px 36px 28px;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      background:
+
+        linear-gradient(
+          110deg,
+          #11161b,
+          #0e1216
+        );
+
+    }
+
+
+    .document-header::before {
+
+      content:
+        "";
+
+      position:
+        absolute;
+
+      left:
+        0;
+
+      top:
+        0;
+
+      bottom:
+        0;
+
+      width:
+        5px;
+
+      background:
+        var(--orange);
+
+    }
+
+
+    .security-label {
+
+      color:
+        var(--orange);
+
+      font-size:
+        10px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .14em;
+
+      margin-bottom:
+        7px;
+
+    }
+
+
+    h1 {
+
+      margin:
+        0;
+
+      font-size:
+        clamp(
+          26px,
+          4vw,
+          42px
+        );
+
+      line-height:
+        1.05;
+
+      letter-spacing:
+        -.03em;
+
+    }
+
+
+    .document-subtitle {
+
+      margin-top:
+        9px;
+
+      color:
+        #b4bcc4;
+
+      font-size:
+        13px;
+
+      max-width:
+        820px;
+
+    }
+
+
+    .classification {
+
+      display:
+        inline-block;
+
+      margin-top:
+        15px;
+
+      border:
+        1px solid
+        var(--orange-border);
+
+      background:
+        var(--orange-soft);
+
+      color:
+        #ffc28e;
+
+      border-radius:
+        999px;
+
+      padding:
+        5px 9px;
+
+      font-size:
+        9px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .08em;
+
+    }
+
+
+    /* =====================================================
+       SECTIONS
+       ===================================================== */
+
+    .section {
+
+      padding:
+        26px 30px;
+
+      border-bottom:
+        1px solid
+        var(--line-soft);
+
+    }
+
+
+    .section:last-child {
+
+      border-bottom:
+        0;
+
+    }
+
+
+    .section-head {
+
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        flex-start;
+
+      gap:
+        18px;
+
+      margin-bottom:
+        18px;
+
+    }
+
+
+    .section-head h2 {
+
+      margin:
+        0;
+
+      font-size:
+        19px;
+
+    }
+
+
+    .section-head p {
+
+      margin:
+        5px 0 0;
+
+      color:
+        var(--muted);
+
+      font-size:
+        12px;
+
+      max-width:
+        760px;
+
+    }
+
+
+    .eyebrow {
+
+      color:
+        var(--orange);
+
+      font-size:
+        9px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .12em;
+
+      margin-bottom:
+        5px;
+
+    }
+
+
+    /* =====================================================
+       FORM CONTROLS
+       ===================================================== */
+
+    .control-grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          3,
+          minmax(0,1fr)
+        );
+
+      gap:
+        12px;
+
+      align-items:
+        end;
+
+    }
+
+
+    .field {
+
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      gap:
+        6px;
+
+    }
+
+
+    .field label {
+
+      color:
+        #c7cdd3;
+
+      font-size:
+        11px;
+
+      font-weight:
+        800;
+
+    }
+
+
+    input,
+    select,
+    textarea {
+
+      width:
+        100%;
+
+      border:
+        1px solid
+        #3a424a;
+
+      border-radius:
+        10px;
+
+      background:
+        #0c1014;
+
+      color:
+        var(--text);
+
+      padding:
+        10px 11px;
+
+      outline:
+        none;
+
+    }
+
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+
+      border-color:
+        var(--orange);
+
+      box-shadow:
+        0 0 0 2px
+        rgba(255,120,0,.08);
+
+    }
+
+
+    textarea {
+
+      min-height:
+        90px;
+
+      resize:
+        vertical;
+
+    }
+
+
+    .primary-button {
+
+      border:
+        1px solid
+        var(--orange);
+
+      border-radius:
+        10px;
+
+      background:
+        var(--orange);
+
+      color:
+        #111;
+
+      font-weight:
+        900;
+
+      padding:
+        11px 15px;
+
+    }
+
+
+    .primary-button:hover {
+
+      filter:
+        brightness(1.08);
+
+    }
+
+
+    .secondary-button {
+
+      border:
+        1px solid
+        #414a53;
+
+      border-radius:
+        10px;
+
+      background:
+        #151a20;
+
+      color:
+        #f1f3f5;
+
+      font-weight:
+        800;
+
+      padding:
+        10px 14px;
+
+    }
+
+
+    .secondary-button:hover {
+
+      border-color:
+        var(--orange);
+
+    }
+
+
+    .danger-button {
+
+      border:
+        1px solid
+        #d96262;
+
+      border-radius:
+        10px;
+
+      background:
+        rgba(220,70,70,.10);
+
+      color:
+        #ffb0b0;
+
+      font-weight:
+        900;
+
+      padding:
+        10px 14px;
+
+    }
+
+
+    button:disabled {
+
+      opacity:
+        .45;
+
+      cursor:
+        not-allowed;
+
+    }
+
+
+    /* =====================================================
+       MESSAGE
+       ===================================================== */
+
+    .message {
+
+      display:
+        none;
+
+      margin-top:
+        14px;
+
+      border-radius:
+        10px;
+
+      padding:
+        11px 13px;
+
+      font-size:
+        12px;
+
+    }
+
+
+    .message.show {
+
+      display:
+        block;
+
+    }
+
+
+    .message.info {
+
+      border:
+        1px solid
+        rgba(90,150,225,.30);
+
+      background:
+        var(--blue-soft);
+
+      color:
+        #bad7ff;
+
+    }
+
+
+    .message.success {
+
+      border:
+        1px solid
+        rgba(70,200,110,.30);
+
+      background:
+        var(--green-soft);
+
+      color:
+        #a9edbd;
+
+    }
+
+
+    .message.error {
+
+      border:
+        1px solid
+        rgba(230,90,90,.32);
+
+      background:
+        var(--red-soft);
+
+      color:
+        #ffb0b0;
+
+    }
+
+
+    .message.warning {
+
+      border:
+        1px solid
+        rgba(230,175,70,.32);
+
+      background:
+        var(--yellow-soft);
+
+      color:
+        #ffd79c;
+
+    }
+
+
+    /* =====================================================
+       REPORT META
+       ===================================================== */
+
+    .report-meta-grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          4,
+          minmax(0,1fr)
+        );
+
+      gap:
+        10px;
+
+    }
+
+
+    .meta-box {
+
+      padding:
+        13px 14px;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius:
+        11px;
+
+      background:
+        #0c1014;
+
+    }
+
+
+    .meta-label {
+
+      display:
+        block;
+
+      color:
+        var(--muted);
+
+      font-size:
+        9px;
+
+      font-weight:
+        850;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .08em;
+
+    }
+
+
+    .meta-value {
+
+      display:
+        block;
+
+      margin-top:
+        4px;
+
+      font-size:
+        13px;
+
+      font-weight:
+        850;
+
+    }
+
+
+    /* =====================================================
+       SUMMARY COUNTERS
+       ===================================================== */
+
+    .summary-grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          6,
+          minmax(0,1fr)
+        );
+
+      gap:
+        9px;
+
+    }
+
+
+    .summary-card {
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius:
+        11px;
+
+      padding:
+        13px;
+
+      background:
+        #0b0f13;
+
+    }
+
+
+    .summary-card span {
+
+      display:
+        block;
+
+      color:
+        var(--muted);
+
+      font-size:
+        9px;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .06em;
+
+      font-weight:
+        800;
+
+    }
+
+
+    .summary-card strong {
+
+      display:
+        block;
+
+      margin-top:
+        5px;
+
+      font-size:
+        25px;
+
+      line-height:
+        1;
+
+    }
+
+
+    .summary-card.pending strong {
+
+      color:
+        var(--yellow);
+
+    }
+
+
+    .summary-card.resolved strong {
+
+      color:
+        var(--green);
+
+    }
+
+
+    .summary-card.unreviewed strong {
+
+      color:
+        var(--red);
+
+    }
+
+
+    /* =====================================================
+       REPORT STATUS
+       ===================================================== */
+
+    .status-badge {
+
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      border-radius:
+        999px;
+
+      padding:
+        5px 9px;
+
+      font-size:
+        9px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        .06em;
+
+      text-transform:
+        uppercase;
+
+    }
+
+
+    .status-badge.draft {
+
+      color:
+        #ffd090;
+
+      border:
+        1px solid
+        rgba(255,185,70,.30);
+
+      background:
+        var(--yellow-soft);
+
+    }
+
+
+    .status-badge.published {
+
+      color:
+        #a8eebc;
+
+      border:
+        1px solid
+        rgba(70,200,110,.30);
+
+      background:
+        var(--green-soft);
+
+    }
+
+
+    .status-badge.resolved {
+
+      color:
+        #a8eebc;
+
+      background:
+        var(--green-soft);
+
+      border:
+        1px solid
+        rgba(70,200,110,.25);
+
+    }
+
+
+    .status-badge.pending {
+
+      color:
+        #ffd297;
+
+      background:
+        var(--yellow-soft);
+
+      border:
+        1px solid
+        rgba(230,175,70,.25);
+
+    }
+
+
+    .status-badge.unreviewed {
+
+      color:
+        #ffabab;
+
+      background:
+        var(--red-soft);
+
+      border:
+        1px solid
+        rgba(230,90,90,.25);
+
+    }
+
+
+    /* =====================================================
+       INCIDENTS
+       ===================================================== */
+
+    .incident-list {
+
+      display:
+        grid;
+
+      gap:
+        12px;
+
+    }
+
+
+    .incident-card {
+
+      border:
+        1px solid
+        #30373e;
+
+      border-radius:
+        13px;
+
+      background:
+        #0c1014;
+
+      overflow:
+        hidden;
+
+    }
+
+
+    .incident-card.carry-forward {
+
+      border-left:
+        4px solid
+        var(--yellow);
+
+    }
+
+
+    .incident-head {
+
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      gap:
+        20px;
+
+      align-items:
+        flex-start;
+
+      padding:
+        15px 16px;
+
+      border-bottom:
+        1px solid
+        #272d33;
+
+    }
+
+
+    .incident-type {
+
+      font-size:
+        15px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .02em;
+
+    }
+
+
+    .incident-time {
+
+      margin-top:
+        3px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        11px;
+
+    }
+
+
+    .carry-label {
+
+      display:
+        inline-block;
+
+      margin-top:
+        7px;
+
+      color:
+        #ffd69e;
+
+      font-size:
+        9px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .07em;
+
+    }
+
+
+    .incident-body {
+
+      padding:
+        15px 16px 17px;
+
+    }
+
+
+    .incident-detail-grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          3,
+          minmax(0,1fr)
+        );
+
+      gap:
+        10px;
+
+      margin-bottom:
+        14px;
+
+    }
+
+
+    .detail-item {
+
+      border:
+        1px solid
+        #262c32;
+
+      border-radius:
+        9px;
+
+      padding:
+        9px 10px;
+
+      background:
+        #10151a;
+
+    }
+
+
+    .detail-item span {
+
+      display:
+        block;
+
+      color:
+        var(--muted);
+
+      font-size:
+        8px;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .07em;
+
+      font-weight:
+        850;
+
+    }
+
+
+    .detail-item strong {
+
+      display:
+        block;
+
+      margin-top:
+        3px;
+
+      font-size:
+        11px;
+
+      overflow-wrap:
+        anywhere;
+
+    }
+
+
+    .prior-note {
+
+      margin:
+        11px 0;
+
+      padding:
+        11px 12px;
+
+      border-left:
+        3px solid
+        var(--yellow);
+
+      background:
+        var(--yellow-soft);
+
+      color:
+        #f0d4aa;
+
+      font-size:
+        11px;
+
+    }
+
+
+    .review-grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        180px 1fr;
+
+      gap:
+        12px;
+
+      align-items:
+        start;
+
+      margin-top:
+        13px;
+
+    }
+
+
+    .review-status-buttons {
+
+      display:
+        grid;
+
+      gap:
+        7px;
+
+    }
+
+
+    .review-status-button {
+
+      width:
+        100%;
+
+      border:
+        1px solid
+        #414951;
+
+      border-radius:
+        9px;
+
+      background:
+        #13181e;
+
+      color:
+        #e8ebee;
+
+      padding:
+        9px 10px;
+
+      font-weight:
+        850;
+
+      font-size:
+        11px;
+
+    }
+
+
+    .review-status-button.active.resolved {
+
+      border-color:
+        var(--green);
+
+      background:
+        var(--green-soft);
+
+      color:
+        #a9edbd;
+
+    }
+
+
+    .review-status-button.active.pending {
+
+      border-color:
+        var(--yellow);
+
+      background:
+        var(--yellow-soft);
+
+      color:
+        #ffd69b;
+
+    }
+
+
+    .review-status-button.active.unreviewed {
+
+      border-color:
+        var(--red);
+
+      background:
+        var(--red-soft);
+
+      color:
+        #ffb1b1;
+
+    }
+
+
+    .review-note textarea {
+
+      min-height:
+        86px;
+
+    }
+
+
+    .review-meta {
+
+      margin-top:
+        7px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        9px;
+
+    }
+
+
+    /* =====================================================
+       HANDOFF SUMMARY
+       ===================================================== */
+
+    .handoff-summary {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        1fr auto;
+
+      gap:
+        12px;
+
+      align-items:
+        end;
+
+    }
+
+
+    /* =====================================================
+       CERTIFICATION / ACKNOWLEDGMENT
+       ===================================================== */
+
+    .cert-grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0,1fr)
+        );
+
+      gap:
+        14px;
+
+    }
+
+
+    .cert-box {
+
+      border:
+        1px solid
+        #30373e;
+
+      border-radius:
+        12px;
+
+      background:
+        #0c1014;
+
+      padding:
+        15px;
+
+    }
+
+
+    .cert-box h3 {
+
+      margin:
+        0 0 6px;
+
+      font-size:
+        13px;
+
+    }
+
+
+    .cert-box p {
+
+      color:
+        var(--muted);
+
+      margin:
+        0 0 12px;
+
+      font-size:
+        10px;
+
+    }
+
+
+    .signature-line {
+
+      padding:
+        9px 0;
+
+      border-bottom:
+        1px solid
+        #3b434a;
+
+      font-size:
+        11px;
+
+    }
+
+
+    .ack-list {
+
+      display:
+        grid;
+
+      gap:
+        8px;
+
+      margin-top:
+        10px;
+
+    }
+
+
+    .ack-item {
+
+      border:
+        1px solid
+        #2d343b;
+
+      border-radius:
+        9px;
+
+      padding:
+        9px 10px;
+
+      background:
+        #10151a;
+
+      font-size:
+        10px;
+
+    }
+
+
+    /* =====================================================
+       ACTION BAR
+       ===================================================== */
+
+    .report-actions {
+
+      display:
+        flex;
+
+      flex-wrap:
+        wrap;
+
+      gap:
+        9px;
+
+      align-items:
+        center;
+
+    }
+
+
+    /* =====================================================
+       HISTORY / COMPLIANCE
+       ===================================================== */
+
+    .table-wrap {
+
+      overflow-x:
+        auto;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius:
+        11px;
+
+    }
+
+
+    table {
+
+      width:
+        100%;
+
+      border-collapse:
+        collapse;
+
+      min-width:
+        880px;
+
+    }
+
+
+    th,
+    td {
+
+      padding:
+        10px 11px;
+
+      border-bottom:
+        1px solid
+        #272d33;
+
+      text-align:
+        left;
+
+      vertical-align:
+        top;
+
+      font-size:
+        10px;
+
+    }
+
+
+    th {
+
+      color:
+        #9fa8b1;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .06em;
+
+      font-size:
+        8px;
+
+      background:
+        #0c1014;
+
+    }
+
+
+    tbody tr:last-child td {
+
+      border-bottom:
+        0;
+
+    }
+
+
+    tbody tr.history-row {
+
+      cursor:
+        pointer;
+
+    }
+
+
+    tbody tr.history-row:hover {
+
+      background:
+        rgba(255,120,0,.05);
+
+    }
+
+
+    .compliance-missing {
+
+      color:
+        #ff9f9f;
+
+      font-weight:
+        900;
+
+    }
+
+
+    .compliance-draft {
+
+      color:
+        #ffd08a;
+
+      font-weight:
+        900;
+
+    }
+
+
+    .compliance-good {
+
+      color:
+        #9deab4;
+
+      font-weight:
+        900;
+
+    }
+
+
+    /* =====================================================
+       EMPTY STATES
+       ===================================================== */
+
+    .empty-state {
+
+      border:
+        1px dashed
+        #394149;
+
+      border-radius:
+        11px;
+
+      padding:
+        24px;
+
+      text-align:
+        center;
+
+      color:
+        var(--muted);
+
+      font-size:
+        12px;
+
+    }
+
+
+    /* =====================================================
+       PRINT CONTENT
+       ===================================================== */
+
+    .print-only {
+
+      display:
+        none;
+
+    }
+
+
+    .print-notes {
+
+      display:
+        none;
+
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+       ===================================================== */
+
+    @media (
+      max-width: 1000px
+    ) {
+
+      .report-meta-grid {
+
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0,1fr)
+          );
+
+      }
+
+
+      .summary-grid {
+
+        grid-template-columns:
+          repeat(
+            3,
+            minmax(0,1fr)
+          );
+
+      }
+
+
+      .incident-detail-grid {
+
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0,1fr)
+          );
+
+      }
+
+    }
+
+
+    @media (
+      max-width: 700px
+    ) {
+
+      .shell {
+
+        width:
+          min(
+            100% - 16px,
+            1480px
+          );
+
+        margin-top:
+          12px;
+
+      }
+
+
+      .topbar {
+
+        align-items:
+          flex-start;
+
+        flex-direction:
+          column;
+
+      }
+
+
+      .document-header,
+      .section {
+
+        padding-left:
+          18px;
+
+        padding-right:
+          18px;
+
+      }
+
+
+      .control-grid,
+      .cert-grid,
+      .handoff-summary,
+      .review-grid {
+
+        grid-template-columns:
+          1fr;
+
+      }
+
+
+      .report-meta-grid {
+
+        grid-template-columns:
+          1fr;
+
+      }
+
+
+      .summary-grid {
+
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0,1fr)
+          );
+
+      }
+
+
+      .incident-detail-grid {
+
+        grid-template-columns:
+          1fr;
+
+      }
+
+    }
+
+
+    /* =====================================================
+       PRINT / PDF
+       ===================================================== */
+
+    @media print {
+
+
+      @page {
+
+        size:
+          letter portrait;
+
+        margin:
+          .45in;
+
+      }
+
+
+      body {
+
+        background:
+          #ffffff !important;
+
+        color:
+          #000000 !important;
+
+        font-family:
+          Arial,
+          Helvetica,
+          sans-serif;
+
+      }
+
+
+      .no-print {
+
+        display:
+          none !important;
+
+      }
+
+
+      .print-only {
+
+        display:
+          block !important;
+
+      }
+
+
+      .shell {
+
+        width:
+          100%;
+
+        margin:
+          0;
+
+      }
+
+
+      .document {
+
+        border:
+          0;
+
+        border-radius:
+          0;
+
+        box-shadow:
+          none;
+
+        background:
+          #ffffff;
+
+        overflow:
+          visible;
+
+      }
+
+
+      .document-header {
+
+        color:
+          #000000;
+
+        background:
+          #ffffff;
+
+        border:
+          2px solid
+          #111111;
+
+        padding:
+          18px 20px;
+
+      }
+
+
+      .document-header::before {
+
+        display:
+          none;
+
+      }
+
+
+      .security-label,
+      .eyebrow {
+
+        color:
+          #000000;
+
+      }
+
+
+      .document-subtitle {
+
+        color:
+          #333333;
+
+      }
+
+
+      .classification {
+
+        color:
+          #000000;
+
+        background:
+          transparent;
+
+        border:
+          1px solid
+          #000000;
+
+      }
+
+
+      .section {
+
+        padding:
+          16px 0;
+
+        border-bottom:
+          1px solid
+          #777777;
+
+      }
+
+
+      .section-head {
+
+        margin-bottom:
+          10px;
+
+      }
+
+
+      .section-head p {
+
+        color:
+          #333333;
+
+      }
+
+
+      .meta-box,
+      .summary-card,
+      .incident-card,
+      .detail-item,
+      .cert-box,
+      .ack-item {
+
+        color:
+          #000000;
+
+        background:
+          #ffffff !important;
+
+        border-color:
+          #777777 !important;
+
+      }
+
+
+      .meta-label,
+      .summary-card span,
+      .detail-item span,
+      .incident-time,
+      .review-meta,
+      .cert-box p {
+
+        color:
+          #444444 !important;
+
+      }
+
+
+      .summary-card strong,
+      .summary-card.pending strong,
+      .summary-card.resolved strong,
+      .summary-card.unreviewed strong {
+
+        color:
+          #000000 !important;
+
+      }
+
+
+      .incident-card {
+
+        page-break-inside:
+          avoid;
+
+        break-inside:
+          avoid;
+
+      }
+
+
+      .carry-label {
+
+        color:
+          #000000;
+
+      }
+
+
+      .prior-note {
+
+        color:
+          #000000;
+
+        background:
+          transparent;
+
+        border-left:
+          3px solid
+          #000000;
+
+      }
+
+
+      .review-grid,
+      .review-status-buttons,
+      .review-note textarea,
+      .handoff-summary textarea {
+
+        display:
+          none !important;
+
+      }
+
+
+      .print-notes {
+
+        display:
+          block !important;
+
+        margin-top:
+          8px;
+
+        border:
+          1px solid
+          #777777;
+
+        padding:
+          8px;
+
+        min-height:
+          38px;
+
+        font-size:
+          10px;
+
+        white-space:
+          pre-wrap;
+
+      }
+
+
+      .status-badge {
+
+        color:
+          #000000 !important;
+
+        background:
+          transparent !important;
+
+        border:
+          1px solid
+          #000000 !important;
+
+      }
+
+
+      a {
+
+        color:
+          #000000;
+
+        text-decoration:
+          none;
+
+      }
+
+
+      .report-actions {
+
+        display:
+          none;
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body
+  data-securetrack-roles=
+    "senior_officer,team_lead,manager,director,admin"
+>
+
+
+<main class="shell">
+
+
+  <!-- ===================================================
+       TOP BAR
+       =================================================== -->
+
+  <div class="topbar no-print">
+
+    <div class="brand">
+
+      <div class="brand-mark">
+        ST
+      </div>
+
+      <div>
+
+        <div class="brand-name">
+          <span>Secure</span><span>Track</span>
+        </div>
+
+        <div class="brand-subtitle">
+          Operations Hub
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="top-actions">
+
+      <span
+        id="currentUserDisplay"
+        style="
+          color:#9fa8b1;
+          font-size:11px;
+          margin-right:6px;
+        "
+      >
+        Loading user…
+      </span>
+
+
+      <a
+        href="hub.html"
+        class="top-link"
+      >
+        ← Operations Hub
+      </a>
+
+
+      <button
+        id="signOutButton"
+        class="ghost-button"
+        type="button"
+      >
+        Sign Out
+      </button>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ===================================================
+       OFFICIAL DOCUMENT
+       =================================================== -->
+
+  <article
+    class="document"
+    id="reportDocument"
+  >
+
+
+    <!-- =================================================
+         HEADER
+         ================================================= -->
+
+    <header class="document-header">
+
+      <div class="security-label">
+        SecureTrack Security Operations
+      </div>
+
+      <h1>
+        End-of-Shift Handoff Report
+      </h1>
+
+      <div class="document-subtitle">
+
+        Official security leadership handoff,
+        incident-status review, and accountability record.
+
+      </div>
+
+      <span class="classification">
+        Security Leadership Use
+      </span>
+
+    </header>
+
+
+
+    <!-- =================================================
+         OPEN / FIND REPORT
+         ================================================= -->
+
+    <section
+      id="draftControls"
+      class="section no-print"
+    >
+
+      <div class="section-head">
+
+        <div>
+
+          <div class="eyebrow">
+            Shift Leadership
+          </div>
+
+          <h2>
+            Open End-of-Shift Report
+          </h2>
+
+          <p>
+
+            Select the date the shift began and the shift
+            name. SecureTrack will automatically attach
+            Security Leadership Alerts associated with that
+            shift's official time window.
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <form
+        id="openReportForm"
+        class="control-grid"
+      >
+
+        <div class="field">
+
+          <label for="shiftDate">
+            Shift Start Date
+          </label>
+
+          <input
+            id="shiftDate"
+            type="date"
+            required
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="shiftName">
+            Shift
+          </label>
+
+          <select
+            id="shiftName"
+            required
+          >
+
+            <option value="">
+              Select shift
+            </option>
+
+            <option value="Alpha">
+              Alpha Shift
+            </option>
+
+            <option value="Bravo">
+              Bravo Shift
+            </option>
+
+            <option value="Charlie">
+              Charlie Shift
+            </option>
+
+            <option value="Delta">
+              Delta Shift
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <button
+          id="openReportButton"
+          class="primary-button"
+          type="submit"
+        >
+          Open Report
+        </button>
+
+      </form>
+
+
+      <div
+        id="pageMessage"
+        class="message"
+      ></div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         ACTIVE REPORT
+         ================================================= -->
+
+    <div
+      id="reportArea"
+      hidden
+    >
+
+
+      <!-- ===============================================
+           REPORT IDENTIFICATION
+           =============================================== -->
+
+      <section class="section">
+
+        <div class="section-head">
+
+          <div>
+
+            <div class="eyebrow">
+              Official Record
+            </div>
+
+            <h2 id="reportTitle">
+              End-of-Shift Report
+            </h2>
+
+          </div>
+
+
+          <span
+            id="reportStatusBadge"
+            class="status-badge draft"
+          >
+            Draft
+          </span>
+
+        </div>
+
+
+        <div class="report-meta-grid">
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Report ID
+            </span>
+
+            <strong
+              id="reportCode"
+              class="meta-value"
+            >
+              —
+            </strong>
+
+          </div>
+
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Outgoing Shift
+            </span>
+
+            <strong
+              id="outgoingShift"
+              class="meta-value"
+            >
+              —
+            </strong>
+
+          </div>
+
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Official Shift Window
+            </span>
+
+            <strong
+              id="shiftWindow"
+              class="meta-value"
+            >
+              —
+            </strong>
+
+          </div>
+
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Receiving Shift
+            </span>
+
+            <strong
+              id="receivingShift"
+              class="meta-value"
+            >
+              —
+            </strong>
+
+          </div>
+
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Prepared By
+            </span>
+
+            <strong
+              id="preparedBy"
+              class="meta-value"
+            >
+              —
+            </strong>
+
+          </div>
+
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Published By
+            </span>
+
+            <strong
+              id="publishedBy"
+              class="meta-value"
+            >
+              Not yet published
+            </strong>
+
+          </div>
+
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Published
+            </span>
+
+            <strong
+              id="publishedAt"
+              class="meta-value"
+            >
+              —
+            </strong>
+
+          </div>
+
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Version
+            </span>
+
+            <strong
+              id="reportVersion"
+              class="meta-value"
+            >
+              —
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- ===============================================
+           SHIFT ACTIVITY SUMMARY
+           =============================================== -->
+
+      <section class="section">
+
+        <div class="section-head">
+
+          <div>
+
+            <div class="eyebrow">
+              Shift Activity
+            </div>
+
+            <h2>
+              Leadership Alert Summary
+            </h2>
+
+            <p>
+
+              A concise accounting of Security Leadership
+              Alerts associated with this shift.
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="summary-grid">
+
+          <div class="summary-card">
+
+            <span>
+              Total Alerts
+            </span>
+
+            <strong id="summaryTotal">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="summary-card">
+
+            <span>
+              Code Greens
+            </span>
+
+            <strong id="summaryCodeGreen">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="summary-card">
+
+            <span>
+              Taser Pulls
+            </span>
+
+            <strong id="summaryTaser">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="summary-card resolved">
+
+            <span>
+              Resolved
+            </span>
+
+            <strong id="summaryResolved">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="summary-card pending">
+
+            <span>
+              Pending
+            </span>
+
+            <strong id="summaryPending">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="summary-card unreviewed">
+
+            <span>
+              Unreviewed
+            </span>
+
+            <strong id="summaryUnreviewed">
+              0
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="summary-grid"
+          style="margin-top:9px;"
+        >
+
+          <div class="summary-card">
+
+            <span>
+              CTW
+            </span>
+
+            <strong id="summaryCtw">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="summary-card">
+
+            <span>
+              Officer Injuries
+            </span>
+
+            <strong id="summaryInjury">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="summary-card">
+
+            <span>
+              Staffing Alerts
+            </span>
+
+            <strong id="summaryStaffing">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="summary-card">
+
+            <span>
+              Carry Forward
+            </span>
+
+            <strong id="summaryCarryForward">
+              0
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- ===============================================
+           INCIDENT REVIEW
+           =============================================== -->
+
+      <section class="section">
+
+        <div class="section-head">
+
+          <div>
+
+            <div class="eyebrow">
+              Incident Accountability
+            </div>
+
+            <h2>
+              Security Leadership Alerts
+            </h2>
+
+            <p>
+
+              Every alert must be reviewed before the report
+              is published. Pending items require clear
+              handoff instructions for incoming leadership.
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="incidentList"
+          class="incident-list"
+        >
+
+          <div class="empty-state">
+            Open a report to load shift activity.
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- ===============================================
+           GENERAL HANDOFF SUMMARY
+           =============================================== -->
+
+      <section class="section">
+
+        <div class="section-head">
+
+          <div>
+
+            <div class="eyebrow">
+              Leadership Handoff
+            </div>
+
+            <h2>
+              Overall Shift Summary
+            </h2>
+
+            <p>
+
+              Use this area for operational information that
+              the incoming shift should understand beyond a
+              single incident.
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="handoff-summary">
+
+          <div class="field">
+
+            <label for="handoffSummary">
+              Shift Leadership Notes
+            </label>
+
+            <textarea
+              id="handoffSummary"
+              placeholder="Example: No additional unresolved safety concerns beyond the pending incidents listed above."
+            ></textarea>
+
+            <div
+              id="handoffSummaryPrint"
+              class="print-notes"
+            ></div>
+
+          </div>
+
+
+          <button
+            id="saveSummaryButton"
+            class="secondary-button no-print"
+            type="button"
+          >
+            Save Summary
+          </button>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- ===============================================
+           CERTIFICATION
+           =============================================== -->
+
+      <section class="section">
+
+        <div class="section-head">
+
+          <div>
+
+            <div class="eyebrow">
+              Accountability
+            </div>
+
+            <h2>
+              Leadership Certification & Receipt
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div class="cert-grid">
+
+
+          <!-- OUTGOING -->
+
+          <article class="cert-box">
+
+            <h3>
+              Outgoing Leadership Certification
+            </h3>
+
+            <p>
+
+              Publication certifies that the report reflects
+              the known security events, unresolved matters,
+              and operational information requiring handoff
+              at the conclusion of the shift.
+
+            </p>
+
+
+            <div class="signature-line">
+
+              <strong>
+                Published by:
+              </strong>
+
+              <span id="certPublishedBy">
+                Not yet published
+              </span>
+
+            </div>
+
+
+            <div class="signature-line">
+
+              <strong>
+                SecureTrack timestamp:
+              </strong>
+
+              <span id="certPublishedAt">
+                —
+              </span>
+
+            </div>
+
+          </article>
+
+
+
+          <!-- INCOMING -->
+
+          <article class="cert-box">
+
+            <h3>
+              Incoming Leadership Acknowledgment
+            </h3>
+
+            <p>
+
+              Receipt confirms that incoming shift
+              leadership received and reviewed the handoff
+              made available by the outgoing shift.
+
+            </p>
+
+
+            <div
+              id="acknowledgementList"
+              class="ack-list"
+            >
+
+              <div class="ack-item">
+                No acknowledgment recorded.
+              </div>
+
+            </div>
+
+
+            <div
+              id="acknowledgementControls"
+              class="no-print"
+              style="
+                margin-top:14px;
+              "
+              hidden
+            >
+
+              <div class="field">
+
+                <label for="acknowledgementNote">
+                  Receipt Note — Optional
+                </label>
+
+                <textarea
+                  id="acknowledgementNote"
+                  placeholder="Optional receiving leadership note."
+                ></textarea>
+
+              </div>
+
+
+              <button
+                id="acknowledgeButton"
+                class="primary-button"
+                type="button"
+                style="margin-top:9px;"
+              >
+                Acknowledge Receipt
+              </button>
+
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- ===============================================
+           REPORT ACTIONS
+           =============================================== -->
+
+      <section class="section no-print">
+
+        <div class="report-actions">
+
+          <button
+            id="refreshReportButton"
+            class="secondary-button"
+            type="button"
+          >
+            Refresh Report
+          </button>
+
+
+          <button
+            id="printReportButton"
+            class="secondary-button"
+            type="button"
+          >
+            Print / Save PDF
+          </button>
+
+
+          <button
+            id="publishReportButton"
+            class="primary-button"
+            type="button"
+          >
+            Publish End-of-Shift Report
+          </button>
+
+        </div>
+
+
+        <div
+          id="reportActionMessage"
+          class="message"
+        ></div>
+
+      </section>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         PUBLISHED REPORT HISTORY
+         ================================================= -->
+
+    <section class="section no-print">
+
+      <div class="section-head">
+
+        <div>
+
+          <div class="eyebrow">
+            Historical Accountability
+          </div>
+
+          <h2>
+            End-of-Shift Report History
+          </h2>
+
+          <p>
+
+            Published reports provide a permanent record of
+            what was communicated between outgoing and
+            incoming security leadership.
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="control-grid">
+
+        <div class="field">
+
+          <label for="historyFromDate">
+            From
+          </label>
+
+          <input
+            id="historyFromDate"
+            type="date"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="historyToDate">
+            Through
+          </label>
+
+          <input
+            id="historyToDate"
+            type="date"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="historyShift">
+            Shift
+          </label>
+
+          <select id="historyShift">
+
+            <option value="">
+              All Shifts
+            </option>
+
+            <option value="Alpha">
+              Alpha
+            </option>
+
+            <option value="Bravo">
+              Bravo
+            </option>
+
+            <option value="Charlie">
+              Charlie
+            </option>
+
+            <option value="Delta">
+              Delta
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div
+        style="
+          margin:12px 0 14px;
+        "
+      >
+
+        <button
+          id="loadHistoryButton"
+          class="secondary-button"
+          type="button"
+        >
+          Load Report History
+        </button>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Report
+              </th>
+
+              <th>
+                Shift
+              </th>
+
+              <th>
+                Alerts
+              </th>
+
+              <th>
+                Resolved
+              </th>
+
+              <th>
+                Pending
+              </th>
+
+              <th>
+                Acknowledgments
+              </th>
+
+              <th>
+                Published By
+              </th>
+
+              <th>
+                Published
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="historyTableBody">
+
+            <tr>
+
+              <td
+                colspan="8"
+                class="empty-state"
+              >
+                Loading report history…
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         MANAGEMENT COMPLIANCE
+         ================================================= -->
+
+    <section
+      id="complianceSection"
+      class="section no-print"
+      hidden
+    >
+
+      <div class="section-head">
+
+        <div>
+
+          <div class="eyebrow">
+            Management Oversight
+          </div>
+
+          <h2>
+            Shift Handoff Compliance
+          </h2>
+
+          <p>
+
+            Identify shifts with published reports,
+            overdue drafts, late publication, or no
+            End-of-Shift report.
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="control-grid">
+
+        <div class="field">
+
+          <label for="complianceFromDate">
+            From
+          </label>
+
+          <input
+            id="complianceFromDate"
+            type="date"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="complianceToDate">
+            Through
+          </label>
+
+          <input
+            id="complianceToDate"
+            type="date"
+          >
+
+        </div>
+
+
+        <div>
+
+          <button
+            id="loadComplianceButton"
+            class="secondary-button"
+            type="button"
+            style="width:100%;"
+          >
+            Review Compliance
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="table-wrap"
+        style="margin-top:14px;"
+      >
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Shift
+              </th>
+
+              <th>
+                Window
+              </th>
+
+              <th>
+                Report
+              </th>
+
+              <th>
+                Compliance
+              </th>
+
+              <th>
+                Published By
+              </th>
+
+              <th>
+                Published
+              </th>
+
+              <th>
+                Receipt
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="complianceTableBody">
+
+            <tr>
+
+              <td
+                colspan="7"
+                class="empty-state"
+              >
+                Select a date range to review compliance.
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         PRINT FOOTER
+         ================================================= -->
+
+    <section class="section print-only">
+
+      <div
+        style="
+          font-size:9px;
+          color:#333;
+          text-align:center;
+        "
+      >
+
+        SecureTrack Operations Hub •
+        End-of-Shift Security Leadership Handoff Record
+
+        <br>
+
+        Generated from the official SecureTrack record.
+        Printed copies are uncontrolled after printing.
+
+      </div>
+
+    </section>
+
+
+  </article>
+
+</main>
+
+
+
+<!-- =====================================================
+     SCRIPTS
+     ===================================================== -->
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="config.js"></script>
+
+<script src="secure-page.js"></script>
+
+<script src="end-of-shift-report.js"></script>
+
+
+</body>
+</html>
