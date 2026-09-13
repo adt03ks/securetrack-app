@@ -2081,12 +2081,12 @@
       data,
       error
     } =
-      await db.rpc(
-        "get_outstanding_property_queue",
-        {
-          p_status: null
-        }
-      );
+     await db.rpc(
+  "get_outstanding_property_queue",
+  {
+    p_case_status: null
+  }
+);
 
 
     if (error) {
