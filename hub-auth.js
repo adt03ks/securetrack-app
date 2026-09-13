@@ -46,7 +46,6 @@
 
   const ROLE_LABELS = {
   officer: "Officer",
-  dispatcher: "Dispatcher",
   senior_officer: "Senior Officer",
   team_lead: "Team Lead",
   manager: "Manager",
@@ -57,16 +56,14 @@
   const MODULE_ACCESS = {
     devices: [
       "officer",
-      "dispatcher",
       "senior_officer",
       "team_lead",
       "manager",
       "admin"
     ],
-    incidents: ["dispatcher", "manager", "admin"],
+    incidents: ["manager", "admin"],
     property: [
       "officer",
-      "dispatcher",
       "senior_officer",
       "team_lead",
       "manager",
@@ -75,7 +72,6 @@
     assignments: ["senior_officer", "team_lead", "manager", "admin"],
     overtime: [
       "officer",
-      "dispatcher",
       "senior_officer",
       "team_lead",
       "manager",
