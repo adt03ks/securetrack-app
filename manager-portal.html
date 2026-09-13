@@ -76,6 +76,43 @@
       font-weight: 800;
     }
 
+    .portal-card.priority {
+      border-color:
+        rgba(255,120,0,.45);
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,120,0,.08),
+          #11151a
+        );
+    }
+
+    .portal-badge {
+      display: inline-flex;
+      align-items: center;
+
+      margin-top: 10px;
+
+      padding: 5px 9px;
+
+      border-radius: 999px;
+
+      background:
+        rgba(255,120,0,.12);
+
+      border:
+        1px solid rgba(255,120,0,.32);
+
+      color: #ff9b45;
+
+      font-size: 11px;
+      font-weight: 800;
+
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
     @media (max-width: 700px) {
 
       .portal-grid {
@@ -167,6 +204,44 @@
     <section class="portal-grid">
 
 
+      <!-- =========================================
+           PERSONNEL ADMINISTRATION
+           ========================================= -->
+
+      <a
+        class="portal-card priority"
+        href="personnel-administration.html"
+      >
+
+        <div class="eyebrow">
+          Personnel Management
+        </div>
+
+        <h2>
+          Personnel Administration
+        </h2>
+
+        <p class="subtle">
+          Add and manage officers, photos,
+          ranks, qualifications, shifts,
+          outside officers and employee separations.
+        </p>
+
+        <span class="portal-badge">
+          Manager / Director
+        </span>
+
+        <span class="portal-arrow">
+          Open Personnel Administration →
+        </span>
+
+      </a>
+
+
+      <!-- =========================================
+           OFFICER DIRECTORY
+           ========================================= -->
+
       <a
         class="portal-card"
         href="officer-directory.html"
@@ -181,7 +256,7 @@
         </h2>
 
         <p class="subtle">
-          Officer profiles, shift assignments,
+          View officer profiles, shift assignments,
           armed qualifications and command transfers.
         </p>
 
@@ -191,6 +266,10 @@
 
       </a>
 
+
+      <!-- =========================================
+           TIME OFF / TRAINING
+           ========================================= -->
 
       <a
         class="portal-card"
@@ -217,6 +296,10 @@
       </a>
 
 
+      <!-- =========================================
+           DUTY STATION ASSIGNMENTS
+           ========================================= -->
+
       <a
         class="portal-card"
         href="assignments.html"
@@ -242,9 +325,13 @@
       </a>
 
 
+      <!-- =========================================
+           SECURITY EQUIPMENT
+           ========================================= -->
+
       <a
         class="portal-card"
-       href="manager-portal.html"
+        href="manager.html"
       >
 
         <div class="eyebrow">
