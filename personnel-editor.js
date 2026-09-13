@@ -754,10 +754,6 @@
                   Team Lead
                 </option>
 
-                <option value="dispatcher">
-                  Dispatcher
-                </option>
-
                 <option value="manager">
                   Manager
                 </option>
