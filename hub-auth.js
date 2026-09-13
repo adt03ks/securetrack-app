@@ -77,7 +77,14 @@
     "admin"
   ],
 
-
+endOfShift: [
+  "senior_officer",
+  "team_lead",
+  "manager",
+  "director",
+  "admin"
+],
+   
   // Property / Belongings
   property: [
     "officer",
