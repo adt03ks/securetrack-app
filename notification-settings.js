@@ -3,18 +3,17 @@
   "use strict";
 
 
-  // =========================================================
-  // SECURETRACK MANAGER CLIENT
-  // =========================================================
-
   const STM =
     window.SecureTrackManager;
 
 
-  if (!STM || !STM.db) {
+  if (
+    !STM ||
+    !STM.db
+  ) {
 
     console.error(
-      "SecureTrack Manager client is unavailable."
+      "SecureTrack client is unavailable."
     );
 
     return;
@@ -26,22 +25,6 @@
     STM.db;
 
 
-  // =========================================================
-  // PAGE ELEMENTS
-  // =========================================================
-
-  const managerName =
-    document.getElementById(
-      "managerName"
-    );
-
-
-  const logoutButton =
-    document.getElementById(
-      "logoutButton"
-    );
-
-
   const loading =
     document.getElementById(
       "settingsLoading"
@@ -50,7 +33,25 @@
 
   const form =
     document.getElementById(
-      "notificationSettingsForm"
+      "notificationForm"
+    );
+
+
+  const accountEmail =
+    document.getElementById(
+      "accountEmail"
+    );
+
+
+  const emailEnabled =
+    document.getElementById(
+      "emailEnabled"
+    );
+
+
+  const ntfyEnabled =
+    document.getElementById(
+      "ntfyEnabled"
     );
 
 
@@ -72,6 +73,36 @@
     );
 
 
+  const codeGreenAlerts =
+    document.getElementById(
+      "codeGreenAlerts"
+    );
+
+
+  const taserPullAlerts =
+    document.getElementById(
+      "taserPullAlerts"
+    );
+
+
+  const ctwAlerts =
+    document.getElementById(
+      "ctwAlerts"
+    );
+
+
+  const officerInjuryAlerts =
+    document.getElementById(
+      "officerInjuryAlerts"
+    );
+
+
+  const insufficientStaffingAlerts =
+    document.getElementById(
+      "insufficientStaffingAlerts"
+    );
+
+
   const failedInspectionAlerts =
     document.getElementById(
       "failedInspectionAlerts"
@@ -81,24 +112,6 @@
   const criticalIssueAlerts =
     document.getElementById(
       "criticalIssueAlerts"
-    );
-
-
-  const consentStatusCard =
-    document.getElementById(
-      "consentStatusCard"
-    );
-
-
-  const consentStatusText =
-    document.getElementById(
-      "consentStatusText"
-    );
-
-
-  const consentDateText =
-    document.getElementById(
-      "consentDateText"
     );
 
 
@@ -114,48 +127,36 @@
     );
 
 
-  // =========================================================
-  // CURRENT STATE
-  // =========================================================
+  let loadedPhone =
+    "";
 
-  let loadedPhoneNumber = "";
-
-  let originalConsent =
-    false;
-
-
-  // =========================================================
-  // RESULT MESSAGE
-  // =========================================================
 
   function showResult(
-    message,
+    text,
     type = "success"
   ) {
 
-    result.className =
-      `result show ${type}`;
-
     result.textContent =
-      message;
+      text;
+
+
+    result.className =
+      `notification-result show ${type}`;
 
   }
 
 
   function clearResult() {
 
-    result.className =
-      "result";
-
     result.textContent =
       "";
 
+
+    result.className =
+      "notification-result";
+
   }
 
-
-  // =========================================================
-  // PHONE NUMBER NORMALIZATION
-  // =========================================================
 
   function normalizePhone(
     value
@@ -172,27 +173,17 @@
     }
 
 
-    /*
-      Already entered in international
-      format such as +13465551234
-    */
-
     if (
       /^\+[1-9][0-9]{7,14}$/
-        .test(raw)
+        .test(
+          raw
+        )
     ) {
 
       return raw;
 
     }
 
-
-    /*
-      Remove formatting:
-      (346) 555-1234
-      346-555-1234
-      etc.
-    */
 
     const digits =
       raw.replace(
@@ -201,12 +192,9 @@
       );
 
 
-    /*
-      Standard U.S. 10-digit number
-    */
-
     if (
-      digits.length === 10
+      digits.length ===
+      10
     ) {
 
       return `+1${digits}`;
@@ -214,28 +202,12 @@
     }
 
 
-    /*
-      U.S. number already beginning
-      with country code 1
-    */
-
     if (
-      digits.length === 11 &&
-      digits.startsWith("1")
-    ) {
-
-      return `+${digits}`;
-
-    }
-
-
-    /*
-      Other international number
-    */
-
-    if (
-      digits.length >= 8 &&
-      digits.length <= 15
+      digits.length ===
+      11 &&
+      digits.startsWith(
+        "1"
+      )
     ) {
 
       return `+${digits}`;
@@ -248,101 +220,11 @@
   }
 
 
-  // =========================================================
-  // DISPLAY CONSENT DATE
-  // =========================================================
-
-  function formatDate(
-    value
-  ) {
-
-    if (!value) {
-      return "—";
-    }
-
-
-    const date =
-      new Date(value);
-
+  function updateSmsControls() {
 
     if (
-      Number.isNaN(
-        date.getTime()
-      )
+      !smsConsent.checked
     ) {
-
-      return "—";
-
-    }
-
-
-    return date.toLocaleString(
-      undefined,
-      {
-        dateStyle: "medium",
-        timeStyle: "short"
-      }
-    );
-
-  }
-
-
-  // =========================================================
-  // CONSENT STATUS DISPLAY
-  // =========================================================
-
-  function updateConsentStatus(
-    consent,
-    consentDate
-  ) {
-
-    if (consent) {
-
-      consentStatusText.textContent =
-        "Opted In";
-
-      consentDateText.textContent =
-        formatDate(
-          consentDate
-        );
-
-      consentStatusCard.classList.add(
-        "active"
-      );
-
-    } else {
-
-      consentStatusText.textContent =
-        "Not Consented";
-
-      consentDateText.textContent =
-        "—";
-
-      consentStatusCard.classList.remove(
-        "active"
-      );
-
-    }
-
-  }
-
-
-  // =========================================================
-  // CONTROL DEPENDENCIES
-  // =========================================================
-
-  function updateControls() {
-
-    const consented =
-      smsConsent.checked;
-
-
-    /*
-      SMS cannot remain enabled when
-      consent has been removed.
-    */
-
-    if (!consented) {
 
       smsEnabled.checked =
         false;
@@ -351,53 +233,129 @@
 
 
     smsEnabled.disabled =
-      !consented;
-
-
-    const notificationsActive =
-      consented &&
-      smsEnabled.checked;
-
-
-    /*
-      Preserve category choices,
-      but visually prevent changing
-      them until SMS is enabled.
-    */
-
-    failedInspectionAlerts.disabled =
-      !notificationsActive;
-
-    criticalIssueAlerts.disabled =
-      !notificationsActive;
+      !smsConsent.checked;
 
   }
 
 
-  // =========================================================
-  // VERIFY MANAGER SESSION
-  // =========================================================
+  function populate(
+    settings
+  ) {
 
- async function requireSession() {
+    const email =
+      String(
+        settings.email ||
+        ""
+      ).trim();
 
-  const manager =
-    await STM.requireManager();
 
-  if (!manager) {
-    return null;
+    accountEmail.textContent =
+      email ||
+      "No email address on file";
+
+
+    emailEnabled.checked =
+      Boolean(
+        settings.email_enabled
+      );
+
+
+    if (!email) {
+
+      emailEnabled.checked =
+        false;
+
+
+      emailEnabled.disabled =
+        true;
+
+    }
+    else {
+
+      emailEnabled.disabled =
+        false;
+
+    }
+
+
+    ntfyEnabled.checked =
+      Boolean(
+        settings.ntfy_enabled
+      );
+
+
+    phoneInput.value =
+      settings.phone_number ||
+      "";
+
+
+    loadedPhone =
+      normalizePhone(
+        settings.phone_number ||
+        ""
+      );
+
+
+    smsConsent.checked =
+      Boolean(
+        settings.sms_consent
+      );
+
+
+    smsEnabled.checked =
+      Boolean(
+        settings.sms_enabled
+      );
+
+
+    codeGreenAlerts.checked =
+      settings.code_green_alerts !==
+      false;
+
+
+    taserPullAlerts.checked =
+      settings.taser_pull_alerts !==
+      false;
+
+
+    ctwAlerts.checked =
+      settings.ctw_alerts !==
+      false;
+
+
+    officerInjuryAlerts.checked =
+      settings.officer_injury_alerts !==
+      false;
+
+
+    insufficientStaffingAlerts.checked =
+      settings
+        .insufficient_staffing_alerts !==
+      false;
+
+
+    failedInspectionAlerts.checked =
+      settings
+        .failed_inspection_alerts !==
+      false;
+
+
+    criticalIssueAlerts.checked =
+      settings
+        .critical_issue_alerts !==
+      false;
+
+
+    updateSmsControls();
+
   }
 
-  return manager.session;
-
-}
-  // =========================================================
-  // LOAD NOTIFICATION SETTINGS
-  // =========================================================
 
   async function loadSettings() {
 
     loading.hidden =
       false;
+
 
     form.hidden =
       true;
@@ -405,12 +363,21 @@
 
     try {
 
+
       const session =
-        await requireSession();
+        await STM.getSession();
 
 
-      if (!session) {
+      if (
+        !session
+      ) {
+
+        window.location.replace(
+          "login.html?next=notification-settings.html"
+        );
+
         return;
+
       }
 
 
@@ -419,133 +386,59 @@
         error
       } =
         await db.rpc(
-          "get_my_notification_settings"
+          "get_my_notification_preferences"
         );
 
 
       if (error) {
+
         throw error;
+
       }
 
 
-      const settings =
-        data || {};
-
-
-      // =========================================
-      // MANAGER DISPLAY NAME
-      // =========================================
-
-      managerName.textContent =
-        settings.display_name ||
-        session.user.email ||
-        "Manager";
-
-
-      // =========================================
-      // PHONE NUMBER
-      // =========================================
-
-      phoneInput.value =
-        settings.phone_number ||
-        "";
-
-
-      loadedPhoneNumber =
-        normalizePhone(
-          settings.phone_number ||
-          ""
-        );
-
-
-      // =========================================
-      // CONSENT
-      // =========================================
-
-      smsConsent.checked =
-        Boolean(
-          settings.sms_consent
-        );
-
-
-      originalConsent =
-        Boolean(
-          settings.sms_consent
-        );
-
-
-      // =========================================
-      // SMS ENABLED
-      // =========================================
-
-      smsEnabled.checked =
-        Boolean(
-          settings.sms_enabled
-        );
-
-
-      // =========================================
-      // ALERT CATEGORIES
-      // =========================================
-
-      failedInspectionAlerts.checked =
-        settings.failed_inspection_alerts
-          !== false;
-
-
-      criticalIssueAlerts.checked =
-        settings.critical_issue_alerts
-          !== false;
-
-
-      // =========================================
-      // CONSENT STATUS
-      // =========================================
-
-      updateConsentStatus(
-        Boolean(
-          settings.sms_consent
-        ),
-        settings.sms_consent_at
+      populate(
+        data || {}
       );
-
-
-      updateControls();
 
 
       loading.hidden =
         true;
 
+
       form.hidden =
         false;
 
 
-    } catch (error) {
+    }
+    catch (error) {
 
       console.error(
-        "SecureTrack notification settings load error:",
+        "Notification settings load error:",
         error
       );
 
 
       loading.textContent =
-        "Notification settings could not be loaded.";
-
-
-      showResult(
-        error.message ||
-        "Unable to load notification settings.",
-        "error"
-      );
+        error?.message ||
+        "Unable to load notification preferences.";
 
     }
 
   }
 
 
-  // =========================================================
-  // PHONE NUMBER CHANGED
-  // =========================================================
+  smsConsent.addEventListener(
+    "change",
+    () => {
+
+      clearResult();
+
+      updateSmsControls();
+
+    }
+  );
+
 
   phoneInput.addEventListener(
     "input",
@@ -554,120 +447,47 @@
       clearResult();
 
 
-      const currentPhone =
+      const current =
         normalizePhone(
           phoneInput.value
         );
 
 
       /*
-        Consent is tied to the number
-        that originally received permission.
+        Existing SMS consent belongs to the number
+        that was originally approved.
 
-        If the manager changes the mobile
-        number, SecureTrack requires the
-        consent checkbox to be selected
-        again before SMS can be enabled.
+        If the number changes, require consent again.
       */
 
       if (
-        loadedPhoneNumber &&
-        currentPhone &&
-        currentPhone !==
-          loadedPhoneNumber
+        loadedPhone &&
+        current &&
+        current !==
+          loadedPhone
       ) {
 
         smsConsent.checked =
           false;
 
+
         smsEnabled.checked =
           false;
 
 
-        consentStatusText.textContent =
-          "New Consent Required";
-
-        consentDateText.textContent =
-          "—";
-
-        consentStatusCard.classList.remove(
-          "active"
-        );
-
-
-        updateControls();
+        updateSmsControls();
 
       }
 
     }
   );
 
-
-  // =========================================================
-  // CONSENT CHECKBOX
-  // =========================================================
-
-  smsConsent.addEventListener(
-    "change",
-    () => {
-
-      clearResult();
-
-
-      if (
-        smsConsent.checked
-      ) {
-
-        consentStatusText.textContent =
-          originalConsent
-            ? "Opted In"
-            : "Consent Pending Save";
-
-      } else {
-
-        consentStatusText.textContent =
-          originalConsent
-            ? "Opt-Out Pending Save"
-            : "Not Consented";
-
-        consentDateText.textContent =
-          "—";
-
-      }
-
-
-      updateControls();
-
-    }
-  );
-
-
-  // =========================================================
-  // SMS ENABLED CHECKBOX
-  // =========================================================
-
-  smsEnabled.addEventListener(
-    "change",
-    () => {
-
-      clearResult();
-
-      updateControls();
-
-    }
-  );
-
-
-  // =========================================================
-  // SAVE NOTIFICATION SETTINGS
-  // =========================================================
 
   form.addEventListener(
     "submit",
-    async (event) => {
+    async event => {
 
       event.preventDefault();
-
 
       clearResult();
 
@@ -678,11 +498,12 @@
         );
 
 
-      // =========================================
-      // VALIDATE PHONE
-      // =========================================
-
       if (
+        (
+          smsConsent.checked ||
+          smsEnabled.checked
+        )
+        &&
         !/^\+[1-9][0-9]{7,14}$/
           .test(
             normalizedPhone
@@ -690,9 +511,10 @@
       ) {
 
         showResult(
-          "Enter a valid mobile number. U.S. numbers may be entered as 10 digits or in +1 international format.",
+          "Enter a valid mobile number before enabling SMS notifications.",
           "error"
         );
+
 
         phoneInput.focus();
 
@@ -701,33 +523,24 @@
       }
 
 
-      // =========================================
-      // VALIDATE CONSENT
-      // =========================================
-
       if (
         smsEnabled.checked &&
         !smsConsent.checked
       ) {
 
         showResult(
-          "You must agree to receive SecureTrack text messages before SMS notifications can be enabled.",
+          "SMS consent is required before text alerts can be enabled.",
           "error"
         );
-
-        smsConsent.focus();
 
         return;
 
       }
 
 
-      // =========================================
-      // SAVE
-      // =========================================
-
       saveButton.disabled =
         true;
+
 
       saveButton.textContent =
         "Saving Preferences…";
@@ -735,16 +548,20 @@
 
       try {
 
+
         const {
           data,
           error
         } =
           await db.rpc(
-            "save_my_notification_settings",
+            "save_my_notification_preferences",
             {
 
-              p_phone_number:
-                normalizedPhone,
+              p_email_enabled:
+                emailEnabled.checked,
+
+              p_ntfy_enabled:
+                ntfyEnabled.checked,
 
               p_sms_enabled:
                 smsEnabled.checked,
@@ -752,118 +569,49 @@
               p_sms_consent:
                 smsConsent.checked,
 
+              p_phone_number:
+                normalizedPhone,
+
               p_failed_inspection_alerts:
                 failedInspectionAlerts.checked,
 
               p_critical_issue_alerts:
-                criticalIssueAlerts.checked
+                criticalIssueAlerts.checked,
+
+              p_code_green_alerts:
+                codeGreenAlerts.checked,
+
+              p_taser_pull_alerts:
+                taserPullAlerts.checked,
+
+              p_ctw_alerts:
+                ctwAlerts.checked,
+
+              p_officer_injury_alerts:
+                officerInjuryAlerts.checked,
+
+              p_insufficient_staffing_alerts:
+                insufficientStaffingAlerts.checked
 
             }
           );
 
 
         if (error) {
+
           throw error;
+
         }
 
 
-        const settings =
-          data || {};
-
-
-        // =======================================
-        // UPDATE FORM WITH SAVED VALUES
-        // =======================================
-
-        phoneInput.value =
-          settings.phone_number ||
-          normalizedPhone;
-
-
-        loadedPhoneNumber =
-          normalizePhone(
-            settings.phone_number ||
-            normalizedPhone
-          );
-
-
-        smsConsent.checked =
-          Boolean(
-            settings.sms_consent
-          );
-
-
-        smsEnabled.checked =
-          Boolean(
-            settings.sms_enabled
-          );
-
-
-        failedInspectionAlerts.checked =
-          Boolean(
-            settings.failed_inspection_alerts
-          );
-
-
-        criticalIssueAlerts.checked =
-          Boolean(
-            settings.critical_issue_alerts
-          );
-
-
-        originalConsent =
-          Boolean(
-            settings.sms_consent
-          );
-
-
-        updateConsentStatus(
-          Boolean(
-            settings.sms_consent
-          ),
-          settings.sms_consent_at
+        populate(
+          data || {}
         );
 
 
-        updateControls();
-
-
-       // =======================================
-// SUCCESS MESSAGE
-// =======================================
-
-if (
-  settings.confirmation_pending
-) {
-
-  showResult(
-    "Notification preferences saved. Your SMS consent has been recorded and a SecureTrack opt-in confirmation text has been queued."
-  );
-
-} else if (
-  settings.sms_consent &&
-  settings.sms_enabled
-) {
-
-  showResult(
-    "Notification preferences saved. SecureTrack SMS notifications are enabled for this mobile number."
-  );
-
-} else if (
-  settings.sms_consent
-) {
-
-  showResult(
-    "Notification preferences saved. SMS consent is recorded, but text notifications are currently disabled."
-  );
-
-} else {
-
-  showResult(
-    "Notification preferences saved. SMS messaging is disabled and no active SMS consent is recorded."
-  );
-
-        }
+        showResult(
+          "Notification preferences saved successfully."
+        );
 
 
         saveButton.textContent =
@@ -881,22 +629,23 @@ if (
         );
 
 
-      } catch (error) {
+      }
+      catch (error) {
 
         console.error(
-          "SecureTrack notification settings save error:",
+          "Notification settings save error:",
           error
         );
 
 
         showResult(
-          error.message ||
-          "Notification preferences could not be saved.",
+          error?.message ||
+          "Unable to save notification preferences.",
           "error"
         );
 
-
-      } finally {
+      }
+      finally {
 
         saveButton.disabled =
           false;
@@ -906,28 +655,6 @@ if (
     }
   );
 
-
-  // =========================================================
-  // SIGN OUT
-  // =========================================================
-logoutButton.addEventListener(
-  "click",
-  async () => {
-
-    logoutButton.disabled =
-      true;
-
-    logoutButton.textContent =
-      "Signing Out…";
-
-    await STM.signOut();
-
-  }
-);
-
-  // =========================================================
-  // INITIALIZE PAGE
-  // =========================================================
 
   await loadSettings();
 
