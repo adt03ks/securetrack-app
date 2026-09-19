@@ -586,7 +586,111 @@
     manager.email ||
     "Management";
 
+async function loadReportingOfficers() {
 
+  const {
+    data,
+    error
+  } =
+    await db
+      .from(
+        "overtime_signups"
+      )
+      .select(
+        "user_id, display_name"
+      )
+      .not(
+        "user_id",
+        "is",
+        null
+      );
+
+
+  if (error) {
+
+    console.warn(
+      "Unable to load reporting officers:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  const unique =
+    new Map();
+
+
+  (data || [])
+    .forEach(
+      item => {
+
+        if (
+          item.user_id &&
+          !unique.has(
+            item.user_id
+          )
+        ) {
+
+          unique.set(
+            item.user_id,
+            item.display_name ||
+            "Unnamed Officer"
+          );
+
+        }
+
+      }
+    );
+
+
+  officer.innerHTML = `
+
+    <option value="all">
+      All Officers
+    </option>
+
+  `;
+
+
+  Array.from(
+    unique.entries()
+  )
+    .sort(
+      (a, b) =>
+        a[1].localeCompare(
+          b[1]
+        )
+    )
+    .forEach(
+      ([
+        userId,
+        name
+      ]) => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          userId;
+
+
+        option.textContent =
+          name;
+
+
+        officer.appendChild(
+          option
+        );
+
+      }
+    );
+
+}
 
   // =========================================================
   // LOAD REPORT TYPES
@@ -3188,7 +3292,8 @@ async function generateOvertimeReport(
   // INITIALIZE
   // =========================================================
 
-  loadReportTypes();
+ loadReportTypes();
 
+await loadReportingOfficers();
 
 })();
