@@ -22,8 +22,9 @@
   const roles = auth.roles || [];
 
   const isManager =
-    roles.includes("manager") ||
-    roles.includes("admin");
+  roles.includes("manager") ||
+  roles.includes("director") ||
+  roles.includes("admin");
 
   const isOperational =
     roles.some(role =>
