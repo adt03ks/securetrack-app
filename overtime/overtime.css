@@ -572,3 +572,53 @@ td { font-size: 14px; }
   }
 
 }
+/* =========================================================
+   OFF-CAMPUS OVERTIME MODAL
+   ========================================================= */
+
+#offCampusModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(0, 0, 0, 0.78);
+
+  z-index: 99999;
+}
+
+
+#offCampusModal.show {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+
+.fill-off-campus-button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+}
+
+
+.fill-off-campus-button:disabled {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+}
+
+
+#confirmOffCampusButton {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+
+#confirmOffCampusButton:not(:disabled) {
+  opacity: 1;
+}
