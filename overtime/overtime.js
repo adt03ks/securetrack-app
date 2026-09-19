@@ -1420,7 +1420,424 @@ if (
       }
     }
   );
+// =========================================================
+// OFF-CAMPUS OVERTIME ASSIGNMENT MODAL
+// =========================================================
 
+
+function openOffCampusModal(
+  opportunity
+) {
+
+  clearMessage();
+
+
+  // Reset any information from a previous assignment.
+  offCampusForm.reset();
+
+
+  // Store the opportunity ID for submission.
+  offCampusOpportunityId.value =
+    opportunity.id;
+
+
+  const remaining =
+    Math.max(
+
+      Number(
+        opportunity.total_openings ||
+        0
+      )
+
+      -
+
+      Number(
+        opportunity.filled_openings ||
+        0
+      ),
+
+      0
+
+    );
+
+
+  const timeText =
+    opportunity.start_time ||
+    opportunity.end_time
+
+      ? `${formatTime(
+          opportunity.start_time
+        ) || "—"} - ${formatTime(
+          opportunity.end_time
+        ) || "—"}`
+
+      : "Time not specified";
+
+
+  /*
+    location currently stores our new
+    Overtime Type value:
+
+    Regular Shift
+    Special Assignment
+  */
+
+  offCampusSummary.innerHTML = `
+
+    <strong>
+      ${opportunity.opportunity_date || "Date not available"}
+    </strong>
+
+    <br>
+
+    ${opportunity.shift_name || "Shift not available"}
+
+    <br>
+
+    Overtime Type:
+    ${opportunity.location || "—"}
+
+    <br>
+
+    ${timeText}
+
+    <br>
+
+    ${remaining} opening(s) remaining
+
+  `;
+
+
+  offCampusModal.classList.add(
+    "show"
+  );
+
+
+  offCampusModal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+
+  /*
+    Put the cursor directly in Officer Name.
+  */
+
+  setTimeout(
+    () => {
+
+      offCampusOfficerName.focus();
+
+    },
+    50
+  );
+
+}
+
+
+
+// =========================================================
+// CLOSE OFF-CAMPUS MODAL
+// =========================================================
+
+function closeOffCampusModal() {
+
+  offCampusModal.classList.remove(
+    "show"
+  );
+
+
+  offCampusModal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+
+  offCampusForm.reset();
+
+
+  offCampusOpportunityId.value =
+    "";
+
+
+  offCampusSummary.innerHTML =
+    "";
+
+}
+
+
+
+// =========================================================
+// CANCEL BUTTON
+// =========================================================
+
+cancelOffCampusButton.addEventListener(
+  "click",
+  closeOffCampusModal
+);
+
+
+
+// =========================================================
+// CLICK OUTSIDE MODAL TO CLOSE
+// =========================================================
+
+offCampusModal.addEventListener(
+  "click",
+  event => {
+
+    if (
+      event.target ===
+      offCampusModal
+    ) {
+
+      closeOffCampusModal();
+
+    }
+
+  }
+);
+
+
+
+// =========================================================
+// ESCAPE KEY TO CLOSE
+// =========================================================
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key === "Escape" &&
+      offCampusModal.classList.contains(
+        "show"
+      )
+    ) {
+
+      closeOffCampusModal();
+
+    }
+
+  }
+);
+
+
+
+// =========================================================
+// SUBMIT OFF-CAMPUS ASSIGNMENT
+// =========================================================
+
+offCampusForm.addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+
+    clearMessage();
+
+
+    const opportunityId =
+      offCampusOpportunityId
+        .value
+        .trim();
+
+
+    const officerName =
+      offCampusOfficerName
+        .value
+        .trim();
+
+
+    const homeCampus =
+      offCampusHomeCampus
+        .value
+        .trim();
+
+
+    const notes =
+      offCampusNotes
+        .value
+        .trim();
+
+
+    // -----------------------------------------------------
+    // VALIDATION
+    // -----------------------------------------------------
+
+    if (!opportunityId) {
+
+      showMessage(
+        "The overtime opportunity could not be identified.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if (!officerName) {
+
+      showMessage(
+        "Enter the off-campus officer's name.",
+        "error"
+      );
+
+      offCampusOfficerName.focus();
+
+      return;
+
+    }
+
+
+    if (!homeCampus) {
+
+      showMessage(
+        "Enter the officer's home campus or facility.",
+        "error"
+      );
+
+      offCampusHomeCampus.focus();
+
+      return;
+
+    }
+
+
+
+    // -----------------------------------------------------
+    // LOCK SUBMIT BUTTON
+    // -----------------------------------------------------
+
+    confirmOffCampusButton.disabled =
+      true;
+
+
+    confirmOffCampusButton.textContent =
+      "Filling Opening…";
+
+
+    try {
+
+
+      // ---------------------------------------------------
+      // SECURE SUPABASE RPC
+      // ---------------------------------------------------
+
+      const {
+        data,
+        error
+      } =
+        await db.rpc(
+          "fill_overtime_with_off_campus_officer",
+          {
+
+            p_opportunity_id:
+              opportunityId,
+
+            p_officer_name:
+              officerName,
+
+            p_home_campus:
+              homeCampus,
+
+            p_notes:
+              notes || null
+
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+
+      // ---------------------------------------------------
+      // CLOSE MODAL
+      // ---------------------------------------------------
+
+      closeOffCampusModal();
+
+
+
+      // ---------------------------------------------------
+      // SUCCESS MESSAGE
+      // ---------------------------------------------------
+
+      showMessage(
+
+        `${data?.officer_name || officerName} ` +
+        "was assigned as off-campus overtime help.",
+
+        "success"
+
+      );
+
+
+
+      // ---------------------------------------------------
+      // REFRESH ALL OVERTIME DATA
+      // ---------------------------------------------------
+
+      await refreshAll();
+
+
+
+      /*
+        If the manager currently has the detail
+        window open for this opportunity, refresh
+        that too.
+      */
+
+      if (
+        currentDetailOpportunityId ===
+        opportunityId
+      ) {
+
+        await loadDetail(
+          opportunityId
+        );
+
+      }
+
+
+    } catch (error) {
+
+
+      console.error(
+        "Off-campus overtime assignment error:",
+        error
+      );
+
+
+      showMessage(
+
+        error.message ||
+        "Unable to fill this overtime opening.",
+
+        "error"
+
+      );
+
+
+    } finally {
+
+
+      confirmOffCampusButton.disabled =
+        false;
+
+
+      confirmOffCampusButton.textContent =
+        "Fill Overtime Opening";
+
+    }
+
+  }
+);
   function openDetail(item) {
     currentDetailOpportunityId =
       item.id;
