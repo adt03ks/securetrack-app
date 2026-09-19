@@ -1841,45 +1841,57 @@
           );
 
 
-        if (
-          item.status ===
-          "open" &&
-          remaining > 0
-        ) {
+       if (
+  item.status === "open" &&
+  remaining > 0
+) {
 
-          const offCampus =
-            document.createElement(
-              "button"
-            );
+  const offCampus =
+    document.createElement("button");
 
+  offCampus.type =
+    "button";
 
-          offCampus.type =
-            "button";
+  offCampus.className =
+    "button primary small fill-off-campus-button";
 
+  offCampus.textContent =
+    "Fill Off-Campus";
 
-          offCampus.className =
-            "button approve small";
+  // Force button to remain active.
+  offCampus.disabled =
+    false;
 
+  offCampus.style.pointerEvents =
+    "auto";
 
-          offCampus.textContent =
-            "Fill Off-Campus";
+  offCampus.style.cursor =
+    "pointer";
 
+  offCampus.addEventListener(
+    "click",
+    event => {
 
-          offCampus.addEventListener(
-            "click",
-            () =>
-              openOffCampusModal(
-                item
-              )
-          );
+      event.preventDefault();
+      event.stopPropagation();
 
+      console.log(
+        "Opening off-campus modal:",
+        item
+      );
 
-          manageTd.appendChild(
-            offCampus
-          );
+      openOffCampusModal(
+        item
+      );
 
-        }
+    }
+  );
 
+  manageTd.appendChild(
+    offCampus
+  );
+
+}
 
         const choices =
 
@@ -2626,386 +2638,185 @@
   // =========================================================
   // OFF-CAMPUS MANUAL FILL
   // =========================================================
+function openOffCampusModal(
+  opportunity
+) {
 
-  function openOffCampusModal(
+  console.log(
+    "openOffCampusModal called",
     opportunity
+  );
+
+
+  if (!offCampusModal) {
+
+    console.error(
+      "offCampusModal was not found."
+    );
+
+    showMessage(
+      "Unable to open the off-campus assignment window.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (!offCampusForm) {
+
+    console.error(
+      "offCampusForm was not found."
+    );
+
+    showMessage(
+      "The off-campus assignment form could not be found.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  clearMessage();
+
+
+  offCampusForm.reset();
+
+
+  if (
+    offCampusOpportunityId
   ) {
-
-    if (
-      !offCampusModal ||
-      !offCampusForm
-    ) {
-
-      showMessage(
-        "The off-campus assignment form is unavailable.",
-        "error"
-      );
-
-
-      return;
-
-    }
-
-
-    clearMessage();
-
-
-    offCampusForm.reset();
-
 
     offCampusOpportunityId.value =
       opportunity.id;
 
+  }
 
-    const remaining =
-      Math.max(
 
-        Number(
-          opportunity.total_openings ||
-          0
-        )
+  const remaining =
+    Math.max(
 
-        -
-
-        Number(
-          opportunity.filled_openings ||
-          0
-        ),
-
+      Number(
+        opportunity.total_openings ||
         0
+      )
 
-      );
+      -
 
+      Number(
+        opportunity.filled_openings ||
+        0
+      ),
 
-    const timeText =
+      0
 
-      opportunity.start_time ||
-      opportunity.end_time
-
-        ? `${formatTime(
-            opportunity.start_time
-          ) || "—"} - `
-
-          +
-
-          `${formatTime(
-            opportunity.end_time
-          ) || "—"}`
-
-        : "Time not specified";
-
-
-    offCampusSummary.textContent =
-
-      `${opportunity.opportunity_date || "—"} • `
-
-      +
-
-      `${opportunity.shift_name || "—"} • `
-
-      +
-
-      `${opportunity.location || "—"} • `
-
-      +
-
-      `${timeText} • `
-
-      +
-
-      `${remaining} opening(s) remaining`;
-
-
-    offCampusModal.classList.add(
-      "show"
     );
 
 
-    offCampusModal.setAttribute(
-      "aria-hidden",
-      "false"
-    );
+  const timeText =
 
+    opportunity.start_time ||
+    opportunity.end_time
 
-    setTimeout(
-      () =>
-        offCampusOfficerName
-          ?.focus(),
-      50
-    );
+      ? `${formatTime(
+          opportunity.start_time
+        ) || "—"} - ${formatTime(
+          opportunity.end_time
+        ) || "—"}`
 
-  }
-
-
-  function closeOffCampusModal() {
-
-    if (
-      !offCampusModal
-    ) {
-      return;
-    }
-
-
-    offCampusModal.classList.remove(
-      "show"
-    );
-
-
-    offCampusModal.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
-
-    offCampusForm
-      ?.reset();
-
-
-    if (
-      offCampusOpportunityId
-    ) {
-
-      offCampusOpportunityId.value =
-        "";
-
-    }
-
-
-    if (
-      offCampusSummary
-    ) {
-
-      offCampusSummary.textContent =
-        "";
-
-    }
-
-  }
-
-
-  cancelOffCampusButton
-    ?.addEventListener(
-      "click",
-      closeOffCampusModal
-    );
-
-
-  offCampusModal
-    ?.addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target ===
-          offCampusModal
-        ) {
-
-          closeOffCampusModal();
-
-        }
-
-      }
-    );
+      : "Time not specified";
 
 
   if (
-    offCampusForm
+    offCampusSummary
   ) {
 
-    offCampusForm.addEventListener(
-      "submit",
-      async event => {
+    offCampusSummary.textContent =
 
-        event.preventDefault();
+      `${opportunity.opportunity_date || "—"} • ` +
 
+      `${opportunity.shift_name || "—"} • ` +
 
-        clearMessage();
+      `${opportunity.location || "—"} • ` +
 
+      `${timeText} • ` +
 
-        const opportunityId =
-          offCampusOpportunityId
-            .value
-            .trim();
-
-
-        const officerName =
-          offCampusOfficerName
-            .value
-            .trim();
-
-
-        const homeCampus =
-          offCampusHomeCampus
-            .value
-            .trim();
-
-
-        const notes =
-          offCampusNotes
-            .value
-            .trim();
-
-
-        if (
-          !opportunityId
-        ) {
-
-          showMessage(
-            "The overtime opportunity could not be identified.",
-            "error"
-          );
-
-
-          return;
-
-        }
-
-
-        if (
-          !officerName
-        ) {
-
-          showMessage(
-            "Enter the off-campus officer's name.",
-            "error"
-          );
-
-
-          offCampusOfficerName.focus();
-
-
-          return;
-
-        }
-
-
-        if (
-          !homeCampus
-        ) {
-
-          showMessage(
-            "Enter the officer's home campus or facility.",
-            "error"
-          );
-
-
-          offCampusHomeCampus.focus();
-
-
-          return;
-
-        }
-
-
-        confirmOffCampusButton.disabled =
-          true;
-
-
-        confirmOffCampusButton.textContent =
-          "Filling Opening…";
-
-
-        try {
-
-          const {
-            data,
-            error
-          } =
-            await db.rpc(
-              "fill_overtime_with_off_campus_officer",
-              {
-
-                p_opportunity_id:
-                  opportunityId,
-
-                p_officer_name:
-                  officerName,
-
-                p_home_campus:
-                  homeCampus,
-
-                p_notes:
-                  notes ||
-                  null
-
-              }
-            );
-
-
-          if (
-            error
-          ) {
-            throw error;
-          }
-
-
-          closeOffCampusModal();
-
-
-          showMessage(
-
-            `${data?.officer_name || officerName} `
-
-            +
-
-            "was assigned as off-campus overtime help.",
-
-            "success"
-
-          );
-
-
-          await refreshAll();
-
-
-          if (
-            currentDetailOpportunityId ===
-            opportunityId
-          ) {
-
-            await loadDetail(
-              opportunityId
-            );
-
-          }
-
-        }
-
-        catch (
-          error
-        ) {
-
-          console.error(
-            "Off-campus overtime assignment error:",
-            error
-          );
-
-
-          showMessage(
-            error.message ||
-            "Unable to fill this overtime opening.",
-            "error"
-          );
-
-        }
-
-        finally {
-
-          confirmOffCampusButton.disabled =
-            false;
-
-
-          confirmOffCampusButton.textContent =
-            "Fill Overtime Opening";
-
-        }
-
-      }
-    );
+      `${remaining} opening(s) remaining`;
 
   }
 
 
+  // -----------------------------------------------
+  // FORCE MODAL OPEN
+  // -----------------------------------------------
+
+  offCampusModal.hidden =
+    false;
+
+
+  offCampusModal.removeAttribute(
+    "hidden"
+  );
+
+
+  offCampusModal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+
+  offCampusModal.classList.add(
+    "show"
+  );
+
+
+  offCampusModal.style.display =
+    "flex";
+
+
+  offCampusModal.style.visibility =
+    "visible";
+
+
+  offCampusModal.style.opacity =
+    "1";
+
+
+  offCampusModal.style.pointerEvents =
+    "auto";
+
+
+  offCampusModal.style.position =
+    "fixed";
+
+
+  offCampusModal.style.inset =
+    "0";
+
+
+  offCampusModal.style.zIndex =
+    "99999";
+
+
+  setTimeout(
+    () => {
+
+      if (
+        offCampusOfficerName
+      ) {
+
+        offCampusOfficerName.focus();
+
+      }
+
+    },
+    50
+  );
+
+}
   // =========================================================
   // DETAIL MODAL
   // =========================================================
@@ -4194,54 +4005,69 @@
             "show"
           )
       ) {
+function closeOffCampusModal() {
 
-        closeOffCampusModal();
-
-      }
-
-
-      if (
-        editModal
-          ?.classList
-          .contains(
-            "show"
-          )
-      ) {
-
-        closeEditModal();
-
-      }
+  if (!offCampusModal) {
+    return;
+  }
 
 
-      if (
-        detailModal
-          ?.classList
-          .contains(
-            "show"
-          )
-      ) {
-
-        closeDetailModal();
-
-      }
-
-
-      if (
-        reviewModal
-          ?.classList
-          .contains(
-            "show"
-          )
-      ) {
-
-        closeReviewModal();
-
-      }
-
-    }
+  offCampusModal.classList.remove(
+    "show"
   );
 
 
+  offCampusModal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+
+  offCampusModal.style.display =
+    "none";
+
+
+  offCampusModal.style.visibility =
+    "hidden";
+
+
+  offCampusModal.style.opacity =
+    "0";
+
+
+  offCampusModal.style.pointerEvents =
+    "none";
+
+
+  if (
+    offCampusForm
+  ) {
+
+    offCampusForm.reset();
+
+  }
+
+
+  if (
+    offCampusOpportunityId
+  ) {
+
+    offCampusOpportunityId.value =
+      "";
+
+  }
+
+
+  if (
+    offCampusSummary
+  ) {
+
+    offCampusSummary.textContent =
+      "";
+
+  }
+
+}
   // =========================================================
   // REFRESH BUTTON
   // =========================================================
