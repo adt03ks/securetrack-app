@@ -791,7 +791,61 @@ const cancelOffCampusButton =
         details,
         edit
       );
+// ---------------------------------------------------------
+// MANUAL OFF-CAMPUS FILL
+// ---------------------------------------------------------
 
+const remaining =
+  Math.max(
+    Number(
+      item.total_openings ||
+      0
+    ) -
+    Number(
+      item.filled_openings ||
+      0
+    ),
+    0
+  );
+
+
+if (
+  item.status === "open" &&
+  remaining > 0
+) {
+
+  const offCampus =
+    document.createElement(
+      "button"
+    );
+
+
+  offCampus.type =
+    "button";
+
+
+  offCampus.className =
+    "button approve small";
+
+
+  offCampus.textContent =
+    "Fill Off-Campus";
+
+
+  offCampus.addEventListener(
+    "click",
+    () =>
+      openOffCampusModal(
+        item
+      )
+  );
+
+
+  manageTd.appendChild(
+    offCampus
+  );
+
+}
       const choices =
         item.status === "open"
           ? [
