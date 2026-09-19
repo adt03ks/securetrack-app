@@ -79,33 +79,40 @@
           </label>
         </div>
 
-        <div class="field-grid two">
-          <label>
-            <span>Type <b>*</b></span>
-           <div class="field">
+       <div class="field-grid two">
 
-  <label for="opportunityType">
-    Overtime Type
+  <label>
+    <span>Overtime Type <b>*</b></span>
+
+    <select
+      id="opportunityLocation"
+      required
+    >
+      <option value="">
+        Select overtime type
+      </option>
+
+      <option value="Regular Shift">
+        Regular Shift
+      </option>
+
+      <option value="Special Assignment">
+        Special Assignment
+      </option>
+    </select>
   </label>
 
-  <select
-    id="opportunityType"
-    required
-  >
+  <label>
+    <span>Number of Openings <b>*</b></span>
 
-    <option value="">
-      Select overtime type
-    </option>
-
-    <option value="Regular Shift">
-      Regular Shift
-    </option>
-
-    <option value="Special Assignment">
-      Special Assignment
-    </option>
-
-  </select>
+    <input
+      id="totalOpenings"
+      type="number"
+      min="1"
+      value="1"
+      required
+    >
+  </label>
 
 </div>
           </label>
