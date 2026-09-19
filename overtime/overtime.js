@@ -50,7 +50,7 @@
   const opportunityShift = document.getElementById("opportunityShift");
   const startTime = document.getElementById("startTime");
   const endTime = document.getElementById("endTime");
-  const opportunityLocation = document.getElementById("opportunityLocation");
+  const opportunityType = document.getElementById("opportunityType");
   const totalOpenings = document.getElementById("totalOpenings");
   const requirements = document.getElementById("requirements");
   const opportunityNotes = document.getElementById("opportunityNotes");
@@ -87,7 +87,7 @@
   const editOpportunityShift = document.getElementById("editOpportunityShift");
   const editStartTime = document.getElementById("editStartTime");
   const editEndTime = document.getElementById("editEndTime");
-  const editOpportunityLocation = document.getElementById("editOpportunityLocation");
+  const editOpportunityType = document.getElementById("editOpportunityType");
   const editTotalOpenings = document.getElementById("editTotalOpenings");
   const editRequirements = document.getElementById("editRequirements");
   const editOpportunityNotes = document.getElementById("editOpportunityNotes");
