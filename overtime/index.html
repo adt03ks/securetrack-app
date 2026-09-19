@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="overtime.css">
 </head>
 
-<body data-securetrack-roles="officer,senior_officer,team_lead,manager,director,admin">
+<body data-securetrack-roles="officer,dispatcher,senior_officer,team_lead,manager,director,admin">
   <main class="shell">
 
     <header class="topbar">
@@ -51,7 +51,7 @@
     <section id="managerCreateSection" class="card" hidden>
       <div class="section-head">
         <div>
-          <div class="eyebrow">MANAGER / ADMIN</div>
+          <div class="eyebrow">MANAGER / DIRECTOR / ADMIN</div>
           <h2>Create Overtime Opportunity</h2>
         </div>
       </div>
@@ -79,42 +79,14 @@
           </label>
         </div>
 
-       <div class="field-grid two">
-
-  <label>
-    <span>Overtime Type <b>*</b></span>
-
-    <select
-      id="opportunityLocation"
-      required
-    >
-      <option value="">
-        Select overtime type
-      </option>
-
-      <option value="Regular Shift">
-        Regular Shift
-      </option>
-
-      <option value="Special Assignment">
-        Special Assignment
-      </option>
-    </select>
-  </label>
-
-  <label>
-    <span>Number of Openings <b>*</b></span>
-
-    <input
-      id="totalOpenings"
-      type="number"
-      min="1"
-      value="1"
-      required
-    >
-  </label>
-
-</div>
+        <div class="field-grid two">
+          <label>
+            <span>Overtime Type <b>*</b></span>
+            <select id="opportunityLocation" required>
+              <option value="">Select overtime type</option>
+              <option value="Regular Shift">Regular Shift</option>
+              <option value="Special Assignment">Special Assignment</option>
+            </select>
           </label>
 
           <label>
@@ -182,7 +154,7 @@
     </section>
 
     <section id="managerReviewSection" class="card" hidden>
-      <div class="eyebrow">MANAGER / ADMIN</div>
+      <div class="eyebrow">MANAGER / DIRECTOR / ADMIN</div>
       <h2>Pending Requests</h2>
 
       <div class="table-wrap">
@@ -207,7 +179,7 @@
     </section>
 
     <section id="managerManageSection" class="card" hidden>
-      <div class="eyebrow">MANAGER / ADMIN</div>
+      <div class="eyebrow">MANAGER / DIRECTOR / ADMIN</div>
       <h2>Manage Opportunities</h2>
 
       <div class="table-wrap">
@@ -315,7 +287,7 @@
 
       <div class="modal-header">
         <div>
-          <div class="eyebrow">MANAGER / ADMIN</div>
+          <div class="eyebrow">MANAGER / DIRECTOR / ADMIN</div>
           <h2 id="editModalTitle">Edit Overtime Opportunity</h2>
         </div>
 
@@ -351,33 +323,12 @@
 
         <div class="field-grid two">
           <label>
-            <span>Type <b>*</b></span>
-           <div class="field">
-
-  <label for="editOpportunityType">
-    Overtime Type
-  </label>
-
-  <select
-    id="editOpportunityType"
-    required
-  >
-
-    <option value="">
-      Select overtime type
-    </option>
-
-    <option value="Regular Shift">
-      Regular Shift
-    </option>
-
-    <option value="Special Assignment">
-      Special Assignment
-    </option>
-
-  </select>
-
-</div>
+            <span>Overtime Type <b>*</b></span>
+            <select id="editOpportunityLocation" required>
+              <option value="">Select overtime type</option>
+              <option value="Regular Shift">Regular Shift</option>
+              <option value="Special Assignment">Special Assignment</option>
+            </select>
           </label>
 
           <label>
@@ -416,12 +367,12 @@
 
 <div
   id="offCampusModal"
-  class="offcampus-modal"
+  class="modal-backdrop"
   aria-hidden="true"
 >
 
   <section
-    class="offcampus-dialog"
+    class="modal-card modal-wide"
     role="dialog"
     aria-modal="true"
     aria-labelledby="offCampusTitle"
@@ -435,7 +386,7 @@
       Fill With Off-Campus Officer
     </h2>
 
-    <p class="subtle">
+    <p class="muted">
       Use this option when an officer from another campus
       has agreed to fill this overtime opportunity and cannot
       request the opening through this SecureTrack portal.
@@ -519,7 +470,7 @@
       </div>
 
 
-      <div class="offcampus-actions">
+      <div class="modal-actions">
 
         <button
           id="cancelOffCampusButton"
