@@ -28,7 +28,7 @@
 
   const isOperational =
     roles.some(role =>
-      ["officer","dispatcher","senior_officer","team_lead"].includes(role)
+      ["officer","senior_officer","team_lead"].includes(role)
     );
 
   const currentUserName = document.getElementById("currentUserName");
@@ -95,6 +95,55 @@
   const closeEditButton = document.getElementById("closeEditButton");
   const cancelEditButton = document.getElementById("cancelEditButton");
 
+  // =========================================================
+// OFF-CAMPUS OVERTIME
+// =========================================================
+
+const offCampusModal =
+  document.getElementById(
+    "offCampusModal"
+  );
+
+const offCampusForm =
+  document.getElementById(
+    "offCampusForm"
+  );
+
+const offCampusOpportunityId =
+  document.getElementById(
+    "offCampusOpportunityId"
+  );
+
+const offCampusSummary =
+  document.getElementById(
+    "offCampusSummary"
+  );
+
+const offCampusOfficerName =
+  document.getElementById(
+    "offCampusOfficerName"
+  );
+
+const offCampusHomeCampus =
+  document.getElementById(
+    "offCampusHomeCampus"
+  );
+
+const offCampusNotes =
+  document.getElementById(
+    "offCampusNotes"
+  );
+
+const confirmOffCampusButton =
+  document.getElementById(
+    "confirmOffCampusButton"
+  );
+
+const cancelOffCampusButton =
+  document.getElementById(
+    "cancelOffCampusButton"
+  );
+  
   let opportunities = [];
   let myRequests = [];
   let pendingRequests = [];
