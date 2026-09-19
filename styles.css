@@ -2465,3 +2465,89 @@ h2.form-title { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.08; margin-b
   }
 
 }
+/* =========================================================
+   MANAGER PORTAL - REPORTING CENTER CARD
+   ========================================================= */
+
+.management-card {
+  display: block;
+
+  min-height: 100%;
+
+  padding: 28px;
+
+  border: 1px solid #343b43;
+  border-radius: 18px;
+
+  background: #0d1115;
+
+  color: #eef1f4;
+
+  text-decoration: none;
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    transform .18s ease;
+}
+
+
+.management-card:hover {
+  border-color: rgba(255, 120, 0, .65);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 120, 0, .07),
+      #0d1115 50%
+    );
+
+  transform: translateY(-1px);
+}
+
+
+.management-card .eyebrow {
+  color: #ff7800;
+
+  text-decoration: none;
+}
+
+
+.management-card h2 {
+  margin: 10px 0 12px;
+
+  color: #f0f2f4;
+
+  font-size: 27px;
+
+  text-decoration: none;
+}
+
+
+.management-card p {
+  margin: 0 0 25px;
+
+  color: #98a2ad;
+
+  font-size: 16px;
+  line-height: 1.55;
+
+  text-decoration: none;
+}
+
+
+.management-card-link {
+  display: inline-block;
+
+  color: #ff7800;
+
+  font-weight: 800;
+
+  text-decoration: none;
+}
+
+
+.management-card *,
+.management-card:hover * {
+  text-decoration: none;
+}
