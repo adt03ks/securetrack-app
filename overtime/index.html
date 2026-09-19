@@ -353,7 +353,140 @@
     </section>
   </div>
 
+<!-- =====================================================
+     OFF-CAMPUS OVERTIME ASSIGNMENT MODAL
+     ===================================================== -->
 
+<div
+  id="offCampusModal"
+  class="offcampus-modal"
+  aria-hidden="true"
+>
+
+  <section
+    class="offcampus-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="offCampusTitle"
+  >
+
+    <div class="eyebrow">
+      Management Overtime Assignment
+    </div>
+
+    <h2 id="offCampusTitle">
+      Fill With Off-Campus Officer
+    </h2>
+
+    <p class="subtle">
+      Use this option when an officer from another campus
+      has agreed to fill this overtime opportunity and cannot
+      request the opening through this SecureTrack portal.
+    </p>
+
+
+    <div
+      id="offCampusSummary"
+      class="offcampus-summary"
+    >
+    </div>
+
+
+    <form id="offCampusForm">
+
+      <input
+        id="offCampusOpportunityId"
+        type="hidden"
+      >
+
+
+      <div class="field">
+
+        <label for="offCampusOfficerName">
+          Officer Name
+        </label>
+
+        <input
+          id="offCampusOfficerName"
+          type="text"
+          autocomplete="off"
+          placeholder="Enter officer's full name"
+          required
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="offCampusHomeCampus">
+          Home Campus / Facility
+        </label>
+
+        <input
+          id="offCampusHomeCampus"
+          type="text"
+          autocomplete="off"
+          placeholder="Example: Memorial Hermann Southwest"
+          required
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="offCampusNotes">
+          Assignment Notes
+        </label>
+
+        <textarea
+          id="offCampusNotes"
+          rows="4"
+          placeholder="Optional notes regarding the outside overtime assignment..."
+        ></textarea>
+
+      </div>
+
+
+      <div class="offcampus-warning">
+
+        <strong>
+          This immediately fills one overtime opening.
+        </strong>
+
+        The officer will be recorded as
+        <strong>Off-Campus Help</strong> and will not need
+        a SecureTrack user account.
+
+      </div>
+
+
+      <div class="offcampus-actions">
+
+        <button
+          id="cancelOffCampusButton"
+          type="button"
+          class="button secondary"
+        >
+          Cancel
+        </button>
+
+        <button
+          id="confirmOffCampusButton"
+          type="submit"
+          class="button approve"
+        >
+          Fill Overtime Opening
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config.js"></script>
   <script src="../secure-page.js"></script>
