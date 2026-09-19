@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#080a0c">
+
+  <title>
+    SecureTrack | Reporting Center
+  </title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+
+<body>
+
+<main class="shell reporting-shell">
+
+  <section class="panel reporting-panel">
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header class="reporting-header">
+
+      <div class="manager-header-row">
+
+        <div class="brandbar">
+
+          <div class="logo-mark" aria-hidden="true">
+            <span class="logo-lock"></span>
+          </div>
+
+          <div>
+
+            <div class="wordmark">
+              <span>Secure</span><span>Track</span>
+            </div>
+
+            <div class="tagline">
+              Operations Management
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="manager-user-area">
+
+          <span id="reportingUserName">
+            Management
+          </span>
+
+          <a
+            href="management-portal.html"
+            class="back-link"
+          >
+            ← Manager Portal
+          </a>
+
+          <button
+            id="logoutButton"
+            class="back-link"
+            type="button"
+          >
+            Sign Out
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="eyebrow">
+        Management Intelligence
+      </div>
+
+      <h1>
+        Reporting Center
+      </h1>
+
+      <p class="subtle">
+        Generate operational, staffing, equipment,
+        personnel and notification reports from one location.
+      </p>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         QUICK REPORTS
+         ===================================================== -->
+
+    <section class="reporting-section">
+
+      <div class="reporting-section-heading">
+
+        <div>
+          <div class="eyebrow">
+            Quick Reports
+          </div>
+
+          <h2>
+            Management Exceptions
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div class="quick-report-grid">
+
+        <button
+          class="quick-report-card"
+          data-report="device_over_24"
+          type="button"
+        >
+          <span class="quick-report-icon">
+            24+
+          </span>
+
+          <span>
+            <strong>
+              Equipment Out &gt;24 Hours
+            </strong>
+
+            <small>
+              Checked-out equipment exceeding 24 hours
+            </small>
+          </span>
+        </button>
+
+
+        <button
+          class="quick-report-card"
+          data-report="failed_inspections"
+          type="button"
+        >
+          <span class="quick-report-icon">
+            !
+          </span>
+
+          <span>
+            <strong>
+              Failed Inspections
+            </strong>
+
+            <small>
+              Equipment inspections requiring attention
+            </small>
+          </span>
+        </button>
+
+
+        <button
+          class="quick-report-card"
+          data-report="unfilled_overtime"
+          type="button"
+        >
+          <span class="quick-report-icon">
+            OT
+          </span>
+
+          <span>
+            <strong>
+              Unfilled Overtime
+            </strong>
+
+            <small>
+              Open staffing needs
+            </small>
+          </span>
+        </button>
+
+
+        <button
+          class="quick-report-card"
+          data-report="incomplete_handoffs"
+          type="button"
+        >
+          <span class="quick-report-icon">
+            ↔
+          </span>
+
+          <span>
+            <strong>
+              Incomplete Handoffs
+            </strong>
+
+            <small>
+              Shifts missing completed handoff records
+            </small>
+          </span>
+        </button>
+
+
+        <button
+          class="quick-report-card"
+          data-report="unarmed_officers"
+          type="button"
+        >
+          <span class="quick-report-icon">
+            Q
+          </span>
+
+          <span>
+            <strong>
+              Qualification Exceptions
+            </strong>
+
+            <small>
+              Officers missing armed qualification
+            </small>
+          </span>
+        </button>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         REPORT MODULES
+         ===================================================== -->
+
+    <section class="reporting-section">
+
+      <div class="eyebrow">
+        Report Categories
+      </div>
+
+      <div
+        class="report-module-tabs"
+        role="tablist"
+      >
+
+        <button
+          class="report-tab active"
+          data-module="devices"
+          type="button"
+        >
+          Devices
+        </button>
+
+        <button
+          class="report-tab"
+          data-module="overtime"
+          type="button"
+        >
+          Overtime
+        </button>
+
+        <button
+          class="report-tab"
+          data-module="alerts"
+          type="button"
+        >
+          Security Alerts
+        </button>
+
+        <button
+          class="report-tab"
+          data-module="duty"
+          type="button"
+        >
+          Duty Stations
+        </button>
+
+        <button
+          class="report-tab"
+          data-module="handoff"
+          type="button"
+        >
+          Shift Handoff
+        </button>
+
+        <button
+          class="report-tab"
+          data-module="personnel"
+          type="button"
+        >
+          Personnel
+        </button>
+
+        <button
+          class="report-tab"
+          data-module="notifications"
+          type="button"
+        >
+          Notifications
+        </button>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         REPORT BUILDER
+         ===================================================== -->
+
+    <section class="reporting-section">
+
+      <div class="report-builder">
+
+        <div class="report-builder-heading">
+
+          <div>
+
+            <div class="eyebrow">
+              Report Builder
+            </div>
+
+            <h2 id="reportModuleTitle">
+              Device Reports
+            </h2>
+
+          </div>
+
+          <span
+            id="reportAccessBadge"
+            class="report-access-badge"
+          >
+            MANAGEMENT
+          </span>
+
+        </div>
+
+
+        <div class="report-filter-grid">
+
+
+          <!-- REPORT TYPE -->
+
+          <div class="field">
+
+            <label for="reportType">
+              Report
+            </label>
+
+            <select id="reportType">
+            </select>
+
+          </div>
+
+
+          <!-- DATE RANGE -->
+
+          <div class="field">
+
+            <label for="reportDateRange">
+              Date Range
+            </label>
+
+            <select id="reportDateRange">
+
+              <option value="today">
+                Today
+              </option>
+
+              <option value="7">
+                Last 7 Days
+              </option>
+
+              <option value="30" selected>
+                Last 30 Days
+              </option>
+
+              <option value="90">
+                Last 90 Days
+              </option>
+
+              <option value="custom">
+                Custom Range
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- START DATE -->
+
+          <div class="field">
+
+            <label for="reportStartDate">
+              Start Date
+            </label>
+
+            <input
+              id="reportStartDate"
+              type="date"
+            >
+
+          </div>
+
+
+          <!-- END DATE -->
+
+          <div class="field">
+
+            <label for="reportEndDate">
+              End Date
+            </label>
+
+            <input
+              id="reportEndDate"
+              type="date"
+            >
+
+          </div>
+
+
+          <!-- SHIFT -->
+
+          <div class="field">
+
+            <label for="reportShift">
+              Shift
+            </label>
+
+            <select id="reportShift">
+
+              <option value="all">
+                All Authorized Shifts
+              </option>
+
+              <option value="Alpha">
+                Alpha
+              </option>
+
+              <option value="Bravo">
+                Bravo
+              </option>
+
+              <option value="Charlie">
+                Charlie
+              </option>
+
+              <option value="Delta">
+                Delta
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- OFFICER -->
+
+          <div class="field">
+
+            <label for="reportOfficer">
+              Officer
+            </label>
+
+            <select id="reportOfficer">
+
+              <option value="all">
+                All Officers
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             GENERATE
+             ================================================= -->
+
+        <div class="report-builder-actions">
+
+          <button
+            id="generateReportButton"
+            type="button"
+            class="primary-btn"
+          >
+            Generate Report
+          </button>
+
+
+          <button
+            id="exportReportButton"
+            type="button"
+            class="secondary-btn"
+            disabled
+          >
+            Export CSV
+          </button>
+
+
+          <button
+            id="printReportButton"
+            type="button"
+            class="secondary-btn"
+            disabled
+          >
+            Print / PDF
+          </button>
+
+        </div>
+
+
+        <div
+          id="reportResult"
+          class="result"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         REPORT OUTPUT
+         ===================================================== -->
+
+    <section
+      id="reportOutput"
+      class="report-output"
+      hidden
+    >
+
+
+      <!-- REPORT HEADER -->
+
+      <div class="report-output-header">
+
+        <div>
+
+          <div class="eyebrow">
+            Generated Report
+          </div>
+
+          <h2 id="generatedReportTitle">
+            Report
+          </h2>
+
+          <div
+            id="generatedReportMeta"
+            class="report-meta"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- KPI SUMMARY -->
+
+      <div
+        id="reportSummaryCards"
+        class="report-summary-grid"
+      ></div>
+
+
+
+      <!-- EXCEPTION / DETAIL TABLE -->
+
+      <div class="report-table-wrap">
+
+        <table
+          id="reportTable"
+          class="report-table"
+        >
+
+          <thead id="reportTableHead">
+          </thead>
+
+          <tbody id="reportTableBody">
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <footer class="reporting-footer">
+
+      <div>
+
+        <strong>
+          SECURE. ACCOUNTABLE. CONNECTED.
+        </strong>
+
+        <br>
+
+        SecureTrack Management Reporting Center
+
+      </div>
+
+      <div>
+        MANAGEMENT REPORTING
+      </div>
+
+    </footer>
+
+
+  </section>
+
+</main>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="config.js"></script>
+
+<script src="manager-common.js"></script>
+
+<script src="reports-center.js"></script>
+
+</body>
+</html>
