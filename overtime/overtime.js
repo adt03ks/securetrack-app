@@ -5,6 +5,124 @@
   // AUTH
   // =========================================================
 
+  const BUILD_ID = "2026-09-19-1826";
+  console.log(`SecureTrack Overtime build ${BUILD_ID}`);
+
+
+  async function buildAuthFallback() {
+
+    const cfg =
+      window.SECURETRACK_CONFIG || {};
+
+
+    if (
+      !window.supabase ||
+      !cfg.supabaseUrl ||
+      !cfg.supabaseAnonKey
+    ) {
+      throw new Error(
+        "SecureTrack configuration is unavailable."
+      );
+    }
+
+
+    const fallbackDb =
+      window.supabase.createClient(
+        cfg.supabaseUrl,
+        cfg.supabaseAnonKey,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      );
+
+
+    const {
+      data: { session },
+      error: sessionError
+    } =
+      await fallbackDb.auth.getSession();
+
+
+    if (sessionError) {
+      throw sessionError;
+    }
+
+
+    if (!session?.user) {
+      return null;
+    }
+
+
+    const [
+      profileResult,
+      rolesResult
+    ] =
+      await Promise.all([
+
+        fallbackDb
+          .from("profiles")
+          .select(
+            "id, display_name, employee_number, email, is_active"
+          )
+          .eq(
+            "id",
+            session.user.id
+          )
+          .maybeSingle(),
+
+        fallbackDb
+          .from("user_roles")
+          .select("role")
+          .eq(
+            "user_id",
+            session.user.id
+          )
+
+      ]);
+
+
+    if (profileResult.error) {
+      throw profileResult.error;
+    }
+
+
+    if (rolesResult.error) {
+      throw rolesResult.error;
+    }
+
+
+    const profile =
+      profileResult.data || {};
+
+
+    const roles =
+      (rolesResult.data || [])
+        .map(row => row.role);
+
+
+    const fallbackAuth = {
+      db: fallbackDb,
+      session,
+      user: session.user,
+      profile,
+      roles
+    };
+
+
+    window.SecureTrackAuth =
+      window.SecureTrackAuth ||
+      fallbackAuth;
+
+
+    return fallbackAuth;
+
+  }
+
+
   function waitForAuth() {
 
     if (window.SecureTrackAuth) {
@@ -15,28 +133,100 @@
 
 
     return new Promise(
-      resolve => {
+      (resolve, reject) => {
 
-        const handler =
-          event => {
-
-            document.removeEventListener(
-              "securetrack:authorized",
-              handler
-            );
+        let settled = false;
 
 
-            resolve(
-              event.detail ||
-              window.SecureTrackAuth
-            );
+        const finish = authValue => {
 
-          };
+          if (settled) {
+            return;
+          }
+
+
+          settled = true;
+
+
+          document.removeEventListener(
+            "securetrack:authorized",
+            handler
+          );
+
+
+          resolve(authValue);
+
+        };
+
+
+        const handler = event => {
+
+          finish(
+            event.detail ||
+            window.SecureTrackAuth
+          );
+
+        };
 
 
         document.addEventListener(
           "securetrack:authorized",
           handler
+        );
+
+
+        setTimeout(
+          async () => {
+
+            if (settled) {
+              return;
+            }
+
+
+            try {
+
+              if (window.SecureTrackAuth) {
+                finish(
+                  window.SecureTrackAuth
+                );
+                return;
+              }
+
+
+              const fallbackAuth =
+                await buildAuthFallback();
+
+
+              if (!fallbackAuth) {
+                throw new Error(
+                  "No active SecureTrack session was found."
+                );
+              }
+
+
+              finish(
+                fallbackAuth
+              );
+
+            }
+
+            catch (error) {
+
+              if (!settled) {
+                settled = true;
+
+                document.removeEventListener(
+                  "securetrack:authorized",
+                  handler
+                );
+
+                reject(error);
+              }
+
+            }
+
+          },
+          2500
         );
 
       }
@@ -45,14 +235,79 @@
   }
 
 
-  const auth =
-    await waitForAuth();
+  let auth;
+
+
+  try {
+
+    auth =
+      await waitForAuth();
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "SecureTrack overtime authentication failed:",
+      error
+    );
+
+
+    const nameEl =
+      document.getElementById(
+        "currentUserName"
+      );
+
+
+    const messageEl =
+      document.getElementById(
+        "pageMessage"
+      );
+
+
+    const listEl =
+      document.getElementById(
+        "opportunityList"
+      );
+
+
+    if (nameEl) {
+      nameEl.textContent =
+        "Authentication unavailable";
+    }
+
+
+    if (messageEl) {
+      messageEl.textContent =
+        error.message ||
+        "Unable to initialize SecureTrack authentication.";
+
+      messageEl.className =
+        "message show error";
+    }
+
+
+    if (listEl) {
+      listEl.innerHTML =
+        '<div class="empty">Unable to initialize SecureTrack authentication.</div>';
+    }
+
+
+    return;
+
+  }
 
 
   if (
     !auth?.db ||
     !auth?.user
   ) {
+
+    console.error(
+      "SecureTrack authentication returned without a database client or user.",
+      auth
+    );
+
     return;
   }
 
