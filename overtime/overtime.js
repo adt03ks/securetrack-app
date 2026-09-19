@@ -102,9 +102,14 @@
 
   function roleLabel(list) {
     const order = [
-      "admin","manager","team_lead",
-      "senior_officer","dispatcher","officer"
-    ];
+     const order = [
+  "admin",
+  "director",
+  "manager",
+  "team_lead",
+  "senior_officer",
+  "officer"
+];
 
     const found =
       order.find(role => list.includes(role));
