@@ -1684,23 +1684,34 @@
 
 
       if (
-        activeModule ===
-        "devices"
-      ) {
+  activeModule ===
+  "devices"
+) {
 
-        await generateDeviceReport(
-          selectedReport,
-          range
-        );
+  await generateDeviceReport(
+    selectedReport,
+    range
+  );
 
 
-      } else {
+} else if (
+  activeModule ===
+  "overtime"
+) {
 
-        throw new Error(
-          `${reportDefinitions[activeModule].title} are ready in the interface but still need to be connected to their SecureTrack database module.`
-        );
+  await generateOvertimeReport(
+    selectedReport,
+    range
+  );
 
-      }
+
+} else {
+
+  throw new Error(
+    `${reportDefinitions[activeModule].title} are ready in the interface but still need to be connected to their SecureTrack database module.`
+  );
+
+}
 
 
       output.hidden =
