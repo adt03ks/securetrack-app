@@ -1754,7 +1754,1282 @@
 
   }
 
+// =========================================================
+// OVERTIME REPORTS
+// =========================================================
 
+async function generateOvertimeReport(
+  type,
+  range
+) {
+
+  const startDate =
+    range.start
+      .toISOString()
+      .slice(0, 10);
+
+
+  const endDate =
+    range.end
+      .toISOString()
+      .slice(0, 10);
+
+
+  // =======================================================
+  // LOAD OPPORTUNITIES
+  // =======================================================
+
+  let opportunityQuery =
+    db
+      .from(
+        "overtime_opportunities"
+      )
+      .select(`
+        id,
+        opportunity_date,
+        shift_name,
+        start_time,
+        end_time,
+        location,
+        total_openings,
+        filled_openings,
+        requirements,
+        notes,
+        status,
+        created_by_name,
+        created_at,
+        updated_at
+      `)
+      .gte(
+        "opportunity_date",
+        startDate
+      )
+      .lte(
+        "opportunity_date",
+        endDate
+      )
+      .order(
+        "opportunity_date",
+        {
+          ascending: false
+        }
+      );
+
+
+  if (
+    shift.value &&
+    shift.value !== "all"
+  ) {
+
+    opportunityQuery =
+      opportunityQuery.eq(
+        "shift_name",
+        shift.value
+      );
+
+  }
+
+
+  const {
+    data: opportunityData,
+    error: opportunityError
+  } =
+    await opportunityQuery;
+
+
+  if (opportunityError) {
+    throw opportunityError;
+  }
+
+
+  const opportunities =
+    opportunityData || [];
+
+
+  const opportunityIds =
+    opportunities.map(
+      item => item.id
+    );
+
+
+  // =======================================================
+  // LOAD SIGNUPS FOR THOSE OPPORTUNITIES
+  // =======================================================
+
+  let signups = [];
+
+
+  if (
+    opportunityIds.length
+  ) {
+
+    const {
+      data: signupData,
+      error: signupError
+    } =
+      await db
+        .from(
+          "overtime_signups"
+        )
+        .select(`
+          id,
+          opportunity_id,
+          user_id,
+          display_name,
+          status,
+          requested_at,
+          reviewed_at,
+          reviewed_by_name,
+          manager_notes
+        `)
+        .in(
+          "opportunity_id",
+          opportunityIds
+        )
+        .order(
+          "requested_at",
+          {
+            ascending: false
+          }
+        );
+
+
+    if (signupError) {
+      throw signupError;
+    }
+
+
+    signups =
+      signupData || [];
+
+  }
+
+
+  // =======================================================
+  // HELPER MAP
+  // =======================================================
+
+  const opportunityMap =
+    new Map(
+      opportunities.map(
+        item => [
+          item.id,
+          item
+        ]
+      )
+    );
+
+
+  // =======================================================
+  // CALCULATE HOURS
+  // =======================================================
+
+  function calculateHours(
+    startTime,
+    endTime
+  ) {
+
+    if (
+      !startTime ||
+      !endTime
+    ) {
+
+      return 0;
+
+    }
+
+
+    const [
+      startHour,
+      startMinute
+    ] =
+      String(
+        startTime
+      )
+        .split(":")
+        .map(Number);
+
+
+    const [
+      endHour,
+      endMinute
+    ] =
+      String(
+        endTime
+      )
+        .split(":")
+        .map(Number);
+
+
+    let startMinutes =
+      startHour * 60 +
+      startMinute;
+
+
+    let endMinutes =
+      endHour * 60 +
+      endMinute;
+
+
+    /*
+      Supports an overtime period that
+      crosses midnight.
+    */
+
+    if (
+      endMinutes <
+      startMinutes
+    ) {
+
+      endMinutes +=
+        24 * 60;
+
+    }
+
+
+    return (
+      endMinutes -
+      startMinutes
+    ) / 60;
+
+  }
+
+
+  // =======================================================
+  // OVERTIME OPPORTUNITIES
+  // =======================================================
+
+  if (
+    type ===
+    "overtime_opportunities"
+  ) {
+
+    const totalOpenings =
+      opportunities.reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            item.total_openings ||
+            0
+          ),
+        0
+      );
+
+
+    const filledOpenings =
+      opportunities.reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            item.filled_openings ||
+            0
+          ),
+        0
+      );
+
+
+    renderSummary([
+      {
+        label:
+          "Opportunities",
+
+        value:
+          opportunities.length
+      },
+
+      {
+        label:
+          "Total Openings",
+
+        value:
+          totalOpenings
+      },
+
+      {
+        label:
+          "Filled Openings",
+
+        value:
+          filledOpenings
+      },
+
+      {
+        label:
+          "Remaining",
+
+        value:
+          Math.max(
+            totalOpenings -
+            filledOpenings,
+            0
+          )
+      }
+    ]);
+
+
+    renderTable(
+      [
+        {
+          key:
+            "date",
+
+          label:
+            "Date"
+        },
+
+        {
+          key:
+            "shift",
+
+          label:
+            "Shift"
+        },
+
+        {
+          key:
+            "time",
+
+          label:
+            "Time"
+        },
+
+        {
+          key:
+            "location",
+
+          label:
+            "Location"
+        },
+
+        {
+          key:
+            "filled",
+
+          label:
+            "Filled"
+        },
+
+        {
+          key:
+            "status",
+
+          label:
+            "Status"
+        },
+
+        {
+          key:
+            "createdBy",
+
+          label:
+            "Created By"
+        }
+      ],
+
+      opportunities.map(
+        item => ({
+
+          date:
+            item.opportunity_date,
+
+          shift:
+            item.shift_name,
+
+          time:
+            `${item.start_time || "—"} - ${item.end_time || "—"}`,
+
+          location:
+            item.location,
+
+          filled:
+            `${item.filled_openings || 0}/${item.total_openings || 0}`,
+
+          status:
+            item.status,
+
+          createdBy:
+            item.created_by_name ||
+            "—"
+
+        })
+      )
+    );
+
+
+    return;
+
+  }
+
+
+  // =======================================================
+  // UTILIZED OVERTIME HOURS
+  //
+  // Count completed overtime assignments.
+  // =======================================================
+
+  if (
+    type ===
+    "overtime_hours"
+  ) {
+
+    const utilized =
+      signups.filter(
+        item =>
+          item.status ===
+          "completed"
+      );
+
+
+    let totalHours =
+      0;
+
+
+    const rows =
+      utilized.map(
+        signup => {
+
+          const opportunity =
+            opportunityMap.get(
+              signup.opportunity_id
+            );
+
+
+          const hours =
+            calculateHours(
+              opportunity
+                ?.start_time,
+              opportunity
+                ?.end_time
+            );
+
+
+          totalHours +=
+            hours;
+
+
+          return {
+
+            officer:
+              signup.display_name ||
+              "—",
+
+            date:
+              opportunity
+                ?.opportunity_date ||
+              "—",
+
+            shift:
+              opportunity
+                ?.shift_name ||
+              "—",
+
+            location:
+              opportunity
+                ?.location ||
+              "—",
+
+            time:
+              `${opportunity?.start_time || "—"} - ${opportunity?.end_time || "—"}`,
+
+            hours:
+              hours
+                .toFixed(2)
+
+          };
+
+        }
+      );
+
+
+    const uniqueOfficers =
+      new Set(
+        utilized
+          .map(
+            item =>
+              item.user_id
+          )
+          .filter(Boolean)
+      ).size;
+
+
+    renderSummary([
+      {
+        label:
+          "Completed OT Assignments",
+
+        value:
+          utilized.length
+      },
+
+      {
+        label:
+          "Utilized Hours",
+
+        value:
+          totalHours
+            .toFixed(1)
+      },
+
+      {
+        label:
+          "Officers Utilized",
+
+        value:
+          uniqueOfficers
+      }
+    ]);
+
+
+    renderTable(
+      [
+        {
+          key:
+            "officer",
+
+          label:
+            "Officer"
+        },
+
+        {
+          key:
+            "date",
+
+          label:
+            "Date"
+        },
+
+        {
+          key:
+            "shift",
+
+          label:
+            "Shift"
+        },
+
+        {
+          key:
+            "location",
+
+          label:
+            "Location"
+        },
+
+        {
+          key:
+            "time",
+
+          label:
+            "Time"
+        },
+
+        {
+          key:
+            "hours",
+
+          label:
+            "Hours"
+        }
+      ],
+
+      rows
+    );
+
+
+    return;
+
+  }
+
+
+  // =======================================================
+  // FILLED OVERTIME OPPORTUNITIES
+  // =======================================================
+
+  if (
+    type ===
+    "filled_overtime"
+  ) {
+
+    const filled =
+      opportunities.filter(
+        item =>
+          Number(
+            item.filled_openings ||
+            0
+          ) >=
+          Number(
+            item.total_openings ||
+            0
+          ) &&
+          Number(
+            item.total_openings ||
+            0
+          ) > 0
+      );
+
+
+    renderSummary([
+      {
+        label:
+          "Fully Filled Opportunities",
+
+        value:
+          filled.length
+      },
+
+      {
+        label:
+          "Total Opportunities",
+
+        value:
+          opportunities.length
+      },
+
+      {
+        label:
+          "Fill Rate",
+
+        value:
+          opportunities.length
+            ? `${(
+                filled.length /
+                opportunities.length *
+                100
+              ).toFixed(1)}%`
+            : "0%"
+      }
+    ]);
+
+
+    renderTable(
+      [
+        {
+          key:
+            "date",
+
+          label:
+            "Date"
+        },
+
+        {
+          key:
+            "shift",
+
+          label:
+            "Shift"
+        },
+
+        {
+          key:
+            "location",
+
+          label:
+            "Location"
+        },
+
+        {
+          key:
+            "filled",
+
+          label:
+            "Filled"
+        },
+
+        {
+          key:
+            "status",
+
+          label:
+            "Status"
+        }
+      ],
+
+      filled.map(
+        item => ({
+
+          date:
+            item.opportunity_date,
+
+          shift:
+            item.shift_name,
+
+          location:
+            item.location,
+
+          filled:
+            `${item.filled_openings}/${item.total_openings}`,
+
+          status:
+            item.status
+
+        })
+      )
+    );
+
+
+    return;
+
+  }
+
+
+  // =======================================================
+  // UNFILLED OVERTIME OPPORTUNITIES
+  // =======================================================
+
+  if (
+    type ===
+    "unfilled_overtime"
+  ) {
+
+    const unfilled =
+      opportunities.filter(
+        item =>
+          Number(
+            item.filled_openings ||
+            0
+          ) <
+          Number(
+            item.total_openings ||
+            0
+          )
+      );
+
+
+    const remainingOpenings =
+      unfilled.reduce(
+        (sum, item) =>
+          sum +
+          Math.max(
+            Number(
+              item.total_openings ||
+              0
+            ) -
+            Number(
+              item.filled_openings ||
+              0
+            ),
+            0
+          ),
+        0
+      );
+
+
+    renderSummary([
+      {
+        label:
+          "Unfilled Opportunities",
+
+        value:
+          unfilled.length
+      },
+
+      {
+        label:
+          "Remaining Openings",
+
+        value:
+          remainingOpenings
+      }
+    ]);
+
+
+    renderTable(
+      [
+        {
+          key:
+            "date",
+
+          label:
+            "Date"
+        },
+
+        {
+          key:
+            "shift",
+
+          label:
+            "Shift"
+        },
+
+        {
+          key:
+            "location",
+
+          label:
+            "Location"
+        },
+
+        {
+          key:
+            "needed",
+
+          label:
+            "Openings Needed"
+        },
+
+        {
+          key:
+            "status",
+
+          label:
+            "Status"
+        }
+      ],
+
+      unfilled.map(
+        item => ({
+
+          date:
+            item.opportunity_date,
+
+          shift:
+            item.shift_name,
+
+          location:
+            item.location,
+
+          needed:
+            Math.max(
+              Number(
+                item.total_openings ||
+                0
+              ) -
+              Number(
+                item.filled_openings ||
+                0
+              ),
+              0
+            ),
+
+          status:
+            item.status
+
+        })
+      )
+    );
+
+
+    return;
+
+  }
+
+
+  // =======================================================
+  // SHIFTS REQUIRING OVERTIME
+  // =======================================================
+
+  if (
+    type ===
+    "overtime_by_shift"
+  ) {
+
+    const shiftMap =
+      new Map();
+
+
+    opportunities.forEach(
+      item => {
+
+        const shiftName =
+          item.shift_name ||
+          "Unknown";
+
+
+        if (
+          !shiftMap.has(
+            shiftName
+          )
+        ) {
+
+          shiftMap.set(
+            shiftName,
+            {
+              shift:
+                shiftName,
+
+              opportunities:
+                0,
+
+              openings:
+                0,
+
+              filled:
+                0,
+
+              remaining:
+                0
+            }
+          );
+
+        }
+
+
+        const row =
+          shiftMap.get(
+            shiftName
+          );
+
+
+        row.opportunities +=
+          1;
+
+
+        row.openings +=
+          Number(
+            item.total_openings ||
+            0
+          );
+
+
+        row.filled +=
+          Number(
+            item.filled_openings ||
+            0
+          );
+
+
+        row.remaining +=
+          Math.max(
+            Number(
+              item.total_openings ||
+              0
+            ) -
+            Number(
+              item.filled_openings ||
+              0
+            ),
+            0
+          );
+
+      }
+    );
+
+
+    const rows =
+      Array.from(
+        shiftMap.values()
+      )
+        .sort(
+          (a, b) =>
+            b.opportunities -
+            a.opportunities
+        );
+
+
+    renderSummary([
+      {
+        label:
+          "Shifts With OT",
+
+        value:
+          rows.length
+      },
+
+      {
+        label:
+          "Total Opportunities",
+
+        value:
+          opportunities.length
+      }
+    ]);
+
+
+    renderTable(
+      [
+        {
+          key:
+            "shift",
+
+          label:
+            "Shift"
+        },
+
+        {
+          key:
+            "opportunities",
+
+          label:
+            "Opportunities"
+        },
+
+        {
+          key:
+            "openings",
+
+          label:
+            "Total Openings"
+        },
+
+        {
+          key:
+            "filled",
+
+          label:
+            "Filled"
+        },
+
+        {
+          key:
+            "remaining",
+
+          label:
+            "Remaining"
+        }
+      ],
+
+      rows
+    );
+
+
+    return;
+
+  }
+
+
+  // =======================================================
+  // OFFICER OVERTIME SIGNUP HISTORY
+  // =======================================================
+
+  if (
+    type ===
+    "overtime_by_officer"
+  ) {
+
+    let filteredSignups =
+      [...signups];
+
+
+    if (
+      officer.value &&
+      officer.value !==
+      "all"
+    ) {
+
+      filteredSignups =
+        filteredSignups.filter(
+          item =>
+            item.user_id ===
+            officer.value
+        );
+
+    }
+
+
+    const uniqueOfficers =
+      new Set(
+        filteredSignups
+          .map(
+            item =>
+              item.user_id
+          )
+          .filter(Boolean)
+      ).size;
+
+
+    const approved =
+      filteredSignups.filter(
+        item =>
+          item.status ===
+          "approved" ||
+          item.status ===
+          "completed"
+      ).length;
+
+
+    const denied =
+      filteredSignups.filter(
+        item =>
+          item.status ===
+          "denied"
+      ).length;
+
+
+    renderSummary([
+      {
+        label:
+          "Signup Requests",
+
+        value:
+          filteredSignups.length
+      },
+
+      {
+        label:
+          "Officers",
+
+        value:
+          uniqueOfficers
+      },
+
+      {
+        label:
+          "Approved / Completed",
+
+        value:
+          approved
+      },
+
+      {
+        label:
+          "Denied",
+
+        value:
+          denied
+      }
+    ]);
+
+
+    renderTable(
+      [
+        {
+          key:
+            "officer",
+
+          label:
+            "Officer"
+        },
+
+        {
+          key:
+            "date",
+
+          label:
+            "OT Date"
+        },
+
+        {
+          key:
+            "shift",
+
+          label:
+            "Shift"
+        },
+
+        {
+          key:
+            "location",
+
+          label:
+            "Location"
+        },
+
+        {
+          key:
+            "status",
+
+          label:
+            "Request Status"
+        },
+
+        {
+          key:
+            "requested",
+
+          label:
+            "Requested"
+        },
+
+        {
+          key:
+            "reviewed",
+
+          label:
+            "Reviewed"
+        },
+
+        {
+          key:
+            "reviewedBy",
+
+          label:
+            "Reviewed By"
+        }
+      ],
+
+      filteredSignups.map(
+        item => {
+
+          const opportunity =
+            opportunityMap.get(
+              item.opportunity_id
+            );
+
+
+          return {
+
+            officer:
+              item.display_name ||
+              "—",
+
+            date:
+              opportunity
+                ?.opportunity_date ||
+              "—",
+
+            shift:
+              opportunity
+                ?.shift_name ||
+              "—",
+
+            location:
+              opportunity
+                ?.location ||
+              "—",
+
+            status:
+              item.status,
+
+            requested:
+              item.requested_at
+                ? new Date(
+                    item.requested_at
+                  ).toLocaleString()
+                : "—",
+
+            reviewed:
+              item.reviewed_at
+                ? new Date(
+                    item.reviewed_at
+                  ).toLocaleString()
+                : "—",
+
+            reviewedBy:
+              item.reviewed_by_name ||
+              "—"
+
+          };
+
+        }
+      )
+    );
+
+
+    return;
+
+  }
+
+
+  // =======================================================
+  // ON-CAMPUS VS OFF-CAMPUS
+  // =======================================================
+
+  if (
+    type ===
+    "external_overtime"
+  ) {
+
+    throw new Error(
+      "SecureTrack does not currently store whether an overtime signup is on-campus or off-campus help. Add a home-campus/help-source field before this report can be generated accurately."
+    );
+
+  }
+
+
+  throw new Error(
+    "This overtime report is not configured."
+  );
+
+}
 
   // =========================================================
   // GENERATE BUTTON
