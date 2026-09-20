@@ -572,3 +572,53 @@ textarea { resize: vertical; }
     margin-top: 3px;
   }
 }
+/* =========================================================
+   CLICKABLE PROPERTY SUMMARY CARDS
+   ========================================================= */
+
+.summary-link {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    transform .15s ease,
+    border-color .15s ease,
+    background .15s ease,
+    box-shadow .15s ease;
+}
+
+.summary-link:hover {
+  transform: translateY(-2px);
+  border-color: rgba(242, 140, 40, .65);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(28, 32, 37, .98),
+      rgba(12, 14, 17, .99)
+    );
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, .24);
+}
+
+.summary-link:focus-visible {
+  outline: 2px solid #f28c28;
+  outline-offset: 3px;
+}
+
+.summary-link small {
+  display: block;
+  margin-top: 14px;
+  color: #f2a04b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.summary-link:hover small {
+  color: #ffb667;
+}
