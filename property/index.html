@@ -6,9 +6,105 @@
   <meta name="theme-color" content="#0b0d10">
   <title>SecureTrack | Property / Belongings</title>
   <link rel="stylesheet" href="property.css">
+
+  <style>
+    .category-field { position: relative; }
+    .category-picker {
+      position: relative;
+      width: 100%;
+    }
+    .category-picker summary {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 46px;
+      padding: 11px 12px;
+      border: 1px solid #343a41;
+      border-radius: 10px;
+      background: #080b0e;
+      color: #f4f6f7;
+    }
+    .category-picker summary::-webkit-details-marker { display: none; }
+    .category-picker summary::after {
+      content: "▾";
+      color: #ff922b;
+      font-size: 14px;
+    }
+    .category-picker[open] summary::after { content: "▴"; }
+    .category-menu {
+      position: absolute;
+      z-index: 40;
+      left: 0;
+      right: 0;
+      top: calc(100% + 6px);
+      max-height: 360px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #343a41;
+      border-radius: 12px;
+      background: #0b0f13;
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+    }
+    .category-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+    .category-option:hover { background: #121820; }
+    .category-option input {
+      width: 17px;
+      height: 17px;
+      margin-top: 2px;
+      accent-color: #ff7a00;
+      flex: 0 0 auto;
+    }
+    .category-option span {
+      color: #e8ebee;
+      line-height: 1.35;
+    }
+    .category-help {
+      display: block;
+      margin-top: 6px;
+      color: #8f979f;
+      font-size: 12px;
+    }
+    .category-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 9px;
+      min-height: 0;
+    }
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 8px;
+      border: 1px solid rgba(255,146,43,.35);
+      border-radius: 999px;
+      background: rgba(255,146,43,.08);
+      color: #ffbf79;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .category-error {
+      display: none;
+      margin-top: 7px;
+      color: #ffadad;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .category-error.show { display: block; }
+  </style>
 </head>
 
-<body data-securetrack-roles="officer,dispatcher,senior_officer,team_lead,manager,admin">
+<body data-securetrack-roles="officer,dispatcher,senior_officer,team_lead,manager,director,admin">
   <main class="shell">
     <header class="topbar">
       <div>
@@ -78,24 +174,84 @@
 
         <label>
           <span>Property Description <b>*</b></span>
-          <textarea id="description" name="description" rows="3" required placeholder="Example: Black backpack containing clothing and phone charger"></textarea>
+          <textarea id="description" name="description" rows="3" required placeholder="Example: Black backpack containing clothing, wallet, medication and phone charger"></textarea>
         </label>
 
         <div class="form-grid two-col">
-          <label>
-            <span>Category <b>*</b></span>
-            <select id="category" name="category" required>
-              <option value="">Select category</option>
-              <option>Personal Belongings</option>
-              <option>Electronics</option>
-              <option>Wallet / Identification</option>
-              <option>Keys</option>
-              <option>Clothing</option>
-              <option>Jewelry / Valuables</option>
-              <option>Cash</option>
-              <option>Other</option>
-            </select>
-          </label>
+          <div class="category-field">
+            <span>Property Categories <b>*</b></span>
+
+            <!--
+              property.js can continue reading document.getElementById('category').value.
+              Selected checkboxes are combined into this hidden text value.
+            -->
+            <input id="category" name="category" type="hidden" value="">
+
+            <details id="categoryPicker" class="category-picker">
+              <summary id="categorySummary">Select property categories</summary>
+
+              <div class="category-menu" role="group" aria-label="Property categories">
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Cash & Financial Items">
+                  <span>Cash & Financial Items</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Identification & Documents">
+                  <span>Identification & Documents</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Electronics">
+                  <span>Electronics</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Jewelry & Valuables">
+                  <span>Jewelry & Valuables</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Clothing & Personal Accessories">
+                  <span>Clothing & Personal Accessories</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Bags, Wallets & Containers">
+                  <span>Bags, Wallets & Containers</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Keys & Access Items">
+                  <span>Keys & Access Items</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Medical, Medication & Assistive Items">
+                  <span>Medical, Medication & Assistive Items</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Weapons">
+                  <span>Weapons</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Restricted & Hazardous Items">
+                  <span>Restricted & Hazardous Items</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Other Personal Property">
+                  <span>Other Personal Property</span>
+                </label>
+              </div>
+            </details>
+
+            <small class="category-help">Select all that apply. The description should list each item in detail.</small>
+            <div id="categoryBadges" class="category-badges" aria-live="polite"></div>
+            <div id="categoryError" class="category-error" role="alert">Select at least one property category.</div>
+          </div>
 
           <label>
             <span>Date / Time Received <b>*</b></span>
@@ -159,7 +315,7 @@
               <th>DG</th>
               <th>MRN</th>
               <th>Description</th>
-              <th>Category</th>
+              <th>Categories</th>
               <th>Storage</th>
               <th>Status</th>
               <th>Received</th>
@@ -179,6 +335,105 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config.js"></script>
   <script src="../secure-page.js"></script>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const form = document.getElementById("propertyIntakeForm");
+      const categoryInput = document.getElementById("category");
+      const categoryPicker = document.getElementById("categoryPicker");
+      const categorySummary = document.getElementById("categorySummary");
+      const categoryBadges = document.getElementById("categoryBadges");
+      const categoryError = document.getElementById("categoryError");
+      const checkboxes = [
+        ...document.querySelectorAll('input[name="propertyCategory"]')
+      ];
+
+      function selectedCategories() {
+        return checkboxes
+          .filter(box => box.checked)
+          .map(box => box.value);
+      }
+
+      function syncCategories() {
+        const selected = selectedCategories();
+
+        categoryInput.value = selected.join(" | ");
+
+        if (!selected.length) {
+          categorySummary.textContent = "Select property categories";
+          categoryBadges.innerHTML = "";
+          return;
+        }
+
+        categorySummary.textContent =
+          selected.length === 1
+            ? selected[0]
+            : `${selected.length} categories selected`;
+
+        categoryBadges.innerHTML = selected
+          .map(value => {
+            const safe = String(value)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+
+            return `<span class="category-badge">${safe}</span>`;
+          })
+          .join("");
+
+        categoryError.classList.remove("show");
+      }
+
+      checkboxes.forEach(box => {
+        box.addEventListener("change", syncCategories);
+      });
+
+      form.addEventListener(
+        "submit",
+        event => {
+          syncCategories();
+
+          if (!selectedCategories().length) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            categoryError.classList.add("show");
+            categoryPicker.open = true;
+            categoryPicker.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        },
+        true
+      );
+
+      form.addEventListener("reset", () => {
+        window.setTimeout(() => {
+          checkboxes.forEach(box => {
+            box.checked = false;
+          });
+          categoryInput.value = "";
+          categorySummary.textContent = "Select property categories";
+          categoryBadges.innerHTML = "";
+          categoryError.classList.remove("show");
+          categoryPicker.open = false;
+        }, 0);
+      });
+
+      document.addEventListener("click", event => {
+        if (
+          categoryPicker.open &&
+          !categoryPicker.contains(event.target)
+        ) {
+          categoryPicker.open = false;
+        }
+      });
+
+      syncCategories();
+    })();
+  </script>
+
   <script src="property.js"></script>
 </body>
 </html>
