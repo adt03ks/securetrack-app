@@ -4042,21 +4042,25 @@ renderSearchResults(
   // SEARCH FORM
   // =========================================================
 
-  searchForm
-    .addEventListener(
-      "submit",
-      event => {
+ searchForm.addEventListener(
+  "submit",
+  event => {
 
-        event.preventDefault();
+    event.preventDefault();
 
 
-        runSearch(
-          searchInput.value
-        );
+    // A manual search searches across
+    // all property statuses.
+    activePropertyStatusFilter =
+      null;
 
-      }
+
+    runSearch(
+      searchInput.value
     );
 
+  }
+);
 // =========================================================
 // SUMMARY CARD RECORD SHORTCUTS
 // =========================================================
