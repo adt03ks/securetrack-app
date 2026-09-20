@@ -2192,6 +2192,23 @@
       background:#11151a; color:#fff; cursor:pointer; font-size:20px;
     }
     .outside-officer-body { padding:24px; }
+    .outside-officer-photo-area {
+      display:flex; gap:18px; align-items:center; margin-bottom:22px; padding-bottom:20px;
+      border-bottom:1px solid #292f35;
+    }
+    .outside-officer-photo {
+      width:92px; height:92px; min-width:92px; border-radius:50%; overflow:hidden;
+      display:flex; align-items:center; justify-content:center; border:2px solid #414850;
+      background:linear-gradient(145deg,#272e35,#11151a); color:#ff922b;
+      font-size:27px; font-weight:900; letter-spacing:.04em;
+    }
+    .outside-officer-photo img {
+      width:100%; height:100%; object-fit:cover; object-position:center; display:block;
+    }
+    .outside-officer-photo-tools { flex:1; min-width:0; }
+    .outside-officer-photo-tools input { max-width:100%; }
+    .outside-officer-photo-note { color:#8f979f; font-size:12px; margin-top:7px; line-height:1.45; }
+    .outside-officer-photo-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
     .outside-officer-grid {
       display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px;
     }
@@ -2282,6 +2299,7 @@
       .outside-officer-grid,
       .outside-officer-qualification-form { grid-template-columns:1fr; }
       .outside-officer-field.full { grid-column:auto; }
+      .outside-officer-photo-area { align-items:flex-start; }
     }
   `;
 
@@ -2304,6 +2322,33 @@
           </header>
 
           <div class="outside-officer-body">
+            <section class="outside-officer-photo-area">
+              <div id="outsideOfficerPhoto" class="outside-officer-photo">?</div>
+              <div class="outside-officer-photo-tools">
+                <strong>Outside Officer Photo</strong>
+                <div class="outside-officer-photo-note">
+                  Optional but recommended so supervisors can quickly identify the officer.
+                  JPG, PNG or WebP. Maximum file size: 5 MB.
+                </div>
+                <input
+                  id="outsideOfficerPhotoInput"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  style="margin-top:10px;"
+                >
+                <div class="outside-officer-photo-actions">
+                  <button
+                    id="outsideOfficerRemovePhoto"
+                    class="personnel-editor-danger"
+                    type="button"
+                    hidden
+                  >
+                    Remove Photo
+                  </button>
+                </div>
+              </div>
+            </section>
+
             <div class="outside-officer-grid">
               <div class="outside-officer-field">
                 <label for="outsideOfficerFirstName">First Name *</label>
@@ -2429,6 +2474,9 @@
   const outsideQualificationsSection = document.getElementById("outsideOfficerQualificationsSection");
   const outsideQualificationList = document.getElementById("outsideOfficerQualificationList");
   const outsideArmed = document.getElementById("outsideOfficerArmed");
+  const outsidePhoto = document.getElementById("outsideOfficerPhoto");
+  const outsidePhotoInput = document.getElementById("outsideOfficerPhotoInput");
+  const outsideRemovePhotoButton = document.getElementById("outsideOfficerRemovePhoto");
 
   const outsideFields = {
     firstName: document.getElementById("outsideOfficerFirstName"),
@@ -2456,8 +2504,12 @@
   let currentOutsideOfficer = null;
   let currentOutsideQualifications = [];
   let outsideArmedInitial = false;
+  let selectedOutsidePhotoFile = null;
 
   const outsideArmedCache = new Map();
+  const outsideOfficerRecordCache = new Map();
+  const outsidePhotoUrlCache = new Map();
+  let outsideOfficerDirectoryLoadPromise = null;
 
   function outsideNullable(value) {
     const clean = String(value || "").trim();
@@ -2474,6 +2526,181 @@
     outsideMessage.className = "outside-officer-message";
   }
 
+  function outsideInitials(person) {
+    const first = String(person?.first_name || "").trim();
+    const last = String(person?.last_name || "").trim();
+    if (first || last) {
+      return ((first[0] || "") + (last[0] || "")).toUpperCase();
+    }
+    const display = String(person?.display_name || "").trim();
+    const parts = display.split(/\s+/).filter(Boolean);
+    if (!parts.length) return "?";
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  async function outsideSignedPhotoURL(path) {
+    if (!path) return null;
+    if (outsidePhotoUrlCache.has(path)) {
+      return outsidePhotoUrlCache.get(path);
+    }
+
+    const { data, error } = await db
+      .storage
+      .from("officer-profile-photos")
+      .createSignedUrl(path, 3600);
+
+    if (error) {
+      console.warn("Unable to create outside officer photo URL:", error);
+      return null;
+    }
+
+    const url = data?.signedUrl || null;
+    if (url) outsidePhotoUrlCache.set(path, url);
+    return url;
+  }
+
+  async function renderOutsideEditorPhoto(person = null) {
+    if (!outsidePhoto) return;
+
+    outsidePhoto.innerHTML = "";
+    outsidePhoto.textContent = outsideInitials(person || {});
+    outsideRemovePhotoButton.hidden = !(
+      selectedOutsidePhotoFile || person?.profile_photo_path
+    );
+
+    if (selectedOutsidePhotoFile) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        outsidePhoto.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = reader.result;
+        img.alt = "Selected outside officer photo";
+        outsidePhoto.appendChild(img);
+      };
+      reader.readAsDataURL(selectedOutsidePhotoFile);
+      return;
+    }
+
+    if (!person?.profile_photo_path) return;
+
+    const url = await outsideSignedPhotoURL(person.profile_photo_path);
+    if (!url) return;
+
+    outsidePhoto.innerHTML = "";
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = (person.display_name || "Outside officer") + " profile photo";
+    img.addEventListener("error", () => {
+      outsidePhoto.innerHTML = "";
+      outsidePhoto.textContent = outsideInitials(person);
+    });
+    outsidePhoto.appendChild(img);
+  }
+
+  async function loadOutsideOfficerRecordCache(force = false) {
+    if (!force && outsideOfficerRecordCache.size) return;
+    if (outsideOfficerDirectoryLoadPromise) {
+      await outsideOfficerDirectoryLoadPromise;
+      return;
+    }
+
+    outsideOfficerDirectoryLoadPromise = (async () => {
+      const { data, error } = await db.rpc(
+        "get_outside_officer_directory",
+        { p_include_inactive: true }
+      );
+      if (error) throw error;
+      outsideOfficerRecordCache.clear();
+      (data || []).forEach(person => {
+        outsideOfficerRecordCache.set(
+          String(person.outside_officer_id),
+          person
+        );
+      });
+    })();
+
+    try {
+      await outsideOfficerDirectoryLoadPromise;
+    }
+    finally {
+      outsideOfficerDirectoryLoadPromise = null;
+    }
+  }
+
+  async function getOutsideOfficerRecordCached(outsideOfficerId) {
+    const key = String(outsideOfficerId || "");
+    if (!key) return null;
+    await loadOutsideOfficerRecordCache(false);
+    return outsideOfficerRecordCache.get(key) || null;
+  }
+
+  async function uploadOutsideOfficerPhoto(outsideOfficerId) {
+    if (!selectedOutsidePhotoFile || !outsideOfficerId) return null;
+
+    const extensions = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp"
+    };
+    const extension = extensions[selectedOutsidePhotoFile.type];
+    if (!extension) {
+      throw new Error("Photo must be JPG, PNG or WebP.");
+    }
+
+    const newPath =
+      "outside-officers/" +
+      outsideOfficerId +
+      "/profile-" +
+      Date.now() +
+      "." +
+      extension;
+
+    const oldPath = currentOutsideOfficer?.profile_photo_path || null;
+
+    const { error: uploadError } = await db
+      .storage
+      .from("officer-profile-photos")
+      .upload(newPath, selectedOutsidePhotoFile, {
+        cacheControl: "3600",
+        upsert: false
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { error: savePathError } = await db.rpc(
+      "set_outside_officer_profile_photo",
+      {
+        p_outside_officer_id: outsideOfficerId,
+        p_profile_photo_path: newPath
+      }
+    );
+
+    if (savePathError) {
+      await db
+        .storage
+        .from("officer-profile-photos")
+        .remove([newPath]);
+      throw savePathError;
+    }
+
+    if (oldPath && oldPath !== newPath) {
+      const { error: removeOldError } = await db
+        .storage
+        .from("officer-profile-photos")
+        .remove([oldPath]);
+      if (removeOldError) {
+        console.warn("Old outside officer photo could not be removed:", removeOldError);
+      }
+      outsidePhotoUrlCache.delete(oldPath);
+    }
+
+    selectedOutsidePhotoFile = null;
+    outsidePhotoInput.value = "";
+    outsideOfficerRecordCache.clear();
+    return newPath;
+  }
+
   function resetOutsideForm() {
     Object.values(outsideFields).forEach(field => {
       if (field.tagName === "SELECT") field.value = "officer";
@@ -2485,6 +2712,11 @@
     outsideQualificationFields.notes.value = "";
     outsideArmed.checked = false;
     outsideArmedInitial = false;
+    selectedOutsidePhotoFile = null;
+    outsidePhotoInput.value = "";
+    outsidePhoto.innerHTML = "";
+    outsidePhoto.textContent = "?";
+    outsideRemovePhotoButton.hidden = true;
     currentOutsideOfficer = null;
     currentOutsideQualifications = [];
     outsideQualificationsSection.hidden = true;
@@ -2493,14 +2725,93 @@
     clearOutsideMessage();
   }
 
-  async function getOutsideOfficerById(outsideOfficerId) {
-    const { data, error } = await db.rpc(
-      "get_outside_officer_directory",
-      { p_include_inactive: true }
+  outsidePhotoInput.addEventListener("change", async event => {
+    const file = event.target.files?.[0] || null;
+    if (!file) {
+      selectedOutsidePhotoFile = null;
+      await renderOutsideEditorPhoto(currentOutsideOfficer);
+      return;
+    }
+
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      outsidePhotoInput.value = "";
+      selectedOutsidePhotoFile = null;
+      setOutsideMessage("Photo must be JPG, PNG or WebP.", "error");
+      await renderOutsideEditorPhoto(currentOutsideOfficer);
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      outsidePhotoInput.value = "";
+      selectedOutsidePhotoFile = null;
+      setOutsideMessage("Photo must be 5 MB or smaller.", "error");
+      await renderOutsideEditorPhoto(currentOutsideOfficer);
+      return;
+    }
+
+    selectedOutsidePhotoFile = file;
+    clearOutsideMessage();
+    await renderOutsideEditorPhoto(currentOutsideOfficer);
+  });
+
+  outsideRemovePhotoButton.addEventListener("click", async () => {
+    clearOutsideMessage();
+
+    if (selectedOutsidePhotoFile) {
+      selectedOutsidePhotoFile = null;
+      outsidePhotoInput.value = "";
+      await renderOutsideEditorPhoto(currentOutsideOfficer);
+      setOutsideMessage("Selected photo cleared.", "info");
+      return;
+    }
+
+    if (!currentOutsideOfficer?.profile_photo_path) return;
+
+    const confirmed = window.confirm(
+      "Remove this outside officer's profile photo?"
     );
-    if (error) throw error;
-    return (data || []).find(
-      officer => String(officer.outside_officer_id) === String(outsideOfficerId)
+    if (!confirmed) return;
+
+    const oldPath = currentOutsideOfficer.profile_photo_path;
+    const { error } = await db.rpc(
+      "set_outside_officer_profile_photo",
+      {
+        p_outside_officer_id: currentOutsideOfficer.outside_officer_id,
+        p_profile_photo_path: null
+      }
+    );
+
+    if (error) {
+      setOutsideMessage(error.message, "error");
+      return;
+    }
+
+    const { error: storageError } = await db
+      .storage
+      .from("officer-profile-photos")
+      .remove([oldPath]);
+
+    if (storageError) {
+      console.warn(
+        "Outside officer photo pointer was cleared, but file removal failed:",
+        storageError
+      );
+    }
+
+    currentOutsideOfficer.profile_photo_path = null;
+    outsidePhotoUrlCache.delete(oldPath);
+    outsideOfficerRecordCache.clear();
+    await renderOutsideEditorPhoto(currentOutsideOfficer);
+    await refreshOutsideDirectory();
+    scheduleOutsideOfficerCardScan();
+    setOutsideMessage("Outside officer photo removed.", "success");
+  });
+
+  async function getOutsideOfficerById(outsideOfficerId) {
+    await loadOutsideOfficerRecordCache(true);
+    return outsideOfficerRecordCache.get(
+      String(outsideOfficerId)
     ) || null;
   }
 
@@ -2812,10 +3123,55 @@
         key;
 
     try {
-      const isArmed =
-        await getOutsideArmedStatus(
-          outsideOfficerId
+      const [isArmed, officerRecord] =
+        await Promise.all([
+          getOutsideArmedStatus(
+            outsideOfficerId
+          ),
+          getOutsideOfficerRecordCached(
+            outsideOfficerId
+          )
+        ]);
+
+      const avatar =
+        card.querySelector(
+          ".avatar"
         );
+
+      if (avatar && officerRecord) {
+        const photoPath =
+          officerRecord.profile_photo_path ||
+          null;
+
+        if (photoPath) {
+          const photoUrl =
+            await outsideSignedPhotoURL(
+              photoPath
+            );
+
+          if (photoUrl) {
+            avatar.innerHTML = "";
+            const image = document.createElement("img");
+            image.src = photoUrl;
+            image.alt =
+              (officerRecord.display_name || "Outside officer") +
+              " profile photo";
+            image.style.width = "100%";
+            image.style.height = "100%";
+            image.style.objectFit = "cover";
+            image.style.objectPosition = "center";
+            image.addEventListener("error", () => {
+              avatar.innerHTML = "";
+              avatar.textContent = outsideInitials(officerRecord);
+            });
+            avatar.appendChild(image);
+          }
+        }
+        else {
+          avatar.innerHTML = "";
+          avatar.textContent = outsideInitials(officerRecord);
+        }
+      }
 
       card
         .querySelectorAll(
@@ -2929,6 +3285,7 @@
     outsideFields.birthDate.value = person.birth_date || "";
     outsideFields.hireDate.value = person.hire_date || "";
     outsideFields.notes.value = person.notes || "";
+    renderOutsideEditorPhoto(person);
   }
 
   async function openOutsideAdd() {
@@ -2938,6 +3295,7 @@
     outsideSaveButton.textContent = "Add Outside Officer";
     outsideOverlay.hidden = false;
     document.body.style.overflow = "hidden";
+    renderOutsideEditorPhoto(null);
     setTimeout(() => outsideFields.firstName.focus(), 50);
   }
 
@@ -3073,6 +3431,24 @@
           );
       }
 
+      if (selectedOutsidePhotoFile) {
+        if (!outsideOfficerId) {
+          throw new Error(
+            "Outside officer was saved, but the new directory ID could not be resolved for the photo upload. Reopen the officer and upload the photo."
+          );
+        }
+
+        const savedPhotoPath =
+          await uploadOutsideOfficerPhoto(
+            outsideOfficerId
+          );
+
+        if (currentOutsideOfficer && savedPhotoPath) {
+          currentOutsideOfficer.profile_photo_path =
+            savedPhotoPath;
+        }
+      }
+
       if (
         outsideArmed.checked &&
         !outsideOfficerId
@@ -3100,6 +3476,7 @@
           outsideOfficerId || ""
         )
       );
+      outsideOfficerRecordCache.clear();
 
       await refreshOutsideDirectory();
       scheduleOutsideOfficerCardScan();
