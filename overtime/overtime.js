@@ -3082,6 +3082,75 @@
   }
 
 
+  const outsideOfficerPickerPhotoCache = new Map();
+
+  function outsideOfficerInitials(officer) {
+    const first = String(officer?.first_name || "").trim();
+    const last = String(officer?.last_name || "").trim();
+    if (first || last) {
+      return ((first[0] || "") + (last[0] || "")).toUpperCase();
+    }
+
+    const display = String(officer?.display_name || "").trim();
+    const parts = display.split(/\s+/).filter(Boolean);
+    if (!parts.length) return "?";
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  async function outsideOfficerPickerPhotoUrl(path) {
+    if (!path) return null;
+    if (outsideOfficerPickerPhotoCache.has(path)) {
+      return outsideOfficerPickerPhotoCache.get(path);
+    }
+
+    const { data, error } = await db
+      .storage
+      .from("officer-profile-photos")
+      .createSignedUrl(path, 3600);
+
+    if (error) {
+      console.warn(
+        "Unable to load outside officer picker photo:",
+        error
+      );
+      return null;
+    }
+
+    const url = data?.signedUrl || null;
+    if (url) outsideOfficerPickerPhotoCache.set(path, url);
+    return url;
+  }
+
+  async function renderOutsideOfficerPickerPhoto(
+    avatar,
+    officer
+  ) {
+    if (!avatar) return;
+
+    avatar.textContent = outsideOfficerInitials(officer);
+    const path = officer?.profile_photo_path || null;
+    if (!path) return;
+
+    const url = await outsideOfficerPickerPhotoUrl(path);
+    if (!url) return;
+
+    avatar.innerHTML = "";
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = (officer.display_name || "Outside officer") + " profile photo";
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "cover";
+    img.style.objectPosition = "center";
+    img.style.display = "block";
+    img.addEventListener("error", () => {
+      avatar.innerHTML = "";
+      avatar.textContent = outsideOfficerInitials(officer);
+    });
+    avatar.appendChild(img);
+  }
+
   function clearSelectedOutsideOfficer() {
 
     selectedOutsideOfficer =
@@ -3264,6 +3333,75 @@
           "div"
         );
 
+      left.style.display =
+        "flex";
+
+      left.style.alignItems =
+        "center";
+
+      left.style.gap =
+        "11px";
+
+      left.style.minWidth =
+        "0";
+
+      const avatar =
+        document.createElement(
+          "div"
+        );
+
+      avatar.style.width =
+        "44px";
+
+      avatar.style.height =
+        "44px";
+
+      avatar.style.minWidth =
+        "44px";
+
+      avatar.style.borderRadius =
+        "50%";
+
+      avatar.style.overflow =
+        "hidden";
+
+      avatar.style.display =
+        "flex";
+
+      avatar.style.alignItems =
+        "center";
+
+      avatar.style.justifyContent =
+        "center";
+
+      avatar.style.background =
+        "linear-gradient(145deg,#272e35,#11151a)";
+
+      avatar.style.border =
+        "1px solid #444c55";
+
+      avatar.style.color =
+        "#ff922b";
+
+      avatar.style.fontWeight =
+        "900";
+
+      avatar.style.fontSize =
+        "13px";
+
+      avatar.textContent =
+        outsideOfficerInitials(
+          officer
+        );
+
+      const text =
+        document.createElement(
+          "div"
+        );
+
+      text.style.minWidth =
+        "0";
+
       const name =
         document.createElement(
           "strong"
@@ -3297,8 +3435,15 @@
       meta.style.color =
         "#9aa2aa";
 
-      left.appendChild(name);
-      left.appendChild(meta);
+      text.appendChild(name);
+      text.appendChild(meta);
+      left.appendChild(avatar);
+      left.appendChild(text);
+
+      renderOutsideOfficerPickerPhoto(
+        avatar,
+        officer
+      );
 
 
       const choose =
