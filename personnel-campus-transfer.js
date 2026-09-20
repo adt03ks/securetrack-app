@@ -1,2525 +1,746 @@
-<!doctype html>
-<html lang="en">
+(function () {
+  "use strict";
 
-<head>
-  <meta charset="utf-8">
+  const STM = window.SecureTrackManager;
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1"
-  >
+  if (!STM || !STM.db) {
+    console.error(
+      "SecureTrackManager is required for Campus Transfer."
+    );
+    return;
+  }
 
-  <meta
-    name="theme-color"
-    content="#080a0c"
-  >
+  const db = STM.db;
 
-  <title>
-    SecureTrack | Personnel Administration
-  </title>
+  let currentPersonnel = null;
+  let submitting = false;
 
-  <link
-    rel="stylesheet"
-    href="styles.css"
-  >
+  // =========================================================
+  // STYLES
+  // =========================================================
 
-  <style>
+  const style = document.createElement("style");
 
-    * {
-      box-sizing: border-box;
+  style.textContent = `
+    .campus-transfer-overlay[hidden] {
+      display: none !important;
     }
 
-    .personnel-wrap {
+    .campus-transfer-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10040;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow-y: auto;
+      padding: 34px 16px;
+      background: rgba(0,0,0,.82);
+      backdrop-filter: blur(4px);
+    }
+
+    .campus-transfer-modal {
+      width: min(760px, 100%);
+      overflow: hidden;
+      border: 1px solid #3b4249;
+      border-radius: 18px;
+      background: linear-gradient(145deg,#0b0e11,#11151a);
+      box-shadow: 0 24px 80px rgba(0,0,0,.62);
+    }
+
+    .campus-transfer-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 22px 24px;
+      border-bottom: 1px solid #2d333a;
+    }
+
+    .campus-transfer-head h2 {
+      margin: 4px 0 0;
+    }
+
+    .campus-transfer-close {
+      width: 38px;
+      height: 38px;
+      border: 1px solid #3b4249;
+      border-radius: 10px;
+      background: #11151a;
+      color: #fff;
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    .campus-transfer-body {
       padding: 24px;
     }
 
-    .personnel-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .tab-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 22px;
-    }
-
-    .tab-button {
-      border: 1px solid #343a41;
-      background: #0b0e11;
-      color: #d5d8dc;
-      padding: 10px 14px;
-      border-radius: 11px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    .tab-button:hover {
-      border-color: #ff7800;
-    }
-
-    .tab-button.active {
-      color: #fff;
-      border-color: #ff7800;
-      background:
-        rgba(255,120,0,.12);
-    }
-
-    .tab-panel {
-      display: none;
-    }
-
-    .tab-panel.active {
-      display: block;
-    }
-
-    .section-head {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 18px;
-    }
-
-    .section-head h2 {
-      margin: 0 0 5px;
-    }
-
-    .search-row {
+    .campus-transfer-summary {
       display: grid;
-      grid-template-columns:
-        minmax(180px, 2fr)
-        minmax(130px, 1fr)
-        auto;
+      grid-template-columns: repeat(2, minmax(0,1fr));
       gap: 10px;
       margin-bottom: 18px;
     }
 
-    .search-row input,
-    .search-row select {
-      width: 100%;
-      min-height: 44px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid #343a41;
-      background: #080a0c;
-      color: #fff;
-    }
-
-    .personnel-grid {
-      display: grid;
-      grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .person-card {
+    .campus-transfer-summary-item {
       border: 1px solid #30363d;
-      background:
-        linear-gradient(
-          145deg,
-          #0b0e11,
-          #11151a
-        );
-      border-radius: 16px;
-      padding: 17px;
+      border-radius: 11px;
+      padding: 11px 12px;
+      background: #0a0d10;
     }
 
-    .person-card:hover {
-      border-color:
-        rgba(255,120,0,.7);
-    }
-
-    .person-top {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-    }
-
-    .avatar {
-      width: 58px;
-      height: 58px;
-      min-width: 58px;
-      border-radius: 50%;
-      overflow: hidden;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      background:
-        linear-gradient(
-          145deg,
-          #262c33,
-          #12161a
-        );
-
-      border:
-        1px solid #444c55;
-
-      color: #ff922b;
-      font-weight: 900;
-      font-size: 18px;
-      letter-spacing: .04em;
-    }
-
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .person-name {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .person-rank {
-      margin-top: 3px;
-      color: #ff922b;
-      font-size: 13px;
-      font-weight: 800;
+    .campus-transfer-summary-item span {
+      display: block;
+      margin-bottom: 3px;
+      color: #8f979f;
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .07em;
       text-transform: uppercase;
-      letter-spacing: .04em;
     }
 
-    .person-meta {
+    .campus-transfer-summary-item strong {
+      color: #f5f7f8;
+      font-size: 14px;
+    }
+
+    .campus-transfer-warning {
+      margin-bottom: 20px;
+      padding: 14px 15px;
+      border: 1px solid rgba(255,146,43,.42);
+      border-radius: 12px;
+      background: rgba(255,146,43,.08);
+      color: #f1c18b;
+      line-height: 1.55;
+    }
+
+    .campus-transfer-warning strong {
+      color: #ff922b;
+    }
+
+    .campus-transfer-grid {
       display: grid;
-      grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-      gap: 8px 14px;
-      margin-top: 15px;
-      font-size: 13px;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 15px;
     }
 
-    .meta-label {
-      color: #8d969f;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-    }
-
-    .meta-value {
-      color: #e6e8ea;
-      margin-top: 2px;
-      overflow-wrap: anywhere;
-    }
-
-    .badge-row {
+    .campus-transfer-field {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 6px;
-      margin-top: 13px;
     }
 
-    .status-badge {
-      display: inline-flex;
-      padding: 5px 8px;
-      border-radius: 999px;
-      border:
-        1px solid #3e454c;
-      font-size: 11px;
+    .campus-transfer-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .campus-transfer-field label {
+      color: #b8bec5;
+      font-size: 12px;
       font-weight: 800;
     }
 
-    .status-badge.orange {
-      color: #ff9a3c;
-      border-color:
-        rgba(255,120,0,.45);
-      background:
-        rgba(255,120,0,.08);
+    .campus-transfer-field input,
+    .campus-transfer-field textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #383f46;
+      border-radius: 10px;
+      background: #080b0e;
+      color: #f4f6f7;
+      padding: 11px 12px;
+      font: inherit;
     }
 
-    .status-badge.green {
-      color: #9adea8;
-      border-color:
-        rgba(87,187,109,.4);
-      background:
-        rgba(87,187,109,.08);
+    .campus-transfer-field textarea {
+      min-height: 96px;
+      resize: vertical;
     }
 
-    .status-badge.red {
-      color: #ff9292;
-      border-color:
-        rgba(224,74,74,.45);
-      background:
-        rgba(224,74,74,.08);
-    }
-
-    .card-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .action-button {
-      border: 1px solid #3b4249;
-      background: #151a1f;
-      color: #fff;
-      border-radius: 9px;
-      padding: 8px 11px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 12px;
-    }
-
-    .action-button:hover {
+    .campus-transfer-field input:focus,
+    .campus-transfer-field textarea:focus {
+      outline: 2px solid rgba(255,120,0,.25);
       border-color: #ff7800;
     }
 
-    .action-button.orange {
-      border-color:
-        rgba(255,120,0,.5);
-      color: #ff9a3c;
+    .campus-transfer-ack {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 13px 14px;
+      border: 1px solid #353c43;
+      border-radius: 11px;
+      background: #090c0f;
+      color: #d6dade;
+      line-height: 1.45;
+      cursor: pointer;
     }
 
-    .action-button.danger {
-      border-color:
-        rgba(224,74,74,.45);
-      color: #ff9292;
+    .campus-transfer-ack input {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      margin-top: 1px;
     }
 
-    .primary-button {
-      border: 1px solid #ff7800;
-      background: #ff7800;
-      color: #101214;
+    .campus-transfer-message {
+      display: none;
+      margin-top: 16px;
+      padding: 11px 13px;
       border-radius: 10px;
-      padding: 10px 14px;
+    }
+
+    .campus-transfer-message.success {
+      display: block;
+      color: #9adea8;
+      border: 1px solid rgba(87,187,109,.4);
+      background: rgba(87,187,109,.08);
+    }
+
+    .campus-transfer-message.error {
+      display: block;
+      color: #ffadad;
+      border: 1px solid rgba(224,74,74,.45);
+      background: rgba(224,74,74,.08);
+    }
+
+    .campus-transfer-message.info {
+      display: block;
+      color: #ffbf79;
+      border: 1px solid rgba(255,146,43,.35);
+      background: rgba(255,146,43,.07);
+    }
+
+    .campus-transfer-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 18px 24px;
+      border-top: 1px solid #2d333a;
+    }
+
+    .campus-transfer-button {
+      border-color: rgba(255,146,43,.55) !important;
+      color: #ffb25f !important;
+    }
+
+    .campus-transfer-confirm {
+      border: 1px solid #ff7800;
+      border-radius: 10px;
+      background: #ff7800;
+      color: #111;
+      padding: 10px 15px;
       cursor: pointer;
       font-weight: 900;
     }
 
-    .primary-button:disabled {
+    .campus-transfer-confirm:disabled {
       opacity: .45;
       cursor: not-allowed;
     }
 
-    .secondary-button {
-      border: 1px solid #3d444c;
-      background: #11151a;
-      color: #fff;
+    .campus-transfer-cancel {
+      border: 1px solid #3a4249;
       border-radius: 10px;
-      padding: 10px 14px;
+      background: #11161b;
+      color: #e5e8eb;
+      padding: 10px 15px;
       cursor: pointer;
       font-weight: 800;
     }
 
-    .empty-state {
-      border: 1px dashed #3b4249;
-      border-radius: 14px;
-      padding: 28px;
-      text-align: center;
-      color: #9098a0;
-    }
-
-    .loading-box {
-      padding: 24px;
-      text-align: center;
-      color: #9098a0;
-    }
-
-    .notice {
-      border: 1px solid
-        rgba(255,120,0,.35);
-      background:
-        rgba(255,120,0,.07);
-      border-radius: 12px;
-      padding: 13px 15px;
-      margin-bottom: 17px;
-    }
-
-    .notice strong {
-      color: #ff922b;
-    }
-
-    .error-box {
-      display: none;
-      border: 1px solid
-        rgba(220,65,65,.5);
-      background:
-        rgba(220,65,65,.08);
-      color: #ffb3b3;
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 15px;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns:
-        repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 22px;
-    }
-
-    .summary-card {
-      border: 1px solid #30363d;
-      border-radius: 14px;
-      padding: 15px;
-      background: #0c1014;
-    }
-
-    .summary-value {
-      font-size: 28px;
-      font-weight: 900;
-      color: #fff;
-    }
-
-    .summary-label {
-      margin-top: 3px;
-      color: #929aa2;
-      font-size: 12px;
-    }
-
-    .property-card {
-      border: 1px solid #30363d;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 12px;
-      background: #0b0e11;
-    }
-
-    .property-title {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    @media (max-width: 850px) {
-
-      .personnel-grid,
-      .summary-grid {
+    @media (max-width: 650px) {
+      .campus-transfer-summary,
+      .campus-transfer-grid {
         grid-template-columns: 1fr;
       }
-
-      .search-row {
-        grid-template-columns: 1fr;
-      }
-
-      .person-meta {
-        grid-template-columns: 1fr;
-      }
-
     }
+  `;
 
-  </style>
+  document.head.appendChild(style);
 
-</head>
+  // =========================================================
+  // MODAL
+  // =========================================================
 
+  const overlay = document.createElement("div");
+  overlay.id = "campusTransferOverlay";
+  overlay.className = "campus-transfer-overlay";
+  overlay.hidden = true;
+  overlay.setAttribute("aria-hidden", "true");
 
-<body
-  data-securetrack-roles="manager,director,admin"
->
-
-<main class="shell">
-
-  <section class="panel manager-console">
-
-
-    <header class="panel-head manager-header">
-
-      <div class="manager-header-row">
-
-        <div class="brandbar">
-
-          <div
-            class="logo-mark"
-            aria-hidden="true"
-          >
-            <span class="logo-lock"></span>
-          </div>
-
-          <div>
-
-            <div class="wordmark">
-              <span>Secure</span><span>Track</span>
-            </div>
-
-            <div class="tagline">
-              Personnel Management
-            </div>
-
-          </div>
-
+  overlay.innerHTML = `
+    <section
+      class="campus-transfer-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="campusTransferTitle"
+    >
+      <div class="campus-transfer-head">
+        <div>
+          <div class="eyebrow">Personnel Transfer</div>
+          <h2 id="campusTransferTitle">Transfer to Outside Officer</h2>
+          <p id="campusTransferSubtitle" class="subtle" style="margin:7px 0 0;">
+            Move an active local officer to the Outside Officer Directory.
+          </p>
         </div>
 
-
-        <div class="manager-user-area">
-
-          <a
-            class="back-link"
-            href="manager-portal.html"
-          >
-            ← Manager Portal
-          </a>
-
-          <button
-            id="logoutButton"
-            class="back-link"
-            type="button"
-          >
-            Sign Out
-          </button>
-
-        </div>
-
+        <button
+          id="campusTransferClose"
+          class="campus-transfer-close"
+          type="button"
+          aria-label="Close"
+        >×</button>
       </div>
 
+      <form id="campusTransferForm">
+        <div class="campus-transfer-body">
+          <input id="campusTransferUserId" type="hidden">
 
-      <div class="eyebrow">
-        Personnel Administration
-      </div>
-
-      <h1>
-        Personnel Management
-      </h1>
-
-      <p class="subtle">
-        Manage active personnel, outside officers,
-        ranks, qualifications, separation and
-        outstanding property.
-      </p>
-
-    </header>
-
-
-    <div class="personnel-wrap">
-
-      <div
-        id="errorBox"
-        class="error-box"
-      ></div>
-
-
-      <!-- ======================================
-           SUMMARY
-           ====================================== -->
-
-      <section
-        class="summary-grid"
-        aria-label="Personnel summary"
-      >
-
-        <div class="summary-card">
-
-          <div
-            id="activeCount"
-            class="summary-value"
-          >
-            —
-          </div>
-
-          <div class="summary-label">
-            Active Personnel
-          </div>
-
-        </div>
-
-
-        <div class="summary-card">
-
-          <div
-            id="outsideCount"
-            class="summary-value"
-          >
-            —
-          </div>
-
-          <div class="summary-label">
-            Outside Officers
-          </div>
-
-        </div>
-
-
-        <div class="summary-card">
-
-          <div
-            id="propertyCount"
-            class="summary-value"
-          >
-            —
-          </div>
-
-          <div class="summary-label">
-            Open Property Cases
-          </div>
-
-        </div>
-
-
-        <div class="summary-card">
-
-          <div
-            id="transferCount"
-            class="summary-value"
-          >
-            —
-          </div>
-
-          <div class="summary-label">
-            Transfer Pending
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- ======================================
-           TABS
-           ====================================== -->
-
-      <nav class="tab-row">
-
-        <button
-          class="tab-button active"
-          data-tab="activePersonnel"
-          type="button"
-        >
-          Active Personnel
-        </button>
-
-        <button
-          class="tab-button"
-          data-tab="outsideOfficers"
-          type="button"
-        >
-          Outside Officers
-        </button>
-
-        <button
-          class="tab-button"
-          data-tab="separation"
-          type="button"
-        >
-          Employee Separation
-        </button>
-
-        <button
-          class="tab-button"
-          data-tab="outstandingProperty"
-          type="button"
-        >
-          Outstanding Property
-        </button>
-
-      </nav>
-
-
-      <!-- ======================================
-           ACTIVE PERSONNEL
-           ====================================== -->
-
-      <section
-        id="activePersonnel"
-        class="tab-panel active"
-      >
-
-        <div class="section-head">
-
-          <div>
-
-            <div class="eyebrow">
-              Local Personnel
+          <div class="campus-transfer-summary">
+            <div class="campus-transfer-summary-item">
+              <span>Officer</span>
+              <strong id="campusTransferOfficerName">—</strong>
             </div>
 
-            <h2>
-              Active Personnel
-            </h2>
+            <div class="campus-transfer-summary-item">
+              <span>Current Shift</span>
+              <strong id="campusTransferCurrentShift">—</strong>
+            </div>
 
-            <p class="subtle">
-              Personnel regularly assigned to this campus.
-            </p>
+            <div class="campus-transfer-summary-item">
+              <span>Employee #</span>
+              <strong id="campusTransferEmployeeNumber">—</strong>
+            </div>
 
+            <div class="campus-transfer-summary-item">
+              <span>Current Rank</span>
+              <strong id="campusTransferRank">—</strong>
+            </div>
           </div>
 
+          <div class="campus-transfer-warning">
+            <strong>This changes the officer's SecureTrack access.</strong><br>
+            The officer will be removed from active local personnel, their local shift assignment will be closed,
+            and their SecureTrack application roles will be revoked. Their original profile and historical records
+            are preserved. A linked Outside Officer record will remain available for future overtime assignments.
+          </div>
+
+          <div class="campus-transfer-grid">
+            <div class="campus-transfer-field">
+              <label for="campusTransferHomeCampus">New Home Campus *</label>
+              <input
+                id="campusTransferHomeCampus"
+                type="text"
+                placeholder="Example: Memorial City"
+                autocomplete="off"
+                required
+              >
+            </div>
+
+            <div class="campus-transfer-field">
+              <label for="campusTransferEffectiveDate">Effective Date *</label>
+              <input
+                id="campusTransferEffectiveDate"
+                type="date"
+                required
+              >
+            </div>
+
+            <div class="campus-transfer-field full">
+              <label for="campusTransferNotes">Transfer Notes</label>
+              <textarea
+                id="campusTransferNotes"
+                placeholder="Optional notes about the campus transfer"
+              ></textarea>
+            </div>
+          </div>
+
+          <label class="campus-transfer-ack">
+            <input id="campusTransferAcknowledge" type="checkbox">
+            <span>
+              I understand that completing this transfer will revoke this officer's current SecureTrack application access
+              and convert them to an Outside Officer record for this campus.
+            </span>
+          </label>
+
+          <div
+            id="campusTransferMessage"
+            class="campus-transfer-message"
+            role="status"
+            aria-live="polite"
+          ></div>
+        </div>
+
+        <div class="campus-transfer-footer">
           <button
-            id="addOfficerButton"
-            class="primary-button"
+            id="campusTransferCancel"
+            class="campus-transfer-cancel"
             type="button"
+          >Cancel</button>
+
+          <button
+            id="campusTransferConfirm"
+            class="campus-transfer-confirm"
+            type="submit"
             disabled
-            title="Secure account creation is being configured next."
-          >
-            + Add New Officer
-          </button>
-
+          >Transfer to Outside Officer</button>
         </div>
-
-
-        <div class="notice">
-
-          <strong>
-            New Officer Setup:
-          </strong>
-
-          The secure server-side account creation process
-          will be connected next. Existing personnel can
-          already be displayed here.
-
-        </div>
-
-
-        <div class="search-row">
-
-          <input
-            id="activeSearch"
-            type="search"
-            placeholder="Search name, employee number, email..."
-          >
-
-          <select id="activeShiftFilter">
-
-            <option value="">
-              All Shifts
-            </option>
-
-            <option value="Alpha">
-              Alpha
-            </option>
-
-            <option value="Bravo">
-              Bravo
-            </option>
-
-            <option value="Charlie">
-              Charlie
-            </option>
-
-            <option value="Delta">
-              Delta
-            </option>
-
-          </select>
-
-          <button
-            id="refreshActiveButton"
-            class="secondary-button"
-            type="button"
-          >
-            Refresh
-          </button>
-
-        </div>
-
-
-        <div
-          id="activePersonnelGrid"
-          class="personnel-grid"
-        >
-
-          <div class="loading-box">
-            Loading active personnel...
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- ======================================
-           OUTSIDE OFFICERS
-           ====================================== -->
-
-      <section
-        id="outsideOfficers"
-        class="tab-panel"
-      >
-
-        <div class="section-head">
-
-          <div>
-
-            <div class="eyebrow">
-              Overtime Personnel
-            </div>
-
-            <h2>
-              Outside Officers
-            </h2>
-
-            <p class="subtle">
-              Officers from another campus who may
-              repeatedly work overtime at this location.
-            </p>
-
-          </div>
-
-          <button
-            id="addOutsideButton"
-            class="primary-button"
-            type="button"
-          >
-            + Add Outside Officer
-          </button>
-
-        </div>
-
-
-        <div class="search-row">
-
-          <input
-            id="outsideSearch"
-            type="search"
-            placeholder="Search name, campus, phone, email..."
-          >
-
-          <select id="outsideRankFilter">
-
-            <option value="">
-              All Ranks
-            </option>
-
-            <option value="officer">
-              Officer
-            </option>
-
-            <option value="senior_officer">
-              Senior Officer
-            </option>
-
-            <option value="team_lead">
-              Team Lead
-            </option>
-
-          </select>
-
-          <button
-            id="refreshOutsideButton"
-            class="secondary-button"
-            type="button"
-          >
-            Refresh
-          </button>
-
-        </div>
-
-
-        <div
-          id="outsideOfficerGrid"
-          class="personnel-grid"
-        >
-
-          <div class="loading-box">
-            Loading outside officers...
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- ======================================
-           EMPLOYEE SEPARATION
-           ====================================== -->
-
-      <section
-        id="separation"
-        class="tab-panel"
-      >
-
-        <div class="section-head">
-
-          <div>
-
-            <div class="eyebrow">
-              Employment Status
-            </div>
-
-            <h2>
-              Employee Separation
-            </h2>
-
-            <p class="subtle">
-              Process an approved employee separation while
-              preserving SecureTrack history and accountability.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="notice">
-
-          <strong>
-            Important:
-          </strong>
-
-          SecureTrack will preserve the employee's historical
-          transactions, incidents, training, assignments and
-          property records. Separation does not delete the
-          employee's operational history.
-
-        </div>
-
-
-        <div
-          id="separationGrid"
-          class="personnel-grid"
-        >
-
-          <div class="loading-box">
-            Loading eligible personnel...
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- ======================================
-           OUTSTANDING PROPERTY
-           ====================================== -->
-
-      <section
-        id="outstandingProperty"
-        class="tab-panel"
-      >
-
-        <div class="section-head">
-
-          <div>
-
-            <div class="eyebrow">
-              Accountability
-            </div>
-
-            <h2>
-              Outstanding Property
-            </h2>
-
-            <p class="subtle">
-              Follow unresolved property after
-              an employee separation.
-            </p>
-
-          </div>
-
-          <button
-            id="refreshPropertyButton"
-            class="secondary-button"
-            type="button"
-          >
-            Refresh
-          </button>
-
-        </div>
-
-
-        <div id="propertyQueue">
-
-          <div class="loading-box">
-            Loading outstanding property...
-          </div>
-
-        </div>
-
-      </section>
-
-
-    </div>
-
-
-    <div class="actions">
-
-      <div class="footer-trust">
-
-        <div>
-
-          <strong>
-            SECURE. ACCOUNTABLE. CONNECTED.
-          </strong>
-
-          <br>
-
-          SecureTrack Personnel Administration
-
-        </div>
-
-        <div>
-          ◉ MANAGEMENT
-        </div>
-
-      </div>
-
-    </div>
-
-
-  </section>
-
-</main>
-
-
-<script
-  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-></script>
-
-<script src="config.js"></script>
-<script src="secure-page.js"></script>
-<script src="manager-common.js"></script>
-
-
-<script>
-
-(async function () {
-
-  "use strict";
-
-
-  const STM =
-    window.SecureTrackManager;
-
-
-  if (!STM) {
-
-    console.error(
-      "SecureTrackManager was not loaded."
-    );
-
-    return;
-
+      </form>
+    </section>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const form = document.getElementById("campusTransferForm");
+  const closeButton = document.getElementById("campusTransferClose");
+  const cancelButton = document.getElementById("campusTransferCancel");
+  const confirmButton = document.getElementById("campusTransferConfirm");
+  const acknowledge = document.getElementById("campusTransferAcknowledge");
+  const userIdInput = document.getElementById("campusTransferUserId");
+  const homeCampusInput = document.getElementById("campusTransferHomeCampus");
+  const effectiveDateInput = document.getElementById("campusTransferEffectiveDate");
+  const notesInput = document.getElementById("campusTransferNotes");
+  const messageBox = document.getElementById("campusTransferMessage");
+
+  function localToday() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }
 
-
-  const manager =
-    await STM.requireManager();
-
-
-  if (!manager) {
-    return;
-  }
-
-
-  const db =
-    STM.db;
-
-
-  let activePersonnel = [];
-
-  let outsideOfficers = [];
-
-  let outstandingProperty = [];
-
-
-  // ============================================
-  // HELPERS
-  // ============================================
-
-  function escapeHTML(value) {
-
-    return String(
-      value ?? ""
-    )
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-
-  }
-
-
-  function initials(
-    firstName,
-    lastName,
-    displayName
-  ) {
-
-    const first =
-      String(
-        firstName || ""
-      ).trim();
-
-
-    const last =
-      String(
-        lastName || ""
-      ).trim();
-
-
-    if (first || last) {
-
-      return (
-        (first[0] || "") +
-        (last[0] || "")
-      ).toUpperCase();
-
-    }
-
-
-    const parts =
-      String(
-        displayName || ""
-      )
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean);
-
-
-    if (!parts.length) {
-      return "?";
-    }
-
-
-    if (parts.length === 1) {
-      return parts[0][0].toUpperCase();
-    }
-
-
-    return (
-      parts[0][0] +
-      parts[parts.length - 1][0]
-    ).toUpperCase();
-
-  }
-
-
-  function rankLabel(rank) {
-
+  function rankLabel(value) {
     const labels = {
-
-      officer:
-        "Officer",
-
-      senior_officer:
-        "Senior Officer",
-
-      team_lead:
-        "Team Lead",
-
-      manager:
-        "Manager",
-
-      director:
-        "Director",
-
-      admin:
-        "Administrator",
-
-      dispatcher:
-        "Dispatcher"
-
+      officer: "Officer",
+      senior_officer: "Senior Officer",
+      team_lead: "Team Lead",
+      dispatcher: "Dispatcher",
+      manager: "Manager",
+      director: "Director",
+      admin: "Administrator"
     };
 
-
-    return labels[rank] || rank || "Officer";
-
+    return labels[value] || value || "—";
   }
 
+  function setMessage(message, type) {
+    messageBox.className = "campus-transfer-message";
+    messageBox.textContent = "";
 
-  function showError(message) {
+    if (!message) return;
 
-    const box =
-      document.getElementById(
-        "errorBox"
-      );
-
-
-    box.textContent =
-      message;
-
-
-    box.style.display =
-      "block";
-
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-
+    messageBox.textContent = message;
+    messageBox.classList.add(type || "info");
   }
 
+  function resetForm() {
+    currentPersonnel = null;
+    form.reset();
+    userIdInput.value = "";
+    effectiveDateInput.value = localToday();
+    confirmButton.disabled = true;
+    confirmButton.textContent = "Transfer to Outside Officer";
+    setMessage("", "info");
 
-  function clearError() {
-
-    document
-      .getElementById(
-        "errorBox"
-      )
-      .style.display =
-        "none";
-
+    document.getElementById("campusTransferOfficerName").textContent = "—";
+    document.getElementById("campusTransferCurrentShift").textContent = "—";
+    document.getElementById("campusTransferEmployeeNumber").textContent = "—";
+    document.getElementById("campusTransferRank").textContent = "—";
   }
 
+  async function openTransfer(userId) {
+    if (!userId || submitting) return;
 
-  function renderAvatar(person) {
+    resetForm();
 
-    const letters =
-      initials(
-        person.first_name,
-        person.last_name,
-        person.display_name
-      );
+    overlay.hidden = false;
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
 
+    document.getElementById("campusTransferSubtitle").textContent =
+      "Loading personnel record...";
 
-    /*
-      Photos are stored in private buckets.
+    confirmButton.disabled = true;
 
-      For now the page uses initials.
-      Signed-photo URL loading will be connected
-      when we build the photo editor.
-    */
-
-    return `
-      <div class="avatar">
-        ${escapeHTML(letters)}
-      </div>
-    `;
-
-  }
-
-
-  // ============================================
-  // TABS
-  // ============================================
-
-  document
-    .querySelectorAll(
-      ".tab-button"
-    )
-    .forEach(button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          const target =
-            button.dataset.tab;
-
-
-          document
-            .querySelectorAll(
-              ".tab-button"
-            )
-            .forEach(b =>
-              b.classList.remove(
-                "active"
-              )
-            );
-
-
-          document
-            .querySelectorAll(
-              ".tab-panel"
-            )
-            .forEach(panel =>
-              panel.classList.remove(
-                "active"
-              )
-            );
-
-
-          button.classList.add(
-            "active"
-          );
-
-
-          document
-            .getElementById(
-              target
-            )
-            .classList.add(
-              "active"
-            );
-
-        }
-      );
-
-    });
-
-
-  // ============================================
-  // ACTIVE PERSONNEL
-  // ============================================
-
-  async function loadActivePersonnel() {
-
-    clearError();
-
-
-    const grid =
-      document.getElementById(
-        "activePersonnelGrid"
-      );
-
-
-    grid.innerHTML =
-      `<div class="loading-box">
-        Loading active personnel...
-      </div>`;
-
-
-   const {
-  data,
-  error
-} =
- await db.rpc(
-  "get_personnel_admin_directory",
-  {
-    p_include_terminated: false
-  }
-);
-
-
-    if (error) {
-
-      console.error(
-        "Personnel directory error:",
-        error
-      );
-
-
-      grid.innerHTML =
-        `<div class="empty-state">
-          Unable to load personnel.
-        </div>`;
-
-
-      showError(
-        error.message
-      );
-
-      return;
-
-    }
-
-
-    activePersonnel =
-      data || [];
-
-
-    document
-      .getElementById(
-        "activeCount"
-      )
-      .textContent =
-        activePersonnel.length;
-
-
-    document
-      .getElementById(
-        "transferCount"
-      )
-      .textContent =
-        activePersonnel.filter(
-          person =>
-            person.transfer_pending ===
-            true
-        ).length;
-
-
-    renderActivePersonnel();
-
-  }
-
-
-  function renderActivePersonnel() {
-
-    const search =
-      document
-        .getElementById(
-          "activeSearch"
-        )
-        .value
-        .trim()
-        .toLowerCase();
-
-
-    const shift =
-      document
-        .getElementById(
-          "activeShiftFilter"
-        )
-        .value;
-
-
-    const filtered =
-      activePersonnel.filter(
-        person => {
-
-          const haystack =
-            [
-              person.display_name,
-              person.first_name,
-              person.last_name,
-              person.employee_number,
-              person.email,
-              person.phone_number,
-              person.shift_name
-            ]
-              .filter(Boolean)
-              .join(" ")
-              .toLowerCase();
-
-
-          if (
-            search &&
-            !haystack.includes(
-              search
-            )
-          ) {
-            return false;
-          }
-
-
-          if (
-            shift &&
-            person.shift_name !==
-              shift
-          ) {
-            return false;
-          }
-
-
-          return true;
-
-        }
-      );
-
-
-    const grid =
-      document.getElementById(
-        "activePersonnelGrid"
-      );
-
-
-    if (!filtered.length) {
-
-      grid.innerHTML =
-        `<div class="empty-state">
-          No active personnel match this search.
-        </div>`;
-
-      return;
-
-    }
-
-
-    grid.innerHTML =
-      filtered
-        .map(person => {
-
-          const rank =
-            person.rank ||
-            person.officer_rank ||
-            "officer";
-
-
-          return `
-            <article class="person-card">
-
-              <div class="person-top">
-
-                ${renderAvatar(person)}
-
-                <div>
-
-                  <h3 class="person-name">
-                    ${escapeHTML(
-                      person.display_name
-                    )}
-                  </h3>
-
-                  <div class="person-rank">
-                    ${escapeHTML(
-                      rankLabel(rank)
-                    )}
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              <div class="person-meta">
-
-                <div>
-
-                  <div class="meta-label">
-                    Employee #
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.employee_number ||
-                      "—"
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Shift
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.shift_name ||
-                      "Unassigned"
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Email
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.email ||
-                      "—"
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Telephone
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.phone_number ||
-                      "—"
-                    )}
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              <div class="badge-row">
-
-                <span class="status-badge green">
-                  ACTIVE
-                </span>
-
-                ${
-                  person.transfer_pending
-                    ? `
-                      <span class="status-badge orange">
-                        TRANSFER PENDING
-                      </span>
-                    `
-                    : ""
-                }
-
-              </div>
-
-
-              <div class="card-actions">
-
-                <button
-                  class="action-button orange"
-                  type="button"
-                  data-action="edit"
-                  data-id="${escapeHTML(
-                    person.user_id
-                  )}"
-                >
-                  Edit Personnel
-                </button>
-
-                <button
-                  class="action-button"
-                  type="button"
-                  data-action="qualifications"
-                  data-id="${escapeHTML(
-                    person.user_id
-                  )}"
-                >
-                  Qualifications
-                </button>
-
-                <button
-                  class="action-button danger"
-                  type="button"
-                  data-action="separate"
-                  data-id="${escapeHTML(
-                    person.user_id
-                  )}"
-                >
-                  Employee Separation
-                </button>
-
-              </div>
-
-            </article>
-          `;
-
-        })
-        .join("");
-
-  }
-
-
-  // ============================================
-  // OUTSIDE OFFICERS
-  // ============================================
-
-  async function loadOutsideOfficers() {
-
-    clearError();
-
-
-    const grid =
-      document.getElementById(
-        "outsideOfficerGrid"
-      );
-
-
-    grid.innerHTML =
-      `<div class="loading-box">
-        Loading outside officers...
-      </div>`;
-
-
-    const {
-      data,
-      error
-    } =
-      await db.rpc(
-        "get_outside_officer_directory",
+    try {
+      const { data, error } = await db.rpc(
+        "get_personnel_admin_record",
         {
-          p_include_inactive: false
+          p_user_id: userId
         }
       );
 
+      if (error) throw error;
+      if (!data) throw new Error("Personnel record was not found.");
 
-    if (error) {
+      currentPersonnel = data;
+      userIdInput.value = userId;
 
-      console.error(
-        "Outside officer error:",
-        error
-      );
+      document.getElementById("campusTransferSubtitle").textContent =
+        "Confirm the destination campus before converting this profile to an Outside Officer.";
 
+      document.getElementById("campusTransferOfficerName").textContent =
+        data.display_name ||
+        [data.first_name, data.last_name].filter(Boolean).join(" ") ||
+        "Personnel Record";
 
-      grid.innerHTML =
-        `<div class="empty-state">
-          Unable to load outside officers.
-        </div>`;
+      document.getElementById("campusTransferCurrentShift").textContent =
+        data.shift_name || "Unassigned";
 
+      document.getElementById("campusTransferEmployeeNumber").textContent =
+        data.employee_number || "—";
 
-      showError(
-        error.message
-      );
+      document.getElementById("campusTransferRank").textContent =
+        rankLabel(data.rank);
 
-      return;
-
+      setTimeout(() => homeCampusInput.focus(), 50);
     }
-
-
-    outsideOfficers =
-      data || [];
-
-
-    document
-      .getElementById(
-        "outsideCount"
-      )
-      .textContent =
-        outsideOfficers.length;
-
-
-    renderOutsideOfficers();
-
+    catch (error) {
+      console.error("Campus transfer record load failed:", error);
+      setMessage(
+        error.message || "Unable to load this personnel record.",
+        "error"
+      );
+    }
   }
 
+  function closeTransfer() {
+    if (submitting) return;
 
-  function renderOutsideOfficers() {
+    overlay.hidden = true;
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    resetForm();
+  }
 
-    const search =
-      document
-        .getElementById(
-          "outsideSearch"
-        )
-        .value
-        .trim()
-        .toLowerCase();
+  acknowledge.addEventListener("change", () => {
+    confirmButton.disabled =
+      !acknowledge.checked ||
+      !currentPersonnel ||
+      submitting;
+  });
 
+  closeButton.addEventListener("click", closeTransfer);
+  cancelButton.addEventListener("click", closeTransfer);
 
-    const rank =
-      document
-        .getElementById(
-          "outsideRankFilter"
-        )
-        .value;
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) {
+      closeTransfer();
+    }
+  });
 
+  document.addEventListener("keydown", event => {
+    if (
+      event.key === "Escape" &&
+      !overlay.hidden &&
+      !submitting
+    ) {
+      closeTransfer();
+    }
+  });
 
-    const filtered =
-      outsideOfficers.filter(
-        person => {
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
 
-          const haystack =
-            [
-              person.display_name,
-              person.first_name,
-              person.last_name,
-              person.home_campus,
-              person.email,
-              person.phone_number,
-              person.employee_number
-            ]
-              .filter(Boolean)
-              .join(" ")
-              .toLowerCase();
+    if (submitting || !currentPersonnel) return;
 
+    const userId = userIdInput.value;
+    const homeCampus = homeCampusInput.value.trim();
+    const effectiveDate = effectiveDateInput.value;
+    const notes = notesInput.value.trim();
 
-          if (
-            search &&
-            !haystack.includes(
-              search
-            )
-          ) {
-            return false;
-          }
+    if (!userId) {
+      setMessage("The personnel record is missing a user ID.", "error");
+      return;
+    }
 
+    if (!homeCampus) {
+      setMessage("Enter the officer's new home campus.", "error");
+      homeCampusInput.focus();
+      return;
+    }
 
-          if (
-            rank &&
-            person.rank !==
-              rank
-          ) {
-            return false;
-          }
+    if (!effectiveDate) {
+      setMessage("Choose the transfer effective date.", "error");
+      effectiveDateInput.focus();
+      return;
+    }
 
+    if (!acknowledge.checked) {
+      setMessage(
+        "Confirm that you understand the access change before completing the transfer.",
+        "error"
+      );
+      return;
+    }
 
-          return true;
+    const officerName =
+      currentPersonnel.display_name ||
+      "this officer";
 
+    const confirmed = window.confirm(
+      `Transfer ${officerName} to ${homeCampus}?\n\n` +
+      "This will remove the officer from active local personnel, revoke their SecureTrack application roles, and create or reactivate their linked Outside Officer record. Historical records will be preserved."
+    );
+
+    if (!confirmed) return;
+
+    submitting = true;
+    confirmButton.disabled = true;
+    cancelButton.disabled = true;
+    closeButton.disabled = true;
+    confirmButton.textContent = "Completing Transfer…";
+    setMessage("Completing campus transfer…", "info");
+
+    try {
+      const { data, error } = await db.rpc(
+        "transfer_personnel_to_outside_officer",
+        {
+          p_user_id: userId,
+          p_home_campus: homeCampus,
+          p_effective_date: effectiveDate,
+          p_notes: notes || null
         }
       );
 
-
-    const grid =
-      document.getElementById(
-        "outsideOfficerGrid"
-      );
-
-
-    if (!filtered.length) {
-
-      grid.innerHTML =
-        `<div class="empty-state">
-          No outside officers match this search.
-        </div>`;
-
-      return;
-
-    }
-
-
-    grid.innerHTML =
-      filtered
-        .map(person => {
-
-          return `
-            <article class="person-card">
-
-              <div class="person-top">
-
-                ${renderAvatar(person)}
-
-                <div>
-
-                  <h3 class="person-name">
-                    ${escapeHTML(
-                      person.display_name
-                    )}
-                  </h3>
-
-                  <div class="person-rank">
-                    ${escapeHTML(
-                      rankLabel(
-                        person.rank
-                      )
-                    )}
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              <div class="person-meta">
-
-                <div>
-
-                  <div class="meta-label">
-                    Home Campus
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.home_campus ||
-                      "Not specified"
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Employee #
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.employee_number ||
-                      "—"
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Telephone
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.phone_number
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Email
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.email
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Qualifications
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.active_qualification_count ||
-                      0
-                    )}
-                    active /
-                    ${escapeHTML(
-                      person.verified_qualification_count ||
-                      0
-                    )}
-                    verified
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Overtime Here
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.completed_overtime_count ||
-                      0
-                    )}
-                    completed
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              <div class="badge-row">
-
-                <span class="status-badge orange">
-                  OUTSIDE OFFICER
-                </span>
-
-                <span class="status-badge green">
-                  ACTIVE
-                </span>
-
-              </div>
-
-
-              <div class="card-actions">
-
-                <button
-                  class="action-button orange"
-                  type="button"
-                  data-outside-action="edit"
-                  data-id="${escapeHTML(
-                    person.outside_officer_id
-                  )}"
-                >
-                  Edit Officer
-                </button>
-
-                <button
-                  class="action-button"
-                  type="button"
-                  data-outside-action="qualifications"
-                  data-id="${escapeHTML(
-                    person.outside_officer_id
-                  )}"
-                >
-                  Qualifications
-                </button>
-
-                <button
-                  class="action-button"
-                  type="button"
-                  data-outside-action="history"
-                  data-id="${escapeHTML(
-                    person.outside_officer_id
-                  )}"
-                >
-                  Overtime History
-                </button>
-
-              </div>
-
-            </article>
-          `;
-
-        })
-        .join("");
-
-  }
-
-
-  // ============================================
-  // SEPARATION LIST
-  // ============================================
-
-  function renderSeparationList() {
-
-    const grid =
-      document.getElementById(
-        "separationGrid"
-      );
-
-
-    if (!activePersonnel.length) {
-
-      grid.innerHTML =
-        `<div class="empty-state">
-          No active personnel are available.
-        </div>`;
-
-      return;
-
-    }
-
-
-    grid.innerHTML =
-      activePersonnel
-        .map(person => {
-
-          return `
-            <article class="person-card">
-
-              <div class="person-top">
-
-                ${renderAvatar(person)}
-
-                <div>
-
-                  <h3 class="person-name">
-                    ${escapeHTML(
-                      person.display_name
-                    )}
-                  </h3>
-
-                  <div class="person-rank">
-                    ${escapeHTML(
-                      rankLabel(
-                        person.rank ||
-                        person.officer_rank ||
-                        "officer"
-                      )
-                    )}
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              <div class="person-meta">
-
-                <div>
-
-                  <div class="meta-label">
-                    Employee #
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.employee_number ||
-                      "—"
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Current Shift
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.shift_name ||
-                      "Unassigned"
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Hire Date
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      person.hire_date ||
-                      "—"
-                    )}
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              <div class="card-actions">
-
-                <button
-                  class="action-button danger"
-                  type="button"
-                  data-separation-id="${escapeHTML(
-                    person.user_id
-                  )}"
-                >
-                  Begin Separation
-                </button>
-
-              </div>
-
-            </article>
-          `;
-
-        })
-        .join("");
-
-  }
-
-
-  // ============================================
-  // OUTSTANDING PROPERTY
-  // ============================================
-
-  async function loadOutstandingProperty() {
-
-    const container =
-      document.getElementById(
-        "propertyQueue"
-      );
-
-
-    container.innerHTML =
-      `<div class="loading-box">
-        Loading outstanding property...
-      </div>`;
-
-
-    const {
-      data,
-      error
-    } =
-     await db.rpc(
-  "get_outstanding_property_queue",
-  {
-    p_case_status: null
-  }
-);
-
-
-    if (error) {
-
-      console.error(
-        "Outstanding property error:",
-        error
-      );
-
-
-      container.innerHTML =
-        `<div class="empty-state">
-          Unable to load outstanding property.
-        </div>`;
-
-
-      document
-        .getElementById(
-          "propertyCount"
-        )
-        .textContent =
-          "—";
-
-      return;
-
-    }
-
-
-    outstandingProperty =
-      data || [];
-
-
-    const openCases =
-      outstandingProperty.filter(
-        item =>
-          item.case_status !==
-          "resolved"
-      );
-
-
-    document
-      .getElementById(
-        "propertyCount"
-      )
-      .textContent =
-        openCases.length;
-
-
-    if (!outstandingProperty.length) {
-
-      container.innerHTML =
-        `<div class="empty-state">
-          No outstanding property cases.
-        </div>`;
-
-      return;
-
-    }
-
-
-    container.innerHTML =
-      outstandingProperty
-        .map(item => {
-
-          const unresolved =
-            Number(
-              item.unresolved_items ||
-              0
-            );
-
-
-          return `
-            <article class="property-card">
-
-              <div class="property-title">
-
-                <div>
-
-                  <h3 style="margin:0;">
-                    ${escapeHTML(
-                      item.display_name ||
-                      "Former Employee"
-                    )}
-                  </h3>
-
-                  <div class="subtle">
-                    Employee #
-                    ${escapeHTML(
-                      item.employee_number ||
-                      "—"
-                    )}
-                    · Former Shift:
-                    ${escapeHTML(
-                      item.former_shift ||
-                      "—"
-                    )}
-                  </div>
-
-                </div>
-
-                <span
-                  class="status-badge ${
-                    unresolved > 0
-                      ? "red"
-                      : "green"
-                  }"
-                >
-                  ${escapeHTML(
-                    String(
-                      item.case_status ||
-                      "open"
-                    ).toUpperCase()
-                  )}
-                </span>
-
-              </div>
-
-
-              <div class="person-meta">
-
-                <div>
-
-                  <div class="meta-label">
-                    Termination Date
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      item.termination_effective_date ||
-                      "—"
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Outstanding Items
-                  </div>
-
-                  <div class="meta-value">
-                    ${escapeHTML(
-                      unresolved
-                    )}
-                    of
-                    ${escapeHTML(
-                      item.total_items ||
-                      0
-                    )}
-                  </div>
-
-                </div>
-
-
-                <div>
-
-                  <div class="meta-label">
-                    Retention Impact
-                  </div>
-
-                  <div class="meta-value">
-                    ${
-                      item.retention_impact
-                        ? "Yes"
-                        : "No"
-                    }
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              ${
-                item.notes
-                  ? `
-                    <div
-                      class="subtle"
-                      style="margin-top:12px;"
-                    >
-                      ${escapeHTML(
-                        item.notes
-                      )}
-                    </div>
-                  `
-                  : ""
-              }
-
-            </article>
-          `;
-
-        })
-        .join("");
-
-  }
-
-
-  // ============================================
-  // EVENTS
-  // ============================================
-
-  document
-    .getElementById(
-      "activeSearch"
-    )
-    .addEventListener(
-      "input",
-      renderActivePersonnel
-    );
-
-
-  document
-    .getElementById(
-      "activeShiftFilter"
-    )
-    .addEventListener(
-      "change",
-      renderActivePersonnel
-    );
-
-
-  document
-    .getElementById(
-      "outsideSearch"
-    )
-    .addEventListener(
-      "input",
-      renderOutsideOfficers
-    );
-
-
-  document
-    .getElementById(
-      "outsideRankFilter"
-    )
-    .addEventListener(
-      "change",
-      renderOutsideOfficers
-    );
-
-
-  document
-    .getElementById(
-      "refreshActiveButton"
-    )
-    .addEventListener(
-      "click",
-      async () => {
-
-        await loadActivePersonnel();
-
-        renderSeparationList();
-
+      if (error) throw error;
+
+      if (data && data.success === false) {
+        throw new Error(
+          data.message ||
+          "SecureTrack did not complete the campus transfer."
+        );
       }
-    );
 
+      setMessage(
+        `${officerName} was transferred to the Outside Officer Directory. SecureTrack application access has been revoked.`,
+        "success"
+      );
 
-  document
-    .getElementById(
-      "refreshOutsideButton"
-    )
-    .addEventListener(
-      "click",
-      loadOutsideOfficers
-    );
+      // Refresh both directory sections using the page's existing controls.
+      setTimeout(() => {
+        overlay.hidden = true;
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
 
+        document.getElementById("refreshActiveButton")?.click();
+        document.getElementById("refreshOutsideButton")?.click();
 
-  document
-    .getElementById(
-      "refreshPropertyButton"
-    )
-    .addEventListener(
-      "click",
-      loadOutstandingProperty
-    );
+        if (
+          window.SecureTrackOutsideOfficerEditor &&
+          typeof window.SecureTrackOutsideOfficerEditor.refresh === "function"
+        ) {
+          window.SecureTrackOutsideOfficerEditor.refresh();
+        }
 
+        currentPersonnel = null;
+        submitting = false;
+        cancelButton.disabled = false;
+        closeButton.disabled = false;
+        confirmButton.textContent = "Transfer to Outside Officer";
+      }, 950);
+    }
+    catch (error) {
+      console.error("Campus transfer failed:", error);
+      setMessage(
+        error.message || "Unable to complete this campus transfer.",
+        "error"
+      );
 
-  document
-    .getElementById(
-      "logoutButton"
-    )
-    .addEventListener(
-      "click",
-      async () => {
+      submitting = false;
+      cancelButton.disabled = false;
+      closeButton.disabled = false;
+      confirmButton.textContent = "Transfer to Outside Officer";
+      confirmButton.disabled = !acknowledge.checked;
+    }
+  });
 
-        await STM.signOut();
+  // =========================================================
+  // ADD TRANSFER BUTTON TO ACTIVE PERSONNEL CARDS
+  // =========================================================
 
+  function installTransferButtons() {
+    const grid = document.getElementById("activePersonnelGrid");
+    if (!grid) return;
+
+    grid.querySelectorAll(".person-card").forEach(card => {
+      if (card.querySelector("button[data-campus-transfer-id]")) {
+        return;
       }
-    );
 
+      const editButton = card.querySelector(
+        'button[data-action="edit"][data-id]'
+      );
 
-  /*
-    Remaining staged controls are handled here.
-    Outside Officer add/edit/qualification actions are
-    provided by personnel-editor.js.
-  */
+      const actions = card.querySelector(".card-actions");
+
+      if (!editButton || !actions) return;
+
+      const userId = editButton.dataset.id;
+      if (!userId) return;
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "action-button campus-transfer-button";
+      button.dataset.campusTransferId = userId;
+      button.textContent = "Transfer to Outside Officer";
+
+      const separationButton = actions.querySelector(
+        'button[data-action="separate"]'
+      );
+
+      if (separationButton) {
+        actions.insertBefore(button, separationButton);
+      }
+      else {
+        actions.appendChild(button);
+      }
+    });
+  }
+
+  const activeGrid = document.getElementById("activePersonnelGrid");
+
+  if (activeGrid) {
+    installTransferButtons();
+
+    const observer = new MutationObserver(() => {
+      installTransferButtons();
+    });
+
+    observer.observe(activeGrid, {
+      childList: true,
+      subtree: true
+    });
+  }
 
   document.addEventListener(
     "click",
     event => {
+      const button = event.target.closest(
+        "button[data-campus-transfer-id]"
+      );
 
-      const button =
-        event.target.closest(
-          "button"
-        );
+      if (!button) return;
 
+      event.preventDefault();
+      event.stopImmediatePropagation();
 
-      if (!button) {
-        return;
-      }
-
-
-      if (
-        button.id ===
-        "addOutsideButton"
-      ) {
-
-        if (
-          window.SecureTrackOutsideOfficerEditor
-          ?.add
-        ) {
-
-          window.SecureTrackOutsideOfficerEditor
-            .add();
-
-        }
-        else {
-
-          alert(
-            "Outside Officer editor did not load. Refresh the page and try again."
-          );
-
-        }
-
-        return;
-
-      }
-
-
-      if (
-        button.dataset.action
-      ) {
-
-        alert(
-          "Personnel editing controls will be connected in the next step."
-        );
-
-        return;
-
-      }
-
-
-      if (
-        button.dataset.outsideAction
-      ) {
-
-        const api =
-          window.SecureTrackOutsideOfficerEditor;
-
-        const action =
-          button.dataset.outsideAction;
-
-        const outsideOfficerId =
-          button.dataset.id;
-
-        if (api && outsideOfficerId) {
-
-          if (action === "edit") {
-            api.edit(outsideOfficerId);
-          }
-          else if (action === "qualifications") {
-            api.qualifications(outsideOfficerId);
-          }
-          else if (action === "history") {
-            api.history(outsideOfficerId);
-          }
-
-        }
-        else {
-
-          alert(
-            "Outside Officer editor did not load. Refresh the page and try again."
-          );
-
-        }
-
-        return;
-
-      }
-
-
-      if (
-        button.dataset.separationId
-      ) {
-
-        alert(
-          "The secure Employee Separation confirmation form will be connected next."
-        );
-
-      }
-
-    }
+      openTransfer(
+        button.dataset.campusTransferId
+      );
+    },
+    true
   );
 
-
-  // ============================================
-  // INITIAL LOAD
-  // ============================================
-
-  await Promise.all([
-
-    loadActivePersonnel(),
-
-    loadOutsideOfficers(),
-
-    loadOutstandingProperty()
-
-  ]);
-
-
-  renderSeparationList();
-
-
+  // Expose a tiny API for future reuse, including a future
+  // "return to home campus" workflow.
+  window.SecureTrackCampusTransfer = {
+    open: openTransfer,
+    scan: installTransferButtons
+  };
 })();
-
-</script>
-
-<script src="personnel-photo-tools.js"></script>
-<script src="personnel-editor.js"></script>
-<script src="personnel-campus-transfer.js"></script>
-<script src="personnel-onboarding.js"></script>
-<script src="personnel-account-access.js"></script>
-</body>
-</html>
