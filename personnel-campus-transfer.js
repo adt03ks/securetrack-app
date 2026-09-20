@@ -1,0 +1,2525 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#080a0c"
+  >
+
+  <title>
+    SecureTrack | Personnel Administration
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .personnel-wrap {
+      padding: 24px;
+    }
+
+    .personnel-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .tab-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .tab-button {
+      border: 1px solid #343a41;
+      background: #0b0e11;
+      color: #d5d8dc;
+      padding: 10px 14px;
+      border-radius: 11px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .tab-button:hover {
+      border-color: #ff7800;
+    }
+
+    .tab-button.active {
+      color: #fff;
+      border-color: #ff7800;
+      background:
+        rgba(255,120,0,.12);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .section-head h2 {
+      margin: 0 0 5px;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns:
+        minmax(180px, 2fr)
+        minmax(130px, 1fr)
+        auto;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .search-row input,
+    .search-row select {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #343a41;
+      background: #080a0c;
+      color: #fff;
+    }
+
+    .personnel-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .person-card {
+      border: 1px solid #30363d;
+      background:
+        linear-gradient(
+          145deg,
+          #0b0e11,
+          #11151a
+        );
+      border-radius: 16px;
+      padding: 17px;
+    }
+
+    .person-card:hover {
+      border-color:
+        rgba(255,120,0,.7);
+    }
+
+    .person-top {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 58px;
+      height: 58px;
+      min-width: 58px;
+      border-radius: 50%;
+      overflow: hidden;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background:
+        linear-gradient(
+          145deg,
+          #262c33,
+          #12161a
+        );
+
+      border:
+        1px solid #444c55;
+
+      color: #ff922b;
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: .04em;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .person-name {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .person-rank {
+      margin-top: 3px;
+      color: #ff922b;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .person-meta {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 8px 14px;
+      margin-top: 15px;
+      font-size: 13px;
+    }
+
+    .meta-label {
+      color: #8d969f;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .meta-value {
+      color: #e6e8ea;
+      margin-top: 2px;
+      overflow-wrap: anywhere;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 13px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      padding: 5px 8px;
+      border-radius: 999px;
+      border:
+        1px solid #3e454c;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .status-badge.orange {
+      color: #ff9a3c;
+      border-color:
+        rgba(255,120,0,.45);
+      background:
+        rgba(255,120,0,.08);
+    }
+
+    .status-badge.green {
+      color: #9adea8;
+      border-color:
+        rgba(87,187,109,.4);
+      background:
+        rgba(87,187,109,.08);
+    }
+
+    .status-badge.red {
+      color: #ff9292;
+      border-color:
+        rgba(224,74,74,.45);
+      background:
+        rgba(224,74,74,.08);
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .action-button {
+      border: 1px solid #3b4249;
+      background: #151a1f;
+      color: #fff;
+      border-radius: 9px;
+      padding: 8px 11px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .action-button:hover {
+      border-color: #ff7800;
+    }
+
+    .action-button.orange {
+      border-color:
+        rgba(255,120,0,.5);
+      color: #ff9a3c;
+    }
+
+    .action-button.danger {
+      border-color:
+        rgba(224,74,74,.45);
+      color: #ff9292;
+    }
+
+    .primary-button {
+      border: 1px solid #ff7800;
+      background: #ff7800;
+      color: #101214;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .primary-button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .secondary-button {
+      border: 1px solid #3d444c;
+      background: #11151a;
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .empty-state {
+      border: 1px dashed #3b4249;
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+      color: #9098a0;
+    }
+
+    .loading-box {
+      padding: 24px;
+      text-align: center;
+      color: #9098a0;
+    }
+
+    .notice {
+      border: 1px solid
+        rgba(255,120,0,.35);
+      background:
+        rgba(255,120,0,.07);
+      border-radius: 12px;
+      padding: 13px 15px;
+      margin-bottom: 17px;
+    }
+
+    .notice strong {
+      color: #ff922b;
+    }
+
+    .error-box {
+      display: none;
+      border: 1px solid
+        rgba(220,65,65,.5);
+      background:
+        rgba(220,65,65,.08);
+      color: #ffb3b3;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 15px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .summary-card {
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      padding: 15px;
+      background: #0c1014;
+    }
+
+    .summary-value {
+      font-size: 28px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .summary-label {
+      margin-top: 3px;
+      color: #929aa2;
+      font-size: 12px;
+    }
+
+    .property-card {
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #0b0e11;
+    }
+
+    .property-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 850px) {
+
+      .personnel-grid,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .search-row {
+        grid-template-columns: 1fr;
+      }
+
+      .person-meta {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body
+  data-securetrack-roles="manager,director,admin"
+>
+
+<main class="shell">
+
+  <section class="panel manager-console">
+
+
+    <header class="panel-head manager-header">
+
+      <div class="manager-header-row">
+
+        <div class="brandbar">
+
+          <div
+            class="logo-mark"
+            aria-hidden="true"
+          >
+            <span class="logo-lock"></span>
+          </div>
+
+          <div>
+
+            <div class="wordmark">
+              <span>Secure</span><span>Track</span>
+            </div>
+
+            <div class="tagline">
+              Personnel Management
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="manager-user-area">
+
+          <a
+            class="back-link"
+            href="manager-portal.html"
+          >
+            ← Manager Portal
+          </a>
+
+          <button
+            id="logoutButton"
+            class="back-link"
+            type="button"
+          >
+            Sign Out
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="eyebrow">
+        Personnel Administration
+      </div>
+
+      <h1>
+        Personnel Management
+      </h1>
+
+      <p class="subtle">
+        Manage active personnel, outside officers,
+        ranks, qualifications, separation and
+        outstanding property.
+      </p>
+
+    </header>
+
+
+    <div class="personnel-wrap">
+
+      <div
+        id="errorBox"
+        class="error-box"
+      ></div>
+
+
+      <!-- ======================================
+           SUMMARY
+           ====================================== -->
+
+      <section
+        class="summary-grid"
+        aria-label="Personnel summary"
+      >
+
+        <div class="summary-card">
+
+          <div
+            id="activeCount"
+            class="summary-value"
+          >
+            —
+          </div>
+
+          <div class="summary-label">
+            Active Personnel
+          </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+          <div
+            id="outsideCount"
+            class="summary-value"
+          >
+            —
+          </div>
+
+          <div class="summary-label">
+            Outside Officers
+          </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+          <div
+            id="propertyCount"
+            class="summary-value"
+          >
+            —
+          </div>
+
+          <div class="summary-label">
+            Open Property Cases
+          </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+          <div
+            id="transferCount"
+            class="summary-value"
+          >
+            —
+          </div>
+
+          <div class="summary-label">
+            Transfer Pending
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ======================================
+           TABS
+           ====================================== -->
+
+      <nav class="tab-row">
+
+        <button
+          class="tab-button active"
+          data-tab="activePersonnel"
+          type="button"
+        >
+          Active Personnel
+        </button>
+
+        <button
+          class="tab-button"
+          data-tab="outsideOfficers"
+          type="button"
+        >
+          Outside Officers
+        </button>
+
+        <button
+          class="tab-button"
+          data-tab="separation"
+          type="button"
+        >
+          Employee Separation
+        </button>
+
+        <button
+          class="tab-button"
+          data-tab="outstandingProperty"
+          type="button"
+        >
+          Outstanding Property
+        </button>
+
+      </nav>
+
+
+      <!-- ======================================
+           ACTIVE PERSONNEL
+           ====================================== -->
+
+      <section
+        id="activePersonnel"
+        class="tab-panel active"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <div class="eyebrow">
+              Local Personnel
+            </div>
+
+            <h2>
+              Active Personnel
+            </h2>
+
+            <p class="subtle">
+              Personnel regularly assigned to this campus.
+            </p>
+
+          </div>
+
+          <button
+            id="addOfficerButton"
+            class="primary-button"
+            type="button"
+            disabled
+            title="Secure account creation is being configured next."
+          >
+            + Add New Officer
+          </button>
+
+        </div>
+
+
+        <div class="notice">
+
+          <strong>
+            New Officer Setup:
+          </strong>
+
+          The secure server-side account creation process
+          will be connected next. Existing personnel can
+          already be displayed here.
+
+        </div>
+
+
+        <div class="search-row">
+
+          <input
+            id="activeSearch"
+            type="search"
+            placeholder="Search name, employee number, email..."
+          >
+
+          <select id="activeShiftFilter">
+
+            <option value="">
+              All Shifts
+            </option>
+
+            <option value="Alpha">
+              Alpha
+            </option>
+
+            <option value="Bravo">
+              Bravo
+            </option>
+
+            <option value="Charlie">
+              Charlie
+            </option>
+
+            <option value="Delta">
+              Delta
+            </option>
+
+          </select>
+
+          <button
+            id="refreshActiveButton"
+            class="secondary-button"
+            type="button"
+          >
+            Refresh
+          </button>
+
+        </div>
+
+
+        <div
+          id="activePersonnelGrid"
+          class="personnel-grid"
+        >
+
+          <div class="loading-box">
+            Loading active personnel...
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ======================================
+           OUTSIDE OFFICERS
+           ====================================== -->
+
+      <section
+        id="outsideOfficers"
+        class="tab-panel"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <div class="eyebrow">
+              Overtime Personnel
+            </div>
+
+            <h2>
+              Outside Officers
+            </h2>
+
+            <p class="subtle">
+              Officers from another campus who may
+              repeatedly work overtime at this location.
+            </p>
+
+          </div>
+
+          <button
+            id="addOutsideButton"
+            class="primary-button"
+            type="button"
+          >
+            + Add Outside Officer
+          </button>
+
+        </div>
+
+
+        <div class="search-row">
+
+          <input
+            id="outsideSearch"
+            type="search"
+            placeholder="Search name, campus, phone, email..."
+          >
+
+          <select id="outsideRankFilter">
+
+            <option value="">
+              All Ranks
+            </option>
+
+            <option value="officer">
+              Officer
+            </option>
+
+            <option value="senior_officer">
+              Senior Officer
+            </option>
+
+            <option value="team_lead">
+              Team Lead
+            </option>
+
+          </select>
+
+          <button
+            id="refreshOutsideButton"
+            class="secondary-button"
+            type="button"
+          >
+            Refresh
+          </button>
+
+        </div>
+
+
+        <div
+          id="outsideOfficerGrid"
+          class="personnel-grid"
+        >
+
+          <div class="loading-box">
+            Loading outside officers...
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ======================================
+           EMPLOYEE SEPARATION
+           ====================================== -->
+
+      <section
+        id="separation"
+        class="tab-panel"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <div class="eyebrow">
+              Employment Status
+            </div>
+
+            <h2>
+              Employee Separation
+            </h2>
+
+            <p class="subtle">
+              Process an approved employee separation while
+              preserving SecureTrack history and accountability.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="notice">
+
+          <strong>
+            Important:
+          </strong>
+
+          SecureTrack will preserve the employee's historical
+          transactions, incidents, training, assignments and
+          property records. Separation does not delete the
+          employee's operational history.
+
+        </div>
+
+
+        <div
+          id="separationGrid"
+          class="personnel-grid"
+        >
+
+          <div class="loading-box">
+            Loading eligible personnel...
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ======================================
+           OUTSTANDING PROPERTY
+           ====================================== -->
+
+      <section
+        id="outstandingProperty"
+        class="tab-panel"
+      >
+
+        <div class="section-head">
+
+          <div>
+
+            <div class="eyebrow">
+              Accountability
+            </div>
+
+            <h2>
+              Outstanding Property
+            </h2>
+
+            <p class="subtle">
+              Follow unresolved property after
+              an employee separation.
+            </p>
+
+          </div>
+
+          <button
+            id="refreshPropertyButton"
+            class="secondary-button"
+            type="button"
+          >
+            Refresh
+          </button>
+
+        </div>
+
+
+        <div id="propertyQueue">
+
+          <div class="loading-box">
+            Loading outstanding property...
+          </div>
+
+        </div>
+
+      </section>
+
+
+    </div>
+
+
+    <div class="actions">
+
+      <div class="footer-trust">
+
+        <div>
+
+          <strong>
+            SECURE. ACCOUNTABLE. CONNECTED.
+          </strong>
+
+          <br>
+
+          SecureTrack Personnel Administration
+
+        </div>
+
+        <div>
+          ◉ MANAGEMENT
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </section>
+
+</main>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="config.js"></script>
+<script src="secure-page.js"></script>
+<script src="manager-common.js"></script>
+
+
+<script>
+
+(async function () {
+
+  "use strict";
+
+
+  const STM =
+    window.SecureTrackManager;
+
+
+  if (!STM) {
+
+    console.error(
+      "SecureTrackManager was not loaded."
+    );
+
+    return;
+
+  }
+
+
+  const manager =
+    await STM.requireManager();
+
+
+  if (!manager) {
+    return;
+  }
+
+
+  const db =
+    STM.db;
+
+
+  let activePersonnel = [];
+
+  let outsideOfficers = [];
+
+  let outstandingProperty = [];
+
+
+  // ============================================
+  // HELPERS
+  // ============================================
+
+  function escapeHTML(value) {
+
+    return String(
+      value ?? ""
+    )
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+  }
+
+
+  function initials(
+    firstName,
+    lastName,
+    displayName
+  ) {
+
+    const first =
+      String(
+        firstName || ""
+      ).trim();
+
+
+    const last =
+      String(
+        lastName || ""
+      ).trim();
+
+
+    if (first || last) {
+
+      return (
+        (first[0] || "") +
+        (last[0] || "")
+      ).toUpperCase();
+
+    }
+
+
+    const parts =
+      String(
+        displayName || ""
+      )
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+
+    if (!parts.length) {
+      return "?";
+    }
+
+
+    if (parts.length === 1) {
+      return parts[0][0].toUpperCase();
+    }
+
+
+    return (
+      parts[0][0] +
+      parts[parts.length - 1][0]
+    ).toUpperCase();
+
+  }
+
+
+  function rankLabel(rank) {
+
+    const labels = {
+
+      officer:
+        "Officer",
+
+      senior_officer:
+        "Senior Officer",
+
+      team_lead:
+        "Team Lead",
+
+      manager:
+        "Manager",
+
+      director:
+        "Director",
+
+      admin:
+        "Administrator",
+
+      dispatcher:
+        "Dispatcher"
+
+    };
+
+
+    return labels[rank] || rank || "Officer";
+
+  }
+
+
+  function showError(message) {
+
+    const box =
+      document.getElementById(
+        "errorBox"
+      );
+
+
+    box.textContent =
+      message;
+
+
+    box.style.display =
+      "block";
+
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  }
+
+
+  function clearError() {
+
+    document
+      .getElementById(
+        "errorBox"
+      )
+      .style.display =
+        "none";
+
+  }
+
+
+  function renderAvatar(person) {
+
+    const letters =
+      initials(
+        person.first_name,
+        person.last_name,
+        person.display_name
+      );
+
+
+    /*
+      Photos are stored in private buckets.
+
+      For now the page uses initials.
+      Signed-photo URL loading will be connected
+      when we build the photo editor.
+    */
+
+    return `
+      <div class="avatar">
+        ${escapeHTML(letters)}
+      </div>
+    `;
+
+  }
+
+
+  // ============================================
+  // TABS
+  // ============================================
+
+  document
+    .querySelectorAll(
+      ".tab-button"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          const target =
+            button.dataset.tab;
+
+
+          document
+            .querySelectorAll(
+              ".tab-button"
+            )
+            .forEach(b =>
+              b.classList.remove(
+                "active"
+              )
+            );
+
+
+          document
+            .querySelectorAll(
+              ".tab-panel"
+            )
+            .forEach(panel =>
+              panel.classList.remove(
+                "active"
+              )
+            );
+
+
+          button.classList.add(
+            "active"
+          );
+
+
+          document
+            .getElementById(
+              target
+            )
+            .classList.add(
+              "active"
+            );
+
+        }
+      );
+
+    });
+
+
+  // ============================================
+  // ACTIVE PERSONNEL
+  // ============================================
+
+  async function loadActivePersonnel() {
+
+    clearError();
+
+
+    const grid =
+      document.getElementById(
+        "activePersonnelGrid"
+      );
+
+
+    grid.innerHTML =
+      `<div class="loading-box">
+        Loading active personnel...
+      </div>`;
+
+
+   const {
+  data,
+  error
+} =
+ await db.rpc(
+  "get_personnel_admin_directory",
+  {
+    p_include_terminated: false
+  }
+);
+
+
+    if (error) {
+
+      console.error(
+        "Personnel directory error:",
+        error
+      );
+
+
+      grid.innerHTML =
+        `<div class="empty-state">
+          Unable to load personnel.
+        </div>`;
+
+
+      showError(
+        error.message
+      );
+
+      return;
+
+    }
+
+
+    activePersonnel =
+      data || [];
+
+
+    document
+      .getElementById(
+        "activeCount"
+      )
+      .textContent =
+        activePersonnel.length;
+
+
+    document
+      .getElementById(
+        "transferCount"
+      )
+      .textContent =
+        activePersonnel.filter(
+          person =>
+            person.transfer_pending ===
+            true
+        ).length;
+
+
+    renderActivePersonnel();
+
+  }
+
+
+  function renderActivePersonnel() {
+
+    const search =
+      document
+        .getElementById(
+          "activeSearch"
+        )
+        .value
+        .trim()
+        .toLowerCase();
+
+
+    const shift =
+      document
+        .getElementById(
+          "activeShiftFilter"
+        )
+        .value;
+
+
+    const filtered =
+      activePersonnel.filter(
+        person => {
+
+          const haystack =
+            [
+              person.display_name,
+              person.first_name,
+              person.last_name,
+              person.employee_number,
+              person.email,
+              person.phone_number,
+              person.shift_name
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+
+
+          if (
+            search &&
+            !haystack.includes(
+              search
+            )
+          ) {
+            return false;
+          }
+
+
+          if (
+            shift &&
+            person.shift_name !==
+              shift
+          ) {
+            return false;
+          }
+
+
+          return true;
+
+        }
+      );
+
+
+    const grid =
+      document.getElementById(
+        "activePersonnelGrid"
+      );
+
+
+    if (!filtered.length) {
+
+      grid.innerHTML =
+        `<div class="empty-state">
+          No active personnel match this search.
+        </div>`;
+
+      return;
+
+    }
+
+
+    grid.innerHTML =
+      filtered
+        .map(person => {
+
+          const rank =
+            person.rank ||
+            person.officer_rank ||
+            "officer";
+
+
+          return `
+            <article class="person-card">
+
+              <div class="person-top">
+
+                ${renderAvatar(person)}
+
+                <div>
+
+                  <h3 class="person-name">
+                    ${escapeHTML(
+                      person.display_name
+                    )}
+                  </h3>
+
+                  <div class="person-rank">
+                    ${escapeHTML(
+                      rankLabel(rank)
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="person-meta">
+
+                <div>
+
+                  <div class="meta-label">
+                    Employee #
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.employee_number ||
+                      "—"
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Shift
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.shift_name ||
+                      "Unassigned"
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Email
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.email ||
+                      "—"
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Telephone
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.phone_number ||
+                      "—"
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="badge-row">
+
+                <span class="status-badge green">
+                  ACTIVE
+                </span>
+
+                ${
+                  person.transfer_pending
+                    ? `
+                      <span class="status-badge orange">
+                        TRANSFER PENDING
+                      </span>
+                    `
+                    : ""
+                }
+
+              </div>
+
+
+              <div class="card-actions">
+
+                <button
+                  class="action-button orange"
+                  type="button"
+                  data-action="edit"
+                  data-id="${escapeHTML(
+                    person.user_id
+                  )}"
+                >
+                  Edit Personnel
+                </button>
+
+                <button
+                  class="action-button"
+                  type="button"
+                  data-action="qualifications"
+                  data-id="${escapeHTML(
+                    person.user_id
+                  )}"
+                >
+                  Qualifications
+                </button>
+
+                <button
+                  class="action-button danger"
+                  type="button"
+                  data-action="separate"
+                  data-id="${escapeHTML(
+                    person.user_id
+                  )}"
+                >
+                  Employee Separation
+                </button>
+
+              </div>
+
+            </article>
+          `;
+
+        })
+        .join("");
+
+  }
+
+
+  // ============================================
+  // OUTSIDE OFFICERS
+  // ============================================
+
+  async function loadOutsideOfficers() {
+
+    clearError();
+
+
+    const grid =
+      document.getElementById(
+        "outsideOfficerGrid"
+      );
+
+
+    grid.innerHTML =
+      `<div class="loading-box">
+        Loading outside officers...
+      </div>`;
+
+
+    const {
+      data,
+      error
+    } =
+      await db.rpc(
+        "get_outside_officer_directory",
+        {
+          p_include_inactive: false
+        }
+      );
+
+
+    if (error) {
+
+      console.error(
+        "Outside officer error:",
+        error
+      );
+
+
+      grid.innerHTML =
+        `<div class="empty-state">
+          Unable to load outside officers.
+        </div>`;
+
+
+      showError(
+        error.message
+      );
+
+      return;
+
+    }
+
+
+    outsideOfficers =
+      data || [];
+
+
+    document
+      .getElementById(
+        "outsideCount"
+      )
+      .textContent =
+        outsideOfficers.length;
+
+
+    renderOutsideOfficers();
+
+  }
+
+
+  function renderOutsideOfficers() {
+
+    const search =
+      document
+        .getElementById(
+          "outsideSearch"
+        )
+        .value
+        .trim()
+        .toLowerCase();
+
+
+    const rank =
+      document
+        .getElementById(
+          "outsideRankFilter"
+        )
+        .value;
+
+
+    const filtered =
+      outsideOfficers.filter(
+        person => {
+
+          const haystack =
+            [
+              person.display_name,
+              person.first_name,
+              person.last_name,
+              person.home_campus,
+              person.email,
+              person.phone_number,
+              person.employee_number
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+
+
+          if (
+            search &&
+            !haystack.includes(
+              search
+            )
+          ) {
+            return false;
+          }
+
+
+          if (
+            rank &&
+            person.rank !==
+              rank
+          ) {
+            return false;
+          }
+
+
+          return true;
+
+        }
+      );
+
+
+    const grid =
+      document.getElementById(
+        "outsideOfficerGrid"
+      );
+
+
+    if (!filtered.length) {
+
+      grid.innerHTML =
+        `<div class="empty-state">
+          No outside officers match this search.
+        </div>`;
+
+      return;
+
+    }
+
+
+    grid.innerHTML =
+      filtered
+        .map(person => {
+
+          return `
+            <article class="person-card">
+
+              <div class="person-top">
+
+                ${renderAvatar(person)}
+
+                <div>
+
+                  <h3 class="person-name">
+                    ${escapeHTML(
+                      person.display_name
+                    )}
+                  </h3>
+
+                  <div class="person-rank">
+                    ${escapeHTML(
+                      rankLabel(
+                        person.rank
+                      )
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="person-meta">
+
+                <div>
+
+                  <div class="meta-label">
+                    Home Campus
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.home_campus ||
+                      "Not specified"
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Employee #
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.employee_number ||
+                      "—"
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Telephone
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.phone_number
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Email
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.email
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Qualifications
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.active_qualification_count ||
+                      0
+                    )}
+                    active /
+                    ${escapeHTML(
+                      person.verified_qualification_count ||
+                      0
+                    )}
+                    verified
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Overtime Here
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.completed_overtime_count ||
+                      0
+                    )}
+                    completed
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="badge-row">
+
+                <span class="status-badge orange">
+                  OUTSIDE OFFICER
+                </span>
+
+                <span class="status-badge green">
+                  ACTIVE
+                </span>
+
+              </div>
+
+
+              <div class="card-actions">
+
+                <button
+                  class="action-button orange"
+                  type="button"
+                  data-outside-action="edit"
+                  data-id="${escapeHTML(
+                    person.outside_officer_id
+                  )}"
+                >
+                  Edit Officer
+                </button>
+
+                <button
+                  class="action-button"
+                  type="button"
+                  data-outside-action="qualifications"
+                  data-id="${escapeHTML(
+                    person.outside_officer_id
+                  )}"
+                >
+                  Qualifications
+                </button>
+
+                <button
+                  class="action-button"
+                  type="button"
+                  data-outside-action="history"
+                  data-id="${escapeHTML(
+                    person.outside_officer_id
+                  )}"
+                >
+                  Overtime History
+                </button>
+
+              </div>
+
+            </article>
+          `;
+
+        })
+        .join("");
+
+  }
+
+
+  // ============================================
+  // SEPARATION LIST
+  // ============================================
+
+  function renderSeparationList() {
+
+    const grid =
+      document.getElementById(
+        "separationGrid"
+      );
+
+
+    if (!activePersonnel.length) {
+
+      grid.innerHTML =
+        `<div class="empty-state">
+          No active personnel are available.
+        </div>`;
+
+      return;
+
+    }
+
+
+    grid.innerHTML =
+      activePersonnel
+        .map(person => {
+
+          return `
+            <article class="person-card">
+
+              <div class="person-top">
+
+                ${renderAvatar(person)}
+
+                <div>
+
+                  <h3 class="person-name">
+                    ${escapeHTML(
+                      person.display_name
+                    )}
+                  </h3>
+
+                  <div class="person-rank">
+                    ${escapeHTML(
+                      rankLabel(
+                        person.rank ||
+                        person.officer_rank ||
+                        "officer"
+                      )
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="person-meta">
+
+                <div>
+
+                  <div class="meta-label">
+                    Employee #
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.employee_number ||
+                      "—"
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Current Shift
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.shift_name ||
+                      "Unassigned"
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Hire Date
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      person.hire_date ||
+                      "—"
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="card-actions">
+
+                <button
+                  class="action-button danger"
+                  type="button"
+                  data-separation-id="${escapeHTML(
+                    person.user_id
+                  )}"
+                >
+                  Begin Separation
+                </button>
+
+              </div>
+
+            </article>
+          `;
+
+        })
+        .join("");
+
+  }
+
+
+  // ============================================
+  // OUTSTANDING PROPERTY
+  // ============================================
+
+  async function loadOutstandingProperty() {
+
+    const container =
+      document.getElementById(
+        "propertyQueue"
+      );
+
+
+    container.innerHTML =
+      `<div class="loading-box">
+        Loading outstanding property...
+      </div>`;
+
+
+    const {
+      data,
+      error
+    } =
+     await db.rpc(
+  "get_outstanding_property_queue",
+  {
+    p_case_status: null
+  }
+);
+
+
+    if (error) {
+
+      console.error(
+        "Outstanding property error:",
+        error
+      );
+
+
+      container.innerHTML =
+        `<div class="empty-state">
+          Unable to load outstanding property.
+        </div>`;
+
+
+      document
+        .getElementById(
+          "propertyCount"
+        )
+        .textContent =
+          "—";
+
+      return;
+
+    }
+
+
+    outstandingProperty =
+      data || [];
+
+
+    const openCases =
+      outstandingProperty.filter(
+        item =>
+          item.case_status !==
+          "resolved"
+      );
+
+
+    document
+      .getElementById(
+        "propertyCount"
+      )
+      .textContent =
+        openCases.length;
+
+
+    if (!outstandingProperty.length) {
+
+      container.innerHTML =
+        `<div class="empty-state">
+          No outstanding property cases.
+        </div>`;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      outstandingProperty
+        .map(item => {
+
+          const unresolved =
+            Number(
+              item.unresolved_items ||
+              0
+            );
+
+
+          return `
+            <article class="property-card">
+
+              <div class="property-title">
+
+                <div>
+
+                  <h3 style="margin:0;">
+                    ${escapeHTML(
+                      item.display_name ||
+                      "Former Employee"
+                    )}
+                  </h3>
+
+                  <div class="subtle">
+                    Employee #
+                    ${escapeHTML(
+                      item.employee_number ||
+                      "—"
+                    )}
+                    · Former Shift:
+                    ${escapeHTML(
+                      item.former_shift ||
+                      "—"
+                    )}
+                  </div>
+
+                </div>
+
+                <span
+                  class="status-badge ${
+                    unresolved > 0
+                      ? "red"
+                      : "green"
+                  }"
+                >
+                  ${escapeHTML(
+                    String(
+                      item.case_status ||
+                      "open"
+                    ).toUpperCase()
+                  )}
+                </span>
+
+              </div>
+
+
+              <div class="person-meta">
+
+                <div>
+
+                  <div class="meta-label">
+                    Termination Date
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      item.termination_effective_date ||
+                      "—"
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Outstanding Items
+                  </div>
+
+                  <div class="meta-value">
+                    ${escapeHTML(
+                      unresolved
+                    )}
+                    of
+                    ${escapeHTML(
+                      item.total_items ||
+                      0
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="meta-label">
+                    Retention Impact
+                  </div>
+
+                  <div class="meta-value">
+                    ${
+                      item.retention_impact
+                        ? "Yes"
+                        : "No"
+                    }
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              ${
+                item.notes
+                  ? `
+                    <div
+                      class="subtle"
+                      style="margin-top:12px;"
+                    >
+                      ${escapeHTML(
+                        item.notes
+                      )}
+                    </div>
+                  `
+                  : ""
+              }
+
+            </article>
+          `;
+
+        })
+        .join("");
+
+  }
+
+
+  // ============================================
+  // EVENTS
+  // ============================================
+
+  document
+    .getElementById(
+      "activeSearch"
+    )
+    .addEventListener(
+      "input",
+      renderActivePersonnel
+    );
+
+
+  document
+    .getElementById(
+      "activeShiftFilter"
+    )
+    .addEventListener(
+      "change",
+      renderActivePersonnel
+    );
+
+
+  document
+    .getElementById(
+      "outsideSearch"
+    )
+    .addEventListener(
+      "input",
+      renderOutsideOfficers
+    );
+
+
+  document
+    .getElementById(
+      "outsideRankFilter"
+    )
+    .addEventListener(
+      "change",
+      renderOutsideOfficers
+    );
+
+
+  document
+    .getElementById(
+      "refreshActiveButton"
+    )
+    .addEventListener(
+      "click",
+      async () => {
+
+        await loadActivePersonnel();
+
+        renderSeparationList();
+
+      }
+    );
+
+
+  document
+    .getElementById(
+      "refreshOutsideButton"
+    )
+    .addEventListener(
+      "click",
+      loadOutsideOfficers
+    );
+
+
+  document
+    .getElementById(
+      "refreshPropertyButton"
+    )
+    .addEventListener(
+      "click",
+      loadOutstandingProperty
+    );
+
+
+  document
+    .getElementById(
+      "logoutButton"
+    )
+    .addEventListener(
+      "click",
+      async () => {
+
+        await STM.signOut();
+
+      }
+    );
+
+
+  /*
+    Remaining staged controls are handled here.
+    Outside Officer add/edit/qualification actions are
+    provided by personnel-editor.js.
+  */
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      const button =
+        event.target.closest(
+          "button"
+        );
+
+
+      if (!button) {
+        return;
+      }
+
+
+      if (
+        button.id ===
+        "addOutsideButton"
+      ) {
+
+        if (
+          window.SecureTrackOutsideOfficerEditor
+          ?.add
+        ) {
+
+          window.SecureTrackOutsideOfficerEditor
+            .add();
+
+        }
+        else {
+
+          alert(
+            "Outside Officer editor did not load. Refresh the page and try again."
+          );
+
+        }
+
+        return;
+
+      }
+
+
+      if (
+        button.dataset.action
+      ) {
+
+        alert(
+          "Personnel editing controls will be connected in the next step."
+        );
+
+        return;
+
+      }
+
+
+      if (
+        button.dataset.outsideAction
+      ) {
+
+        const api =
+          window.SecureTrackOutsideOfficerEditor;
+
+        const action =
+          button.dataset.outsideAction;
+
+        const outsideOfficerId =
+          button.dataset.id;
+
+        if (api && outsideOfficerId) {
+
+          if (action === "edit") {
+            api.edit(outsideOfficerId);
+          }
+          else if (action === "qualifications") {
+            api.qualifications(outsideOfficerId);
+          }
+          else if (action === "history") {
+            api.history(outsideOfficerId);
+          }
+
+        }
+        else {
+
+          alert(
+            "Outside Officer editor did not load. Refresh the page and try again."
+          );
+
+        }
+
+        return;
+
+      }
+
+
+      if (
+        button.dataset.separationId
+      ) {
+
+        alert(
+          "The secure Employee Separation confirmation form will be connected next."
+        );
+
+      }
+
+    }
+  );
+
+
+  // ============================================
+  // INITIAL LOAD
+  // ============================================
+
+  await Promise.all([
+
+    loadActivePersonnel(),
+
+    loadOutsideOfficers(),
+
+    loadOutstandingProperty()
+
+  ]);
+
+
+  renderSeparationList();
+
+
+})();
+
+</script>
+
+<script src="personnel-photo-tools.js"></script>
+<script src="personnel-editor.js"></script>
+<script src="personnel-campus-transfer.js"></script>
+<script src="personnel-onboarding.js"></script>
+<script src="personnel-account-access.js"></script>
+</body>
+</html>
