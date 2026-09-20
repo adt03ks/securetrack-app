@@ -2163,4 +2163,650 @@
   );
 
 
+
+  // ========================================================
+  // OUTSIDE OFFICER EDITOR
+  // ========================================================
+
+  const outsideStyle = document.createElement("style");
+
+  outsideStyle.textContent = `
+    .outside-officer-overlay[hidden] { display:none !important; }
+    .outside-officer-overlay {
+      position:fixed; inset:0; z-index:10020; display:flex;
+      align-items:flex-start; justify-content:center; padding:32px 16px;
+      overflow-y:auto; background:rgba(0,0,0,.82); backdrop-filter:blur(4px);
+    }
+    .outside-officer-modal {
+      width:min(940px,100%); overflow:hidden; border:1px solid #3b4249;
+      border-radius:18px; background:linear-gradient(145deg,#0b0e11,#11151a);
+      box-shadow:0 24px 80px rgba(0,0,0,.6);
+    }
+    .outside-officer-head {
+      display:flex; justify-content:space-between; gap:18px; align-items:flex-start;
+      padding:22px 24px; border-bottom:1px solid #2d333a;
+    }
+    .outside-officer-head h2 { margin:4px 0 0; }
+    .outside-officer-close {
+      width:38px; height:38px; border:1px solid #3b4249; border-radius:10px;
+      background:#11151a; color:#fff; cursor:pointer; font-size:20px;
+    }
+    .outside-officer-body { padding:24px; }
+    .outside-officer-grid {
+      display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px;
+    }
+    .outside-officer-field { display:flex; flex-direction:column; gap:6px; }
+    .outside-officer-field.full { grid-column:1 / -1; }
+    .outside-officer-field label { color:#b8bec5; font-size:12px; font-weight:800; }
+    .outside-officer-field input,
+    .outside-officer-field select,
+    .outside-officer-field textarea {
+      width:100%; border:1px solid #383f46; border-radius:10px; background:#080b0e;
+      color:#f4f6f7; padding:11px 12px; font:inherit;
+    }
+    .outside-officer-field textarea { min-height:92px; resize:vertical; }
+    .outside-officer-field input:focus,
+    .outside-officer-field select:focus,
+    .outside-officer-field textarea:focus {
+      outline:2px solid rgba(255,120,0,.25); border-color:#ff7800;
+    }
+    .outside-officer-section {
+      margin-top:24px; padding-top:20px; border-top:1px solid #292f35;
+    }
+    .outside-officer-qualification-list { display:grid; gap:9px; margin-top:12px; }
+    .outside-officer-qualification-row {
+      display:flex; justify-content:space-between; gap:12px; align-items:center;
+      border:1px solid #333a41; border-radius:11px; padding:11px 12px; background:#0a0d10;
+    }
+    .outside-officer-qualification-meta { color:#9aa2aa; font-size:12px; margin-top:3px; }
+    .outside-officer-chip {
+      display:inline-flex; border:1px solid #3d444b; border-radius:999px;
+      padding:4px 7px; font-size:10px; font-weight:850; margin-left:6px;
+    }
+    .outside-officer-chip.verified { color:#9adea8; border-color:rgba(87,187,109,.4); }
+    .outside-officer-chip.unverified { color:#ffbf79; border-color:rgba(255,146,43,.4); }
+    .outside-officer-footer {
+      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      padding:18px 24px; border-top:1px solid #2d333a;
+    }
+    .outside-officer-footer-right { display:flex; gap:10px; flex-wrap:wrap; }
+    .outside-officer-message {
+      display:none; margin-top:18px; padding:11px 13px; border-radius:10px;
+    }
+    .outside-officer-message.success {
+      display:block; color:#9adea8; border:1px solid rgba(87,187,109,.4);
+      background:rgba(87,187,109,.08);
+    }
+    .outside-officer-message.error {
+      display:block; color:#ffadad; border:1px solid rgba(224,74,74,.45);
+      background:rgba(224,74,74,.08);
+    }
+    .outside-officer-message.info {
+      display:block; color:#ffbf79; border:1px solid rgba(255,146,43,.35);
+      background:rgba(255,146,43,.07);
+    }
+    .outside-officer-qualification-form {
+      display:grid; grid-template-columns:150px 1fr auto; gap:10px; align-items:end; margin-top:13px;
+    }
+    .outside-officer-verified-check {
+      min-height:44px; display:flex; align-items:center; gap:8px; border:1px solid #383f46;
+      border-radius:10px; padding:9px 11px; background:#080b0e; color:#d6dade; white-space:nowrap;
+    }
+    .outside-officer-verified-check input { width:17px; height:17px; }
+    @media (max-width:760px) {
+      .outside-officer-grid,
+      .outside-officer-qualification-form { grid-template-columns:1fr; }
+      .outside-officer-field.full { grid-column:auto; }
+    }
+  `;
+
+  document.head.appendChild(outsideStyle);
+
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `
+      <div id="outsideOfficerEditorOverlay" class="outside-officer-overlay" hidden>
+        <section class="outside-officer-modal" role="dialog" aria-modal="true" aria-labelledby="outsideOfficerEditorTitle">
+          <header class="outside-officer-head">
+            <div>
+              <div class="eyebrow">Outside Officer Directory</div>
+              <h2 id="outsideOfficerEditorTitle">Add Outside Officer</h2>
+              <p id="outsideOfficerEditorSubtitle" class="subtle" style="margin-bottom:0;">
+                Officers from another campus who may work overtime here.
+              </p>
+            </div>
+            <button id="outsideOfficerEditorClose" class="outside-officer-close" type="button" aria-label="Close">×</button>
+          </header>
+
+          <div class="outside-officer-body">
+            <div class="outside-officer-grid">
+              <div class="outside-officer-field">
+                <label for="outsideOfficerFirstName">First Name *</label>
+                <input id="outsideOfficerFirstName" type="text" autocomplete="off">
+              </div>
+              <div class="outside-officer-field">
+                <label for="outsideOfficerMiddleInitial">Middle Initial</label>
+                <input id="outsideOfficerMiddleInitial" type="text" maxlength="1" autocomplete="off">
+              </div>
+              <div class="outside-officer-field">
+                <label for="outsideOfficerLastName">Last Name *</label>
+                <input id="outsideOfficerLastName" type="text" autocomplete="off">
+              </div>
+              <div class="outside-officer-field">
+                <label for="outsideOfficerNickname">Nickname</label>
+                <input id="outsideOfficerNickname" type="text" autocomplete="off">
+              </div>
+              <div class="outside-officer-field">
+                <label for="outsideOfficerPhone">Telephone Number *</label>
+                <input id="outsideOfficerPhone" type="tel" autocomplete="tel">
+              </div>
+              <div class="outside-officer-field">
+                <label for="outsideOfficerEmail">Email Address *</label>
+                <input id="outsideOfficerEmail" type="email" autocomplete="email">
+              </div>
+              <div class="outside-officer-field">
+                <label for="outsideOfficerEmployeeNumber">Employee Number</label>
+                <input id="outsideOfficerEmployeeNumber" type="text" autocomplete="off">
+              </div>
+              <div class="outside-officer-field">
+                <label for="outsideOfficerRank">Rank *</label>
+                <select id="outsideOfficerRank">
+                  <option value="officer">Officer</option>
+                  <option value="senior_officer">Senior Officer</option>
+                  <option value="team_lead">Team Lead</option>
+                </select>
+              </div>
+              <div class="outside-officer-field full">
+                <label for="outsideOfficerHomeCampus">Home Campus *</label>
+                <input id="outsideOfficerHomeCampus" type="text" placeholder="Example: TMC, Memorial City, Sugar Land" autocomplete="off">
+              </div>
+              <div class="outside-officer-field">
+                <label for="outsideOfficerBirthDate">Date of Birth</label>
+                <input id="outsideOfficerBirthDate" type="date">
+              </div>
+              <div class="outside-officer-field">
+                <label for="outsideOfficerHireDate">Hire Date</label>
+                <input id="outsideOfficerHireDate" type="date">
+              </div>
+              <div class="outside-officer-field full">
+                <label for="outsideOfficerNotes">Notes</label>
+                <textarea id="outsideOfficerNotes" placeholder="Optional directory or overtime notes"></textarea>
+              </div>
+            </div>
+
+            <section id="outsideOfficerQualificationsSection" class="outside-officer-section" hidden>
+              <div class="eyebrow">Qualifications</div>
+              <h3 style="margin:5px 0;">Outside Officer Qualifications</h3>
+              <p class="subtle" style="margin-bottom:0;">
+                Add and verify qualifications before using them for overtime eligibility decisions.
+              </p>
+              <div id="outsideOfficerQualificationList" class="outside-officer-qualification-list"></div>
+              <div class="outside-officer-qualification-form">
+                <div class="outside-officer-field">
+                  <label for="outsideQualificationCode">Code</label>
+                  <input id="outsideQualificationCode" type="text" placeholder="ARMED" autocomplete="off">
+                </div>
+                <div class="outside-officer-field">
+                  <label for="outsideQualificationName">Qualification Name</label>
+                  <input id="outsideQualificationName" type="text" placeholder="Armed Qualification" autocomplete="off">
+                </div>
+                <label class="outside-officer-verified-check">
+                  <input id="outsideQualificationVerified" type="checkbox"> Verified
+                </label>
+              </div>
+              <div class="outside-officer-field" style="margin-top:10px;">
+                <label for="outsideQualificationNotes">Qualification Notes</label>
+                <input id="outsideQualificationNotes" type="text" placeholder="Optional qualification notes" autocomplete="off">
+              </div>
+              <div style="margin-top:10px;">
+                <button id="outsideQualificationSave" class="personnel-editor-secondary" type="button">
+                  Add / Update Qualification
+                </button>
+              </div>
+            </section>
+
+            <div id="outsideOfficerEditorMessage" class="outside-officer-message"></div>
+          </div>
+
+          <footer class="outside-officer-footer">
+            <button id="outsideOfficerActiveToggle" class="personnel-editor-danger" type="button" hidden>
+              Mark Inactive
+            </button>
+            <div class="outside-officer-footer-right">
+              <button id="outsideOfficerEditorCancel" class="personnel-editor-secondary" type="button">Cancel</button>
+              <button id="outsideOfficerEditorSave" class="personnel-editor-primary" type="button">Save Outside Officer</button>
+            </div>
+          </footer>
+        </section>
+      </div>
+    `
+  );
+
+  const outsideOverlay = document.getElementById("outsideOfficerEditorOverlay");
+  const outsideTitle = document.getElementById("outsideOfficerEditorTitle");
+  const outsideSubtitle = document.getElementById("outsideOfficerEditorSubtitle");
+  const outsideMessage = document.getElementById("outsideOfficerEditorMessage");
+  const outsideSaveButton = document.getElementById("outsideOfficerEditorSave");
+  const outsideActiveToggle = document.getElementById("outsideOfficerActiveToggle");
+  const outsideQualificationsSection = document.getElementById("outsideOfficerQualificationsSection");
+  const outsideQualificationList = document.getElementById("outsideOfficerQualificationList");
+
+  const outsideFields = {
+    firstName: document.getElementById("outsideOfficerFirstName"),
+    middleInitial: document.getElementById("outsideOfficerMiddleInitial"),
+    lastName: document.getElementById("outsideOfficerLastName"),
+    nickname: document.getElementById("outsideOfficerNickname"),
+    phone: document.getElementById("outsideOfficerPhone"),
+    email: document.getElementById("outsideOfficerEmail"),
+    employeeNumber: document.getElementById("outsideOfficerEmployeeNumber"),
+    rank: document.getElementById("outsideOfficerRank"),
+    homeCampus: document.getElementById("outsideOfficerHomeCampus"),
+    birthDate: document.getElementById("outsideOfficerBirthDate"),
+    hireDate: document.getElementById("outsideOfficerHireDate"),
+    notes: document.getElementById("outsideOfficerNotes")
+  };
+
+  const outsideQualificationFields = {
+    code: document.getElementById("outsideQualificationCode"),
+    name: document.getElementById("outsideQualificationName"),
+    verified: document.getElementById("outsideQualificationVerified"),
+    notes: document.getElementById("outsideQualificationNotes")
+  };
+
+  const outsideQualificationSave = document.getElementById("outsideQualificationSave");
+  let currentOutsideOfficer = null;
+  let currentOutsideQualifications = [];
+
+  function outsideNullable(value) {
+    const clean = String(value || "").trim();
+    return clean || null;
+  }
+
+  function setOutsideMessage(text, type = "info") {
+    outsideMessage.textContent = text || "";
+    outsideMessage.className = "outside-officer-message " + type;
+  }
+
+  function clearOutsideMessage() {
+    outsideMessage.textContent = "";
+    outsideMessage.className = "outside-officer-message";
+  }
+
+  function resetOutsideForm() {
+    Object.values(outsideFields).forEach(field => {
+      if (field.tagName === "SELECT") field.value = "officer";
+      else field.value = "";
+    });
+    outsideQualificationFields.code.value = "";
+    outsideQualificationFields.name.value = "";
+    outsideQualificationFields.verified.checked = false;
+    outsideQualificationFields.notes.value = "";
+    currentOutsideOfficer = null;
+    currentOutsideQualifications = [];
+    outsideQualificationsSection.hidden = true;
+    outsideActiveToggle.hidden = true;
+    outsideQualificationList.innerHTML = "";
+    clearOutsideMessage();
+  }
+
+  async function getOutsideOfficerById(outsideOfficerId) {
+    const { data, error } = await db.rpc(
+      "get_outside_officer_directory",
+      { p_include_inactive: true }
+    );
+    if (error) throw error;
+    return (data || []).find(
+      officer => String(officer.outside_officer_id) === String(outsideOfficerId)
+    ) || null;
+  }
+
+  async function loadOutsideQualifications(outsideOfficerId) {
+    const { data, error } = await db.rpc(
+      "get_outside_officer_qualifications",
+      { p_outside_officer_id: outsideOfficerId }
+    );
+    if (error) throw error;
+    currentOutsideQualifications = data || [];
+    renderOutsideQualifications();
+  }
+
+  function renderOutsideQualifications() {
+    if (!currentOutsideQualifications.length) {
+      outsideQualificationList.innerHTML = '<div class="subtle">No qualifications recorded.</div>';
+      return;
+    }
+    outsideQualificationList.innerHTML = "";
+    currentOutsideQualifications.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "outside-officer-qualification-row";
+      const text = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = item.qualification_name || item.qualification_code || "Qualification";
+      const verified = document.createElement("span");
+      const isVerified = item.verification_status === "verified";
+      verified.className = "outside-officer-chip " + (isVerified ? "verified" : "unverified");
+      verified.textContent = isVerified ? "VERIFIED" : "UNVERIFIED";
+      title.appendChild(verified);
+      const meta = document.createElement("div");
+      meta.className = "outside-officer-qualification-meta";
+      meta.textContent = `${item.qualification_code || "—"} • ${item.status || "—"}`;
+      text.append(title, meta);
+      row.appendChild(text);
+      if (item.status === "active") {
+        const revoke = document.createElement("button");
+        revoke.type = "button";
+        revoke.className = "personnel-editor-danger";
+        revoke.textContent = "Revoke";
+        revoke.addEventListener("click", async () => {
+          if (!currentOutsideOfficer) return;
+          const confirmed = window.confirm(`Revoke ${item.qualification_name || item.qualification_code}?`);
+          if (!confirmed) return;
+          const { error } = await db.rpc(
+            "revoke_outside_officer_qualification",
+            {
+              p_outside_officer_id: currentOutsideOfficer.outside_officer_id,
+              p_qualification_code: item.qualification_code,
+              p_notes: "Revoked through Personnel Administration"
+            }
+          );
+          if (error) {
+            setOutsideMessage(error.message, "error");
+            return;
+          }
+          await loadOutsideQualifications(currentOutsideOfficer.outside_officer_id);
+          setOutsideMessage("Qualification revoked.", "success");
+        });
+        row.appendChild(revoke);
+      }
+      outsideQualificationList.appendChild(row);
+    });
+  }
+
+  function populateOutsideForm(person) {
+    outsideFields.firstName.value = person.first_name || "";
+    outsideFields.middleInitial.value = person.middle_initial || "";
+    outsideFields.lastName.value = person.last_name || "";
+    outsideFields.nickname.value = person.nickname || "";
+    outsideFields.phone.value = person.phone_number || "";
+    outsideFields.email.value = person.email || "";
+    outsideFields.employeeNumber.value = person.employee_number || "";
+    outsideFields.rank.value = person.rank || "officer";
+    outsideFields.homeCampus.value = person.home_campus || "";
+    outsideFields.birthDate.value = person.birth_date || "";
+    outsideFields.hireDate.value = person.hire_date || "";
+    outsideFields.notes.value = person.notes || "";
+  }
+
+  async function openOutsideAdd() {
+    resetOutsideForm();
+    outsideTitle.textContent = "Add Outside Officer";
+    outsideSubtitle.textContent = "Create a reusable outside-officer record for overtime assignments.";
+    outsideSaveButton.textContent = "Add Outside Officer";
+    outsideOverlay.hidden = false;
+    document.body.style.overflow = "hidden";
+    setTimeout(() => outsideFields.firstName.focus(), 50);
+  }
+
+  async function openOutsideEdit(outsideOfficerId) {
+    resetOutsideForm();
+    outsideTitle.textContent = "Edit Outside Officer";
+    outsideSubtitle.textContent = "Loading outside officer record...";
+    outsideSaveButton.textContent = "Save Outside Officer";
+    outsideSaveButton.disabled = true;
+    outsideOverlay.hidden = false;
+    document.body.style.overflow = "hidden";
+    try {
+      const person = await getOutsideOfficerById(outsideOfficerId);
+      if (!person) throw new Error("Outside officer record was not found.");
+      currentOutsideOfficer = person;
+      populateOutsideForm(person);
+      outsideSubtitle.textContent = person.display_name || "Outside Officer";
+      outsideQualificationsSection.hidden = false;
+      outsideActiveToggle.hidden = false;
+      outsideActiveToggle.textContent = person.is_active === false ? "Reactivate Officer" : "Mark Inactive";
+      await loadOutsideQualifications(person.outside_officer_id);
+    }
+    catch (error) {
+      console.error("Outside officer editor load failed:", error);
+      setOutsideMessage(error.message || "Outside officer record could not be loaded.", "error");
+    }
+    finally {
+      outsideSaveButton.disabled = false;
+    }
+  }
+
+  function closeOutsideEditor() {
+    outsideOverlay.hidden = true;
+    document.body.style.overflow = "";
+    resetOutsideForm();
+  }
+
+  function validateOutsideForm() {
+    if (!outsideFields.firstName.value.trim()) {
+      setOutsideMessage("First name is required.", "error");
+      outsideFields.firstName.focus();
+      return false;
+    }
+    if (!outsideFields.lastName.value.trim()) {
+      setOutsideMessage("Last name is required.", "error");
+      outsideFields.lastName.focus();
+      return false;
+    }
+    if (outsideFields.middleInitial.value.trim() && !/^[A-Za-z]$/.test(outsideFields.middleInitial.value.trim())) {
+      setOutsideMessage("Middle initial must contain one letter.", "error");
+      outsideFields.middleInitial.focus();
+      return false;
+    }
+    if (!outsideFields.phone.value.trim()) {
+      setOutsideMessage("Telephone number is required.", "error");
+      outsideFields.phone.focus();
+      return false;
+    }
+    if (!outsideFields.email.value.trim()) {
+      setOutsideMessage("Email address is required.", "error");
+      outsideFields.email.focus();
+      return false;
+    }
+    if (!outsideFields.homeCampus.value.trim()) {
+      setOutsideMessage("Home campus is required for overtime assignments.", "error");
+      outsideFields.homeCampus.focus();
+      return false;
+    }
+    return true;
+  }
+
+  function outsideRpcPayload() {
+    return {
+      p_first_name: outsideFields.firstName.value.trim(),
+      p_middle_initial: outsideNullable(outsideFields.middleInitial.value),
+      p_last_name: outsideFields.lastName.value.trim(),
+      p_nickname: outsideNullable(outsideFields.nickname.value),
+      p_phone_number: outsideFields.phone.value.trim(),
+      p_email: outsideFields.email.value.trim(),
+      p_rank: outsideFields.rank.value,
+      p_home_campus: outsideNullable(outsideFields.homeCampus.value),
+      p_employee_number: outsideNullable(outsideFields.employeeNumber.value),
+      p_birth_date: outsideFields.birthDate.value || null,
+      p_hire_date: outsideFields.hireDate.value || null,
+      p_notes: outsideNullable(outsideFields.notes.value)
+    };
+  }
+
+  async function refreshOutsideDirectory() {
+    const refresh = document.getElementById("refreshOutsideButton");
+    if (refresh) refresh.click();
+  }
+
+  outsideSaveButton.addEventListener("click", async () => {
+    clearOutsideMessage();
+    if (!validateOutsideForm()) return;
+    outsideSaveButton.disabled = true;
+    const oldText = outsideSaveButton.textContent;
+    outsideSaveButton.textContent = "Saving...";
+    try {
+      const payload = outsideRpcPayload();
+      let response;
+      if (currentOutsideOfficer) {
+        response = await db.rpc(
+          "update_outside_officer",
+          {
+            p_outside_officer_id: currentOutsideOfficer.outside_officer_id,
+            ...payload
+          }
+        );
+      }
+      else {
+        response = await db.rpc("create_outside_officer", payload);
+      }
+      if (response.error) throw response.error;
+      setOutsideMessage(
+        currentOutsideOfficer ? "Outside officer updated successfully." : "Outside officer added successfully.",
+        "success"
+      );
+      await refreshOutsideDirectory();
+      setTimeout(closeOutsideEditor, 650);
+    }
+    catch (error) {
+      console.error("Outside officer save failed:", error);
+      setOutsideMessage(error.message || "Outside officer could not be saved.", "error");
+    }
+    finally {
+      outsideSaveButton.disabled = false;
+      outsideSaveButton.textContent = oldText;
+    }
+  });
+
+  outsideQualificationSave.addEventListener("click", async () => {
+    if (!currentOutsideOfficer) return;
+    clearOutsideMessage();
+    const code = outsideQualificationFields.code.value.trim().toUpperCase();
+    const name = outsideQualificationFields.name.value.trim();
+    if (!code || !name) {
+      setOutsideMessage("Qualification code and name are required.", "error");
+      return;
+    }
+    outsideQualificationSave.disabled = true;
+    outsideQualificationSave.textContent = "Saving...";
+    try {
+      const { error } = await db.rpc(
+        "set_outside_officer_qualification",
+        {
+          p_outside_officer_id: currentOutsideOfficer.outside_officer_id,
+          p_qualification_code: code,
+          p_qualification_name: name,
+          p_verified: outsideQualificationFields.verified.checked,
+          p_notes: outsideNullable(outsideQualificationFields.notes.value)
+        }
+      );
+      if (error) throw error;
+      outsideQualificationFields.code.value = "";
+      outsideQualificationFields.name.value = "";
+      outsideQualificationFields.verified.checked = false;
+      outsideQualificationFields.notes.value = "";
+      await loadOutsideQualifications(currentOutsideOfficer.outside_officer_id);
+      await refreshOutsideDirectory();
+      setOutsideMessage("Qualification saved.", "success");
+    }
+    catch (error) {
+      console.error("Outside officer qualification save failed:", error);
+      setOutsideMessage(error.message || "Qualification could not be saved.", "error");
+    }
+    finally {
+      outsideQualificationSave.disabled = false;
+      outsideQualificationSave.textContent = "Add / Update Qualification";
+    }
+  });
+
+  outsideActiveToggle.addEventListener("click", async () => {
+    if (!currentOutsideOfficer) return;
+    const nextActive = currentOutsideOfficer.is_active === false;
+    const confirmed = window.confirm(
+      nextActive ? "Reactivate this outside officer?" : "Mark this outside officer inactive? Existing history will be preserved."
+    );
+    if (!confirmed) return;
+    const { error } = await db.rpc(
+      "set_outside_officer_active",
+      {
+        p_outside_officer_id: currentOutsideOfficer.outside_officer_id,
+        p_is_active: nextActive,
+        p_reason: nextActive ? "Reactivated through Personnel Administration" : "Marked inactive through Personnel Administration"
+      }
+    );
+    if (error) {
+      setOutsideMessage(error.message, "error");
+      return;
+    }
+    currentOutsideOfficer.is_active = nextActive;
+    await refreshOutsideDirectory();
+    setOutsideMessage(nextActive ? "Outside officer reactivated." : "Outside officer marked inactive.", "success");
+    setTimeout(closeOutsideEditor, 650);
+  });
+
+  function outsideHistorySummary(outsideOfficerId) {
+    getOutsideOfficerById(outsideOfficerId)
+      .then(person => {
+        if (!person) throw new Error("Outside officer record was not found.");
+        const completed = Number(person.completed_overtime_count || 0);
+        const last = person.last_overtime_worked_at
+          ? new Date(person.last_overtime_worked_at).toLocaleString()
+          : "No completed overtime recorded";
+        window.alert(
+          `${person.display_name}\n\nCompleted overtime assignments: ${completed}\nLast overtime worked: ${last}`
+        );
+      })
+      .catch(error => {
+        window.alert(error.message || "Unable to load overtime history summary.");
+      });
+  }
+
+  document.getElementById("outsideOfficerEditorClose").addEventListener("click", closeOutsideEditor);
+  document.getElementById("outsideOfficerEditorCancel").addEventListener("click", closeOutsideEditor);
+
+  outsideOverlay.addEventListener("click", event => {
+    if (event.target === outsideOverlay) closeOutsideEditor();
+  });
+
+  document.addEventListener(
+    "click",
+    event => {
+      const button = event.target.closest("button");
+      if (!button) return;
+      if (button.id === "addOutsideButton") {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openOutsideAdd();
+        return;
+      }
+      const outsideAction = button.dataset.outsideAction;
+      if (!outsideAction) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const outsideOfficerId = button.dataset.id;
+      if (!outsideOfficerId) return;
+      if (outsideAction === "edit") {
+        openOutsideEdit(outsideOfficerId);
+        return;
+      }
+      if (outsideAction === "qualifications") {
+        openOutsideEdit(outsideOfficerId).then(() => {
+          setTimeout(
+            () => outsideQualificationsSection.scrollIntoView({ behavior:"smooth", block:"start" }),
+            80
+          );
+        });
+        return;
+      }
+      if (outsideAction === "history") outsideHistorySummary(outsideOfficerId);
+    },
+    true
+  );
+
+  window.SecureTrackOutsideOfficerEditor = {
+    add: openOutsideAdd,
+    edit: openOutsideEdit,
+    qualifications: openOutsideEdit,
+    history: outsideHistorySummary,
+    refresh: refreshOutsideDirectory
+  };
+
 })();
