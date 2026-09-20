@@ -549,11 +549,29 @@
   const offCampusSummary =
     $("offCampusSummary");
 
-  const offCampusOfficerName =
-    $("offCampusOfficerName");
+  const offCampusOfficerSearch =
+    $("offCampusOfficerSearch");
 
-  const offCampusHomeCampus =
-    $("offCampusHomeCampus");
+  const offCampusOfficerSearchButton =
+    $("offCampusOfficerSearchButton");
+
+  const offCampusOfficerResults =
+    $("offCampusOfficerResults");
+
+  const offCampusSelectedOfficerId =
+    $("offCampusSelectedOfficerId");
+
+  const offCampusSelectedOfficer =
+    $("offCampusSelectedOfficer");
+
+  const offCampusSelectedOfficerName =
+    $("offCampusSelectedOfficerName");
+
+  const offCampusSelectedOfficerDetails =
+    $("offCampusSelectedOfficerDetails");
+
+  const offCampusPickerMessage =
+    $("offCampusPickerMessage");
 
   const offCampusNotes =
     $("offCampusNotes");
@@ -2891,44 +2909,560 @@
 
 
   // =========================================================
-  // OFF-CAMPUS MANUAL FILL
+  // OUTSIDE OFFICER DIRECTORY -> OVERTIME ASSIGNMENT
   // =========================================================
 
-  function openOffCampusModal(opportunity) {
+  let selectedOutsideOfficer =
+    null;
+
+  let outsideOfficerSearchTimer =
+    null;
+
+
+  function setOffCampusPickerMessage(
+    text,
+    type = ""
+  ) {
+
+    if (!offCampusPickerMessage) {
+      return;
+    }
+
+    offCampusPickerMessage.textContent =
+      text || "";
+
+    offCampusPickerMessage.style.display =
+      text
+        ? "block"
+        : "none";
+
+    offCampusPickerMessage.style.color =
+      type === "error"
+        ? "#ffadad"
+        : type === "success"
+          ? "#9adea8"
+          : "#aeb6be";
+
+    offCampusPickerMessage.style.borderColor =
+      type === "error"
+        ? "rgba(224,74,74,.45)"
+        : type === "success"
+          ? "rgba(87,187,109,.40)"
+          : "#343a41";
+  }
+
+
+  function normalizeQualificationList(
+    value
+  ) {
+
+    if (!value) {
+      return [];
+    }
+
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    if (
+      typeof value === "object"
+    ) {
+      return Object.values(value);
+    }
+
+    try {
+      const parsed =
+        JSON.parse(value);
+
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+
+      if (
+        parsed &&
+        typeof parsed === "object"
+      ) {
+        return Object.values(parsed);
+      }
+    }
+    catch (_) {
+      // Ignore non-JSON qualification text.
+    }
+
+    return [];
+  }
+
+
+  function isVerifiedArmedOutsideOfficer(
+    officer
+  ) {
+
+    return normalizeQualificationList(
+      officer?.qualifications
+    ).some(item => {
+
+      const code =
+        String(
+          item?.qualification_code ||
+          item?.code ||
+          ""
+        )
+          .trim()
+          .toUpperCase();
+
+      const status =
+        String(
+          item?.status ||
+          "active"
+        )
+          .trim()
+          .toLowerCase();
+
+      const verification =
+        String(
+          item?.verification_status ||
+          (
+            item?.verified === true
+              ? "verified"
+              : ""
+          )
+        )
+          .trim()
+          .toLowerCase();
+
+      return (
+        code === "ARMED" &&
+        status !== "revoked" &&
+        (
+          verification === "verified" ||
+          item?.verified === true
+        )
+      );
+    });
+  }
+
+
+  function outsideOfficerMetaText(
+    officer
+  ) {
+
+    const parts = [];
+
+    if (officer?.officer_rank) {
+      parts.push(
+        roleLabel([
+          officer.officer_rank
+        ])
+      );
+    }
+
+    if (officer?.home_campus) {
+      parts.push(
+        officer.home_campus
+      );
+    }
+
+    if (officer?.employee_number) {
+      parts.push(
+        `#${officer.employee_number}`
+      );
+    }
+
+    if (
+      isVerifiedArmedOutsideOfficer(
+        officer
+      )
+    ) {
+      parts.push(
+        "🛡 Armed Qualified"
+      );
+    }
+
+    return parts.join(" • ");
+  }
+
+
+  function clearSelectedOutsideOfficer() {
+
+    selectedOutsideOfficer =
+      null;
+
+    if (offCampusSelectedOfficerId) {
+      offCampusSelectedOfficerId.value =
+        "";
+    }
+
+    if (offCampusSelectedOfficer) {
+      offCampusSelectedOfficer.hidden =
+        true;
+    }
+
+    if (offCampusSelectedOfficerName) {
+      offCampusSelectedOfficerName.textContent =
+        "—";
+    }
+
+    if (offCampusSelectedOfficerDetails) {
+      offCampusSelectedOfficerDetails.textContent =
+        "—";
+    }
+
+    if (confirmOffCampusButton) {
+      confirmOffCampusButton.disabled =
+        true;
+    }
+  }
+
+
+  function selectOutsideOfficer(
+    officer
+  ) {
+
+    selectedOutsideOfficer =
+      officer;
+
+    if (offCampusSelectedOfficerId) {
+      offCampusSelectedOfficerId.value =
+        officer.outside_officer_id ||
+        "";
+    }
+
+    if (offCampusSelectedOfficerName) {
+      offCampusSelectedOfficerName.textContent =
+        officer.display_name ||
+        "Outside Officer";
+    }
+
+    if (offCampusSelectedOfficerDetails) {
+      offCampusSelectedOfficerDetails.textContent =
+        outsideOfficerMetaText(
+          officer
+        ) ||
+        "Outside Officer Directory";
+    }
+
+    if (offCampusSelectedOfficer) {
+      offCampusSelectedOfficer.hidden =
+        false;
+    }
+
+    if (offCampusOfficerSearch) {
+      offCampusOfficerSearch.value =
+        officer.display_name ||
+        "";
+    }
+
+    if (offCampusOfficerResults) {
+      offCampusOfficerResults.innerHTML =
+        "";
+    }
+
+    if (confirmOffCampusButton) {
+      confirmOffCampusButton.disabled =
+        false;
+    }
+
+    setOffCampusPickerMessage(
+      `${officer.display_name || "Outside officer"} selected.`,
+      "success"
+    );
+  }
+
+
+  function renderOutsideOfficerResults(
+    rows
+  ) {
+
+    if (!offCampusOfficerResults) {
+      return;
+    }
+
+    offCampusOfficerResults.innerHTML =
+      "";
+
+    const list =
+      Array.isArray(rows)
+        ? rows
+        : [];
+
+    if (!list.length) {
+
+      const empty =
+        document.createElement(
+          "div"
+        );
+
+      empty.textContent =
+        "No active outside officers match this search. Add the officer in Personnel Administration first.";
+
+      empty.style.padding =
+        "12px";
+
+      empty.style.color =
+        "#9aa2aa";
+
+      offCampusOfficerResults.appendChild(
+        empty
+      );
+
+      return;
+    }
+
+
+    list.forEach(officer => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.type =
+        "button";
+
+      button.style.width =
+        "100%";
+
+      button.style.display =
+        "flex";
+
+      button.style.alignItems =
+        "center";
+
+      button.style.justifyContent =
+        "space-between";
+
+      button.style.gap =
+        "12px";
+
+      button.style.padding =
+        "12px 13px";
+
+      button.style.margin =
+        "0";
+
+      button.style.border =
+        "0";
+
+      button.style.borderBottom =
+        "1px solid #2d333a";
+
+      button.style.background =
+        "#0b0e11";
+
+      button.style.color =
+        "#fff";
+
+      button.style.cursor =
+        "pointer";
+
+      button.style.textAlign =
+        "left";
+
+
+      const left =
+        document.createElement(
+          "div"
+        );
+
+      const name =
+        document.createElement(
+          "strong"
+        );
+
+      name.textContent =
+        officer.display_name ||
+        "Outside Officer";
+
+      name.style.display =
+        "block";
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+      meta.textContent =
+        outsideOfficerMetaText(
+          officer
+        ) ||
+        "Outside Officer Directory";
+
+      meta.style.marginTop =
+        "4px";
+
+      meta.style.fontSize =
+        "12px";
+
+      meta.style.color =
+        "#9aa2aa";
+
+      left.appendChild(name);
+      left.appendChild(meta);
+
+
+      const choose =
+        document.createElement(
+          "span"
+        );
+
+      choose.textContent =
+        "Select";
+
+      choose.style.color =
+        "#ff922b";
+
+      choose.style.fontWeight =
+        "800";
+
+      choose.style.whiteSpace =
+        "nowrap";
+
+
+      button.appendChild(left);
+      button.appendChild(choose);
+
+      button.addEventListener(
+        "click",
+        () =>
+          selectOutsideOfficer(
+            officer
+          )
+      );
+
+      offCampusOfficerResults.appendChild(
+        button
+      );
+    });
+  }
+
+
+  async function loadOutsideOfficerMatches(
+    searchText = ""
+  ) {
+
+    if (!offCampusOfficerResults) {
+      return;
+    }
+
+    offCampusOfficerResults.innerHTML =
+      '<div style="padding:12px;color:#9aa2aa;">Loading outside officers…</div>';
+
+    setOffCampusPickerMessage(
+      ""
+    );
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await db.rpc(
+          "search_outside_officers_for_overtime",
+          {
+            p_search:
+              searchText.trim() ||
+              null,
+
+            p_rank:
+              null,
+
+            p_home_campus:
+              null,
+
+            p_qualification_code:
+              null,
+
+            p_verified_only:
+              false
+          }
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      renderOutsideOfficerResults(
+        data || []
+      );
+
+    }
+    catch (error) {
+
+      console.error(
+        "Outside officer directory search failed:",
+        error
+      );
+
+      offCampusOfficerResults.innerHTML =
+        "";
+
+      setOffCampusPickerMessage(
+        error.message ||
+        "Unable to load the Outside Officer Directory.",
+        "error"
+      );
+    }
+  }
+
+
+  function openOffCampusModal(
+    opportunity
+  ) {
 
     if (
       !offCampusModal ||
       !offCampusForm ||
       !offCampusOpportunityId ||
-      !offCampusOfficerName ||
-      !offCampusHomeCampus
+      !offCampusOfficerSearch ||
+      !offCampusSelectedOfficerId
     ) {
-      console.error("Off-campus modal elements are missing.");
+
+      console.error(
+        "Outside officer overtime modal elements are missing."
+      );
+
       showMessage(
-        "The off-campus assignment form is unavailable.",
+        "The outside officer assignment form is unavailable.",
         "error"
       );
+
       return;
     }
 
+
     clearMessage();
     offCampusForm.reset();
+    clearSelectedOutsideOfficer();
+    setOffCampusPickerMessage(
+      ""
+    );
 
     offCampusOpportunityId.value =
       opportunity.id;
 
+
     const remaining =
       Math.max(
-        Number(opportunity.total_openings || 0) -
-        Number(opportunity.filled_openings || 0),
+        Number(
+          opportunity.total_openings ||
+          0
+        ) -
+        Number(
+          opportunity.filled_openings ||
+          0
+        ),
         0
       );
+
 
     const timeText =
       opportunity.start_time ||
       opportunity.end_time
         ? `${formatTime(opportunity.start_time) || "—"} - ${formatTime(opportunity.end_time) || "—"}`
         : "Time not specified";
+
 
     if (offCampusSummary) {
       offCampusSummary.textContent =
@@ -2939,21 +3473,27 @@
         `${remaining} opening(s) remaining`;
     }
 
-    offCampusModal.classList.add("show");
+
+    offCampusModal.classList.add(
+      "show"
+    );
+
     offCampusModal.setAttribute(
       "aria-hidden",
       "false"
     );
 
-    /*
-      This guarantees the modal is visible even if
-      the existing CSS does not define .show correctly.
-    */
     offCampusModal.style.display =
       "flex";
 
+
+    loadOutsideOfficerMatches(
+      ""
+    );
+
     setTimeout(
-      () => offCampusOfficerName.focus(),
+      () =>
+        offCampusOfficerSearch.focus(),
       50
     );
   }
@@ -2965,16 +3505,19 @@
       return;
     }
 
-    offCampusModal.classList.remove("show");
+    clearTimeout(
+      outsideOfficerSearchTimer
+    );
+
+    offCampusModal.classList.remove(
+      "show"
+    );
+
     offCampusModal.setAttribute(
       "aria-hidden",
       "true"
     );
 
-    /*
-      Remove the temporary inline display value so
-      normal CSS controls the modal again.
-    */
     offCampusModal.style.display =
       "";
 
@@ -2991,7 +3534,56 @@
       offCampusSummary.textContent =
         "";
     }
+
+    if (offCampusOfficerResults) {
+      offCampusOfficerResults.innerHTML =
+        "";
+    }
+
+    clearSelectedOutsideOfficer();
+    setOffCampusPickerMessage(
+      ""
+    );
   }
+
+
+  offCampusOfficerSearch
+    ?.addEventListener(
+      "input",
+      () => {
+
+        clearSelectedOutsideOfficer();
+
+        clearTimeout(
+          outsideOfficerSearchTimer
+        );
+
+        outsideOfficerSearchTimer =
+          setTimeout(
+            () =>
+              loadOutsideOfficerMatches(
+                offCampusOfficerSearch.value ||
+                ""
+              ),
+            250
+          );
+      }
+    );
+
+
+  offCampusOfficerSearchButton
+    ?.addEventListener(
+      "click",
+      () => {
+
+        clearSelectedOutsideOfficer();
+
+        loadOutsideOfficerMatches(
+          offCampusOfficerSearch?.value ||
+          ""
+        );
+      }
+    );
 
 
   cancelOffCampusButton
@@ -3024,60 +3616,65 @@
 
         event.preventDefault();
         clearMessage();
+        setOffCampusPickerMessage(
+          ""
+        );
+
 
         const opportunityId =
           offCampusOpportunityId
             ?.value
-            ?.trim() || "";
+            ?.trim() ||
+          "";
 
-        const officerName =
-          offCampusOfficerName
-            ?.value
-            ?.trim() || "";
 
-        const homeCampus =
-          offCampusHomeCampus
+        const outsideOfficerId =
+          offCampusSelectedOfficerId
             ?.value
-            ?.trim() || "";
+            ?.trim() ||
+          "";
+
 
         const notes =
           offCampusNotes
             ?.value
-            ?.trim() || "";
+            ?.trim() ||
+          "";
+
 
         if (!opportunityId) {
-          showMessage(
+
+          setOffCampusPickerMessage(
             "The overtime opportunity could not be identified.",
             "error"
           );
+
           return;
         }
 
-        if (!officerName) {
-          showMessage(
-            "Enter the off-campus officer's name.",
+
+        if (!outsideOfficerId) {
+
+          setOffCampusPickerMessage(
+            "Search for an outside officer and select the officer before filling the opening.",
             "error"
           );
-          offCampusOfficerName?.focus();
+
+          offCampusOfficerSearch?.focus();
+
           return;
         }
 
-        if (!homeCampus) {
-          showMessage(
-            "Enter the officer's home campus or facility.",
-            "error"
-          );
-          offCampusHomeCampus?.focus();
-          return;
-        }
 
         if (confirmOffCampusButton) {
+
           confirmOffCampusButton.disabled =
             true;
 
           confirmOffCampusButton.textContent =
             "Filling Opening…";
         }
+
 
         try {
 
@@ -3086,34 +3683,44 @@
             error
           } =
             await db.rpc(
-              "fill_overtime_with_off_campus_officer",
+              "assign_outside_officer_to_overtime",
               {
                 p_opportunity_id:
                   opportunityId,
 
-                p_officer_name:
-                  officerName,
-
-                p_home_campus:
-                  homeCampus,
+                p_outside_officer_id:
+                  outsideOfficerId,
 
                 p_notes:
-                  notes || null
+                  notes ||
+                  null
               }
             );
+
 
           if (error) {
             throw error;
           }
 
+
+          const officerName =
+            selectedOutsideOfficer
+              ?.display_name ||
+            data?.display_name ||
+            data?.officer_name ||
+            "Outside officer";
+
+
           closeOffCampusModal();
 
           showMessage(
-            `${data?.officer_name || officerName} was assigned as off-campus overtime help.`,
+            `${officerName} was assigned to the overtime opportunity.`,
             "success"
           );
 
+
           await refreshAll();
+
 
           if (
             currentDetailOpportunityId ===
@@ -3128,13 +3735,13 @@
         catch (error) {
 
           console.error(
-            "Off-campus overtime assignment error:",
+            "Outside officer overtime assignment error:",
             error
           );
 
-          showMessage(
+          setOffCampusPickerMessage(
             error.message ||
-            "Unable to fill this overtime opening.",
+            "Unable to assign this outside officer to the overtime opportunity.",
             "error"
           );
 
@@ -3142,8 +3749,10 @@
         finally {
 
           if (confirmOffCampusButton) {
+
             confirmOffCampusButton.disabled =
-              false;
+              !offCampusSelectedOfficerId
+                ?.value;
 
             confirmOffCampusButton.textContent =
               "Fill Overtime Opening";
@@ -3152,6 +3761,7 @@
       }
     );
   }
+
 
   // =========================================================
   // DETAIL MODAL
