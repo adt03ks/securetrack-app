@@ -126,24 +126,56 @@
       <span id="currentUserRole" class="role-pill"></span>
     </section>
 
-    <section class="summary-grid" aria-label="Property summary">
-      <article class="summary-card">
-        <span>Stored</span>
-        <strong id="storedCount">—</strong>
-      </article>
-      <article class="summary-card">
-        <span>Released</span>
-        <strong id="releasedCount">—</strong>
-      </article>
-      <article class="summary-card">
-        <span>Disposed</span>
-        <strong id="disposedCount">—</strong>
-      </article>
-      <article class="summary-card">
-        <span>Total Records</span>
-        <strong id="totalCount">—</strong>
-      </article>
-    </section>
+<section class="summary-grid" aria-label="Property summary">
+
+  <button
+    class="summary-card summary-link"
+    type="button"
+    data-property-status="stored"
+    aria-label="View stored property records"
+  >
+    <span>Stored</span>
+    <strong id="storedCount">—</strong>
+    <small>View Records →</small>
+  </button>
+
+
+  <button
+    class="summary-card summary-link"
+    type="button"
+    data-property-status="released"
+    aria-label="View released property records"
+  >
+    <span>Released</span>
+    <strong id="releasedCount">—</strong>
+    <small>View Records →</small>
+  </button>
+
+
+  <button
+    class="summary-card summary-link"
+    type="button"
+    data-property-status="disposed"
+    aria-label="View disposed property records"
+  >
+    <span>Disposed</span>
+    <strong id="disposedCount">—</strong>
+    <small>View Records →</small>
+  </button>
+
+
+  <button
+    class="summary-card summary-link"
+    type="button"
+    data-property-status=""
+    aria-label="View all property records"
+  >
+    <span>Total Records</span>
+    <strong id="totalCount">—</strong>
+    <small>View All Records →</small>
+  </button>
+
+</section>
 
     <nav class="tabs" aria-label="Property functions">
       <button class="tab active" type="button" data-panel="intakePanel">Log New Property</button>
