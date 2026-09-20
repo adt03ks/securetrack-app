@@ -110,7 +110,8 @@
 
   let currentManagementRequest =
     null;
-
+let activePropertyStatusFilter =
+  null;
 
   // =========================================================
   // ROLE LABEL
