@@ -2440,73 +2440,60 @@ renderSearchResults(
       );
 
 
-      if (
-        !preserveMessage
-      ) {
+     if (
+  !preserveMessage
+) {
 
-        if (
-          searchTerm.trim()
-        ) {
+  if (
+    activePropertyStatusFilter
+  ) {
 
-          showMessage(
-            searchMessage,
-
-            `${rows.length} matching record${rows.length === 1 ? "" : "s"} found.`,
-
-            rows.length
-              ? "success"
-              : "info"
-          );
-
-        }
-
-        else {
-
-          showMessage(
-            searchMessage,
-
-            `Showing ${rows.length} most recent property record${rows.length === 1 ? "" : "s"}.`,
-
-            "info"
-          );
-
-        }
-      }
-
-    }
-
-    catch (
-      error
-    ) {
-
-      console.error(
-        "Property search error:",
-        error
-      );
+    const label =
+      activePropertyStatusFilter
+        .charAt(0)
+        .toUpperCase() +
+      activePropertyStatusFilter
+        .slice(1);
 
 
-      showMessage(
-        searchMessage,
+    showMessage(
+      searchMessage,
 
-        error.message ||
-        "Unable to search property records.",
+      `Showing ${rows.length} ${label.toLowerCase()} property record${rows.length === 1 ? "" : "s"}.`,
 
-        "error"
-      );
+      "info"
+    );
 
-    }
-
-    finally {
-
-      searchButton.disabled =
-        false;
-
-
-      searchButton.textContent =
-        "Search";
-    }
   }
 
+  else if (
+    searchTerm.trim()
+  ) {
+
+    showMessage(
+      searchMessage,
+
+      `${rows.length} matching record${rows.length === 1 ? "" : "s"} found.`,
+
+      rows.length
+        ? "success"
+        : "info"
+    );
+
+  }
+
+  else {
+
+    showMessage(
+      searchMessage,
+
+      `Showing ${rows.length} most recent property record${rows.length === 1 ? "" : "s"}.`,
+
+      "info"
+    );
+
+  }
+}
 
   // =========================================================
   // RENDER DISPOSAL QUEUE
