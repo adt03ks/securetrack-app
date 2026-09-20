@@ -139,11 +139,17 @@
   const locationReceived =
     document.getElementById("locationReceived");
 
-  const storageLocation =
-    document.getElementById("storageLocation");
+ const storageLocation =
+  document.getElementById("storageLocation");
 
-  const notes =
-    document.getElementById("notes");
+const clinicalStaffName =
+  document.getElementById("clinicalStaffName");
+
+const clinicalStaffBadgeNumber =
+  document.getElementById("clinicalStaffBadgeNumber");
+
+const notes =
+  document.getElementById("notes");
 
   const intakeResult =
     document.getElementById("intakeResult");
@@ -2679,7 +2685,35 @@
 
         return;
       }
+const clinicalName =
+  clinicalStaffName
+    .value
+    .trim();
 
+const clinicalBadge =
+  clinicalStaffBadgeNumber
+    .value
+    .trim();
+
+
+if (
+  (clinicalName && !clinicalBadge) ||
+  (!clinicalName && clinicalBadge)
+) {
+  showMessage(
+    intakeResult,
+    "Enter both the clinical staff name and badge number, or leave both fields blank.",
+    "error"
+  );
+
+  if (!clinicalName) {
+    clinicalStaffName.focus();
+  } else {
+    clinicalStaffBadgeNumber.focus();
+  }
+
+  return;
+}
       savePropertyButton.disabled =
         true;
 
