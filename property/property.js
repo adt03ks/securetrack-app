@@ -2727,54 +2727,62 @@ if (
             "Weapons"
           );
 
-        const {
-          data,
-          error
-        } =
-          await db.rpc(
-            "create_property_item",
-            {
-              p_description:
-                description
-                  .value
-                  .trim(),
+       const {
+  data,
+  error
+} =
+  await db.rpc(
+    "create_property_item",
+    {
+      p_description:
+        description
+          .value
+          .trim(),
 
-              p_category:
-                category.value,
+      p_category:
+        category.value,
 
-              p_location_received:
-                locationReceived
-                  .value
-                  .trim(),
+      p_location_received:
+        locationReceived
+          .value
+          .trim(),
 
-              p_storage_location:
-                storageLocation
-                  .value
-                  .trim(),
+      p_storage_location:
+        storageLocation
+          .value
+          .trim(),
 
-              p_dg_number:
-                dgNumber
-                  .value
-                  .trim() ||
-                null,
+      p_dg_number:
+        dgNumber
+          .value
+          .trim() ||
+        null,
 
-              p_mrn_number:
-                mrnNumber
-                  .value
-                  .trim() ||
-                null,
+      p_mrn_number:
+        mrnNumber
+          .value
+          .trim() ||
+        null,
 
-              p_notes:
-                notes
-                  .value
-                  .trim() ||
-                null,
+      p_notes:
+        notes
+          .value
+          .trim() ||
+        null,
 
-              p_received_at:
-                receivedDate
-                  .toISOString()
-            }
-          );
+      p_received_at:
+        receivedDate
+          .toISOString(),
+
+      p_clinical_staff_name:
+        clinicalName ||
+        null,
+
+      p_clinical_staff_badge_number:
+        clinicalBadge ||
+        null
+    }
+  );
 
         if (error) {
           throw error;
