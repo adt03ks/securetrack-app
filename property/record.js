@@ -41,10 +41,27 @@
   const category = document.getElementById("category");
   const storageLocation = document.getElementById("storageLocation");
   const locationReceived = document.getElementById("locationReceived");
-  const receivedAt = document.getElementById("receivedAt");
-  const receivedBy = document.getElementById("receivedBy");
-  const notes = document.getElementById("notes");
-  const timeline = document.getElementById("timeline");
+ const receivedAt =
+  document.getElementById("receivedAt");
+
+const receivedBy =
+  document.getElementById("receivedBy");
+
+const clinicalStaffName =
+  document.getElementById(
+    "clinicalStaffName"
+  );
+
+const clinicalStaffBadgeNumber =
+  document.getElementById(
+    "clinicalStaffBadgeNumber"
+  );
+
+const notes =
+  document.getElementById("notes");
+
+const timeline =
+  document.getElementById("timeline");
 
   const moveButton = document.getElementById("moveButton");
   const releaseButton = document.getElementById("releaseButton");
@@ -538,15 +555,36 @@
         item.received_at
       );
 
-    receivedBy.textContent =
-      safe(
-        item.received_by_name
-      );
+   receivedBy.textContent =
+  safe(
+    item.received_by_name
+  );
 
-    notes.textContent =
-      safe(
-        item.notes
-      );
+
+if (
+  clinicalStaffName
+) {
+  clinicalStaffName.textContent =
+    safe(
+      item.clinical_staff_name
+    );
+}
+
+
+if (
+  clinicalStaffBadgeNumber
+) {
+  clinicalStaffBadgeNumber.textContent =
+    safe(
+      item.clinical_staff_badge_number
+    );
+}
+
+
+notes.textContent =
+  safe(
+    item.notes
+  );
 
     statusPill.className =
       `status-pill ${item.status || ""}`;
@@ -1057,8 +1095,9 @@
                 "property_items"
               )
               .select(
-                "id, property_number, dg_number, mrn_number, description, category, location_received, current_storage_location, status, received_at, received_by_name, notes, created_at, updated_at"
-              )
+               .select(
+  "id, property_number, dg_number, mrn_number, description, category, location_received, current_storage_location, clinical_staff_name, clinical_staff_badge_number, status, received_at, received_by_name, notes, created_at, updated_at"
+)
               .eq(
                 "id",
                 itemId
