@@ -2253,6 +2253,31 @@
       border-radius:10px; padding:9px 11px; background:#080b0e; color:#d6dade; white-space:nowrap;
     }
     .outside-officer-verified-check input { width:17px; height:17px; }
+
+    .outside-officer-armed-check {
+      min-height:45px; display:flex; align-items:center; gap:10px;
+      border:1px solid #343a41; border-radius:10px; padding:10px 12px;
+      background:#0a0d10; color:#f4f6f7; font-weight:800; cursor:pointer;
+    }
+    .outside-officer-armed-check input {
+      width:18px; height:18px; accent-color:#ff7800;
+    }
+    .outside-officer-armed-note {
+      margin-top:6px; color:#8f979f; font-size:11px; line-height:1.45;
+    }
+
+    .st-outside-rank-with-shield {
+      display:flex !important; align-items:center; gap:6px;
+    }
+    .st-outside-armed-shield {
+      width:16px; height:18px; display:inline-flex; align-items:center;
+      justify-content:center; flex:0 0 auto;
+    }
+    .st-outside-armed-shield svg {
+      width:16px; height:18px; display:block;
+      fill:#d84b4b; stroke:#ff9292; stroke-width:1;
+    }
+
     @media (max-width:760px) {
       .outside-officer-grid,
       .outside-officer-qualification-form { grid-template-columns:1fr; }
@@ -2316,6 +2341,19 @@
                   <option value="team_lead">Team Lead</option>
                 </select>
               </div>
+
+              <div class="outside-officer-field">
+                <label>Armed Qualification</label>
+                <label class="outside-officer-armed-check">
+                  <input id="outsideOfficerArmed" type="checkbox">
+                  <span>Officer is currently Armed Qualified</span>
+                </label>
+                <div class="outside-officer-armed-note">
+                  Checking this automatically maintains the verified ARMED qualification
+                  and displays the red shield on the officer card.
+                </div>
+              </div>
+
               <div class="outside-officer-field full">
                 <label for="outsideOfficerHomeCampus">Home Campus *</label>
                 <input id="outsideOfficerHomeCampus" type="text" placeholder="Example: TMC, Memorial City, Sugar Land" autocomplete="off">
@@ -2390,6 +2428,7 @@
   const outsideActiveToggle = document.getElementById("outsideOfficerActiveToggle");
   const outsideQualificationsSection = document.getElementById("outsideOfficerQualificationsSection");
   const outsideQualificationList = document.getElementById("outsideOfficerQualificationList");
+  const outsideArmed = document.getElementById("outsideOfficerArmed");
 
   const outsideFields = {
     firstName: document.getElementById("outsideOfficerFirstName"),
@@ -2416,6 +2455,9 @@
   const outsideQualificationSave = document.getElementById("outsideQualificationSave");
   let currentOutsideOfficer = null;
   let currentOutsideQualifications = [];
+  let outsideArmedInitial = false;
+
+  const outsideArmedCache = new Map();
 
   function outsideNullable(value) {
     const clean = String(value || "").trim();
@@ -2441,6 +2483,8 @@
     outsideQualificationFields.name.value = "";
     outsideQualificationFields.verified.checked = false;
     outsideQualificationFields.notes.value = "";
+    outsideArmed.checked = false;
+    outsideArmedInitial = false;
     currentOutsideOfficer = null;
     currentOutsideQualifications = [];
     outsideQualificationsSection.hidden = true;
@@ -2467,7 +2511,24 @@
     );
     if (error) throw error;
     currentOutsideQualifications = data || [];
+
+    const armedQualification =
+      currentOutsideQualifications.find(item =>
+        String(item.qualification_code || "").trim().toUpperCase() === "ARMED" &&
+        item.status === "active" &&
+        item.verification_status === "verified"
+      );
+
+    outsideArmedInitial = Boolean(armedQualification);
+    outsideArmed.checked = outsideArmedInitial;
+
+    outsideArmedCache.set(
+      String(outsideOfficerId),
+      outsideArmedInitial
+    );
+
     renderOutsideQualifications();
+    scheduleOutsideOfficerCardScan();
   }
 
   function renderOutsideQualifications() {
@@ -2514,6 +2575,24 @@
             return;
           }
           await loadOutsideQualifications(currentOutsideOfficer.outside_officer_id);
+
+          if (
+            String(
+              item.qualification_code || ""
+            )
+              .trim()
+              .toUpperCase() ===
+              "ARMED"
+          ) {
+            outsideArmedCache.delete(
+              String(
+                currentOutsideOfficer.outside_officer_id
+              )
+            );
+            await refreshOutsideDirectory();
+            scheduleOutsideOfficerCardScan();
+          }
+
           setOutsideMessage("Qualification revoked.", "success");
         });
         row.appendChild(revoke);
@@ -2521,6 +2600,321 @@
       outsideQualificationList.appendChild(row);
     });
   }
+
+  async function syncOutsideArmedQualification(
+    outsideOfficerId,
+    desiredArmed,
+    initialArmed
+  ) {
+    if (!outsideOfficerId || desiredArmed === initialArmed) {
+      return;
+    }
+
+    if (desiredArmed) {
+      const { error } = await db.rpc(
+        "set_outside_officer_qualification",
+        {
+          p_outside_officer_id: outsideOfficerId,
+          p_qualification_code: "ARMED",
+          p_qualification_name: "Armed Qualification",
+          p_verified: true,
+          p_notes: "Updated through Personnel Administration"
+        }
+      );
+
+      if (error) throw error;
+    }
+    else {
+      const { error } = await db.rpc(
+        "revoke_outside_officer_qualification",
+        {
+          p_outside_officer_id: outsideOfficerId,
+          p_qualification_code: "ARMED",
+          p_notes: "Armed qualification removed through Personnel Administration"
+        }
+      );
+
+      if (error) throw error;
+    }
+
+    outsideArmedCache.delete(String(outsideOfficerId));
+  }
+
+  async function resolveCreatedOutsideOfficerId(
+    response,
+    payload
+  ) {
+    const result = response?.data;
+
+    const directId =
+      result?.outside_officer_id ||
+      result?.id ||
+      result?.officer_id ||
+      null;
+
+    if (directId) {
+      return directId;
+    }
+
+    const { data, error } = await db.rpc(
+      "get_outside_officer_directory",
+      {
+        p_include_inactive: true
+      }
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    const normalizedEmail =
+      String(payload.p_email || "")
+        .trim()
+        .toLowerCase();
+
+    const normalizedEmployee =
+      String(payload.p_employee_number || "")
+        .trim()
+        .toLowerCase();
+
+    const matches =
+      (data || []).filter(person => {
+        const emailMatch =
+          normalizedEmail &&
+          String(person.email || "")
+            .trim()
+            .toLowerCase() ===
+            normalizedEmail;
+
+        const employeeMatch =
+          normalizedEmployee &&
+          String(person.employee_number || "")
+            .trim()
+            .toLowerCase() ===
+            normalizedEmployee;
+
+        return emailMatch || employeeMatch;
+      });
+
+    if (matches.length === 1) {
+      return matches[0].outside_officer_id;
+    }
+
+    return null;
+  }
+
+  function outsideArmedShieldMarkup() {
+    return `
+      <span
+        class="st-outside-armed-shield"
+        title="Armed Qualified"
+        aria-label="Armed Qualified"
+      >
+        <svg
+          viewBox="0 0 24 28"
+          aria-hidden="true"
+        >
+          <path
+            d="
+              M12 1
+              L22 5
+              V12
+              C22 19
+              17.5 24.5
+              12 27
+              C6.5 24.5
+              2 19
+              2 12
+              V5
+              Z
+            "
+          ></path>
+        </svg>
+      </span>
+    `;
+  }
+
+  async function getOutsideArmedStatus(
+    outsideOfficerId,
+    force = false
+  ) {
+    const key = String(outsideOfficerId);
+
+    if (
+      !force &&
+      outsideArmedCache.has(key)
+    ) {
+      return outsideArmedCache.get(key);
+    }
+
+    const { data, error } = await db.rpc(
+      "get_outside_officer_qualifications",
+      {
+        p_outside_officer_id:
+          outsideOfficerId
+      }
+    );
+
+    if (error) {
+      console.warn(
+        "Unable to load outside officer armed status:",
+        error
+      );
+      return false;
+    }
+
+    const isArmed =
+      (data || []).some(item =>
+        String(
+          item.qualification_code || ""
+        )
+          .trim()
+          .toUpperCase() ===
+          "ARMED" &&
+        item.status === "active" &&
+        item.verification_status === "verified"
+      );
+
+    outsideArmedCache.set(
+      key,
+      isArmed
+    );
+
+    return isArmed;
+  }
+
+  async function decorateOutsideOfficerCard(
+    card,
+    outsideOfficerId
+  ) {
+    if (
+      !card ||
+      !outsideOfficerId
+    ) {
+      return;
+    }
+
+    const key =
+      String(
+        outsideOfficerId
+      );
+
+    if (
+      card.dataset
+        .securetrackOutsideArmedDecorating ===
+        key
+    ) {
+      return;
+    }
+
+    card.dataset
+      .securetrackOutsideArmedDecorating =
+        key;
+
+    try {
+      const isArmed =
+        await getOutsideArmedStatus(
+          outsideOfficerId
+        );
+
+      card
+        .querySelectorAll(
+          ".st-outside-armed-shield"
+        )
+        .forEach(
+          element =>
+            element.remove()
+        );
+
+      const rankLine =
+        card.querySelector(
+          ".person-rank"
+        );
+
+      if (!rankLine) {
+        return;
+      }
+
+      rankLine.classList.remove(
+        "st-outside-rank-with-shield"
+      );
+
+      if (isArmed) {
+        rankLine.classList.add(
+          "st-outside-rank-with-shield"
+        );
+
+        rankLine.insertAdjacentHTML(
+          "afterbegin",
+          outsideArmedShieldMarkup()
+        );
+      }
+
+      card.dataset
+        .securetrackOutsideArmedDecorated =
+          key;
+    }
+    finally {
+      delete card.dataset
+        .securetrackOutsideArmedDecorating;
+    }
+  }
+
+  function scanOutsideOfficerCards() {
+    document
+      .querySelectorAll(
+        'button[data-outside-action="edit"][data-id]'
+      )
+      .forEach(button => {
+        const card =
+          button.closest(
+            ".person-card"
+          );
+
+        const outsideOfficerId =
+          button.dataset.id;
+
+        decorateOutsideOfficerCard(
+          card,
+          outsideOfficerId
+        );
+      });
+  }
+
+  let outsideOfficerCardScanTimer =
+    null;
+
+  function scheduleOutsideOfficerCardScan() {
+    clearTimeout(
+      outsideOfficerCardScanTimer
+    );
+
+    outsideOfficerCardScanTimer =
+      setTimeout(
+        scanOutsideOfficerCards,
+        80
+      );
+  }
+
+  const outsideOfficerGrid =
+    document.getElementById(
+      "outsideOfficerGrid"
+    );
+
+  if (outsideOfficerGrid) {
+    new MutationObserver(
+      scheduleOutsideOfficerCardScan
+    ).observe(
+      outsideOfficerGrid,
+      {
+        childList: true,
+        subtree: true
+      }
+    );
+  }
+
+  scheduleOutsideOfficerCardScan();
+
 
   function populateOutsideForm(person) {
     outsideFields.firstName.value = person.first_name || "";
@@ -2646,25 +3040,88 @@
     try {
       const payload = outsideRpcPayload();
       let response;
-      if (currentOutsideOfficer) {
+      const editingExisting = Boolean(currentOutsideOfficer);
+      let outsideOfficerId =
+        currentOutsideOfficer?.outside_officer_id ||
+        null;
+
+      if (editingExisting) {
         response = await db.rpc(
           "update_outside_officer",
           {
-            p_outside_officer_id: currentOutsideOfficer.outside_officer_id,
+            p_outside_officer_id: outsideOfficerId,
             ...payload
           }
         );
       }
       else {
-        response = await db.rpc("create_outside_officer", payload);
+        response = await db.rpc(
+          "create_outside_officer",
+          payload
+        );
       }
-      if (response.error) throw response.error;
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      if (!outsideOfficerId) {
+        outsideOfficerId =
+          await resolveCreatedOutsideOfficerId(
+            response,
+            payload
+          );
+      }
+
+      if (
+        outsideArmed.checked &&
+        !outsideOfficerId
+      ) {
+        setOutsideMessage(
+          "Outside officer was saved, but the Armed Qualified setting could not be applied automatically. Reopen the officer and check Armed Qualified.",
+          "info"
+        );
+      }
+      else if (outsideOfficerId) {
+        await syncOutsideArmedQualification(
+          outsideOfficerId,
+          outsideArmed.checked,
+          editingExisting
+            ? outsideArmedInitial
+            : false
+        );
+
+        outsideArmedInitial =
+          outsideArmed.checked;
+      }
+
+      outsideArmedCache.delete(
+        String(
+          outsideOfficerId || ""
+        )
+      );
+
+      await refreshOutsideDirectory();
+      scheduleOutsideOfficerCardScan();
+
+      if (
+        outsideArmed.checked &&
+        !outsideOfficerId
+      ) {
+        return;
+      }
+
       setOutsideMessage(
-        currentOutsideOfficer ? "Outside officer updated successfully." : "Outside officer added successfully.",
+        editingExisting
+          ? "Outside officer updated successfully."
+          : "Outside officer added successfully.",
         "success"
       );
-      await refreshOutsideDirectory();
-      setTimeout(closeOutsideEditor, 650);
+
+      setTimeout(
+        closeOutsideEditor,
+        650
+      );
     }
     catch (error) {
       console.error("Outside officer save failed:", error);
@@ -2704,7 +3161,17 @@
       outsideQualificationFields.verified.checked = false;
       outsideQualificationFields.notes.value = "";
       await loadOutsideQualifications(currentOutsideOfficer.outside_officer_id);
+
+      if (code === "ARMED") {
+        outsideArmedCache.delete(
+          String(
+            currentOutsideOfficer.outside_officer_id
+          )
+        );
+      }
+
       await refreshOutsideDirectory();
+      scheduleOutsideOfficerCardScan();
       setOutsideMessage("Qualification saved.", "success");
     }
     catch (error) {
