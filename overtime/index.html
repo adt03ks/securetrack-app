@@ -362,7 +362,7 @@
   </div>
 
 <!-- =====================================================
-     OFF-CAMPUS OVERTIME ASSIGNMENT MODAL
+     OUTSIDE OFFICER -> OVERTIME ASSIGNMENT MODAL
      ===================================================== -->
 
 <div
@@ -383,22 +383,18 @@
     </div>
 
     <h2 id="offCampusTitle">
-      Fill With Off-Campus Officer
+      Fill With Outside Officer
     </h2>
 
     <p class="muted">
-      Use this option when an officer from another campus
-      has agreed to fill this overtime opportunity and cannot
-      request the opening through this SecureTrack portal.
+      Search the SecureTrack Outside Officer Directory and select the
+      officer who will fill this overtime opportunity.
     </p>
-
 
     <div
       id="offCampusSummary"
       class="offcampus-summary"
-    >
-    </div>
-
+    ></div>
 
     <form id="offCampusForm">
 
@@ -407,43 +403,78 @@
         type="hidden"
       >
 
+      <input
+        id="offCampusSelectedOfficerId"
+        type="hidden"
+      >
 
       <div class="field">
-
-        <label for="offCampusOfficerName">
-          Officer Name
+        <label for="offCampusOfficerSearch">
+          Search Outside Officer Directory
         </label>
 
-        <input
-          id="offCampusOfficerName"
-          type="text"
-          autocomplete="off"
-          placeholder="Enter officer's full name"
-          required
+        <div
+          style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;"
         >
+          <input
+            id="offCampusOfficerSearch"
+            type="search"
+            autocomplete="off"
+            placeholder="Search by name, campus, employee number..."
+          >
 
+          <button
+            id="offCampusOfficerSearchButton"
+            type="button"
+            class="button secondary"
+          >
+            Search
+          </button>
+        </div>
       </div>
 
+      <div
+        id="offCampusPickerMessage"
+        role="status"
+        aria-live="polite"
+        style="display:none;margin:10px 0;padding:10px 12px;border:1px solid #343a41;border-radius:10px;background:#0b0e11;"
+      ></div>
 
-      <div class="field">
-
-        <label for="offCampusHomeCampus">
-          Home Campus / Facility
-        </label>
-
-        <input
-          id="offCampusHomeCampus"
-          type="text"
-          autocomplete="off"
-          placeholder="Example: Memorial Hermann Southwest"
-          required
-        >
-
+      <div
+        id="offCampusOfficerResults"
+        style="max-height:260px;overflow:auto;border:1px solid #30363d;border-radius:12px;background:#0b0e11;margin:10px 0 14px;"
+      >
+        <div style="padding:12px;color:#9aa2aa;">
+          Search the Outside Officer Directory to select an officer.
+        </div>
       </div>
 
+      <div
+        id="offCampusSelectedOfficer"
+        hidden
+        style="margin:12px 0 16px;padding:13px 14px;border:1px solid rgba(255,120,0,.55);border-radius:12px;background:rgba(255,120,0,.08);"
+      >
+        <div class="eyebrow">
+          Selected Outside Officer
+        </div>
+
+        <strong
+          id="offCampusSelectedOfficerName"
+          style="display:block;margin-top:4px;font-size:17px;"
+        >
+          —
+        </strong>
+
+        <div
+          id="offCampusSelectedOfficerDetails"
+          class="muted"
+          style="margin-top:4px;"
+        >
+          —
+        </div>
+      </div>
 
       <div class="field">
-
         <label for="offCampusNotes">
           Assignment Notes
         </label>
@@ -451,24 +482,19 @@
         <textarea
           id="offCampusNotes"
           rows="4"
-          placeholder="Optional notes regarding the outside overtime assignment..."
+          placeholder="Optional notes regarding this outside overtime assignment..."
         ></textarea>
-
       </div>
 
-
       <div class="offcampus-warning">
-
         <strong>
           This immediately fills one overtime opening.
         </strong>
 
-        The officer will be recorded as
-        <strong>Off-Campus Help</strong> and will not need
-        a SecureTrack user account.
-
+        The selected person will be recorded by their existing
+        <strong>Outside Officer Directory ID</strong>, preserving their
+        qualifications and overtime history. No SecureTrack login is required.
       </div>
-
 
       <div class="modal-actions">
 
@@ -484,6 +510,7 @@
           id="confirmOffCampusButton"
           type="submit"
           class="button approve"
+          disabled
         >
           Fill Overtime Opening
         </button>
@@ -498,6 +525,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config.js"></script>
   <script src="../secure-page.js"></script>
-  <script src="overtime.js?v=20260919-1826"></script>
+  <script src="overtime.js?v=20260920-outside-directory"></script>
 </body>
 </html>
