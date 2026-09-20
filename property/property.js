@@ -2413,9 +2413,26 @@ let activePropertyStatusFilter =
       }
 
 
-      const rows =
-        searchResult.data ||
-        [];
+     const allRows =
+  searchResult.data ||
+  [];
+
+
+const rows =
+  activePropertyStatusFilter
+
+    ? allRows.filter(
+        row =>
+          row.status ===
+          activePropertyStatusFilter
+      )
+
+    : allRows;
+
+
+renderSearchResults(
+  rows
+);
 
 
       renderSearchResults(
