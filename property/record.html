@@ -6,9 +6,154 @@
   <meta name="theme-color" content="#0b0d10">
   <title>SecureTrack | Property Record</title>
   <link rel="stylesheet" href="property.css">
+
+  <style>
+    .release-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
+
+    .release-section:first-of-type {
+      margin-top: 8px;
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .release-section-title {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .release-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .release-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .check-row {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .check-row input[type="checkbox"] {
+      width: auto;
+      margin-top: 3px;
+      flex: 0 0 auto;
+    }
+
+    .check-row > span {
+      margin: 0 !important;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .release-notice {
+      margin: 10px 0 0;
+      padding: 11px 12px;
+      border: 1px solid rgba(242,140,40,.38);
+      border-radius: 10px;
+      background: rgba(242,140,40,.08);
+      color: #ffd0a0;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .release-error {
+      margin-top: 8px;
+      color: #ffadad;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .id-preview-wrap {
+      margin-top: 10px;
+      display: none;
+    }
+
+    .id-preview-wrap.show {
+      display: block;
+    }
+
+    .id-preview {
+      display: block;
+      max-width: 260px;
+      max-height: 170px;
+      object-fit: contain;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      background: #0b0d10;
+    }
+
+    .verification-card {
+      margin-top: 24px;
+    }
+
+    .verification-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .verification-item {
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 10px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .verification-item span {
+      display: block;
+      color: #9da8b3;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 6px;
+    }
+
+    .verification-item strong {
+      display: block;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .verification-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .hidden-field {
+      display: none !important;
+    }
+
+    @media (max-width: 780px) {
+      .release-grid,
+      .verification-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .release-grid .full,
+      .verification-item.full {
+        grid-column: auto;
+      }
+    }
+  </style>
 </head>
 
-<body data-securetrack-roles="officer,dispatcher,senior_officer,team_lead,manager,admin">
+<body data-securetrack-roles="officer,dispatcher,senior_officer,team_lead,manager,director,admin">
   <main class="shell">
     <header class="topbar">
       <div>
@@ -58,7 +203,7 @@
               <div id="description">—</div>
             </div>
             <div class="detail-item">
-              <span>Category</span>
+              <span>Categories</span>
               <strong id="category">—</strong>
             </div>
             <div class="detail-item">
@@ -92,12 +237,59 @@
           <div class="action-stack">
             <button id="moveButton" class="button secondary action-button" type="button">Move / Transfer Property</button>
             <button id="releaseButton" class="button primary action-button" type="button">Release Property</button>
-            <button id="disposeButton" class="button action-button danger hidden" type="button">Dispose Property</button>
+            <button id="disposeButton" class="button secondary action-button" type="button">Request Disposal</button>
           </div>
 
           <div id="actionResult" class="message" role="status" aria-live="polite"></div>
         </aside>
       </div>
+
+      <article id="releaseVerificationCard" class="timeline-card verification-card" hidden>
+        <div class="eyebrow">RELEASE VERIFICATION</div>
+        <h2>Recipient Verification</h2>
+        <p class="subtitle">Release verification is retained with the property record.</p>
+
+        <div class="verification-grid">
+          <div class="verification-item">
+            <span>Released To</span>
+            <strong id="verificationRecipient">—</strong>
+          </div>
+
+          <div class="verification-item">
+            <span>Relationship</span>
+            <strong id="verificationRelationship">—</strong>
+          </div>
+
+          <div class="verification-item">
+            <span>ID Verification</span>
+            <strong id="verificationIdStatus">—</strong>
+          </div>
+
+          <div class="verification-item" id="verificationApprovalItem">
+            <span>Exception Approval</span>
+            <strong id="verificationApproval">—</strong>
+          </div>
+
+          <div class="verification-item">
+            <span>Released By</span>
+            <strong id="verificationReleasedBy">—</strong>
+          </div>
+
+          <div class="verification-item">
+            <span>Released</span>
+            <strong id="verificationReleasedAt">—</strong>
+          </div>
+
+          <div id="verificationApprovalNotesItem" class="verification-item full" hidden>
+            <span>Approval Notes / Reference</span>
+            <strong id="verificationApprovalNotes">—</strong>
+          </div>
+        </div>
+
+        <div id="verificationImageActions" class="form-actions" hidden>
+          <button id="viewRecipientIdButton" class="button secondary" type="button">View Captured ID</button>
+        </div>
+      </article>
 
       <article class="timeline-card">
         <div class="eyebrow">AUDIT HISTORY</div>
@@ -135,22 +327,133 @@
     <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="releaseTitle">
       <div class="eyebrow">FINAL CUSTODY EVENT</div>
       <h2 id="releaseTitle">Release Property</h2>
-      <p>Record who received the property. Once released, this property can no longer be moved through the normal workflow.</p>
-      <form id="releaseForm">
-        <label>
-          <span>Released To <b>*</b></span>
-          <input id="releasedTo" type="text" required placeholder="Name / approved identifier">
-        </label>
-        <label>
-          <span>Witness</span>
-          <input id="releaseWitness" type="text" placeholder="Optional witness">
-        </label>
-        <label>
-          <span>Notes</span>
-          <textarea id="releaseNotes" rows="3" placeholder="Optional release notes"></textarea>
-        </label>
+      <p>
+        Verify the recipient before releasing property. Patient/self and next-of-kin releases require a captured photo ID.
+        Any non-next-of-kin release or release without acceptable ID requires documented approval from Security Management,
+        Risk Management, or Patient Relations.
+      </p>
+
+      <form id="releaseForm" autocomplete="off">
+        <section class="release-section">
+          <div class="release-section-title">Recipient</div>
+
+          <div class="release-grid">
+            <label>
+              <span>Released To <b>*</b></span>
+              <input id="releasedTo" type="text" required placeholder="Recipient's full name">
+            </label>
+
+            <label>
+              <span>Relationship to Patient <b>*</b></span>
+              <select id="recipientRelationship" required>
+                <option value="">Select relationship</option>
+                <option value="patient_self">Patient / Self</option>
+                <option value="next_of_kin">Next of Kin</option>
+                <option value="other_authorized_recipient">Other Authorized Recipient</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="release-section">
+          <div class="release-section-title">Recipient Identification</div>
+
+          <label id="noIdRow" class="check-row">
+            <input id="noIdPresent" type="checkbox">
+            <span>No acceptable photo ID is present</span>
+          </label>
+
+          <div id="idCaptureFields" class="release-grid">
+            <label>
+              <span>ID Type <b>*</b></span>
+              <select id="recipientIdType">
+                <option value="">Select ID type</option>
+                <option value="driver_license">Driver License</option>
+                <option value="state_id">State ID</option>
+                <option value="passport">Passport</option>
+                <option value="other">Other Photo ID</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Capture / Upload Recipient ID <b>*</b></span>
+              <input
+                id="recipientIdImage"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                capture="environment"
+              >
+              <small>JPG, PNG, or WebP. The image is stored privately in SecureTrack.</small>
+            </label>
+          </div>
+
+          <div id="idPreviewWrap" class="id-preview-wrap">
+            <img id="idPreview" class="id-preview" alt="Selected recipient ID preview">
+          </div>
+        </section>
+
+        <section id="exceptionApprovalSection" class="release-section" hidden>
+          <div class="release-section-title">Exception Approval</div>
+
+          <div id="exceptionRequirementText" class="release-notice"></div>
+
+          <label class="check-row">
+            <input id="exceptionApprovalObtained" type="checkbox">
+            <span>
+              Exception approval has been obtained from authorized Security Management, Risk Management, or Patient Relations.
+            </span>
+          </label>
+
+          <div id="exceptionApprovalFields" hidden>
+            <div class="release-grid">
+              <label>
+                <span>Approval Source <b>*</b></span>
+                <select id="approvalSource">
+                  <option value="">Select approval source</option>
+                  <option value="security_management">Security Management</option>
+                  <option value="risk_management">Risk Management</option>
+                  <option value="patient_relations">Patient Relations</option>
+                </select>
+              </label>
+
+              <label id="securityApproverLabel" hidden>
+                <span>Approving Manager / Director <b>*</b></span>
+                <select id="securityApprover">
+                  <option value="">Select approver</option>
+                </select>
+              </label>
+
+              <label id="externalApproverLabel" hidden>
+                <span>Approved By <b>*</b></span>
+                <input id="externalApproverName" type="text" placeholder="Approver's full name">
+              </label>
+
+              <label class="full">
+                <span>Approval Notes / Reference</span>
+                <textarea id="approvalNotes" rows="3" placeholder="Optional authorization details or reference"></textarea>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="release-section">
+          <div class="release-grid">
+            <label>
+              <span>Witness</span>
+              <input id="releaseWitness" type="text" placeholder="Optional witness">
+            </label>
+
+            <label class="full">
+              <span>Release Notes</span>
+              <textarea id="releaseNotes" rows="3" placeholder="Optional release notes"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <div id="releaseValidationMessage" class="message" role="status" aria-live="polite"></div>
+
         <div class="modal-actions">
-          <button id="confirmReleaseButton" class="button primary" type="submit">Confirm Release</button>
+          <button id="confirmReleaseButton" class="button primary" type="submit">Confirm Verified Release</button>
           <button class="button secondary modal-cancel" type="button">Cancel</button>
         </div>
       </form>
@@ -159,20 +462,18 @@
 
   <div id="disposeModal" class="modal-backdrop" aria-hidden="true">
     <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="disposeTitle">
-      <div class="eyebrow">MANAGER / ADMIN</div>
-      <h2 id="disposeTitle">Dispose Property</h2>
-      <p>This closes the property record as disposed. A reason is required and the action is written to the chain of custody.</p>
+      <div class="eyebrow">DISPOSAL REQUEST</div>
+      <h2 id="disposeTitle">Request Property Disposal</h2>
+      <p>
+        Property remains stored until an authorized Manager or Director physically inspects and completes the disposal.
+      </p>
       <form id="disposeForm">
         <label>
-          <span>Witness</span>
-          <input id="disposeWitness" type="text" placeholder="Optional witness">
-        </label>
-        <label>
-          <span>Disposal Reason / Notes <b>*</b></span>
-          <textarea id="disposeNotes" rows="4" required placeholder="Required disposal reason"></textarea>
+          <span>Request Notes</span>
+          <textarea id="disposeNotes" rows="4" placeholder="Reason for disposal request or inspection information"></textarea>
         </label>
         <div class="modal-actions">
-          <button id="confirmDisposeButton" class="button danger" type="submit">Confirm Disposal</button>
+          <button id="confirmDisposeButton" class="button primary" type="submit">Send Disposal Request</button>
           <button class="button secondary modal-cancel" type="button">Cancel</button>
         </div>
       </form>
