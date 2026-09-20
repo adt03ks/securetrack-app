@@ -101,6 +101,36 @@
       font-weight: 700;
     }
     .category-error.show { display: block; }
+
+    /* Clickable summary cards */
+    .summary-link {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    .summary-link:hover {
+      transform: translateY(-2px);
+      border-color: rgba(242,140,40,.65);
+      box-shadow: 0 10px 28px rgba(0,0,0,.24);
+    }
+    .summary-link:focus-visible {
+      outline: 2px solid #f28c28;
+      outline-offset: 3px;
+    }
+    .summary-link small {
+      display: block;
+      margin-top: 14px;
+      color: #f2a04b;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
   </style>
 </head>
 
@@ -126,56 +156,31 @@
       <span id="currentUserRole" class="role-pill"></span>
     </section>
 
-<section class="summary-grid" aria-label="Property summary">
+    <section class="summary-grid" aria-label="Property summary">
+      <button class="summary-card summary-link" type="button" data-property-status="stored" aria-label="View stored property records">
+        <span>Stored</span>
+        <strong id="storedCount">—</strong>
+        <small>View Records →</small>
+      </button>
 
-  <button
-    class="summary-card summary-link"
-    type="button"
-    data-property-status="stored"
-    aria-label="View stored property records"
-  >
-    <span>Stored</span>
-    <strong id="storedCount">—</strong>
-    <small>View Records →</small>
-  </button>
+      <button class="summary-card summary-link" type="button" data-property-status="released" aria-label="View released property records">
+        <span>Released</span>
+        <strong id="releasedCount">—</strong>
+        <small>View Records →</small>
+      </button>
 
+      <button class="summary-card summary-link" type="button" data-property-status="disposed" aria-label="View disposed property records">
+        <span>Disposed</span>
+        <strong id="disposedCount">—</strong>
+        <small>View Records →</small>
+      </button>
 
-  <button
-    class="summary-card summary-link"
-    type="button"
-    data-property-status="released"
-    aria-label="View released property records"
-  >
-    <span>Released</span>
-    <strong id="releasedCount">—</strong>
-    <small>View Records →</small>
-  </button>
-
-
-  <button
-    class="summary-card summary-link"
-    type="button"
-    data-property-status="disposed"
-    aria-label="View disposed property records"
-  >
-    <span>Disposed</span>
-    <strong id="disposedCount">—</strong>
-    <small>View Records →</small>
-  </button>
-
-
-  <button
-    class="summary-card summary-link"
-    type="button"
-    data-property-status=""
-    aria-label="View all property records"
-  >
-    <span>Total Records</span>
-    <strong id="totalCount">—</strong>
-    <small>View All Records →</small>
-  </button>
-
-</section>
+      <button class="summary-card summary-link" type="button" data-property-status="" aria-label="View all property records">
+        <span>Total Records</span>
+        <strong id="totalCount">—</strong>
+        <small>View All Records →</small>
+      </button>
+    </section>
 
     <nav class="tabs" aria-label="Property functions">
       <button class="tab active" type="button" data-panel="intakePanel">Log New Property</button>
@@ -367,6 +372,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config.js"></script>
   <script src="../secure-page.js"></script>
+  <script src="property.js?v=20260920-summary-links-fix"></script>
 
   <script>
     (function () {
@@ -466,6 +472,5 @@
     })();
   </script>
 
-  <script src="property.js"></script>
 </body>
 </html>
