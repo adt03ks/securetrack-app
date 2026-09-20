@@ -2381,11 +2381,9 @@
 
 
   /*
-    Buttons below are intentionally staged.
-
-    The data display is live now.
-    The editing modals and New Officer Edge Function
-    are the next implementation phase.
+    Remaining staged controls are handled here.
+    Outside Officer add/edit/qualification actions are
+    provided by personnel-editor.js.
   */
 
   document.addEventListener(
@@ -2408,9 +2406,22 @@
         "addOutsideButton"
       ) {
 
-        alert(
-          "Outside Officer entry form is the next interface step."
-        );
+        if (
+          window.SecureTrackOutsideOfficerEditor
+          ?.add
+        ) {
+
+          window.SecureTrackOutsideOfficerEditor
+            .add();
+
+        }
+        else {
+
+          alert(
+            "Outside Officer editor did not load. Refresh the page and try again."
+          );
+
+        }
 
         return;
 
@@ -2434,9 +2445,35 @@
         button.dataset.outsideAction
       ) {
 
-        alert(
-          "Outside Officer editing controls will be connected in the next step."
-        );
+        const api =
+          window.SecureTrackOutsideOfficerEditor;
+
+        const action =
+          button.dataset.outsideAction;
+
+        const outsideOfficerId =
+          button.dataset.id;
+
+        if (api && outsideOfficerId) {
+
+          if (action === "edit") {
+            api.edit(outsideOfficerId);
+          }
+          else if (action === "qualifications") {
+            api.qualifications(outsideOfficerId);
+          }
+          else if (action === "history") {
+            api.history(outsideOfficerId);
+          }
+
+        }
+        else {
+
+          alert(
+            "Outside Officer editor did not load. Refresh the page and try again."
+          );
+
+        }
 
         return;
 
