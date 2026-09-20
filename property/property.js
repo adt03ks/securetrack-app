@@ -4057,7 +4057,105 @@ renderSearchResults(
       }
     );
 
+// =========================================================
+// SUMMARY CARD RECORD SHORTCUTS
+// =========================================================
 
+document
+  .querySelectorAll(
+    "[data-property-status]"
+  )
+  .forEach(
+    card => {
+
+      card.addEventListener(
+        "click",
+        async () => {
+
+          const requestedStatus =
+            card.dataset.propertyStatus ||
+            "";
+
+
+          activePropertyStatusFilter =
+            requestedStatus ||
+            null;
+
+
+          // Clear text search when using
+          // a summary shortcut.
+          searchInput.value =
+            "";
+
+
+          // Switch to Search Property tab.
+          document
+            .querySelectorAll(
+              ".tab"
+            )
+            .forEach(
+              tab =>
+                tab.classList.remove(
+                  "active"
+                )
+            );
+
+
+          document
+            .querySelectorAll(
+              ".panel"
+            )
+            .forEach(
+              panel =>
+                panel.classList.remove(
+                  "active"
+                )
+            );
+
+
+          const searchTab =
+            document.querySelector(
+              '.tab[data-panel="searchPanel"]'
+            );
+
+
+          searchTab
+            ?.classList.add(
+              "active"
+            );
+
+
+          document
+            .getElementById(
+              "searchPanel"
+            )
+            ?.classList.add(
+              "active"
+            );
+
+
+          await runSearch(
+            ""
+          );
+
+
+          document
+            .getElementById(
+              "searchPanel"
+            )
+            ?.scrollIntoView({
+              behavior:
+                "smooth",
+
+              block:
+                "start"
+            });
+
+        }
+      );
+
+    }
+  );
   // =========================================================
   // SIGN OUT
   // =========================================================
