@@ -1274,7 +1274,392 @@ textarea {
   font-size: 29px;
 }
 
+/* =========================================================
+   DUAL AUTHORIZATION REQUESTS
+========================================================= */
 
+.section-help {
+  margin: -8px 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+
+.request-choice-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+
+.request-choice {
+  position: relative;
+  cursor: pointer;
+}
+
+
+.request-choice > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+.request-choice-box {
+  min-height: 100px;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 18px;
+
+  border: 2px solid var(--border);
+  border-radius: 15px;
+
+  background: white;
+
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+
+.request-choice:hover .request-choice-box {
+  border-color: #9fc5f5;
+  transform: translateY(-1px);
+}
+
+
+.request-choice-icon {
+  width: 32px;
+  height: 32px;
+
+  flex: 0 0 32px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 9px;
+
+  background: #edf2f7;
+  color: transparent;
+
+  font-weight: 900;
+}
+
+
+.request-choice strong {
+  display: block;
+
+  color: var(--navy);
+
+  font-size: 15px;
+}
+
+
+.request-choice small {
+  display: block;
+
+  margin-top: 5px;
+
+  color: var(--muted);
+
+  line-height: 1.4;
+}
+
+
+.request-choice
+  input:checked
+  + .request-choice-box {
+
+  border-color: var(--blue);
+
+  background: var(--blue-pale);
+}
+
+
+.request-choice
+  input:checked
+  + .request-choice-box
+  .request-choice-icon {
+
+  background: var(--blue);
+
+  color: white;
+}
+
+
+
+/* =========================================================
+   AUTHORIZATION STATUS CARDS
+========================================================= */
+
+.authorization-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+
+.authorization-card {
+  position: relative;
+
+  padding: 18px;
+
+  border: 2px solid var(--border);
+
+  border-radius: 15px;
+
+  background: white;
+}
+
+
+.authorization-card.not-requested {
+  background: #f5f6f8;
+  border-color: #e1e5ea;
+}
+
+
+.authorization-card.pending {
+  border-color: #8bb9ef;
+  background: #f5f9ff;
+}
+
+
+.authorization-card.approved {
+  border-color: #9ed9bb;
+  background: #f3fbf7;
+}
+
+
+.authorization-card.changes_requested {
+  border-color: #f1c56d;
+  background: #fffaf0;
+}
+
+
+.authorization-card.denied {
+  border-color: #efaaa5;
+  background: #fff7f6;
+}
+
+
+.authorization-card h4 {
+  margin: 0;
+
+  color: var(--navy);
+
+  font-size: 17px;
+}
+
+
+.authorization-card.not-requested h4 {
+  color: #8a95a3;
+}
+
+
+.authorization-status {
+  margin-top: 10px;
+}
+
+
+.authorization-meta {
+  margin-top: 10px;
+
+  color: var(--muted);
+
+  font-size: 12px;
+
+  line-height: 1.5;
+}
+
+
+.authorization-actions {
+  margin-top: 15px;
+}
+
+
+.not-requested-pill {
+  display: inline-flex;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  background: #e7eaee;
+
+  color: #7b8794;
+
+  font-size: 11px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+}
+
+
+.approver-initiated-badge {
+  display: inline-flex;
+
+  margin-top: 8px;
+
+  padding: 5px 8px;
+
+  border-radius: 999px;
+
+  background: #dceeff;
+
+  color: #075aa9;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: 0.5px;
+}
+
+
+
+/* =========================================================
+   LOCATION
+========================================================= */
+
+.location-panel {
+  padding: 18px;
+
+  border: 1px solid #bdd7f2;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f8fbff,
+      #edf6ff
+    );
+}
+
+
+.location-panel-top {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+}
+
+
+.current-location-label {
+  color: var(--muted);
+
+  font-size: 10px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.8px;
+}
+
+
+.current-location-value {
+  margin-top: 5px;
+
+  color: var(--navy);
+
+  font-size: 19px;
+  font-weight: 900;
+}
+
+
+.location-history {
+  display: grid;
+
+  gap: 8px;
+
+  margin-top: 14px;
+}
+
+
+.location-history-item {
+  padding: 11px 13px;
+
+  border-left: 3px solid #9ac3ed;
+
+  border-radius: 0 9px 9px 0;
+
+  background: white;
+}
+
+
+.location-history-item strong {
+  color: var(--navy);
+}
+
+
+.location-history-item span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--muted);
+
+  font-size: 11px;
+}
+
+
+.action-mini-list {
+  display: grid;
+  gap: 5px;
+}
+
+
+.action-mini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  padding: 5px 7px;
+
+  border-radius: 7px;
+
+  background: #f5f8fc;
+
+  font-size: 11px;
+}
+
+
+.action-mini.active {
+  background: var(--blue-pale);
+
+  color: var(--navy);
+
+  font-weight: 800;
+}
+
+
+.action-mini.not-requested {
+  color: #929baa;
+}
+
+
+.mini-request-button {
+  border: 0;
+
+  background: transparent;
+
+  color: var(--blue);
+
+  font-weight: 900;
+
+  padding: 2px 4px;
+}
 /* =========================================================
    RESPONSIVE
 ========================================================= */
@@ -1310,6 +1695,11 @@ textarea {
     padding-top: 10px;
   }
 
+  
+.request-choice-grid,
+.authorization-grid {
+  grid-template-columns: 1fr;
+}
 
   .topbar,
   .hero,
