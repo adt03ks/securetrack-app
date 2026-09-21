@@ -2149,20 +2149,25 @@ function openEditRequest(
 
                   <div class="upload-row">
 
-                    <label>
+                   <label>
 
-                      <span>
-                        Select Subject Image
-                      </span>
+  <span>
+    Select Subject Image(s)
+  </span>
 
-                      <input
-                        id="subjectImageFile"
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                      >
+  <input
+    id="subjectImageFile"
+    type="file"
+    accept="image/jpeg,image/png,image/webp"
+    multiple
+  >
 
-                    </label>
+  <small class="request-detail-small">
+    You may select multiple JPEG, PNG, or WebP images.
+    Maximum 15 MB per image.
+  </small>
 
+</label>
 
                     <label>
 
@@ -2184,7 +2189,7 @@ function openEditRequest(
                       class="button primary"
                       type="button"
                     >
-                      Upload Image
+                      Upload Images
                     </button>
 
                   </div>
@@ -2780,85 +2785,116 @@ function renderLocationHistory(
   // =========================================================
 
   async function uploadSubjectImage(
-    requestId
-  ) {
+  requestId
+) {
 
-    const fileInput =
-      $("subjectImageFile");
-
-
-    const descriptionInput =
-      $("subjectImageDescription");
+  const fileInput =
+    $("subjectImageFile");
 
 
-    const uploadButton =
-      $("uploadSubjectImageButton");
+  const descriptionInput =
+    $("subjectImageDescription");
 
 
-    const file =
-      fileInput?.files?.[0];
+  const uploadButton =
+    $("uploadSubjectImageButton");
 
 
-    if (!file) {
-
-      showMessage(
-        "Select an image before uploading.",
-        "error"
-      );
-
-      return;
-
-    }
+  const files =
+    Array.from(
+      fileInput?.files ||
+      []
+    );
 
 
-    const allowedTypes =
-      [
-        "image/jpeg",
-        "image/png",
-        "image/webp"
-      ];
+  if (!files.length) {
+
+    showMessage(
+      "Select at least one image before uploading.",
+      "error"
+    );
+
+    return;
+
+  }
 
 
-    if (
-      !allowedTypes.includes(
-        file.type
-      )
+  const allowedTypes =
+    [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ];
+
+
+  const invalidTypeFile =
+    files.find(
+      file =>
+        !allowedTypes.includes(
+          file.type
+        )
+    );
+
+
+  if (invalidTypeFile) {
+
+    showMessage(
+      `${invalidTypeFile.name} is not a supported image type. Use JPEG, PNG, or WebP.`,
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const oversizedFile =
+    files.find(
+      file =>
+        file.size >
+        15728640
+    );
+
+
+  if (oversizedFile) {
+
+    showMessage(
+      `${oversizedFile.name} exceeds the 15 MB image limit.`,
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  uploadButton.disabled =
+    true;
+
+
+  const originalButtonText =
+    uploadButton.textContent;
+
+
+  let uploadedCount =
+    0;
+
+
+  try {
+
+    for (
+      let index = 0;
+      index < files.length;
+      index += 1
     ) {
 
-      showMessage(
-        "Subject images must be JPEG, PNG, or WebP.",
-        "error"
-      );
-
-      return;
-
-    }
+      const file =
+        files[index];
 
 
-    if (
-      file.size >
-      15728640
-    ) {
+      uploadButton.textContent =
+        `Uploading ${index + 1} of ${files.length}…`;
 
-      showMessage(
-        "Subject images may not exceed 15 MB.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    uploadButton.disabled =
-      true;
-
-
-    uploadButton.textContent =
-      "Uploading…";
-
-
-    try {
 
       const extension =
         (
@@ -2883,6 +2919,10 @@ function renderLocationHistory(
         `requests/${requestId}/subject/${storageName}`;
 
 
+      // -----------------------------------------------------
+      // UPLOAD IMAGE TO PRIVATE STORAGE
+      // -----------------------------------------------------
+
       const {
         error: uploadError
       } =
@@ -2894,6 +2934,7 @@ function renderLocationHistory(
             storagePath,
             file,
             {
+
               cacheControl:
                 "3600",
 
@@ -2902,14 +2943,26 @@ function renderLocationHistory(
 
               contentType:
                 file.type
+
             }
           );
 
 
       if (uploadError) {
-        throw uploadError;
+
+        throw new Error(
+          `${file.name}: ${
+            uploadError.message ||
+            "Storage upload failed."
+          }`
+        );
+
       }
 
+
+      // -----------------------------------------------------
+      // REGISTER IMAGE WITH IDENTITYLINK SUBJECT FILE
+      // -----------------------------------------------------
 
       const {
         error: registerError
@@ -2944,54 +2997,97 @@ function renderLocationHistory(
 
 
       if (registerError) {
-        throw registerError;
+
+        throw new Error(
+          `${file.name}: ${
+            registerError.message ||
+            "Unable to register subject image."
+          }`
+        );
+
       }
 
 
-      showMessage(
-        "Subject image uploaded securely.",
-        "success"
-      );
-
-
-      await Promise.all([
-        loadRequests(),
-        loadDashboardCounts()
-      ]);
-
-
-      await openRequestDetail(
-        requestId
-      );
+      uploadedCount +=
+        1;
 
     }
-    catch (error) {
-
-      console.error(
-        "IdentityLink image upload error:",
-        error
-      );
 
 
-      showMessage(
+    fileInput.value =
+      "";
+
+
+    if (descriptionInput) {
+
+      descriptionInput.value =
+        "";
+
+    }
+
+
+    showMessage(
+      `${uploadedCount} subject image${
+        uploadedCount === 1
+          ? ""
+          : "s"
+      } uploaded securely.`,
+      "success"
+    );
+
+
+    await Promise.all([
+      loadRequests(),
+      loadDashboardCounts()
+    ]);
+
+
+    await openRequestDetail(
+      requestId
+    );
+
+  }
+  catch (error) {
+
+    console.error(
+      "IdentityLink image upload error:",
+      error
+    );
+
+
+    const partialMessage =
+      uploadedCount > 0
+        ? `${uploadedCount} image${
+            uploadedCount === 1
+              ? ""
+              : "s"
+          } uploaded before the error. `
+        : "";
+
+
+    showMessage(
+      partialMessage +
+      (
         error.message ||
-        "Unable to upload subject image.",
-        "error"
-      );
+        "Unable to upload subject images."
+      ),
+      "error"
+    );
 
-    }
-    finally {
+  }
+  finally {
 
-      uploadButton.disabled =
-        false;
+    uploadButton.disabled =
+      false;
 
-      uploadButton.textContent =
-        "Upload Image";
 
-    }
+    uploadButton.textContent =
+      originalButtonText ||
+      "Upload Images";
 
   }
 
+}
 
 
   // =========================================================
