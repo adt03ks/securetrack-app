@@ -3520,7 +3520,79 @@ function formatFileSize(
 
       cards.push(
         `
-          <article class="image-card">
+<article class="image-card subject-image-card">
+
+  ${
+    currentDetail
+      ?.request
+      ?.case_status ===
+      "open"
+        ? `
+            <button
+              class="subject-image-delete-button"
+              type="button"
+              data-file-id="${escapeHtml(image.id)}"
+              data-storage-path="${escapeHtml(image.storage_path)}"
+              data-file-label="${escapeHtml(
+                image.description ||
+                image.file_name
+              )}"
+              title="Delete this image"
+              aria-label="Delete ${escapeHtml(
+                image.description ||
+                image.file_name
+              )}"
+            >
+              ×
+            </button>
+          `
+        : ""
+  }
+
+  <img
+    src="${escapeHtml(data.signedUrl)}"
+    alt="${escapeHtml(
+      image.description ||
+      "IdentityLink subject image"
+    )}"
+    data-full-image="${escapeHtml(
+      data.signedUrl
+    )}"
+  >
+
+  <div class="image-info">
+
+    <strong>
+      ${escapeHtml(
+        image.description ||
+        image.file_name
+      )}
+    </strong>
+
+    <span>
+      ${escapeHtml(
+        image.file_name
+      )}
+    </span>
+
+    <span>
+      Uploaded by
+      ${escapeHtml(
+        image.uploaded_by_name
+      )}
+    </span>
+
+    <span>
+      ${escapeHtml(
+        formatDateTime(
+          image.created_at
+        )
+      )}
+    </span>
+
+  </div>
+
+</article>
 
             <img
               src="${escapeHtml(data.signedUrl)}"
@@ -3552,36 +3624,130 @@ function formatFileSize(
     }
 
 
-    grid.innerHTML =
-      cards.join("");
+   grid
+  .querySelectorAll(
+    ".subject-image-delete-button"
+  )
+  .forEach(
+    button => {
+
+      button.addEventListener(
+        "click",
+        async event => {
+
+          event.stopPropagation();
 
 
-    grid
-      .querySelectorAll(
-        "[data-full-image]"
-      )
-      .forEach(
-        image => {
+          const fileId =
+            button.dataset.fileId;
 
-          image.addEventListener(
-            "click",
-            () => {
 
-              fullImage.src =
-                image.dataset.fullImage;
+          const storagePath =
+            button.dataset.storagePath;
 
-              imageModal.classList.remove(
-                "hidden"
+
+          const label =
+            button.dataset.fileLabel ||
+            "this image";
+
+
+          const confirmed =
+            window.confirm(
+              `Delete "${label}" from this IdentityLink subject file?`
+            );
+
+
+          if (!confirmed) {
+            return;
+          }
+
+
+          button.disabled =
+            true;
+
+
+          try {
+
+            // Delete sensitive file from private storage first.
+            const {
+              error: storageError
+            } =
+              await db.storage
+                .from(
+                  "identitylink-subject-files"
+                )
+                .remove(
+                  [
+                    storagePath
+                  ]
+                );
+
+
+            if (storageError) {
+              throw storageError;
+            }
+
+
+            // Then remove its IdentityLink database record.
+            const {
+              error: recordError
+            } =
+              await db.rpc(
+                "delete_identitylink_subject_image_record",
+                {
+                  p_file_id:
+                    fileId
+                }
               );
 
+
+            if (recordError) {
+              throw recordError;
             }
-          );
+
+
+            showMessage(
+              `"${label}" deleted.`,
+              "success"
+            );
+
+
+            await Promise.all([
+              loadRequests(),
+              loadDashboardCounts()
+            ]);
+
+
+            await openRequestDetail(
+              currentDetail.request.id
+            );
+
+          }
+          catch (error) {
+
+            console.error(
+              "IdentityLink image deletion error:",
+              error
+            );
+
+
+            showMessage(
+              error.message ||
+              "Unable to delete subject image.",
+              "error"
+            );
+
+
+            button.disabled =
+              false;
+
+          }
 
         }
       );
 
-  }
-
+    }
+  );
 
 
   // =========================================================
