@@ -1940,7 +1940,70 @@ const locationHistory =
 
         </div>
 
+<section class="detail-section">
 
+  <div class="detail-section-head">
+
+    <div>
+
+      <h3>
+        Patient Location
+      </h3>
+
+      <div class="request-detail-small">
+        Current location and movement history
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="location-panel">
+
+    <div class="location-panel-top">
+
+      <div>
+
+        <div class="current-location-label">
+          Current Location
+        </div>
+
+        <div class="current-location-value">
+          ${escapeHtml(request.room_last_known_location)}
+        </div>
+
+      </div>
+
+
+      ${
+        request.case_status ===
+        "open"
+          ? `
+              <button
+                id="updateLocationButton"
+                class="button secondary"
+                type="button"
+              >
+                Update Location
+              </button>
+            `
+          : ""
+      }
+
+    </div>
+
+
+    <div
+      id="locationHistory"
+      class="location-history"
+    >
+      ${renderLocationHistory(locationHistory)}
+    </div>
+
+  </div>
+
+</section>
 
         <section class="detail-section">
 
@@ -2415,6 +2478,69 @@ const locationHistory =
 
   }
 
+function renderLocationHistory(
+  history
+) {
+
+  if (
+    !history.length
+  ) {
+
+    return `
+      <div class="empty-state">
+        No location history recorded.
+      </div>
+    `;
+
+  }
+
+
+  return history
+    .map(
+      item => `
+        <article class="location-history-item">
+
+          <strong>
+            ${escapeHtml(item.new_location)}
+          </strong>
+
+          ${
+            item.previous_location
+              ? `
+                  <div>
+                    Previous:
+                    ${escapeHtml(item.previous_location)}
+                  </div>
+                `
+              : `
+                  <div>
+                    Initial location
+                  </div>
+                `
+          }
+
+          ${
+            item.change_reason
+              ? `
+                  <div>
+                    ${escapeHtml(item.change_reason)}
+                  </div>
+                `
+              : ""
+          }
+
+          <span>
+            ${escapeHtml(item.changed_by_name)}
+            •
+            ${escapeHtml(formatDateTime(item.changed_at))}
+          </span>
+
+        </article>
+      `
+    )
+    .join("");
+
+}
 
   function detailItem(
     label,
