@@ -1254,6 +1254,37 @@ function openNewRequestModal() {
 
 }
 
+  
+  function closeRequestModal() {
+
+    requestModal.classList.add(
+      "hidden"
+    );
+
+  }
+
+
+  $("newRequestButton")
+    ?.addEventListener(
+      "click",
+      openNewRequestModal
+    );
+
+
+  $("closeRequestModalButton")
+    ?.addEventListener(
+      "click",
+      closeRequestModal
+    );
+
+
+  $("cancelRequestButton")
+    ?.addEventListener(
+      "click",
+      closeRequestModal
+    );
+
+  
 
   // =========================================================
   // FORM VALUES
@@ -1760,17 +1791,9 @@ function openEditRequest(
       data;
 
 
-    renderRequestDetail();
+     async function renderRequestDetail() {
 
-  }
-
-
-
-  async function renderRequestDetail() {
-
-    if (
-      !currentDetail?.request
-    ) {
+    if (!currentDetail?.request) {
       return;
     }
 
@@ -1778,28 +1801,25 @@ function openEditRequest(
     const request =
       currentDetail.request;
 
-   const actions =
-  currentDetail.actions ||
-  [];
+
+    const actions =
+      currentDetail.actions ||
+      [];
 
 
-const actionApprovals =
-  currentDetail.action_approvals ||
-  [];
+    const actionApprovals =
+      currentDetail.action_approvals ||
+      [];
 
 
-const locationHistory =
-  currentDetail.location_history ||
-  []; 
+    const locationHistory =
+      currentDetail.location_history ||
+      [];
+
 
     const files =
       currentDetail.files ||
       [];
-
-
-   const legacyApprovals =
-  currentDetail.legacy_approvals ||
-  [];
 
 
     const activity =
@@ -1811,61 +1831,213 @@ const locationHistory =
       request.request_number;
 
 
+    // The SUBJECT FILE remains editable while open.
+    // Image and fingerprint approvals are tracked separately.
+
     const canModify =
-      [
-        "pending",
-        "changes_requested"
-      ].includes(
-        request.status
-      );
+      request.case_status ===
+      "open";
 
 
-    detailBody.innerHTML =
-      `
+    detailBody.innerHTML = `
 
-        <div class="detail-top">
+      <div class="detail-top">
+
+        <div>
+
+          <span
+            class="status-pill ${
+              request.case_status === "open"
+                ? "status-pending"
+                : "status-completed"
+            }"
+          >
+            ${
+              request.case_status === "open"
+                ? "Open Subject File"
+                : escapeHtml(
+                    request.case_status ||
+                    "Closed"
+                  )
+            }
+          </span>
+
+
+          <div class="request-detail-small">
+
+            Submitted
+            ${escapeHtml(
+              formatDateTime(
+                request.submitted_at
+              )
+            )}
+
+            by
+
+            ${escapeHtml(
+              request.submitted_by_name
+            )}
+
+          </div>
+
+        </div>
+
+
+        <div class="detail-actions">
+
+          ${
+            canModify
+              ? `
+                  <button
+                    id="editCurrentRequestButton"
+                    class="button secondary"
+                    type="button"
+                  >
+                    Edit Subject Information
+                  </button>
+                `
+              : ""
+          }
+
+
+          ${
+            canModify
+              ? `
+                  <button
+                    id="cancelCurrentRequestButton"
+                    class="button danger"
+                    type="button"
+                  >
+                    Cancel File
+                  </button>
+                `
+              : ""
+          }
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ================================================
+           SUBJECT INFORMATION
+      ================================================= -->
+
+      <div class="detail-grid">
+
+        ${detailItem(
+          "Patient Alias",
+          request.patient_alias
+        )}
+
+
+        ${detailItem(
+          "MRN / Patient Number",
+          request.mrn_patient_number
+        )}
+
+
+        ${detailItem(
+          "Outside Organization",
+          request.source_organization
+        )}
+
+
+        ${detailItem(
+          "Outside Reference",
+          request.source_reference_number
+        )}
+
+
+        ${detailItem(
+          "Requester's Name",
+          request.source_requester_name
+        )}
+
+
+        ${detailItem(
+          "Requester's Email",
+          request.source_requester_email
+        )}
+
+
+        ${detailItem(
+          "Requester's Phone",
+          request.source_requester_phone
+        )}
+
+
+        ${detailItem(
+          "Other Identifying Factors",
+          request.identifying_factors,
+          true
+        )}
+
+
+        ${detailItem(
+          "Management Notes",
+          request.manager_notes,
+          true
+        )}
+
+      </div>
+
+
+
+      <!-- ================================================
+           LOCATION
+      ================================================= -->
+
+      <section class="detail-section">
+
+        <div class="detail-section-head">
 
           <div>
 
-            <span class="status-pill status-${escapeHtml(request.status)}">
-              ${escapeHtml(statusLabel(request.status))}
-            </span>
+            <h3>
+              Patient Location
+            </h3>
 
             <div class="request-detail-small">
-              Submitted
-              ${escapeHtml(formatDateTime(request.submitted_at))}
-              by
-              ${escapeHtml(request.submitted_by_name)}
+              Current location and movement history
             </div>
 
           </div>
 
+        </div>
 
-          <div class="detail-actions">
+
+        <div class="location-panel">
+
+          <div class="location-panel-top">
+
+            <div>
+
+              <div class="current-location-label">
+                Current Location
+              </div>
+
+              <div class="current-location-value">
+
+                ${escapeHtml(
+                  request.room_last_known_location
+                )}
+
+              </div>
+
+            </div>
+
 
             ${
               canModify
                 ? `
                     <button
-                      id="editCurrentRequestButton"
+                      id="updateLocationButton"
                       class="button secondary"
                       type="button"
                     >
-                      Edit Request
-                    </button>
-                  `
-                : ""
-            }
-
-            ${
-              canModify
-                ? `
-                    <button
-                      id="cancelCurrentRequestButton"
-                      class="button danger"
-                      type="button"
-                    >
-                      Cancel Request
+                      Update Location
                     </button>
                   `
                 : ""
@@ -1873,188 +2045,208 @@ const locationHistory =
 
           </div>
 
+
+          <div
+            id="locationHistory"
+            class="location-history"
+          >
+
+            ${renderLocationHistory(
+              locationHistory
+            )}
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- ================================================
+           AUTHORIZATIONS
+      ================================================= -->
+
+      <section class="detail-section">
+
+        <div class="detail-section-head">
+
+          <div>
+
+            <h3>
+              Identification Authorizations
+            </h3>
+
+            <div class="request-detail-small">
+              Image and fingerprint authorization are
+              tracked independently.
+            </div>
+
+          </div>
+
         </div>
 
 
+        <div class="authorization-grid">
 
-        <div class="detail-grid">
-
-          ${detailItem(
-            "Patient Alias",
-            request.patient_alias
+          ${renderAuthorizationCard(
+            request,
+            actions,
+            actionApprovals,
+            "image_request",
+            "Image Request"
           )}
 
-          ${detailItem(
-            "MRN / Patient Number",
-            request.mrn_patient_number
-          )}
 
-          ${detailItem(
-            "Request Type",
-            requestTypeLabel(
-              request.request_type
-            )
-          )}
-
-          ${detailItem(
-            "Room / Last Known Location",
-            request.room_last_known_location
-          )}
-
-          ${detailItem(
-            "Outside Organization",
-            request.source_organization
-          )}
-
-          ${detailItem(
-            "Outside Reference",
-            request.source_reference_number
-          )}
-
-          ${detailItem(
-            "Requester's Name",
-            request.source_requester_name
-          )}
-
-          ${detailItem(
-            "Requester's Email",
-            request.source_requester_email
-          )}
-
-          ${detailItem(
-            "Requester's Phone",
-            request.source_requester_phone
-          )}
-
-          ${detailItem(
-            "Other Identifying Factors",
-            request.identifying_factors,
-            true
-          )}
-
-          ${detailItem(
-            "Management Notes",
-            request.manager_notes,
-            true
+          ${renderAuthorizationCard(
+            request,
+            actions,
+            actionApprovals,
+            "fingerprint",
+            "Fingerprint Request"
           )}
 
         </div>
 
-<section class="detail-section">
-
-  <div class="detail-section-head">
-
-    <div>
-
-      <h3>
-        Patient Location
-      </h3>
-
-      <div class="request-detail-small">
-        Current location and movement history
-      </div>
-
-    </div>
-
-  </div>
+      </section>
 
 
-  <div class="location-panel">
 
-    <div class="location-panel-top">
+      <!-- ================================================
+           SUBJECT IMAGES
+      ================================================= -->
 
-      <div>
+      <section class="detail-section">
 
-        <div class="current-location-label">
-          Current Location
+        <div class="detail-section-head">
+
+          <div>
+
+            <h3>
+              Subject Images
+            </h3>
+
+            <div class="request-detail-small">
+              Secure photographs associated with this
+              unidentified subject.
+            </div>
+
+          </div>
+
         </div>
 
-        <div class="current-location-value">
-          ${escapeHtml(request.room_last_known_location)}
+
+        ${
+          canModify
+            ? `
+                <div class="upload-panel">
+
+                  <div class="upload-row">
+
+                    <label>
+
+                      <span>
+                        Select Subject Image
+                      </span>
+
+                      <input
+                        id="subjectImageFile"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                      >
+
+                    </label>
+
+
+                    <label>
+
+                      <span>
+                        Image Description
+                      </span>
+
+                      <input
+                        id="subjectImageDescription"
+                        type="text"
+                        placeholder="Example: Front facial image"
+                      >
+
+                    </label>
+
+
+                    <button
+                      id="uploadSubjectImageButton"
+                      class="button primary"
+                      type="button"
+                    >
+                      Upload Image
+                    </button>
+
+                  </div>
+
+                </div>
+              `
+            : ""
+        }
+
+
+        <div
+          id="subjectImageGrid"
+          class="image-grid"
+        >
+
+          <div class="loading-state">
+            Loading images…
+          </div>
+
         </div>
 
-      </div>
+      </section>
 
 
-      ${
-        request.case_status ===
-        "open"
-          ? `
-              <button
-                id="updateLocationButton"
-                class="button secondary"
-                type="button"
-              >
-                Update Location
-              </button>
-            `
-          : ""
-      }
 
-    </div>
+      <!-- ================================================
+           APPROVAL HISTORY
+      ================================================= -->
 
+      <section class="detail-section">
 
-    <div
-      id="locationHistory"
-      class="location-history"
-    >
-      ${renderLocationHistory(locationHistory)}
-    </div>
+        <div class="detail-section-head">
 
-  </div>
+          <h3>
+            Approval History
+          </h3>
 
-</section>
+        </div>
 
-        <section class="detail-section">
+        <div id="approvalHistory"></div>
 
-          <div class="detail-section-head">
-
-            <div>
-
-<section class="detail-section">
-
-  <div class="detail-section-head">
-
-    <div>
-
-      <h3>
-        Identification Authorizations
-      </h3>
-
-      <div class="request-detail-small">
-        Image and fingerprint authorization are tracked independently.
-      </div>
-
-    </div>
-
-  </div>
+      </section>
 
 
-  <div class="authorization-grid">
 
-    ${renderAuthorizationCard(
-      request,
-      actions,
-      actionApprovals,
-      "image_request",
-      "Image Request"
-    )}
+      <!-- ================================================
+           ACTIVITY HISTORY
+      ================================================= -->
 
-    ${renderAuthorizationCard(
-      request,
-      actions,
-      actionApprovals,
-      "fingerprint",
-      "Fingerprint Request"
-    )}
+      <section class="detail-section">
 
-  </div>
+        <div class="detail-section-head">
 
-</section>
+          <h3>
+            Activity History
+          </h3>
+
+        </div>
+
+        <div
+          id="activityHistory"
+          class="activity-list"
+        ></div>
 
       </section>
 
     `;
+
 
 
     // =========================================================
@@ -2081,6 +2273,11 @@ const locationHistory =
       );
 
 
+
+    // =========================================================
+    // EDIT SUBJECT
+    // =========================================================
+
     $("editCurrentRequestButton")
       ?.addEventListener(
         "click",
@@ -2092,134 +2289,123 @@ const locationHistory =
 
         }
       );
-              <h3>
-                Subject Images
-              </h3>
-
-              <div class="request-detail-small">
-                Secure photographs associated with this
-                unidentified subject.
-              </div>
-
-            </div>
-
-          </div>
 
 
-          ${
-            canModify
-              ? `
-                  <div class="upload-panel">
 
-                    <div class="upload-row">
+    // =========================================================
+    // UPDATE LOCATION
+    // =========================================================
 
-                      <label>
+    $("updateLocationButton")
+      ?.addEventListener(
+        "click",
+        async () => {
 
-                        <span>
-                          Select Subject Image
-                        </span>
-
-                        <input
-                          id="subjectImageFile"
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp"
-                        >
-
-                      </label>
+          const newLocation =
+            window.prompt(
+              "Enter the patient's new current location:",
+              request.room_last_known_location ||
+              ""
+            );
 
 
-                      <label>
-
-                        <span>
-                          Image Description
-                        </span>
-
-                        <input
-                          id="subjectImageDescription"
-                          type="text"
-                          placeholder="Example: Front facial image"
-                        >
-
-                      </label>
-
-
-                      <button
-                        id="uploadSubjectImageButton"
-                        class="button primary"
-                        type="button"
-                      >
-                        Upload Image
-                      </button>
-
-                    </div>
-
-                  </div>
-                `
-              : ""
+          if (
+            newLocation ===
+            null
+          ) {
+            return;
           }
 
 
-          <div
-            id="subjectImageGrid"
-            class="image-grid"
-          >
-            <div class="loading-state">
-              Loading images…
-            </div>
-          </div>
+          if (
+            !newLocation.trim()
+          ) {
 
-        </section>
+            showMessage(
+              "Current location is required.",
+              "error"
+            );
 
+            return;
 
-
-        <section class="detail-section">
-
-          <div class="detail-section-head">
-
-            <h3>
-              Approval History
-            </h3>
-
-          </div>
-
-          <div id="approvalHistory"></div>
-
-        </section>
+          }
 
 
-
-        <section class="detail-section">
-
-          <div class="detail-section-head">
-
-            <h3>
-              Activity History
-            </h3>
-
-          </div>
-
-          <div
-            id="activityHistory"
-            class="activity-list"
-          ></div>
-
-        </section>
-
-      `;
+          const reason =
+            window.prompt(
+              "Optional: reason or note for this location change:"
+            );
 
 
-    $("editCurrentRequestButton")
-      ?.addEventListener(
-        "click",
-        () => {
+          try {
 
-          openEditRequest(
-            request
-          );
+            const {
+              error
+            } =
+              await db.rpc(
+                "update_identitylink_location",
+                {
+
+                  p_request_id:
+                    request.id,
+
+                  p_new_location:
+                    newLocation.trim(),
+
+                  p_change_reason:
+                    reason?.trim() ||
+                    null
+
+                }
+              );
+
+
+            if (error) {
+              throw error;
+            }
+
+
+            showMessage(
+              "Patient location updated and added to location history.",
+              "success"
+            );
+
+
+            await Promise.all([
+              loadRequests(),
+              loadDashboardCounts()
+            ]);
+
+
+            await openRequestDetail(
+              request.id
+            );
+
+          }
+          catch (error) {
+
+            console.error(
+              "IdentityLink location update error:",
+              error
+            );
+
+
+            showMessage(
+              error.message ||
+              "Unable to update patient location.",
+              "error"
+            );
+
+          }
 
         }
       );
 
+
+
+    // =========================================================
+    // CANCEL FILE
+    // =========================================================
 
     $("cancelCurrentRequestButton")
       ?.addEventListener(
@@ -2228,7 +2414,7 @@ const locationHistory =
 
           const reason =
             window.prompt(
-              "Enter the reason for cancelling this IdentityLink request:"
+              "Enter the reason for cancelling this IdentityLink file:"
             );
 
 
@@ -2262,11 +2448,13 @@ const locationHistory =
               await db.rpc(
                 "cancel_identitylink_request",
                 {
+
                   p_request_id:
                     request.id,
 
                   p_reason:
                     reason.trim()
+
                 }
               );
 
@@ -2277,7 +2465,7 @@ const locationHistory =
 
 
             showMessage(
-              "IdentityLink request cancelled.",
+              "IdentityLink file cancelled.",
               "success"
             );
 
@@ -2295,9 +2483,15 @@ const locationHistory =
           }
           catch (error) {
 
+            console.error(
+              "IdentityLink cancellation error:",
+              error
+            );
+
+
             showMessage(
               error.message ||
-              "Unable to cancel request.",
+              "Unable to cancel IdentityLink file.",
               "error"
             );
 
@@ -2306,6 +2500,11 @@ const locationHistory =
         }
       );
 
+
+
+    // =========================================================
+    // SUBJECT IMAGE UPLOAD
+    // =========================================================
 
     $("uploadSubjectImageButton")
       ?.addEventListener(
@@ -2317,6 +2516,11 @@ const locationHistory =
       );
 
 
+
+    // =========================================================
+    // RENDER IMAGES / HISTORY
+    // =========================================================
+
     await renderSubjectImages(
       files.filter(
         file =>
@@ -2327,8 +2531,8 @@ const locationHistory =
 
 
     renderApprovalHistory(
-  actionApprovals
-);
+      actionApprovals
+    );
 
 
     renderActivityHistory(
@@ -2336,7 +2540,6 @@ const locationHistory =
     );
 
   }
-
  // =========================================================
   // AUTHORIZATION CARD
   // =========================================================
