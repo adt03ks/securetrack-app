@@ -2147,54 +2147,42 @@ function openEditRequest(
             ? `
                 <div class="upload-panel">
 
-                  <div class="upload-row">
+  <div class="upload-selection">
 
-                   <label>
+    <label>
 
-  <span>
-    Select Subject Image(s)
-  </span>
+      <span>
+        Select Subject Image(s)
+      </span>
 
-  <input
-    id="subjectImageFile"
-    type="file"
-    accept="image/jpeg,image/png,image/webp"
-    multiple
-  >
+      <input
+        id="subjectImageFile"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+      >
 
-  <small class="request-detail-small">
-    You may select multiple JPEG, PNG, or WebP images.
-    Maximum 15 MB per image.
-  </small>
-
-</label>
-
-                    <label>
-
-                      <span>
-                        Image Description
-                      </span>
-
-                      <input
-                        id="subjectImageDescription"
-                        type="text"
-                        placeholder="Example: Front facial image"
-                      >
-
-                    </label>
+    </label>
 
 
-                    <button
-                      id="uploadSubjectImageButton"
-                      class="button primary"
-                      type="button"
-                    >
-                      Upload Images
-                    </button>
+    <div
+      id="selectedImageLabelList"
+      class="selected-image-label-list"
+    ></div>
 
-                  </div>
 
-                </div>
+    <button
+      id="uploadSubjectImageButton"
+      class="button primary"
+      type="button"
+      disabled
+    >
+      Upload Images
+    </button>
+
+  </div>
+
+</div>
               `
             : ""
         }
@@ -2516,7 +2504,11 @@ function openEditRequest(
     // =========================================================
     // SUBJECT IMAGE UPLOAD
     // =========================================================
-
+$("subjectImageFile")
+  ?.addEventListener(
+    "change",
+    renderSelectedImageLabels
+  );
     $("uploadSubjectImageButton")
       ?.addEventListener(
         "click",
@@ -2783,17 +2775,156 @@ function renderLocationHistory(
   // =========================================================
   // SUBJECT IMAGE UPLOAD
   // =========================================================
-
-  async function uploadSubjectImage(
-  requestId
-) {
+function renderSelectedImageLabels() {
 
   const fileInput =
     $("subjectImageFile");
 
 
-  const descriptionInput =
-    $("subjectImageDescription");
+  const container =
+    $("selectedImageLabelList");
+
+
+  const uploadButton =
+    $("uploadSubjectImageButton");
+
+
+  if (
+    !fileInput ||
+    !container ||
+    !uploadButton
+  ) {
+    return;
+  }
+
+
+  const files =
+    Array.from(
+      fileInput.files ||
+      []
+    );
+
+
+  if (!files.length) {
+
+    container.innerHTML =
+      "";
+
+
+    uploadButton.disabled =
+      true;
+
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    files
+      .map(
+        (
+          file,
+          index
+        ) => `
+          <div class="selected-image-label-row">
+
+            <div class="selected-image-file">
+
+              <span class="selected-image-number">
+                ${index + 1}
+              </span>
+
+              <div>
+
+                <strong>
+                  ${escapeHtml(file.name)}
+                </strong>
+
+                <span>
+                  ${formatFileSize(file.size)}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <label>
+
+              <span>
+                Image Label
+              </span>
+
+              <input
+                class="subject-image-label-input"
+                type="text"
+                data-image-index="${index}"
+                placeholder="Example: Front facial image"
+                required
+              >
+
+            </label>
+
+          </div>
+        `
+      )
+      .join("");
+
+
+  uploadButton.disabled =
+    false;
+
+}
+
+
+
+function formatFileSize(
+  bytes
+) {
+
+  if (
+    !Number.isFinite(bytes)
+  ) {
+    return "";
+  }
+
+
+  if (
+    bytes <
+    1024 * 1024
+  ) {
+
+    return `${
+      Math.max(
+        1,
+        Math.round(
+          bytes / 1024
+        )
+      )
+    } KB`;
+
+  }
+
+
+  return `${
+    (
+      bytes /
+      (
+        1024 *
+        1024
+      )
+    )
+      .toFixed(1)
+  } MB`;
+
+}
+ async function uploadSubjectImage(
+  requestId
+) {
+
+  const fileInput =
+    $("subjectImageFile");
 
 
   const uploadButton =
@@ -2819,6 +2950,71 @@ function renderLocationHistory(
   }
 
 
+  const labelInputs =
+    Array.from(
+      document.querySelectorAll(
+        ".subject-image-label-input"
+      )
+    );
+
+
+  const labels =
+    files.map(
+      (
+        file,
+        index
+      ) => {
+
+        const input =
+          labelInputs.find(
+            item =>
+              Number(
+                item.dataset.imageIndex
+              ) ===
+              index
+          );
+
+
+        return input
+          ?.value
+          ?.trim() ||
+          "";
+
+      }
+    );
+
+
+  const missingLabelIndex =
+    labels.findIndex(
+      label =>
+        !label
+    );
+
+
+  if (
+    missingLabelIndex !==
+    -1
+  ) {
+
+    showMessage(
+      `Enter a label for image ${
+        missingLabelIndex + 1
+      } before uploading.`,
+      "error"
+    );
+
+
+    labelInputs[
+      missingLabelIndex
+    ]
+      ?.focus();
+
+
+    return;
+
+  }
+
+
   const allowedTypes =
     [
       "image/jpeg",
@@ -2827,7 +3023,7 @@ function renderLocationHistory(
     ];
 
 
-  const invalidTypeFile =
+  const invalidFile =
     files.find(
       file =>
         !allowedTypes.includes(
@@ -2836,10 +3032,10 @@ function renderLocationHistory(
     );
 
 
-  if (invalidTypeFile) {
+  if (invalidFile) {
 
     showMessage(
-      `${invalidTypeFile.name} is not a supported image type. Use JPEG, PNG, or WebP.`,
+      `${invalidFile.name} must be JPEG, PNG, or WebP.`,
       "error"
     );
 
@@ -2859,7 +3055,7 @@ function renderLocationHistory(
   if (oversizedFile) {
 
     showMessage(
-      `${oversizedFile.name} exceeds the 15 MB image limit.`,
+      `${oversizedFile.name} exceeds the 15 MB limit.`,
       "error"
     );
 
@@ -2868,12 +3064,12 @@ function renderLocationHistory(
   }
 
 
+  const originalText =
+    uploadButton.textContent;
+
+
   uploadButton.disabled =
     true;
-
-
-  const originalButtonText =
-    uploadButton.textContent;
 
 
   let uploadedCount =
@@ -2890,6 +3086,10 @@ function renderLocationHistory(
 
       const file =
         files[index];
+
+
+      const label =
+        labels[index];
 
 
       uploadButton.textContent =
@@ -2917,6 +3117,148 @@ function renderLocationHistory(
 
       const storagePath =
         `requests/${requestId}/subject/${storageName}`;
+
+
+      const {
+        error: uploadError
+      } =
+        await db.storage
+          .from(
+            "identitylink-subject-files"
+          )
+          .upload(
+            storagePath,
+            file,
+            {
+
+              cacheControl:
+                "3600",
+
+              upsert:
+                false,
+
+              contentType:
+                file.type
+
+            }
+          );
+
+
+      if (uploadError) {
+
+        throw new Error(
+          `${file.name}: ${
+            uploadError.message
+          }`
+        );
+
+      }
+
+
+      const {
+        error: registerError
+      } =
+        await db.rpc(
+          "register_identitylink_subject_image",
+          {
+
+            p_request_id:
+              requestId,
+
+            p_storage_path:
+              storagePath,
+
+            p_file_name:
+              file.name,
+
+            p_mime_type:
+              file.type,
+
+            p_file_size_bytes:
+              file.size,
+
+            p_description:
+              label
+
+          }
+        );
+
+
+      if (registerError) {
+
+        throw new Error(
+          `${file.name}: ${
+            registerError.message
+          }`
+        );
+
+      }
+
+
+      uploadedCount +=
+        1;
+
+    }
+
+
+    fileInput.value =
+      "";
+
+
+    $("selectedImageLabelList")
+      .innerHTML =
+      "";
+
+
+    showMessage(
+      `${uploadedCount} subject image${
+        uploadedCount === 1
+          ? ""
+          : "s"
+      } uploaded securely.`,
+      "success"
+    );
+
+
+    await Promise.all([
+      loadRequests(),
+      loadDashboardCounts()
+    ]);
+
+
+    await openRequestDetail(
+      requestId
+    );
+
+  }
+  catch (error) {
+
+    console.error(
+      "IdentityLink image upload error:",
+      error
+    );
+
+
+    showMessage(
+      error.message ||
+      "Unable to upload subject images.",
+      "error"
+    );
+
+  }
+  finally {
+
+    uploadButton.disabled =
+      false;
+
+
+    uploadButton.textContent =
+      originalText ||
+      "Upload Images";
+
+  }
+
+}
 
 
       // -----------------------------------------------------
