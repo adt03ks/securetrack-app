@@ -1,1 +1,814 @@
+<!DOCTYPE html>
 
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="theme-color"
+    content="#0B2E59"
+  >
+
+  <title>
+    IdentityLink Approval Portal
+  </title>
+
+
+  <link
+    rel="stylesheet"
+    href="identitylink-approver.css"
+  >
+
+</head>
+
+
+<body>
+
+
+  <!-- =========================================================
+       PAGE MESSAGE
+  ========================================================== -->
+
+  <div
+    id="pageMessage"
+    class="message"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+
+  <!-- =========================================================
+       LOGIN VIEW
+       The approver does NOT use SecureTrack role routing.
+  ========================================================== -->
+
+  <main
+    id="loginView"
+    class="login-view"
+  >
+
+    <section class="login-card">
+
+
+      <div class="login-logo-wrap">
+
+        <img
+          src="/identitylink/identitylink-logo.png"
+          alt="IdentityLink"
+          class="login-logo"
+        >
+
+      </div>
+
+
+      <div class="login-heading">
+
+        <h1>
+          Approval Portal
+        </h1>
+
+        <p>
+          Identity Resolution & Authorization
+        </p>
+
+      </div>
+
+
+      <form
+        id="loginForm"
+        class="login-form"
+      >
+
+
+        <label>
+
+          <span>
+            Email Address
+          </span>
+
+          <input
+            id="loginEmail"
+            type="email"
+            autocomplete="email"
+            required
+          >
+
+        </label>
+
+
+        <label>
+
+          <span>
+            Password
+          </span>
+
+          <input
+            id="loginPassword"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+
+        </label>
+
+
+        <button
+          id="loginButton"
+          class="button primary wide"
+          type="submit"
+        >
+          Sign In
+        </button>
+
+
+      </form>
+
+
+      <div class="login-security-note">
+
+        <strong>
+          Authorized Access Only
+        </strong>
+
+        <span>
+          Access to IdentityLink is restricted to the
+          designated authorization approver.
+        </span>
+
+      </div>
+
+
+    </section>
+
+  </main>
+
+
+
+  <!-- =========================================================
+       APPROVER APPLICATION
+  ========================================================== -->
+
+  <div
+    id="appView"
+    class="app-view hidden"
+  >
+
+
+    <div class="app-shell">
+
+
+      <!-- =====================================================
+           HEADER
+      ====================================================== -->
+
+      <header class="topbar">
+
+
+        <a
+          class="identitylink-brand"
+          href="/identitylink/approver/"
+          aria-label="IdentityLink Approval Portal Home"
+        >
+
+          <img
+            src="/identitylink/identitylink-logo.png"
+            alt="IdentityLink"
+            class="identitylink-logo"
+          >
+
+        </a>
+
+
+        <div class="topbar-actions">
+
+
+          <button
+            id="refreshButton"
+            class="button secondary"
+            type="button"
+          >
+            Refresh
+          </button>
+
+
+          <button
+            id="signOutButton"
+            class="button ghost"
+            type="button"
+          >
+            Sign Out
+          </button>
+
+
+        </div>
+
+
+      </header>
+
+
+
+      <!-- =====================================================
+           APPROVER IDENTITY
+      ====================================================== -->
+
+      <section class="user-strip">
+
+
+        <div>
+
+          <span class="user-strip-label">
+            APPROVER
+          </span>
+
+          <strong id="currentUserName">
+            IdentityLink Approver
+          </strong>
+
+        </div>
+
+
+        <div class="secure-indicator">
+
+          <span class="secure-dot"></span>
+
+          Secure Authorization Session
+
+        </div>
+
+
+      </section>
+
+
+
+      <!-- =====================================================
+           HERO
+      ====================================================== -->
+
+      <section class="hero">
+
+
+        <div>
+
+          <span class="eyebrow">
+            IDENTITY RESOLUTION & AUTHORIZATION
+          </span>
+
+          <h1>
+            Approval Portal
+          </h1>
+
+          <p>
+            Review and authorize identification requests for
+            unknown patients while maintaining a complete,
+            auditable decision history.
+          </p>
+
+        </div>
+
+
+      </section>
+
+
+
+      <!-- =====================================================
+           DASHBOARD
+      ====================================================== -->
+
+      <section class="dashboard-grid">
+
+
+        <button
+          class="dashboard-card"
+          type="button"
+          data-status-filter="pending"
+        >
+
+          <span class="dashboard-label">
+            Pending Actions
+          </span>
+
+          <strong id="pendingCount">
+            0
+          </strong>
+
+          <span>
+            Awaiting review
+          </span>
+
+        </button>
+
+
+        <button
+          class="dashboard-card"
+          type="button"
+          data-status-filter="changes_requested"
+        >
+
+          <span class="dashboard-label">
+            Changes Requested
+          </span>
+
+          <strong id="changesCount">
+            0
+          </strong>
+
+          <span>
+            Returned to management
+          </span>
+
+        </button>
+
+
+        <button
+          class="dashboard-card"
+          type="button"
+          data-status-filter="approved"
+        >
+
+          <span class="dashboard-label">
+            Approved Actions
+          </span>
+
+          <strong id="approvedCount">
+            0
+          </strong>
+
+          <span>
+            Authorization granted
+          </span>
+
+        </button>
+
+
+        <button
+          class="dashboard-card"
+          type="button"
+          data-status-filter=""
+        >
+
+          <span class="dashboard-label">
+            Subject Files
+          </span>
+
+          <strong id="totalCount">
+            0
+          </strong>
+
+          <span>
+            Assigned records
+          </span>
+
+        </button>
+
+
+      </section>
+
+
+
+      <!-- =====================================================
+           RECORD SEARCH
+      ====================================================== -->
+
+      <section class="records-panel">
+
+
+        <div class="records-heading">
+
+
+          <div>
+
+            <span class="eyebrow">
+              IDENTITYLINK RECORDS
+            </span>
+
+            <h2>
+              Subject Files
+            </h2>
+
+          </div>
+
+
+          <span
+            id="recordSummary"
+            class="record-summary"
+          >
+            0 records shown
+          </span>
+
+
+        </div>
+
+
+
+        <div class="search-row">
+
+
+          <label class="search-field">
+
+            <span class="sr-only">
+              Search IdentityLink records
+            </span>
+
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Search request number, alias, MRN, location or reference"
+            >
+
+          </label>
+
+
+          <label class="filter-field">
+
+            <span class="sr-only">
+              Filter by status
+            </span>
+
+            <select id="statusFilter">
+
+              <option value="">
+                All Records
+              </option>
+
+              <option value="pending">
+                Pending
+              </option>
+
+              <option value="changes_requested">
+                Changes Requested
+              </option>
+
+              <option value="approved">
+                Approved
+              </option>
+
+              <option value="denied">
+                Denied
+              </option>
+
+              <option value="open">
+                Open Subject Files
+              </option>
+
+              <option value="closed">
+                Closed Subject Files
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <button
+            id="searchButton"
+            class="button secondary"
+            type="button"
+          >
+            Search
+          </button>
+
+
+        </div>
+
+
+
+        <div
+          id="requestList"
+          class="request-list"
+        >
+
+          <div class="loading-state">
+            Loading IdentityLink records…
+          </div>
+
+        </div>
+
+
+      </section>
+
+
+    </div>
+
+  </div>
+
+
+
+  <!-- =========================================================
+       REQUEST DETAIL MODAL
+  ========================================================== -->
+
+  <div
+    id="detailModal"
+    class="modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="detailRequestNumber"
+  >
+
+
+    <div class="modal-backdrop"></div>
+
+
+    <section class="modal-card detail-modal-card">
+
+
+      <div class="modal-header">
+
+
+        <div>
+
+          <span class="eyebrow">
+            IDENTITYLINK SUBJECT FILE
+          </span>
+
+          <h2 id="detailRequestNumber">
+            Request
+          </h2>
+
+        </div>
+
+
+        <button
+          id="closeDetailModalButton"
+          class="icon-button"
+          type="button"
+          aria-label="Close request details"
+        >
+          ×
+        </button>
+
+
+      </div>
+
+
+      <div
+        id="detailBody"
+        class="detail-body"
+      >
+
+        <div class="loading-state">
+          Loading IdentityLink request…
+        </div>
+
+      </div>
+
+
+    </section>
+
+
+  </div>
+
+
+
+  <!-- =========================================================
+       APPROVAL / DECISION MODAL
+  ========================================================== -->
+
+  <div
+    id="decisionModal"
+    class="modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="decisionModalTitle"
+  >
+
+
+    <div class="modal-backdrop"></div>
+
+
+    <section class="modal-card decision-modal-card">
+
+
+      <div class="modal-header">
+
+
+        <div>
+
+          <span class="eyebrow">
+            AUTHORIZATION DECISION
+          </span>
+
+          <h2 id="decisionModalTitle">
+            Review Authorization
+          </h2>
+
+        </div>
+
+
+        <button
+          id="closeDecisionModalButton"
+          class="icon-button"
+          type="button"
+          aria-label="Close authorization decision"
+        >
+          ×
+        </button>
+
+
+      </div>
+
+
+
+      <form id="decisionForm">
+
+
+        <input
+          id="decisionRequestId"
+          type="hidden"
+        >
+
+        <input
+          id="decisionActionType"
+          type="hidden"
+        >
+
+        <input
+          id="decisionType"
+          type="hidden"
+        >
+
+        <input
+          id="decisionActivateAction"
+          type="hidden"
+          value="false"
+        >
+
+
+
+        <div
+          id="decisionActionSummary"
+          class="decision-action-summary"
+        ></div>
+
+
+
+        <label
+          id="decisionNotesField"
+          class="form-field"
+        >
+
+          <span id="decisionNotesLabel">
+            Decision Notes
+          </span>
+
+          <textarea
+            id="decisionNotes"
+            rows="5"
+            placeholder="Optional notes"
+          ></textarea>
+
+        </label>
+
+
+
+        <div
+          id="signatureSection"
+          class="signature-section hidden"
+        >
+
+
+          <div class="certification-box">
+
+            <strong>
+              Electronic Certification
+            </strong>
+
+            <p id="certificationText">
+              I certify that I reviewed this IdentityLink
+              authorization request and approve the selected
+              identification action.
+            </p>
+
+          </div>
+
+
+          <label class="form-field">
+
+            <span>
+              Type Your Full Name to Sign
+            </span>
+
+            <input
+              id="typedSignature"
+              type="text"
+              autocomplete="name"
+              placeholder="Electronic signature"
+            >
+
+          </label>
+
+
+          <label class="certification-check">
+
+            <input
+              id="certificationCheck"
+              type="checkbox"
+            >
+
+            <span>
+              I understand that my typed name serves as my
+              electronic signature and will be permanently
+              recorded with this authorization.
+            </span>
+
+          </label>
+
+
+        </div>
+
+
+
+        <div class="modal-actions">
+
+
+          <button
+            id="cancelDecisionButton"
+            class="button secondary"
+            type="button"
+          >
+            Cancel
+          </button>
+
+
+          <button
+            id="submitDecisionButton"
+            class="button primary"
+            type="submit"
+          >
+            Submit Decision
+          </button>
+
+
+        </div>
+
+
+      </form>
+
+
+    </section>
+
+
+  </div>
+
+
+
+  <!-- =========================================================
+       IMAGE VIEWER
+  ========================================================== -->
+
+  <div
+    id="imageModal"
+    class="image-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Subject image viewer"
+  >
+
+
+    <button
+      id="closeImageModalButton"
+      class="image-close"
+      type="button"
+      aria-label="Close image"
+    >
+      ×
+    </button>
+
+
+    <img
+      id="fullImage"
+      src=""
+      alt="IdentityLink subject image"
+    >
+
+
+  </div>
+
+
+
+  <!-- =========================================================
+       SCRIPTS
+       IMPORTANT:
+       NO secure-page.js on the approver portal.
+  ========================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="../../config.js"></script>
+
+  <script src="identitylink-approver.js"></script>
+
+
+</body>
+
+</html>
