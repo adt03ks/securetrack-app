@@ -2245,7 +2245,193 @@ function renderSupervisorContext() {
       "draft";
   }
 
+// =========================================================
+// AUTO-RESUME CURRENT DRAFT SHIFT
+// =========================================================
 
+async function resumeCurrentDraftShift() {
+
+  if (
+    currentShift ||
+    !shiftDate?.value
+  ) {
+    return;
+  }
+
+
+  try {
+
+    // -----------------------------------------------------
+    // Determine the logged-in person's normal shift
+    // when they are part of the operational roster.
+    // -----------------------------------------------------
+
+    const currentStaffMember =
+      staff.find(
+        person =>
+          person.id ===
+          auth.user.id
+      );
+
+
+    const preferredShift =
+      currentStaffMember?.shift_name ||
+      null;
+
+
+    let query =
+      db
+        .from("shift_instances")
+        .select(
+          "id, shift_date, shift_name, status, published_at, supervisor_user_id, supervisor_display_name, supervisor_source"
+        )
+        .eq(
+          "shift_date",
+          shiftDate.value
+        )
+        .eq(
+          "status",
+          "draft"
+        );
+
+
+    if (preferredShift) {
+
+      query =
+        query.eq(
+          "shift_name",
+          preferredShift
+        );
+
+    }
+
+
+    const {
+      data,
+      error
+    } =
+      await query
+        .order(
+          "shift_name"
+        );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    const drafts =
+      data || [];
+
+
+    // -----------------------------------------------------
+    // Nothing to restore.
+    // -----------------------------------------------------
+
+    if (!drafts.length) {
+      return;
+    }
+
+
+    // -----------------------------------------------------
+    // If no roster-based preferred shift exists and there
+    // are several drafts, do not guess which one belongs
+    // on screen.
+    // -----------------------------------------------------
+
+    if (
+      !preferredShift &&
+      drafts.length > 1
+    ) {
+
+      showMessage(
+        "Multiple draft shifts are available for today. Select the shift and click Open Shift.",
+        "info"
+      );
+
+      return;
+    }
+
+
+    const draft =
+      drafts[0];
+
+
+    currentShift =
+      draft;
+
+
+    shiftDate.value =
+      draft.shift_date;
+
+
+    shiftName.value =
+      draft.shift_name;
+
+
+    shiftStatus.hidden =
+      false;
+
+
+    shiftStatusText.textContent =
+      formatShift(
+        currentShift
+      );
+
+
+    const isDraft =
+      currentShift.status ===
+      "draft";
+
+
+    saveAttendanceButton.disabled =
+      !isDraft;
+
+
+    generateButton.disabled =
+      !isDraft;
+
+
+    await Promise.all([
+      loadAttendance(),
+      loadAssignments(),
+      loadPlannedUnavailability(),
+      typeof loadSupervisorContext ===
+        "function"
+          ? loadSupervisorContext()
+          : Promise.resolve()
+    ]);
+
+
+    showMessage(
+      `Draft ${draft.shift_name} shift restored.`,
+      "success"
+    );
+
+
+    console.log(
+      "Duty Assignment draft restored:",
+      draft
+    );
+
+  }
+  catch (error) {
+
+    console.error(
+      "Unable to restore draft shift:",
+      error
+    );
+
+
+    showMessage(
+      error.message ||
+      "Unable to restore the current draft shift.",
+      "error"
+    );
+
+  }
+}
   shiftForm.addEventListener(
     "submit",
     async event => {
@@ -2348,7 +2534,10 @@ function renderSupervisorContext() {
   loadPlannedUnavailability(),
   loadSupervisorContext()
 ]);
+await resumeCurrentDraftShift();
 
+}
+catch (error) {
 
         if (
           data.created
