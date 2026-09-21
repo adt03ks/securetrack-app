@@ -442,3 +442,145 @@ textarea { resize: vertical; }
     width: 100%;
   }
 }
+/* =========================================================
+   SHIFT SUPERVISOR
+   ========================================================= */
+
+.supervisor-panel {
+  margin: 22px 0;
+  padding: 22px;
+  border: 1px solid rgba(255, 120, 0, .45);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,120,0,.08),
+      rgba(10,13,16,.98)
+    );
+}
+
+.supervisor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.supervisor-header h2 {
+  margin:
+    4px 0 8px;
+}
+
+.supervisor-badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #555;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+.supervisor-badge.ready {
+  color: #baf2d4;
+  border-color:
+    rgba(25,182,106,.45);
+  background:
+    rgba(25,182,106,.12);
+}
+
+.supervisor-badge.warning {
+  color: #ffd2a9;
+  border-color:
+    rgba(255,120,0,.45);
+  background:
+    rgba(255,120,0,.12);
+}
+
+.supervisor-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0,1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.supervisor-detail {
+  border: 1px solid #30363d;
+  border-radius: 13px;
+  padding: 15px;
+  background: #0b0e11;
+}
+
+.supervisor-detail span,
+.supervisor-detail small {
+  display: block;
+  color: #929aa3;
+}
+
+.supervisor-detail strong {
+  display: block;
+  margin: 5px 0;
+  font-size: 18px;
+}
+
+.acting-supervisor {
+  margin-top: 18px;
+  border-top:
+    1px solid #343a41;
+  padding-top: 18px;
+}
+
+.acting-warning {
+  margin-bottom: 14px;
+  padding: 13px;
+  border-radius: 11px;
+  background:
+    rgba(255,120,0,.09);
+  border:
+    1px solid rgba(255,120,0,.30);
+}
+
+.acting-warning p {
+  margin-bottom: 0;
+}
+
+.acting-supervisor select {
+  width: 100%;
+  margin:
+    6px 0 12px;
+}
+
+.supervisor-row {
+  background:
+    rgba(255,120,0,.055);
+}
+
+.priority-pill {
+  display: inline-block;
+  margin-right: 7px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background:
+    rgba(255,120,0,.13);
+  color: #ffad61;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.unfilled-post {
+  color: #ff9da0;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+
+  .supervisor-header {
+    flex-direction: column;
+  }
+
+  .supervisor-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
