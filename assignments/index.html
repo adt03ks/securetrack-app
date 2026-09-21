@@ -87,7 +87,132 @@
           <strong id="shiftStatusText">—</strong>
         </div>
       </article>
+<!-- =========================================================
+     SHIFT SUPERVISOR
+     ========================================================= -->
 
+<section
+  id="supervisorPanel"
+  class="supervisor-panel"
+  hidden
+>
+
+  <div class="supervisor-header">
+
+    <div>
+
+      <div class="eyebrow">
+        PRIORITY 1
+      </div>
+
+      <h2>
+        Shift Supervisor
+      </h2>
+
+      <p class="subtle">
+        The designated Team Lead serves as Supervisor when
+        present. If unavailable, a configured Senior Officer
+        must be selected as Acting Supervisor.
+      </p>
+
+    </div>
+
+    <div
+      id="supervisorBadge"
+      class="supervisor-badge"
+    >
+      NOT RESOLVED
+    </div>
+
+  </div>
+
+
+  <div class="supervisor-grid">
+
+    <div class="supervisor-detail">
+
+      <span>
+        Designated Team Lead
+      </span>
+
+      <strong id="designatedTeamLead">
+        —
+      </strong>
+
+      <small id="teamLeadAttendance">
+        Attendance not confirmed
+      </small>
+
+    </div>
+
+
+    <div class="supervisor-detail">
+
+      <span>
+        Current Supervisor
+      </span>
+
+      <strong id="currentSupervisorName">
+        —
+      </strong>
+
+      <small id="currentSupervisorSource">
+        —
+      </small>
+
+    </div>
+
+  </div>
+
+
+  <div
+    id="actingSupervisorSection"
+    class="acting-supervisor"
+    hidden
+  >
+
+    <div class="acting-warning">
+
+      <strong>
+        Acting Supervisor Required
+      </strong>
+
+      <p>
+        The designated Team Lead is not marked present.
+        Select one of the present Senior Officers below.
+      </p>
+
+    </div>
+
+
+    <label>
+
+      <span>
+        Acting Supervisor
+      </span>
+
+      <select id="actingSupervisorSelect">
+
+        <option value="">
+          Select Senior Officer
+        </option>
+
+      </select>
+
+    </label>
+
+
+    <button
+      id="saveActingSupervisorButton"
+      class="button primary"
+      type="button"
+    >
+      Confirm Acting Supervisor
+    </button>
+
+  </div>
+
+</section>
       <article class="card">
         <div class="eyebrow">STEP 2</div>
         <h2>Who’s Here Today?</h2>
