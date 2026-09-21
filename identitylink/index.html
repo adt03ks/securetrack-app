@@ -1,1 +1,822 @@
+<!doctype html>
+<html lang="en">
 
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#0b4ea2"
+  >
+
+  <title>
+    IdentityLink | Management Portal
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="identitylink.css"
+  >
+
+</head>
+
+
+<body
+  data-securetrack-roles="manager,director,admin"
+>
+
+  <main class="app-shell">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="topbar">
+
+      <div class="brand-area">
+
+        <div class="identity-mark">
+          IL
+        </div>
+
+        <div>
+
+          <div class="brand-name">
+            IDENTITY<span>LINK</span>
+          </div>
+
+          <div class="brand-subtitle">
+            Identity Resolution &amp; Authorization
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="header-actions">
+
+        <a
+          class="button secondary"
+          href="../hub.html"
+        >
+          SecureTrack OP
+        </a>
+
+        <button
+          id="refreshButton"
+          class="button secondary"
+          type="button"
+        >
+          Refresh
+        </button>
+
+        <button
+          id="signOutButton"
+          class="button ghost"
+          type="button"
+        >
+          Sign Out
+        </button>
+
+      </div>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         USER STRIP
+    ====================================================== -->
+
+    <section class="user-strip">
+
+      <div>
+
+        <span class="muted">
+          Signed in as
+        </span>
+
+        <strong id="currentUserName">
+          Loading…
+        </strong>
+
+        <span
+          id="currentUserRole"
+          class="role-pill"
+        ></span>
+
+      </div>
+
+
+      <div class="portal-label">
+        MANAGEMENT PORTAL
+      </div>
+
+    </section>
+
+
+
+    <div
+      id="pageMessage"
+      class="message"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="hero">
+
+      <div>
+
+        <div class="eyebrow">
+          UNKNOWN PATIENT IDENTIFICATION
+        </div>
+
+        <h1>
+          IdentityLink
+        </h1>
+
+        <p>
+          Submit and track requests used to assist with
+          identifying unknown patients through authorized
+          image and fingerprint requests.
+        </p>
+
+      </div>
+
+
+      <button
+        id="newRequestButton"
+        class="button primary large"
+        type="button"
+      >
+        + New Identity Request
+      </button>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         DASHBOARD COUNTS
+    ====================================================== -->
+
+    <section class="stats-grid">
+
+      <article
+        class="stat-card clickable"
+        data-status-filter="pending"
+      >
+
+        <span>
+          Pending Approval
+        </span>
+
+        <strong id="pendingCount">
+          0
+        </strong>
+
+      </article>
+
+
+      <article
+        class="stat-card clickable"
+        data-status-filter="changes_requested"
+      >
+
+        <span>
+          Changes Requested
+        </span>
+
+        <strong id="changesCount">
+          0
+        </strong>
+
+      </article>
+
+
+      <article
+        class="stat-card clickable"
+        data-status-filter="approved"
+      >
+
+        <span>
+          Approved
+        </span>
+
+        <strong id="approvedCount">
+          0
+        </strong>
+
+      </article>
+
+
+      <article
+        class="stat-card clickable"
+        data-status-filter=""
+      >
+
+        <span>
+          Total Records
+        </span>
+
+        <strong id="totalCount">
+          0
+        </strong>
+
+      </article>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         SEARCH
+    ====================================================== -->
+
+    <section class="card search-card">
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            IDENTITYLINK RECORDS
+          </div>
+
+          <h2>
+            Search &amp; Track Requests
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="search-grid">
+
+        <div class="search-field">
+
+          <label for="searchInput">
+            Search
+          </label>
+
+          <input
+            id="searchInput"
+            type="search"
+            autocomplete="off"
+            placeholder="Alias, MRN / patient number, request number, location..."
+          >
+
+        </div>
+
+
+        <div>
+
+          <label for="statusFilter">
+            Status
+          </label>
+
+          <select id="statusFilter">
+
+            <option value="">
+              All statuses
+            </option>
+
+            <option value="pending">
+              Pending Approval
+            </option>
+
+            <option value="changes_requested">
+              Changes Requested
+            </option>
+
+            <option value="approved">
+              Approved
+            </option>
+
+            <option value="denied">
+              Denied
+            </option>
+
+            <option value="cancelled">
+              Cancelled
+            </option>
+
+            <option value="completed">
+              Completed
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <button
+          id="searchButton"
+          class="button primary search-button"
+          type="button"
+        >
+          Search
+        </button>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         REQUEST LIST
+    ====================================================== -->
+
+    <section class="card">
+
+      <div class="section-heading">
+
+        <div>
+
+          <h2>
+            Identity Records
+          </h2>
+
+          <p id="recordSummary">
+            Loading records…
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="requestList"
+        class="request-list"
+      >
+
+        <div class="loading-state">
+          Loading IdentityLink records…
+        </div>
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+
+
+  <!-- =======================================================
+       NEW / EDIT REQUEST MODAL
+  ======================================================== -->
+
+  <div
+    id="requestModal"
+    class="modal-backdrop hidden"
+  >
+
+    <section
+      class="modal large-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="requestModalTitle"
+    >
+
+      <div class="modal-header">
+
+        <div>
+
+          <div class="eyebrow">
+            IDENTITYLINK
+          </div>
+
+          <h2 id="requestModalTitle">
+            New Identity Request
+          </h2>
+
+        </div>
+
+        <button
+          id="closeRequestModalButton"
+          class="icon-button"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <form id="requestForm">
+
+        <input
+          id="editingRequestId"
+          type="hidden"
+        >
+
+
+        <section class="form-section">
+
+          <h3>
+            Request
+          </h3>
+
+
+          <div class="field-grid two">
+
+            <label>
+
+              <span>
+                Request Type *
+              </span>
+
+              <select
+                id="requestType"
+                required
+              >
+
+                <option value="">
+                  Select request type
+                </option>
+
+                <option value="image_request">
+                  Image Request
+                </option>
+
+                <option value="fingerprint">
+                  Fingerprint Request
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <div class="information-box">
+
+              <strong>
+                Image Request
+              </strong>
+
+              <span>
+                Includes authorized patient-image requests
+                and media-blast image requests.
+              </span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <section class="form-section">
+
+          <h3>
+            Unknown Patient
+          </h3>
+
+
+          <div class="field-grid two">
+
+            <label>
+
+              <span>
+                Patient Alias *
+              </span>
+
+              <input
+                id="patientAlias"
+                type="text"
+                required
+                autocomplete="off"
+                placeholder="Example: Trauma Doe 814"
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                MRN / Patient Number *
+              </span>
+
+              <input
+                id="mrnPatientNumber"
+                type="text"
+                required
+                autocomplete="off"
+                placeholder="Enter MRN / patient number"
+              >
+
+            </label>
+
+
+            <label class="span-two">
+
+              <span>
+                Room / Last Known Location *
+              </span>
+
+              <input
+                id="lastKnownLocation"
+                type="text"
+                required
+                autocomplete="off"
+                placeholder="Example: Emergency Department - Trauma 2"
+              >
+
+            </label>
+
+
+            <label class="span-two">
+
+              <span>
+                Other Identifying Factors
+              </span>
+
+              <textarea
+                id="identifyingFactors"
+                rows="5"
+                placeholder="Approximate age, clothing, tattoos, distinguishing characteristics, circumstances, or other identifying information presented with the request..."
+              ></textarea>
+
+            </label>
+
+          </div>
+
+
+          <div class="privacy-note">
+
+            <strong>
+              Minimum necessary information
+            </strong>
+
+            Include only information relevant to identifying
+            the unknown patient and processing the request.
+
+          </div>
+
+        </section>
+
+
+
+        <section class="form-section">
+
+          <h3>
+            Outside Request Source
+          </h3>
+
+
+          <div class="field-grid two">
+
+            <label>
+
+              <span>
+                Organization
+              </span>
+
+              <input
+                id="sourceOrganization"
+                type="text"
+                autocomplete="off"
+                placeholder="Agency / organization"
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Requester's Name
+              </span>
+
+              <input
+                id="sourceRequesterName"
+                type="text"
+                autocomplete="off"
+                placeholder="Name of requester"
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Requester's Email
+              </span>
+
+              <input
+                id="sourceRequesterEmail"
+                type="email"
+                autocomplete="off"
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Requester's Phone
+              </span>
+
+              <input
+                id="sourceRequesterPhone"
+                type="tel"
+                autocomplete="off"
+              >
+
+            </label>
+
+
+            <label class="span-two">
+
+              <span>
+                Case / Reference Number
+              </span>
+
+              <input
+                id="sourceReferenceNumber"
+                type="text"
+                autocomplete="off"
+                placeholder="Outside agency case or reference number"
+              >
+
+            </label>
+
+          </div>
+
+        </section>
+
+
+
+        <section class="form-section">
+
+          <h3>
+            Management Notes
+          </h3>
+
+          <label>
+
+            <textarea
+              id="managerNotes"
+              rows="4"
+              placeholder="Internal notes regarding this request..."
+            ></textarea>
+
+          </label>
+
+        </section>
+
+
+
+        <div class="modal-actions">
+
+          <button
+            id="cancelRequestButton"
+            class="button secondary"
+            type="button"
+          >
+            Cancel
+          </button>
+
+          <button
+            id="submitRequestButton"
+            class="button primary"
+            type="submit"
+          >
+            Submit for Approval
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+  </div>
+
+
+
+  <!-- =======================================================
+       REQUEST DETAIL MODAL
+  ======================================================== -->
+
+  <div
+    id="detailModal"
+    class="modal-backdrop hidden"
+  >
+
+    <section
+      class="modal detail-modal"
+      role="dialog"
+      aria-modal="true"
+    >
+
+      <div class="modal-header">
+
+        <div>
+
+          <div class="eyebrow">
+            SUBJECT FILE
+          </div>
+
+          <h2 id="detailRequestNumber">
+            IdentityLink Request
+          </h2>
+
+        </div>
+
+
+        <button
+          id="closeDetailModalButton"
+          class="icon-button"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div
+        id="detailBody"
+        class="detail-body"
+      >
+
+        <div class="loading-state">
+          Loading request…
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+
+
+  <!-- =======================================================
+       IMAGE VIEWER
+  ======================================================== -->
+
+  <div
+    id="imageModal"
+    class="image-backdrop hidden"
+  >
+
+    <button
+      id="closeImageModalButton"
+      class="image-close"
+      type="button"
+    >
+      ×
+    </button>
+
+    <img
+      id="fullImage"
+      alt="IdentityLink subject image"
+    >
+
+  </div>
+
+
+
+  <!-- =======================================================
+       SCRIPTS
+  ======================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="../config.js"></script>
+
+  <script src="../secure-page.js"></script>
+
+  <script src="identitylink.js"></script>
+
+</body>
+
+</html>
