@@ -2115,13 +2115,15 @@ function renderSupervisorContext() {
         }
 
 
-        await loadAttendance();
+       await Promise.all([
+  loadAttendance(),
+  loadSupervisorContext()
+]);
 
-
-        showMessage(
-          "Attendance saved.",
-          "success"
-        );
+showMessage(
+  "Attendance saved.",
+  "success"
+);
 
       } catch (error) {
 
@@ -2187,13 +2189,40 @@ function renderSupervisorContext() {
         }
 
 
-        await loadAssignments();
+       await Promise.all([
+  loadAssignments(),
+  loadSupervisorContext()
+]);
 
 
-        showMessage(
-          `${data.assignments_generated || 0} assignment(s) generated.`,
-          "success"
-        );
+const generated =
+  data?.assignments_generated ||
+  0;
+
+
+const unfilled =
+  data?.unfilled_standard_posts ||
+  0;
+
+
+let message =
+  `${generated} assignment(s) generated.`;
+
+
+if (unfilled > 0) {
+
+  message +=
+    ` ${unfilled} standard post(s) remain unfilled due to staffing.`;
+
+}
+
+
+showMessage(
+  message,
+  unfilled > 0
+    ? "info"
+    : "success"
+);
 
       } catch (error) {
 
