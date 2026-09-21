@@ -2327,8 +2327,8 @@ const locationHistory =
 
 
     renderApprovalHistory(
-      approvals
-    );
+  actionApprovals
+);
 
 
     renderActivityHistory(
@@ -2976,6 +2976,16 @@ function renderLocationHistory(
           approval => `
             <article class="approval-card">
 
+          <strong>
+  ${
+    approval.action_type ===
+    "image_request"
+      ? "Image Request"
+      : "Fingerprint Request"
+  }
+</strong>
+
+<br><br>      
               <span class="status-pill status-${escapeHtml(approval.decision)}">
                 ${escapeHtml(statusLabel(approval.decision))}
               </span>
