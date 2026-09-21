@@ -929,9 +929,32 @@
         }
       );
 
-  }
+    document
+  .querySelectorAll(
+    ".request-action-button"
+  )
+  .forEach(
+    button => {
+
+      button.addEventListener(
+        "click",
+        async event => {
+
+          event.stopPropagation();
 
 
+          await requestAdditionalAction(
+            button.dataset.requestId,
+            button.dataset.actionType
+          );
+
+        }
+      );
+
+    }
+  );
+
+}
 
   // =========================================================
   // DASHBOARD COUNTS
