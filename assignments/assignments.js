@@ -838,7 +838,7 @@ function refreshShiftChoices() {
      .select(
   "id, station_code, station_name, description, is_difficult, requires_qualification, is_active, sort_order, priority_number, station_type"
 )
-      )
+      
       .eq(
         "is_active",
         true
