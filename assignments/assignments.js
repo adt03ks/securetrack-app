@@ -2258,165 +2258,165 @@ async function resumeCurrentDraftShift() {
   }
 }
   shiftForm.addEventListener(
-    "submit",
-    async event => {
+  "submit",
+  async event => {
 
-      event.preventDefault();
+    event.preventDefault();
 
-      clearMessage();
+    clearMessage();
+
+
+    if (
+      !shiftDate.value ||
+      !shiftName.value
+    ) {
+
+      showMessage(
+        "Select a shift date and shift name.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    openShiftButton.disabled =
+      true;
+
+    openShiftButton.textContent =
+      "Opening…";
+
+
+    try {
+
+      const {
+        data,
+        error
+      } = await db.rpc(
+        "create_shift_instance",
+        {
+          p_shift_date:
+            shiftDate.value,
+
+          p_shift_name:
+            shiftName.value
+        }
+      );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      currentShift = {
+        id:
+          data.shift_id,
+
+        shift_date:
+          data.shift_date,
+
+        shift_name:
+          data.shift_name,
+
+        status:
+          data.status ||
+          "draft",
+
+        published_at:
+          data.published_at ||
+          null
+      };
+
+
+      shiftStatus.hidden =
+        false;
+
+
+      shiftStatusText.textContent =
+        formatShift(
+          currentShift
+        );
+
+
+      const isDraft =
+        currentShift.status ===
+        "draft";
+
+
+      saveAttendanceButton.disabled =
+        !isDraft;
+
+
+      generateButton.disabled =
+        !isDraft;
+
+
+      await Promise.all([
+        loadAttendance(),
+        loadAssignments(),
+        loadPlannedUnavailability(),
+
+        typeof loadSupervisorContext ===
+          "function"
+          ? loadSupervisorContext()
+          : Promise.resolve()
+      ]);
 
 
       if (
-        !shiftDate.value ||
-        !shiftName.value
+        data.created
       ) {
 
         showMessage(
-          "Select a shift date and shift name.",
-          "error"
+          "New shift created successfully.",
+          "success"
         );
 
-        return;
+      } else if (
+        currentShift.status ===
+        "published"
+      ) {
+
+        showMessage(
+          "Existing published shift loaded. Published shifts cannot be regenerated from this screen.",
+          "info"
+        );
+
+      } else {
+
+        showMessage(
+          "Existing draft shift loaded successfully.",
+          "success"
+        );
       }
 
+    } catch (error) {
+
+      console.error(
+        "Open shift error:",
+        error
+      );
+
+
+      showMessage(
+        error.message ||
+        "Unable to open shift.",
+        "error"
+      );
+
+    } finally {
 
       openShiftButton.disabled =
-        true;
+        false;
 
 
       openShiftButton.textContent =
-        "Opening…";
-
-
-      try {
-
-        const {
-          data,
-          error
-        } = await db.rpc(
-          "create_shift_instance",
-          {
-            p_shift_date:
-              shiftDate.value,
-
-            p_shift_name:
-              shiftName.value
-          }
-        );
-
-
-        if (error) {
-          throw error;
-        }
-
-
-        currentShift = {
-          id:
-            data.shift_id,
-
-          shift_date:
-            data.shift_date,
-
-          shift_name:
-            data.shift_name,
-
-          status:
-            data.status ||
-            "draft",
-
-          published_at:
-            data.published_at ||
-            null
-        };
-
-
-        shiftStatus.hidden =
-          false;
-
-
-        shiftStatusText.textContent =
-          formatShift(
-            currentShift
-          );
-
-
-        const isDraft =
-          currentShift.status ===
-          "draft";
-
-
-        saveAttendanceButton.disabled =
-          !isDraft;
-
-
-        generateButton.disabled =
-          !isDraft;
-
-
-     await Promise.all([
-  loadAttendance(),
-  loadAssignments(),
-  loadPlannedUnavailability(),
-  loadSupervisorContext()
-]);
-await resumeCurrentDraftShift();
-
-}
-catch (error) {
-
-        if (
-          data.created
-        ) {
-
-          showMessage(
-            "New shift created successfully.",
-            "success"
-          );
-
-        } else if (
-          currentShift.status ===
-          "published"
-        ) {
-
-          showMessage(
-            "Existing published shift loaded. Published shifts cannot be regenerated from this screen.",
-            "info"
-          );
-
-        } else {
-
-          showMessage(
-            "Existing draft shift loaded successfully.",
-            "success"
-          );
-        }
-
-      } catch (error) {
-
-        console.error(
-          "Open shift error:",
-          error
-        );
-
-
-        showMessage(
-          error.message ||
-          "Unable to open shift.",
-          "error"
-        );
-
-      } finally {
-
-        openShiftButton.disabled =
-          false;
-
-
-        openShiftButton.textContent =
-          "Open Shift";
-      }
+        "Open Shift";
     }
-  );
 
+  }
+);
 
   saveAttendanceButton.addEventListener(
     "click",
