@@ -1687,7 +1687,9 @@ textarea {
 
 
 @media (max-width: 720px) {
-
+.identitylink-logo {
+  width: 190px;
+}
   .app-shell {
     width:
       min(100% - 18px, 1500px);
@@ -1751,4 +1753,17 @@ textarea {
     border-radius: 14px;
   }
 
+}
+.identitylink-brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.identitylink-logo {
+  display: block;
+  width: 230px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
 }
