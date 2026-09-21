@@ -107,18 +107,22 @@
       return null;
     }
 
-    return {
-      session,
-    profile: {
-  ...profile,
-  role: roles.includes("admin")
+  const managementRole =
+  roles.includes("admin")
     ? "admin"
     : roles.includes("director")
       ? "director"
-      : "manager"
-},
-      roles
-    };
+      : "manager";
+
+
+return {
+  session,
+  profile: {
+    ...profile,
+    role: managementRole
+  },
+  roles
+};
   }
 
   async function signOut() {
