@@ -2501,937 +2501,529 @@ function openEditRequest(
 
 
 
-    // =========================================================
-    // SUBJECT IMAGE UPLOAD
-    // =========================================================
-$("subjectImageFile")
-  ?.addEventListener(
-    "change",
-    renderSelectedImageLabels
-  );
-    $("uploadSubjectImageButton")
-      ?.addEventListener(
-        "click",
-        () =>
-          uploadSubjectImage(
-            request.id
-          )
-      );
-
-
-
-    // =========================================================
-    // RENDER IMAGES / HISTORY
-    // =========================================================
-
-    await renderSubjectImages(
-      files.filter(
-        file =>
-          file.file_type ===
-          "subject_image"
-      )
-    );
-
-
-    renderApprovalHistory(
-      actionApprovals
-    );
-
-
-    renderActivityHistory(
-      activity
-    );
-
-  }
- // =========================================================
-  // AUTHORIZATION CARD
+     // =========================================================
+  // SUBJECT IMAGE UPLOAD
   // =========================================================
 
-  function renderAuthorizationCard(
-    request,
-    actions,
-    approvals,
-    actionType,
-    label
-  ) {
+  function renderSelectedImageLabels() {
 
-    const action =
-      actions.find(
-        item =>
-          item.action_type ===
-          actionType
-      );
+    const fileInput =
+      $("subjectImageFile");
 
+    const container =
+      $("selectedImageLabelList");
 
-    const status =
-      action?.status ||
-      "not_requested";
-
-
-    const approverInitiated =
-      approvals.some(
-        approval =>
-          approval.action_type ===
-            actionType &&
-          approval.action_snapshot
-            ?.approver_activated_action ===
-            true
-      );
+    const uploadButton =
+      $("uploadSubjectImageButton");
 
 
     if (
-      status ===
-      "not_requested"
+      !fileInput ||
+      !container ||
+      !uploadButton
+    ) {
+      return;
+    }
+
+
+    const files =
+      Array.from(
+        fileInput.files ||
+        []
+      );
+
+
+    if (!files.length) {
+
+      container.innerHTML =
+        "";
+
+      uploadButton.disabled =
+        true;
+
+      return;
+    }
+
+
+    container.innerHTML =
+      files
+        .map(
+          (
+            file,
+            index
+          ) => `
+            <div class="selected-image-label-row">
+
+              <div class="selected-image-file">
+
+                <span class="selected-image-number">
+                  ${index + 1}
+                </span>
+
+                <div>
+
+                  <strong>
+                    ${escapeHtml(file.name)}
+                  </strong>
+
+                  <span>
+                    ${formatFileSize(file.size)}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <label>
+
+                <span>
+                  Image Label
+                </span>
+
+                <input
+                  class="subject-image-label-input"
+                  type="text"
+                  data-image-index="${index}"
+                  placeholder="Example: Front facial image"
+                  required
+                >
+
+              </label>
+
+            </div>
+          `
+        )
+        .join("");
+
+
+    uploadButton.disabled =
+      false;
+
+  }
+
+
+
+  function formatFileSize(
+    bytes
+  ) {
+
+    if (
+      !Number.isFinite(bytes)
+    ) {
+      return "";
+    }
+
+
+    if (
+      bytes <
+      1024 * 1024
     ) {
 
-      return `
-        <article class="authorization-card not-requested">
-
-          <h4>
-            ${escapeHtml(label)}
-          </h4>
-
-          <div class="authorization-status">
-
-            <span class="not-requested-pill">
-              Not Requested
-            </span>
-
-          </div>
-
-          <div class="authorization-meta">
-            This authorization has not been requested.
-          </div>
-
-          <div class="authorization-actions">
-
-            <button
-              class="button secondary request-detail-action-button"
-              type="button"
-              data-request-id="${escapeHtml(request.id)}"
-              data-action-type="${escapeHtml(actionType)}"
-            >
-              ${
-                actionType === "image_request"
-                  ? "Request Image Approval"
-                  : "Request Fingerprint Approval"
-              }
-            </button>
-
-          </div>
-
-        </article>
-      `;
+      return `${
+        Math.max(
+          1,
+          Math.round(
+            bytes / 1024
+          )
+        )
+      } KB`;
 
     }
 
 
-    return `
-      <article class="authorization-card ${escapeHtml(status)}">
+    return `${
+      (
+        bytes /
+        (
+          1024 *
+          1024
+        )
+      )
+        .toFixed(1)
+    } MB`;
 
-        <h4>
-          ${escapeHtml(label)}
-        </h4>
-
-        <div class="authorization-status">
-
-          <span class="status-pill status-${escapeHtml(status)}">
-            ${escapeHtml(statusLabel(status))}
-          </span>
-
-        </div>
+  }
 
 
-        ${
-          approverInitiated
-            ? `
-                <span class="approver-initiated-badge">
-                  APPROVER INITIATED
-                </span>
-              `
-            : ""
+
+  async function uploadSubjectImage(
+    requestId
+  ) {
+
+    const fileInput =
+      $("subjectImageFile");
+
+    const uploadButton =
+      $("uploadSubjectImageButton");
+
+
+    if (
+      !fileInput ||
+      !uploadButton
+    ) {
+      return;
+    }
+
+
+    const files =
+      Array.from(
+        fileInput.files ||
+        []
+      );
+
+
+    if (!files.length) {
+
+      showMessage(
+        "Select at least one image before uploading.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const labelInputs =
+      Array.from(
+        document.querySelectorAll(
+          ".subject-image-label-input"
+        )
+      );
+
+
+    const labels =
+      files.map(
+        (
+          file,
+          index
+        ) => {
+
+          const input =
+            labelInputs.find(
+              item =>
+                Number(
+                  item.dataset.imageIndex
+                ) ===
+                index
+            );
+
+
+          return input
+            ?.value
+            ?.trim() ||
+            "";
+
         }
+      );
 
 
-        <div class="authorization-meta">
-
-          ${
-            action?.requested_by_name
-              ? `
-                  Requested / Activated by:
-                  <strong>
-                    ${escapeHtml(action.requested_by_name)}
-                  </strong>
-                  <br>
-                `
-              : ""
-          }
-
-          ${
-            action?.requested_at
-              ? escapeHtml(
-                  formatDateTime(
-                    action.requested_at
-                  )
-                )
-              : ""
-          }
-
-        </div>
-
-      </article>
-    `;
-
-  }
-
-function renderLocationHistory(
-  history
-) {
-
-  if (
-    !history.length
-  ) {
-
-    return `
-      <div class="empty-state">
-        No location history recorded.
-      </div>
-    `;
-
-  }
+    const missingLabelIndex =
+      labels.findIndex(
+        label =>
+          !label
+      );
 
 
-  return history
-    .map(
-      item => `
-        <article class="location-history-item">
+    if (
+      missingLabelIndex !==
+      -1
+    ) {
 
-          <strong>
-            ${escapeHtml(item.new_location)}
-          </strong>
-
-          ${
-            item.previous_location
-              ? `
-                  <div>
-                    Previous:
-                    ${escapeHtml(item.previous_location)}
-                  </div>
-                `
-              : `
-                  <div>
-                    Initial location
-                  </div>
-                `
-          }
-
-          ${
-            item.change_reason
-              ? `
-                  <div>
-                    ${escapeHtml(item.change_reason)}
-                  </div>
-                `
-              : ""
-          }
-
-          <span>
-            ${escapeHtml(item.changed_by_name)}
-            •
-            ${escapeHtml(formatDateTime(item.changed_at))}
-          </span>
-
-        </article>
-      `
-    )
-    .join("");
-
-}
-
-  function detailItem(
-    label,
-    value,
-    wide = false
-  ) {
-
-    return `
-      <div class="detail-item ${wide ? "wide" : ""}">
-
-        <span class="label">
-          ${escapeHtml(label)}
-        </span>
-
-        <div class="value">
-          ${escapeHtml(value || "—")}
-        </div>
-
-      </div>
-    `;
-
-  }
+      showMessage(
+        `Enter a label for image ${
+          missingLabelIndex + 1
+        } before uploading.`,
+        "error"
+      );
 
 
-
-  // =========================================================
-  // SUBJECT IMAGE UPLOAD
-  // =========================================================
-function renderSelectedImageLabels() {
-
-  const fileInput =
-    $("subjectImageFile");
+      labelInputs[
+        missingLabelIndex
+      ]
+        ?.focus();
 
 
-  const container =
-    $("selectedImageLabelList");
+      return;
+
+    }
 
 
-  const uploadButton =
-    $("uploadSubjectImageButton");
+    const allowedTypes =
+      [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ];
 
 
-  if (
-    !fileInput ||
-    !container ||
-    !uploadButton
-  ) {
-    return;
-  }
+    const invalidFile =
+      files.find(
+        file =>
+          !allowedTypes.includes(
+            file.type
+          )
+      );
 
 
-  const files =
-    Array.from(
-      fileInput.files ||
-      []
-    );
+    if (invalidFile) {
+
+      showMessage(
+        `${invalidFile.name} must be JPEG, PNG, or WebP.`,
+        "error"
+      );
+
+      return;
+
+    }
 
 
-  if (!files.length) {
+    const oversizedFile =
+      files.find(
+        file =>
+          file.size >
+          15728640
+      );
 
-    container.innerHTML =
-      "";
+
+    if (oversizedFile) {
+
+      showMessage(
+        `${oversizedFile.name} exceeds the 15 MB limit.`,
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    const originalText =
+      uploadButton.textContent;
 
 
     uploadButton.disabled =
       true;
 
 
-    return;
-
-  }
-
-
-  container.innerHTML =
-    files
-      .map(
-        (
-          file,
-          index
-        ) => `
-          <div class="selected-image-label-row">
-
-            <div class="selected-image-file">
-
-              <span class="selected-image-number">
-                ${index + 1}
-              </span>
-
-              <div>
-
-                <strong>
-                  ${escapeHtml(file.name)}
-                </strong>
-
-                <span>
-                  ${formatFileSize(file.size)}
-                </span>
-
-              </div>
-
-            </div>
+    let uploadedCount =
+      0;
 
 
-            <label>
+    try {
 
-              <span>
-                Image Label
-              </span>
+      for (
+        let index = 0;
+        index < files.length;
+        index += 1
+      ) {
 
-              <input
-                class="subject-image-label-input"
-                type="text"
-                data-image-index="${index}"
-                placeholder="Example: Front facial image"
-                required
-              >
-
-            </label>
-
-          </div>
-        `
-      )
-      .join("");
+        const file =
+          files[index];
 
 
-  uploadButton.disabled =
-    false;
-
-}
+        const label =
+          labels[index];
 
 
-
-function formatFileSize(
-  bytes
-) {
-
-  if (
-    !Number.isFinite(bytes)
-  ) {
-    return "";
-  }
+        uploadButton.textContent =
+          `Uploading ${index + 1} of ${files.length}…`;
 
 
-  if (
-    bytes <
-    1024 * 1024
-  ) {
-
-    return `${
-      Math.max(
-        1,
-        Math.round(
-          bytes / 1024
-        )
-      )
-    } KB`;
-
-  }
+        const extension =
+          (
+            file.name
+              .split(".")
+              .pop() ||
+            "jpg"
+          )
+            .toLowerCase()
+            .replace(
+              /[^a-z0-9]/g,
+              ""
+            ) ||
+          "jpg";
 
 
-  return `${
-    (
-      bytes /
-      (
-        1024 *
-        1024
-      )
-    )
-      .toFixed(1)
-  } MB`;
-
-}
- async function uploadSubjectImage(
-  requestId
-) {
-
-  const fileInput =
-    $("subjectImageFile");
+        const storageName =
+          `${crypto.randomUUID()}.${extension}`;
 
 
-  const uploadButton =
-    $("uploadSubjectImageButton");
+        const storagePath =
+          `requests/${requestId}/subject/${storageName}`;
 
 
-  const files =
-    Array.from(
-      fileInput?.files ||
-      []
-    );
+        // -----------------------------------------------------
+        // UPLOAD TO PRIVATE STORAGE
+        // -----------------------------------------------------
+
+        const {
+          error: uploadError
+        } =
+          await db.storage
+            .from(
+              "identitylink-subject-files"
+            )
+            .upload(
+              storagePath,
+              file,
+              {
+
+                cacheControl:
+                  "3600",
+
+                upsert:
+                  false,
+
+                contentType:
+                  file.type
+
+              }
+            );
 
 
-  if (!files.length) {
+        if (uploadError) {
 
-    showMessage(
-      "Select at least one image before uploading.",
-      "error"
-    );
+          throw new Error(
+            `${file.name}: ${
+              uploadError.message ||
+              "Storage upload failed."
+            }`
+          );
 
-    return;
-
-  }
-
-
-  const labelInputs =
-    Array.from(
-      document.querySelectorAll(
-        ".subject-image-label-input"
-      )
-    );
+        }
 
 
-  const labels =
-    files.map(
-      (
-        file,
-        index
-      ) => {
+        // -----------------------------------------------------
+        // REGISTER WITH IDENTITYLINK
+        // -----------------------------------------------------
 
-        const input =
-          labelInputs.find(
-            item =>
-              Number(
-                item.dataset.imageIndex
-              ) ===
-              index
+        const {
+          error: registerError
+        } =
+          await db.rpc(
+            "register_identitylink_subject_image",
+            {
+
+              p_request_id:
+                requestId,
+
+              p_storage_path:
+                storagePath,
+
+              p_file_name:
+                file.name,
+
+              p_mime_type:
+                file.type,
+
+              p_file_size_bytes:
+                file.size,
+
+              p_description:
+                label
+
+            }
           );
 
 
-        return input
-          ?.value
-          ?.trim() ||
+        if (registerError) {
+
+          throw new Error(
+            `${file.name}: ${
+              registerError.message ||
+              "Unable to register subject image."
+            }`
+          );
+
+        }
+
+
+        uploadedCount +=
+          1;
+
+      }
+
+
+      fileInput.value =
+        "";
+
+
+      const labelList =
+        $("selectedImageLabelList");
+
+
+      if (labelList) {
+
+        labelList.innerHTML =
           "";
 
       }
-    );
 
 
-  const missingLabelIndex =
-    labels.findIndex(
-      label =>
-        !label
-    );
+      showMessage(
+        `${uploadedCount} subject image${
+          uploadedCount === 1
+            ? ""
+            : "s"
+        } uploaded securely.`,
+        "success"
+      );
 
 
-  if (
-    missingLabelIndex !==
-    -1
-  ) {
-
-    showMessage(
-      `Enter a label for image ${
-        missingLabelIndex + 1
-      } before uploading.`,
-      "error"
-    );
+      await Promise.all([
+        loadRequests(),
+        loadDashboardCounts()
+      ]);
 
 
-    labelInputs[
-      missingLabelIndex
-    ]
-      ?.focus();
+      await openRequestDetail(
+        requestId
+      );
+
+    }
+    catch (error) {
+
+      console.error(
+        "IdentityLink image upload error:",
+        error
+      );
 
 
-    return;
-
-  }
-
-
-  const allowedTypes =
-    [
-      "image/jpeg",
-      "image/png",
-      "image/webp"
-    ];
+      const partialMessage =
+        uploadedCount > 0
+          ? `${uploadedCount} image${
+              uploadedCount === 1
+                ? ""
+                : "s"
+            } uploaded before the error. `
+          : "";
 
 
-  const invalidFile =
-    files.find(
-      file =>
-        !allowedTypes.includes(
-          file.type
-        )
-    );
+      showMessage(
+        partialMessage +
+        (
+          error.message ||
+          "Unable to upload subject images."
+        ),
+        "error"
+      );
 
+    }
+    finally {
 
-  if (invalidFile) {
-
-    showMessage(
-      `${invalidFile.name} must be JPEG, PNG, or WebP.`,
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const oversizedFile =
-    files.find(
-      file =>
-        file.size >
-        15728640
-    );
-
-
-  if (oversizedFile) {
-
-    showMessage(
-      `${oversizedFile.name} exceeds the 15 MB limit.`,
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const originalText =
-    uploadButton.textContent;
-
-
-  uploadButton.disabled =
-    true;
-
-
-  let uploadedCount =
-    0;
-
-
-  try {
-
-    for (
-      let index = 0;
-      index < files.length;
-      index += 1
-    ) {
-
-      const file =
-        files[index];
-
-
-      const label =
-        labels[index];
+      uploadButton.disabled =
+        false;
 
 
       uploadButton.textContent =
-        `Uploading ${index + 1} of ${files.length}…`;
-
-
-      const extension =
-        (
-          file.name
-            .split(".")
-            .pop() ||
-          "jpg"
-        )
-          .toLowerCase()
-          .replace(
-            /[^a-z0-9]/g,
-            ""
-          ) ||
-        "jpg";
-
-
-      const storageName =
-        `${crypto.randomUUID()}.${extension}`;
-
-
-      const storagePath =
-        `requests/${requestId}/subject/${storageName}`;
-
-
-      const {
-        error: uploadError
-      } =
-        await db.storage
-          .from(
-            "identitylink-subject-files"
-          )
-          .upload(
-            storagePath,
-            file,
-            {
-
-              cacheControl:
-                "3600",
-
-              upsert:
-                false,
-
-              contentType:
-                file.type
-
-            }
-          );
-
-
-      if (uploadError) {
-
-        throw new Error(
-          `${file.name}: ${
-            uploadError.message
-          }`
-        );
-
-      }
-
-
-      const {
-        error: registerError
-      } =
-        await db.rpc(
-          "register_identitylink_subject_image",
-          {
-
-            p_request_id:
-              requestId,
-
-            p_storage_path:
-              storagePath,
-
-            p_file_name:
-              file.name,
-
-            p_mime_type:
-              file.type,
-
-            p_file_size_bytes:
-              file.size,
-
-            p_description:
-              label
-
-          }
-        );
-
-
-      if (registerError) {
-
-        throw new Error(
-          `${file.name}: ${
-            registerError.message
-          }`
-        );
-
-      }
-
-
-      uploadedCount +=
-        1;
+        originalText ||
+        "Upload Images";
 
     }
 
-
-    fileInput.value =
-      "";
-
-
-    $("selectedImageLabelList")
-      .innerHTML =
-      "";
-
-
-    showMessage(
-      `${uploadedCount} subject image${
-        uploadedCount === 1
-          ? ""
-          : "s"
-      } uploaded securely.`,
-      "success"
-    );
-
-
-    await Promise.all([
-      loadRequests(),
-      loadDashboardCounts()
-    ]);
-
-
-    await openRequestDetail(
-      requestId
-    );
-
-  }
-  catch (error) {
-
-    console.error(
-      "IdentityLink image upload error:",
-      error
-    );
-
-
-    showMessage(
-      error.message ||
-      "Unable to upload subject images.",
-      "error"
-    );
-
-  }
-  finally {
-
-    uploadButton.disabled =
-      false;
-
-
-    uploadButton.textContent =
-      originalText ||
-      "Upload Images";
-
   }
 
-}
-
-
-      // -----------------------------------------------------
-      // UPLOAD IMAGE TO PRIVATE STORAGE
-      // -----------------------------------------------------
-
-      const {
-        error: uploadError
-      } =
-        await db.storage
-          .from(
-            "identitylink-subject-files"
-          )
-          .upload(
-            storagePath,
-            file,
-            {
-
-              cacheControl:
-                "3600",
-
-              upsert:
-                false,
-
-              contentType:
-                file.type
-
-            }
-          );
-
-
-      if (uploadError) {
-
-        throw new Error(
-          `${file.name}: ${
-            uploadError.message ||
-            "Storage upload failed."
-          }`
-        );
-
-      }
-
-
-      // -----------------------------------------------------
-      // REGISTER IMAGE WITH IDENTITYLINK SUBJECT FILE
-      // -----------------------------------------------------
-
-      const {
-        error: registerError
-      } =
-        await db.rpc(
-          "register_identitylink_subject_image",
-          {
-
-            p_request_id:
-              requestId,
-
-            p_storage_path:
-              storagePath,
-
-            p_file_name:
-              file.name,
-
-            p_mime_type:
-              file.type,
-
-            p_file_size_bytes:
-              file.size,
-
-            p_description:
-              descriptionInput
-                ?.value
-                ?.trim() ||
-              null
-
-          }
-        );
-
-
-      if (registerError) {
-
-        throw new Error(
-          `${file.name}: ${
-            registerError.message ||
-            "Unable to register subject image."
-          }`
-        );
-
-      }
-
-
-      uploadedCount +=
-        1;
-
-    }
-
-fileInput.value = "";
-
-
-const labelList =
-  $("selectedImageLabelList");
-
-
-if (labelList) {
-
-  labelList.innerHTML =
-    "";
-
-}
-
-
-showMessage(
-  `${uploadedCount} subject image${
-    uploadedCount === 1
-      ? ""
-      : "s"
-  } uploaded securely.`,
-  "success"
-);
-
-
-await Promise.all([
-  loadRequests(),
-  loadDashboardCounts()
-]);
-
-
-await openRequestDetail(
-  requestId
-);
-
-  }
-  catch (error) {
-
-    console.error(
-      "IdentityLink image upload error:",
-      error
-    );
-
-
-    const partialMessage =
-      uploadedCount > 0
-        ? `${uploadedCount} image${
-            uploadedCount === 1
-              ? ""
-              : "s"
-          } uploaded before the error. `
-        : "";
-
-
-    showMessage(
-      partialMessage +
-      (
-        error.message ||
-        "Unable to upload subject images."
-      ),
-      "error"
-    );
-
-  }
-  finally {
-
-    uploadButton.disabled =
-      false;
-
-
-    uploadButton.textContent =
-      originalButtonText ||
-      "Upload Images";
-
-  }
-
-}
 
 
   // =========================================================
@@ -3497,12 +3089,15 @@ await openRequestDetail(
 
         cards.push(
           `
-            <article class="image-card">
+            <article class="image-card subject-image-card">
 
               <div class="image-info">
 
                 <strong>
-                  ${escapeHtml(image.file_name)}
+                  ${escapeHtml(
+                    image.description ||
+                    image.file_name
+                  )}
                 </strong>
 
                 <span>
@@ -3522,99 +3117,79 @@ await openRequestDetail(
 
       cards.push(
         `
-<article class="image-card subject-image-card">
+          <article class="image-card subject-image-card">
 
-  ${
-    currentDetail
-      ?.request
-      ?.case_status ===
-      "open"
-        ? `
-            <button
-              class="subject-image-delete-button"
-              type="button"
-              data-file-id="${escapeHtml(image.id)}"
-              data-storage-path="${escapeHtml(image.storage_path)}"
-              data-file-label="${escapeHtml(
-                image.description ||
-                image.file_name
-              )}"
-              title="Delete this image"
-              aria-label="Delete ${escapeHtml(
-                image.description ||
-                image.file_name
-              )}"
-            >
-              ×
-            </button>
-          `
-        : ""
-  }
+            ${
+              currentDetail
+                ?.request
+                ?.case_status ===
+                "open"
+                  ? `
+                      <button
+                        class="subject-image-delete-button"
+                        type="button"
+                        data-file-id="${escapeHtml(image.id)}"
+                        data-storage-path="${escapeHtml(image.storage_path)}"
+                        data-file-label="${escapeHtml(
+                          image.description ||
+                          image.file_name
+                        )}"
+                        title="Delete this image"
+                        aria-label="Delete ${escapeHtml(
+                          image.description ||
+                          image.file_name
+                        )}"
+                      >
+                        ×
+                      </button>
+                    `
+                  : ""
+            }
 
-  <img
-    src="${escapeHtml(data.signedUrl)}"
-    alt="${escapeHtml(
-      image.description ||
-      "IdentityLink subject image"
-    )}"
-    data-full-image="${escapeHtml(
-      data.signedUrl
-    )}"
-  >
-
-  <div class="image-info">
-
-    <strong>
-      ${escapeHtml(
-        image.description ||
-        image.file_name
-      )}
-    </strong>
-
-    <span>
-      ${escapeHtml(
-        image.file_name
-      )}
-    </span>
-
-    <span>
-      Uploaded by
-      ${escapeHtml(
-        image.uploaded_by_name
-      )}
-    </span>
-
-    <span>
-      ${escapeHtml(
-        formatDateTime(
-          image.created_at
-        )
-      )}
-    </span>
-
-  </div>
-
-</article>
 
             <img
               src="${escapeHtml(data.signedUrl)}"
-              alt="${escapeHtml(image.description || "IdentityLink subject image")}"
-              data-full-image="${escapeHtml(data.signedUrl)}"
+              alt="${escapeHtml(
+                image.description ||
+                "IdentityLink subject image"
+              )}"
+              data-full-image="${escapeHtml(
+                data.signedUrl
+              )}"
             >
+
 
             <div class="image-info">
 
               <strong>
-                ${escapeHtml(image.description || image.file_name)}
+                ${escapeHtml(
+                  image.description ||
+                  image.file_name
+                )}
               </strong>
+
+
+              <span>
+                ${escapeHtml(
+                  image.file_name
+                )}
+              </span>
+
 
               <span>
                 Uploaded by
-                ${escapeHtml(image.uploaded_by_name)}
+                ${escapeHtml(
+                  image.uploaded_by_name
+                )}
               </span>
 
+
               <span>
-                ${escapeHtml(formatDateTime(image.created_at))}
+                ${escapeHtml(
+                  formatDateTime(
+                    image.created_at
+                  )
+                )}
               </span>
 
             </div>
@@ -3626,131 +3201,200 @@ await openRequestDetail(
     }
 
 
-   grid
-  .querySelectorAll(
-    ".subject-image-delete-button"
-  )
-  .forEach(
-    button => {
+    // IMPORTANT:
+    // Put the generated cards into the page BEFORE
+    // attaching click/delete listeners.
 
-      button.addEventListener(
-        "click",
-        async event => {
-
-          event.stopPropagation();
+    grid.innerHTML =
+      cards.join("");
 
 
-          const fileId =
-            button.dataset.fileId;
+    // =======================================================
+    // FULL IMAGE VIEWER
+    // =======================================================
+
+    grid
+      .querySelectorAll(
+        "[data-full-image]"
+      )
+      .forEach(
+        image => {
+
+          image.addEventListener(
+            "click",
+            () => {
+
+              fullImage.src =
+                image.dataset.fullImage;
 
 
-          const storagePath =
-            button.dataset.storagePath;
-
-
-          const label =
-            button.dataset.fileLabel ||
-            "this image";
-
-
-          const confirmed =
-            window.confirm(
-              `Delete "${label}" from this IdentityLink subject file?`
-            );
-
-
-          if (!confirmed) {
-            return;
-          }
-
-
-          button.disabled =
-            true;
-
-
-          try {
-
-            // Delete sensitive file from private storage first.
-            const {
-              error: storageError
-            } =
-              await db.storage
-                .from(
-                  "identitylink-subject-files"
-                )
-                .remove(
-                  [
-                    storagePath
-                  ]
-                );
-
-
-            if (storageError) {
-              throw storageError;
-            }
-
-
-            // Then remove its IdentityLink database record.
-            const {
-              error: recordError
-            } =
-              await db.rpc(
-                "delete_identitylink_subject_image_record",
-                {
-                  p_file_id:
-                    fileId
-                }
+              imageModal.classList.remove(
+                "hidden"
               );
 
-
-            if (recordError) {
-              throw recordError;
             }
-
-
-            showMessage(
-              `"${label}" deleted.`,
-              "success"
-            );
-
-
-            await Promise.all([
-              loadRequests(),
-              loadDashboardCounts()
-            ]);
-
-
-            await openRequestDetail(
-              currentDetail.request.id
-            );
-
-          }
-          catch (error) {
-
-            console.error(
-              "IdentityLink image deletion error:",
-              error
-            );
-
-
-            showMessage(
-              error.message ||
-              "Unable to delete subject image.",
-              "error"
-            );
-
-
-            button.disabled =
-              false;
-
-          }
+          );
 
         }
       );
 
-    }
-  );
 
+    // =======================================================
+    // DELETE IMAGE
+    // =======================================================
+
+    grid
+      .querySelectorAll(
+        ".subject-image-delete-button"
+      )
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            async event => {
+
+              event.stopPropagation();
+
+
+              const fileId =
+                button.dataset.fileId;
+
+
+              const storagePath =
+                button.dataset.storagePath;
+
+
+              const label =
+                button.dataset.fileLabel ||
+                "this image";
+
+
+              const requestId =
+                currentDetail
+                  ?.request
+                  ?.id;
+
+
+              if (!requestId) {
+
+                showMessage(
+                  "Unable to determine the IdentityLink subject file.",
+                  "error"
+                );
+
+                return;
+
+              }
+
+
+              const confirmed =
+                window.confirm(
+                  `Delete "${label}" from this IdentityLink subject file?`
+                );
+
+
+              if (!confirmed) {
+                return;
+              }
+
+
+              button.disabled =
+                true;
+
+
+              try {
+
+                // ------------------------------------------------
+                // REMOVE FROM PRIVATE STORAGE
+                // ------------------------------------------------
+
+                const {
+                  error: storageError
+                } =
+                  await db.storage
+                    .from(
+                      "identitylink-subject-files"
+                    )
+                    .remove(
+                      [
+                        storagePath
+                      ]
+                    );
+
+
+                if (storageError) {
+                  throw storageError;
+                }
+
+
+                // ------------------------------------------------
+                // REMOVE IDENTITYLINK FILE RECORD
+                // ------------------------------------------------
+
+                const {
+                  error: recordError
+                } =
+                  await db.rpc(
+                    "delete_identitylink_subject_image_record",
+                    {
+
+                      p_file_id:
+                        fileId
+
+                    }
+                  );
+
+
+                if (recordError) {
+                  throw recordError;
+                }
+
+
+                showMessage(
+                  `"${label}" deleted.`,
+                  "success"
+                );
+
+
+                await Promise.all([
+                  loadRequests(),
+                  loadDashboardCounts()
+                ]);
+
+
+                await openRequestDetail(
+                  requestId
+                );
+
+              }
+              catch (error) {
+
+                console.error(
+                  "IdentityLink image deletion error:",
+                  error
+                );
+
+
+                showMessage(
+                  error.message ||
+                  "Unable to delete subject image.",
+                  "error"
+                );
+
+
+                button.disabled =
+                  false;
+
+              }
+
+            }
+          );
+
+        }
+      );
+
+  }
 
   // =========================================================
   // APPROVAL HISTORY
