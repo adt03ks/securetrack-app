@@ -1787,11 +1787,17 @@ function openEditRequest(
     }
 
 
-    currentDetail =
+        currentDetail =
       data;
 
 
-     async function renderRequestDetail() {
+    renderRequestDetail();
+
+  }
+
+
+
+  async function renderRequestDetail() {
 
     if (!currentDetail?.request) {
       return;
