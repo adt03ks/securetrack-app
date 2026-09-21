@@ -182,7 +182,7 @@
       >
 
         <span>
-          Pending Approval
+          Pending Actions
         </span>
 
         <strong id="pendingCount">
@@ -198,7 +198,7 @@
       >
 
         <span>
-          Changes Requested
+          Actions Needing Changes
         </span>
 
         <strong id="changesCount">
@@ -214,7 +214,7 @@
       >
 
         <span>
-          Approved
+          Approved Actions
         </span>
 
         <strong id="approvedCount">
@@ -430,59 +430,96 @@
         >
 
 
-        <section class="form-section">
+ <section
+  id="requestSelectionSection"
+  class="form-section"
+>
 
-          <h3>
-            Request
-          </h3>
+  <h3>
+    Identification Request(s)
+  </h3>
 
-
-          <div class="field-grid two">
-
-            <label>
-
-              <span>
-                Request Type *
-              </span>
-
-              <select
-                id="requestType"
-                required
-              >
-
-                <option value="">
-                  Select request type
-                </option>
-
-                <option value="image_request">
-                  Image Request
-                </option>
-
-                <option value="fingerprint">
-                  Fingerprint Request
-                </option>
-
-              </select>
-
-            </label>
+  <p class="section-help">
+    Select one or both identification methods.
+  </p>
 
 
-            <div class="information-box">
+  <div class="request-choice-grid">
 
-              <strong>
-                Image Request
-              </strong>
+    <label class="request-choice">
 
-              <span>
-                Includes authorized patient-image requests
-                and media-blast image requests.
-              </span>
+      <input
+        id="requestImage"
+        type="checkbox"
+      >
 
-            </div>
+      <span class="request-choice-box">
 
-          </div>
+        <span class="request-choice-icon">
+          ✓
+        </span>
 
-        </section>
+        <span>
+
+          <strong>
+            Image Request
+          </strong>
+
+          <small>
+            Patient image / media-blast authorization
+          </small>
+
+        </span>
+
+      </span>
+
+    </label>
+
+
+    <label class="request-choice">
+
+      <input
+        id="requestFingerprint"
+        type="checkbox"
+      >
+
+      <span class="request-choice-box">
+
+        <span class="request-choice-icon">
+          ✓
+        </span>
+
+        <span>
+
+          <strong>
+            Fingerprint Request
+          </strong>
+
+          <small>
+            Fingerprint identification authorization
+          </small>
+
+        </span>
+
+      </span>
+
+    </label>
+
+  </div>
+
+
+  <div class="privacy-note">
+
+    <strong>
+      At least one request is required.
+    </strong>
+
+    Image and Fingerprint authorization may be requested
+    together or separately.
+
+  </div>
+
+</section>
 
 
 
@@ -529,10 +566,13 @@
             </label>
 
 
-            <label class="span-two">
+            <label
+  id="initialLocationField"
+  class="span-two"
+>
 
               <span>
-                Room / Last Known Location *
+                Current Location *
               </span>
 
               <input
