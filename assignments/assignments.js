@@ -88,23 +88,67 @@
 
   const confirmManualButton =
     document.getElementById("confirmManualButton");
+const supervisorPanel =
+  document.getElementById(
+    "supervisorPanel"
+  );
 
+const supervisorBadge =
+  document.getElementById(
+    "supervisorBadge"
+  );
 
-  let currentShift = null;
+const designatedTeamLead =
+  document.getElementById(
+    "designatedTeamLead"
+  );
+
+const teamLeadAttendance =
+  document.getElementById(
+    "teamLeadAttendance"
+  );
+
+const currentSupervisorName =
+  document.getElementById(
+    "currentSupervisorName"
+  );
+
+const currentSupervisorSource =
+  document.getElementById(
+    "currentSupervisorSource"
+  );
+
+const actingSupervisorSection =
+  document.getElementById(
+    "actingSupervisorSection"
+  );
+
+const actingSupervisorSelect =
+  document.getElementById(
+    "actingSupervisorSelect"
+  );
+
+const saveActingSupervisorButton =
+  document.getElementById(
+    "saveActingSupervisorButton"
+  );
+
+let currentShift = null;
 let stations = [];
 let staff = [];
 let attendance = [];
 let assignments = [];
 let plannedUnavailability = [];
+let supervisorContext = null;
 
 
   function roleLabel(list) {
     const order = [
       "admin",
+      "director",
       "manager",
       "team_lead",
       "senior_officer",
-      "dispatcher",
       "officer"
     ];
 
@@ -409,8 +453,9 @@ function refreshShiftChoices() {
       error
     } = await db
       .from("duty_stations")
-      .select(
-        "id, station_code, station_name, description, is_difficult, requires_qualification, is_active, sort_order"
+     .select(
+  "id, station_code, station_name, description, is_difficult, requires_qualification, is_active, sort_order, priority_number, station_type"
+)
       )
       .eq(
         "is_active",
