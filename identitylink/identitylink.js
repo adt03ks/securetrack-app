@@ -3355,38 +3355,40 @@ function formatFileSize(
 
     }
 
-
-    fileInput.value =
-      "";
+fileInput.value = "";
 
 
-    if (descriptionInput) {
-
-      descriptionInput.value =
-        "";
-
-    }
+const labelList =
+  $("selectedImageLabelList");
 
 
-    showMessage(
-      `${uploadedCount} subject image${
-        uploadedCount === 1
-          ? ""
-          : "s"
-      } uploaded securely.`,
-      "success"
-    );
+if (labelList) {
+
+  labelList.innerHTML =
+    "";
+
+}
 
 
-    await Promise.all([
-      loadRequests(),
-      loadDashboardCounts()
-    ]);
+showMessage(
+  `${uploadedCount} subject image${
+    uploadedCount === 1
+      ? ""
+      : "s"
+  } uploaded securely.`,
+  "success"
+);
 
 
-    await openRequestDetail(
-      requestId
-    );
+await Promise.all([
+  loadRequests(),
+  loadDashboardCounts()
+]);
+
+
+await openRequestDetail(
+  requestId
+);
 
   }
   catch (error) {
