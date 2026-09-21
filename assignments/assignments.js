@@ -1081,7 +1081,242 @@ async function loadPlannedUnavailability() {
 
   renderAttendance();
 }
+// =========================================================
+// SHIFT SUPERVISOR
+// =========================================================
 
+async function loadSupervisorContext() {
+
+  if (!currentShift) {
+
+    supervisorContext = null;
+
+    if (supervisorPanel) {
+      supervisorPanel.hidden =
+        true;
+    }
+
+    return;
+  }
+
+
+  const {
+    data,
+    error
+  } = await db.rpc(
+    "get_shift_supervisor_context",
+    {
+      p_shift_id:
+        currentShift.id
+    }
+  );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  supervisorContext =
+    data || null;
+
+
+  renderSupervisorContext();
+}
+
+
+function renderSupervisorContext() {
+
+  if (!supervisorPanel) {
+    return;
+  }
+
+
+  if (
+    !currentShift ||
+    !supervisorContext
+  ) {
+
+    supervisorPanel.hidden =
+      true;
+
+    return;
+  }
+
+
+  supervisorPanel.hidden =
+    false;
+
+
+  const context =
+    supervisorContext;
+
+
+  if (!context.configured) {
+
+    designatedTeamLead.textContent =
+      "Not configured";
+
+    teamLeadAttendance.textContent =
+      "Shift leadership configuration incomplete";
+
+    currentSupervisorName.textContent =
+      "—";
+
+    currentSupervisorSource.textContent =
+      "Configure shift leadership before generating";
+
+    supervisorBadge.textContent =
+      "CONFIGURATION REQUIRED";
+
+    supervisorBadge.className =
+      "supervisor-badge warning";
+
+    actingSupervisorSection.hidden =
+      true;
+
+    return;
+  }
+
+
+  designatedTeamLead.textContent =
+    context.designated_team_lead_name ||
+    "Not configured";
+
+
+  if (
+    !context.designated_team_lead_user_id
+  ) {
+
+    teamLeadAttendance.textContent =
+      "No designated Team Lead";
+
+    supervisorBadge.textContent =
+      "CONFIGURATION REQUIRED";
+
+    supervisorBadge.className =
+      "supervisor-badge warning";
+
+    actingSupervisorSection.hidden =
+      true;
+
+    return;
+  }
+
+
+  if (
+    context.designated_team_lead_present
+  ) {
+
+    teamLeadAttendance.textContent =
+      "Present • Supervisor";
+
+    currentSupervisorName.textContent =
+      context.designated_team_lead_name ||
+      "Team Lead";
+
+    currentSupervisorSource.textContent =
+      "Designated Team Lead";
+
+    supervisorBadge.textContent =
+      "SUPERVISOR READY";
+
+    supervisorBadge.className =
+      "supervisor-badge ready";
+
+    actingSupervisorSection.hidden =
+      true;
+
+    return;
+  }
+
+
+  teamLeadAttendance.textContent =
+    "Not marked present";
+
+
+  const actingName =
+    context.supervisor_source ===
+      "acting_senior"
+      ? context.supervisor_display_name
+      : null;
+
+
+  currentSupervisorName.textContent =
+    actingName ||
+    "Acting Supervisor Required";
+
+
+  currentSupervisorSource.textContent =
+    actingName
+      ? "Acting Senior Officer"
+      : "Awaiting selection";
+
+
+  supervisorBadge.textContent =
+    actingName
+      ? "ACTING SUPERVISOR READY"
+      : "SUPERVISOR REQUIRED";
+
+
+  supervisorBadge.className =
+    actingName
+      ? "supervisor-badge ready"
+      : "supervisor-badge warning";
+
+
+  actingSupervisorSection.hidden =
+    false;
+
+
+  actingSupervisorSelect.innerHTML =
+    '<option value="">Select Senior Officer</option>';
+
+
+  const candidates =
+    Array.isArray(
+      context.acting_candidates
+    )
+      ? context.acting_candidates
+      : [];
+
+
+  candidates.forEach(
+    candidate => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        candidate.user_id;
+
+      option.textContent =
+        candidate.display_name;
+
+      if (
+        candidate.user_id ===
+        context.supervisor_user_id
+      ) {
+        option.selected =
+          true;
+      }
+
+      actingSupervisorSelect
+        .appendChild(
+          option
+        );
+    }
+  );
+
+
+  saveActingSupervisorButton.disabled =
+    currentShift.status !==
+      "draft" ||
+    candidates.length ===
+      0;
+}
   async function loadAssignments() {
 
     if (!currentShift) {
@@ -1155,185 +1390,283 @@ async function loadPlannedUnavailability() {
   }
 
 
-  function renderAssignments() {
+ function renderAssignments() {
+
+  assignmentBody.innerHTML =
+    "";
+
+
+  if (!currentShift) {
 
     assignmentBody.innerHTML =
-      "";
+      '<tr><td colspan="5" class="empty">Open a shift to begin.</td></tr>';
+
+    return;
+  }
 
 
-    if (!currentShift) {
+  if (!stations.length) {
 
-      assignmentBody.innerHTML =
-        '<tr><td colspan="5" class="empty">Open a shift to begin.</td></tr>';
+    assignmentBody.innerHTML =
+      '<tr><td colspan="5" class="empty">No active stations configured.</td></tr>';
 
-      return;
-    }
-
-
-    if (!stations.length) {
-
-      assignmentBody.innerHTML =
-        '<tr><td colspan="5" class="empty">No active stations configured.</td></tr>';
-
-      return;
-    }
+    return;
+  }
 
 
-    const assignmentMap =
-      new Map(
-        assignments.map(
-          a => [
-            a.station_id,
-            a
-          ]
-        )
-      );
+  const assignmentMap =
+    new Map(
+      assignments.map(
+        assignment => [
+          assignment.station_id,
+          assignment
+        ]
+      )
+    );
 
 
-    const published =
-      currentShift.status ===
-      "published";
+  const published =
+    currentShift.status ===
+    "published";
 
 
-    stations.forEach(
-      station => {
+  stations.forEach(
+    station => {
 
-        const tr =
-          document.createElement(
-            "tr"
-          );
-
-
-        const assignment =
-          assignmentMap.get(
-            station.id
-          );
-
-
-        const stationTd =
-          document.createElement(
-            "td"
-          );
-
-
-        stationTd.innerHTML =
-          `<strong>${station.station_name}</strong>` +
-          `<br>` +
-          `<span class="muted">${station.station_code || ""}</span>`;
-
-
-        const officerTd =
-          document.createElement(
-            "td"
-          );
-
-
-        officerTd.textContent =
-          assignment?.display_name ||
-          "Unassigned";
-
-
-        const sourceTd =
-          document.createElement(
-            "td"
-          );
-
-
-        const source =
-          document.createElement(
-            "span"
-          );
-
-
-        source.className =
-          "source-pill";
-
-
-        source.textContent =
-          assignment?.assignment_source ||
-          "—";
-
-
-        sourceTd.appendChild(
-          source
+      const assignment =
+        assignmentMap.get(
+          station.id
         );
 
 
-        const lockTd =
-          document.createElement(
-            "td"
-          );
+      const isSupervisor =
+        station.station_type ===
+          "supervisor" ||
+        station.station_code ===
+          "SUPERVISOR";
 
 
-        if (assignment) {
-
-          const lock =
-            document.createElement(
-              "button"
-            );
+      const tr =
+        document.createElement(
+          "tr"
+        );
 
 
-          lock.className =
-            "button secondary lock-button";
+      if (isSupervisor) {
+        tr.classList.add(
+          "supervisor-row"
+        );
+      }
 
 
-          lock.type =
-            "button";
+      // =====================================================
+      // STATION
+      // =====================================================
+
+      const stationTd =
+        document.createElement(
+          "td"
+        );
 
 
-          lock.textContent =
-            assignment.is_locked
-              ? "Unlock"
-              : "Lock";
+      const priority =
+        station.priority_number
+          ? `<span class="priority-pill">#${station.priority_number}</span>`
+          : "";
 
 
-          lock.disabled =
-            published;
+      stationTd.innerHTML =
+        `${priority}<strong>${station.station_name}</strong>` +
+        `<br>` +
+        `<span class="muted">${station.station_code || ""}</span>` +
+        (
+          station.description
+            ? `<br><small class="muted">${station.description}</small>`
+            : ""
+        );
 
 
-          lock.addEventListener(
-            "click",
-            () =>
-              toggleLock(
-                assignment
-              )
-          );
+      // =====================================================
+      // OFFICER
+      // =====================================================
+
+      const officerTd =
+        document.createElement(
+          "td"
+        );
 
 
-          lockTd.appendChild(
-            lock
-          );
+      if (assignment) {
 
-        } else {
+        officerTd.textContent =
+          assignment.display_name;
 
-          lockTd.textContent =
-            "—";
-        }
+      }
+      else {
+
+        officerTd.textContent =
+          isSupervisor
+            ? "SUPERVISOR REQUIRED"
+            : "UNFILLED — STAFFING REQUIRED";
+
+        officerTd.classList.add(
+          "unfilled-post"
+        );
+      }
 
 
-        const manualTd =
-          document.createElement(
-            "td"
-          );
+      // =====================================================
+      // SOURCE
+      // =====================================================
+
+      const sourceTd =
+        document.createElement(
+          "td"
+        );
 
 
-        const manual =
+      const source =
+        document.createElement(
+          "span"
+        );
+
+
+      source.className =
+        "source-pill";
+
+
+      if (
+        isSupervisor &&
+        assignment
+      ) {
+
+        source.textContent =
+          supervisorContext
+            ?.supervisor_source ===
+            "acting_senior"
+              ? "ACTING SENIOR"
+              : "TEAM LEAD";
+
+      }
+      else {
+
+        source.textContent =
+          assignment
+            ?.assignment_source ||
+          "—";
+
+      }
+
+
+      sourceTd.appendChild(
+        source
+      );
+
+
+      // =====================================================
+      // LOCK
+      // =====================================================
+
+      const lockTd =
+        document.createElement(
+          "td"
+        );
+
+
+      if (
+        assignment &&
+        isSupervisor
+      ) {
+
+        lockTd.textContent =
+          "Locked";
+
+      }
+      else if (assignment) {
+
+        const lock =
           document.createElement(
             "button"
           );
 
 
-        manual.className =
-          "button secondary";
+        lock.className =
+          "button secondary lock-button";
 
-
-        manual.type =
+        lock.type =
           "button";
 
 
-        manual.textContent =
-          "Change";
+        lock.textContent =
+          assignment.is_locked
+            ? "Unlock"
+            : "Lock";
 
+
+        lock.disabled =
+          published;
+
+
+        lock.addEventListener(
+          "click",
+          () =>
+            toggleLock(
+              assignment
+            )
+        );
+
+
+        lockTd.appendChild(
+          lock
+        );
+
+      }
+      else {
+
+        lockTd.textContent =
+          "—";
+
+      }
+
+
+      // =====================================================
+      // CHANGE / OVERRIDE
+      // =====================================================
+
+      const manualTd =
+        document.createElement(
+          "td"
+        );
+
+
+      const manual =
+        document.createElement(
+          "button"
+        );
+
+
+      manual.className =
+        "button secondary";
+
+      manual.type =
+        "button";
+
+
+      if (isSupervisor) {
+
+        manual.textContent =
+          "Supervisor";
+
+        manual.disabled =
+          true;
+
+      }
+      else {
+
+        manual.textContent =
+          assignment
+            ? "Change"
+            : "Assign";
 
         manual.disabled =
           published;
@@ -1347,38 +1680,39 @@ async function loadPlannedUnavailability() {
             )
         );
 
-
-        manualTd.appendChild(
-          manual
-        );
-
-
-        tr.append(
-          stationTd,
-          officerTd,
-          sourceTd,
-          lockTd,
-          manualTd
-        );
-
-
-        assignmentBody.appendChild(
-          tr
-        );
       }
-    );
 
 
-    generateButton.disabled =
-      published;
+      manualTd.appendChild(
+        manual
+      );
 
 
-    publishButton.disabled =
-      published ||
-      !assignments.length;
-  }
+      tr.append(
+        stationTd,
+        officerTd,
+        sourceTd,
+        lockTd,
+        manualTd
+      );
 
 
+      assignmentBody.appendChild(
+        tr
+      );
+
+    }
+  );
+
+
+  generateButton.disabled =
+    published;
+
+
+  publishButton.disabled =
+    published ||
+    !assignments.length;
+}
   function openManualModal(
     station
   ) {
@@ -1511,10 +1845,11 @@ async function loadPlannedUnavailability() {
       );
 
 
-   await Promise.all([
+  await Promise.all([
   loadAttendance(),
   loadAssignments(),
-  loadPlannedUnavailability()
+  loadPlannedUnavailability(),
+  loadSupervisorContext()
 ]);
 
 
@@ -1625,10 +1960,11 @@ async function loadPlannedUnavailability() {
           !isDraft;
 
 
-       await Promise.all([
+     await Promise.all([
   loadAttendance(),
   loadAssignments(),
-  loadPlannedUnavailability()
+  loadPlannedUnavailability(),
+  loadSupervisorContext()
 ]);
 
 
@@ -2029,7 +2365,101 @@ async function loadPlannedUnavailability() {
     }
   );
 
+if (
+  saveActingSupervisorButton
+) {
 
+  saveActingSupervisorButton
+    .addEventListener(
+      "click",
+      async () => {
+
+        if (!currentShift) {
+          return;
+        }
+
+
+        const selectedUserId =
+          actingSupervisorSelect.value;
+
+
+        if (!selectedUserId) {
+
+          showMessage(
+            "Select a Senior Officer to serve as Acting Supervisor.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        saveActingSupervisorButton.disabled =
+          true;
+
+        saveActingSupervisorButton.textContent =
+          "Saving…";
+
+
+        try {
+
+          const {
+            error
+          } = await db.rpc(
+            "set_shift_acting_supervisor",
+            {
+              p_shift_id:
+                currentShift.id,
+
+              p_user_id:
+                selectedUserId
+            }
+          );
+
+
+          if (error) {
+            throw error;
+          }
+
+
+          await loadSupervisorContext();
+
+
+          showMessage(
+            "Acting Supervisor confirmed.",
+            "success"
+          );
+
+        }
+        catch (error) {
+
+          console.error(
+            "Acting Supervisor error:",
+            error
+          );
+
+
+          showMessage(
+            error.message ||
+            "Unable to confirm Acting Supervisor.",
+            "error"
+          );
+
+        }
+        finally {
+
+          saveActingSupervisorButton.textContent =
+            "Confirm Acting Supervisor";
+
+          saveActingSupervisorButton.disabled =
+            currentShift?.status !==
+            "draft";
+
+        }
+
+      }
+    );
+}
   publishButton.addEventListener(
     "click",
     async () => {
