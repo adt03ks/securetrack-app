@@ -1,166 +1,24 @@
 (async function () {
   "use strict";
 
-  // =========================================================
-  // SECURETRACK DUTY ASSIGNMENT BUILD
-  // =========================================================
-
-  const BUILD_ID =
-    "2026-09-20-duty-auth-fix-1";
-
   console.log(
-    `SecureTrack Duty Assignment build ${BUILD_ID}`
+    "SecureTrack Duty Assignment build 2026-09-21-auth-fix-2"
   );
 
 
-  // =========================================================
-  // AUTH FALLBACK
-  //
-  // secure-page.js normally supplies SecureTrackAuth.
-  // If its authorized event fires before this file begins
-  // listening, or does not populate the global object,
-  // rebuild the session directly from Supabase.
-  // =========================================================
-
-  async function buildAuthFallback() {
-
-    const cfg =
-      window.SECURETRACK_CONFIG || {};
-
-
-    if (
-      !window.supabase ||
-      !cfg.supabaseUrl ||
-      !cfg.supabaseAnonKey
-    ) {
-
-      throw new Error(
-        "SecureTrack configuration is unavailable."
-      );
-
-    }
-
-
-    const fallbackDb =
-      window.supabase.createClient(
-        cfg.supabaseUrl,
-        cfg.supabaseAnonKey,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true
-          }
-        }
-      );
-
-
-    const {
-      data: {
-        session
-      },
-      error: sessionError
-    } =
-      await fallbackDb.auth.getSession();
-
-
-    if (sessionError) {
-      throw sessionError;
-    }
-
-
-    if (!session?.user) {
-      return null;
-    }
-
-
-    const [
-      profileResult,
-      rolesResult
-    ] =
-      await Promise.all([
-
-        fallbackDb
-          .from("profiles")
-          .select(
-            "id, display_name, employee_number, is_active"
-          )
-          .eq(
-            "id",
-            session.user.id
-          )
-          .maybeSingle(),
-
-        fallbackDb
-          .from("user_roles")
-          .select("role")
-          .eq(
-            "user_id",
-            session.user.id
-          )
-
-      ]);
-
-
-    if (profileResult.error) {
-      throw profileResult.error;
-    }
-
-
-    if (rolesResult.error) {
-      throw rolesResult.error;
-    }
-
-
-    const profile =
-      profileResult.data || {};
-
-
-    const roles =
-      (rolesResult.data || [])
-        .map(
-          row =>
-            row.role
-        );
-
-
-    const fallbackAuth = {
-      db:
-        fallbackDb,
-
-      session,
-
-      user:
-        session.user,
-
-      profile,
-
-      roles
-    };
-
-
-    window.SecureTrackAuth =
-      window.SecureTrackAuth ||
-      fallbackAuth;
-
-
-    return fallbackAuth;
-  }
-
-
-  // =========================================================
-  // WAIT FOR SECURE-PAGE AUTH, THEN FALL BACK
-  // =========================================================
-
   function waitForAuth() {
 
+    const existing =
+      window.SecureTrackAuth;
+
+
     if (
-      window.SecureTrackAuth?.db &&
-      window.SecureTrackAuth?.user
+      existing?.db &&
+      existing?.user
     ) {
 
       return Promise.resolve(
-        window.SecureTrackAuth
+        existing
       );
 
     }
@@ -169,148 +27,123 @@
     return new Promise(
       (resolve, reject) => {
 
-        let settled =
+        let finished =
           false;
 
 
-        const finish =
-          authValue => {
-
-            if (settled) {
-              return;
-            }
-
-
-            settled =
-              true;
-
+        const cleanup =
+          () => {
 
             document.removeEventListener(
               "securetrack:authorized",
-              handler
+              authHandler
             );
 
+            clearInterval(
+              pollTimer
+            );
 
-            resolve(
-              authValue
+            clearTimeout(
+              timeoutTimer
             );
 
           };
 
 
-        const handler =
-          event => {
-
-            const authValue =
-              event.detail ||
-              window.SecureTrackAuth;
-
+        const finish =
+          auth => {
 
             if (
-              authValue?.db &&
-              authValue?.user
+              finished ||
+              !auth?.db ||
+              !auth?.user
             ) {
-
-              finish(
-                authValue
-              );
-
+              return;
             }
+
+
+            finished =
+              true;
+
+
+            cleanup();
+
+
+            resolve(
+              auth
+            );
+
+          };
+
+
+        const authHandler =
+          event => {
+
+            finish(
+              event.detail ||
+              window.SecureTrackAuth
+            );
 
           };
 
 
         document.addEventListener(
           "securetrack:authorized",
-          handler
+          authHandler
         );
 
 
-        // ---------------------------------------------------
-        // Do not allow this page to remain on "Loading..."
-        // forever if the authorization event is missed.
-        // ---------------------------------------------------
+        // -------------------------------------------------
+        // Also poll window.SecureTrackAuth.
+        // This prevents the page from hanging if the
+        // authorization event fired before assignments.js
+        // attached its listener.
+        // -------------------------------------------------
 
-        setTimeout(
-          async () => {
+        const pollTimer =
+          setInterval(
+            () => {
 
-            if (settled) {
-              return;
-            }
+              finish(
+                window.SecureTrackAuth
+              );
+
+            },
+            100
+          );
 
 
-            try {
+        const timeoutTimer =
+          setTimeout(
+            () => {
 
-              if (
-                window.SecureTrackAuth?.db &&
-                window.SecureTrackAuth?.user
-              ) {
-
-                finish(
-                  window.SecureTrackAuth
-                );
-
+              if (finished) {
                 return;
               }
 
 
-              console.warn(
-                "Duty Assignment: secure-page auth event not received. Using session fallback."
+              finished =
+                true;
+
+
+              cleanup();
+
+
+              reject(
+                new Error(
+                  "SecureTrack authentication did not initialize."
+                )
               );
 
-
-              const fallbackAuth =
-                await buildAuthFallback();
-
-
-              if (!fallbackAuth) {
-
-                throw new Error(
-                  "No active SecureTrack session was found."
-                );
-
-              }
-
-
-              finish(
-                fallbackAuth
-              );
-
-            }
-            catch (error) {
-
-              if (!settled) {
-
-                settled =
-                  true;
-
-
-                document.removeEventListener(
-                  "securetrack:authorized",
-                  handler
-                );
-
-
-                reject(
-                  error
-                );
-
-              }
-
-            }
-
-          },
-          2000
-        );
+            },
+            5000
+          );
 
       }
     );
+
   }
 
-
-  // =========================================================
-  // INITIALIZE AUTH
-  // =========================================================
 
   let auth;
 
@@ -324,86 +157,78 @@
   catch (error) {
 
     console.error(
-      "SecureTrack Duty Assignment authentication failed:",
+      "Duty Assignment authentication error:",
       error
     );
 
 
-    const nameElement =
+    const currentUserName =
       document.getElementById(
         "currentUserName"
       );
 
 
-    const messageElement =
+    const pageMessage =
       document.getElementById(
         "pageMessage"
       );
 
 
-    const stationElement =
+    const stationList =
       document.getElementById(
         "stationList"
       );
 
 
-    if (nameElement) {
+    if (currentUserName) {
 
-      nameElement.textContent =
+      currentUserName.textContent =
         "Authentication unavailable";
 
     }
 
 
-    if (messageElement) {
+    if (pageMessage) {
 
-      messageElement.textContent =
-        error.message ||
-        "Unable to initialize SecureTrack authentication.";
+      pageMessage.textContent =
+        error.message;
 
-      messageElement.className =
+      pageMessage.className =
         "message show error";
 
     }
 
 
-    if (stationElement) {
+    if (stationList) {
 
-      stationElement.innerHTML =
-        '<div class="empty">Unable to initialize SecureTrack authentication.</div>';
+      stationList.innerHTML =
+        '<div class="empty">Unable to load duty stations until authentication is available.</div>';
 
     }
 
 
     return;
+
   }
-
-
-  if (
-    !auth?.db ||
-    !auth?.user
-  ) {
-
-    console.error(
-      "Duty Assignment authentication returned without a database client or user.",
-      auth
-    );
-
-    return;
-  }
-
-
-  console.log(
-    "Duty Assignment authenticated:",
-    auth.user.id,
-    auth.roles
-  );
 
 
   const db =
     auth.db;
-  const profile = auth.profile || {};
-  const roles = auth.roles || [];
+
+
+  const profile =
+    auth.profile || {};
+
+
+  const roles =
+    auth.roles || [];
+
+
+  console.log(
+    "Duty Assignment authenticated:",
+    auth.user?.id,
+    roles
+  );
 
   const currentUserName =
     document.getElementById("currentUserName");
