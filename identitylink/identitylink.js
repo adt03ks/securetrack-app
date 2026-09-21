@@ -704,6 +704,68 @@
 
 
 
+  // =========================================================
+  // MINI IMAGE / FINGERPRINT STATUS
+  // =========================================================
+
+  function renderMiniAction(
+    item,
+    actionType,
+    label,
+    status
+  ) {
+
+    const currentStatus =
+      status ||
+      "not_requested";
+
+
+    if (
+      currentStatus ===
+      "not_requested"
+    ) {
+
+      return `
+        <div class="action-mini not-requested">
+
+          <span>
+            ${escapeHtml(label)}
+            • Not Requested
+          </span>
+
+          <button
+            class="mini-request-button request-action-button"
+            type="button"
+            data-request-id="${escapeHtml(item.request_id)}"
+            data-action-type="${escapeHtml(actionType)}"
+          >
+            Request
+          </button>
+
+        </div>
+      `;
+
+    }
+
+
+    return `
+      <div class="action-mini active">
+
+        <strong>
+          ${escapeHtml(label)}
+        </strong>
+
+        <span>
+          ${escapeHtml(statusLabel(currentStatus))}
+        </span>
+
+      </div>
+    `;
+
+  }
+
+
+
   function renderRequests() {
 
     if (!requestList) {
@@ -754,7 +816,7 @@
                   </span>
 
                   <span class="request-detail-small">
-                    ${escapeHtml(requestTypeLabel(item.request_type))}
+                   IdentityLink Subject File
                   </span>
 
                 </div>
@@ -805,16 +867,28 @@
 
                 <div>
 
-                  <span class="status-pill ${statusClass}">
-                    ${escapeHtml(statusLabel(item.status))}
-                  </span>
+                  <div class="action-mini-list">
 
-                  <span class="request-detail-small">
-                    ${Number(item.subject_image_count || 0)}
-                    subject image${Number(item.subject_image_count || 0) === 1 ? "" : "s"}
-                  </span>
+  ${renderMiniAction(
+    item,
+    "image_request",
+    "Image",
+    item.image_status
+  )}
 
-                </div>
+  ${renderMiniAction(
+    item,
+    "fingerprint",
+    "Fingerprint",
+    item.fingerprint_status
+  )}
+
+  <span class="request-detail-small">
+    ${Number(item.subject_image_count || 0)}
+    subject image${Number(item.subject_image_count || 0) === 1 ? "" : "s"}
+  </span>
+
+</div>
 
 
                 <div>
@@ -890,41 +964,97 @@
       data ||
       [];
 
-
-    $("pendingCount").textContent =
-      String(
-        all.filter(
-          item =>
-            item.status ===
-            "pending"
-        ).length
-      );
-
-
-    $("changesCount").textContent =
-      String(
-        all.filter(
-          item =>
-            item.status ===
-            "changes_requested"
-        ).length
-      );
-
-
-    $("approvedCount").textContent =
-      String(
-        all.filter(
-          item =>
-            item.status ===
-            "approved"
-        ).length
-      );
+const pendingActions =
+  all.reduce(
+    (
+      total,
+      item
+    ) =>
+      total +
+      (
+        item.image_status ===
+        "pending"
+          ? 1
+          : 0
+      ) +
+      (
+        item.fingerprint_status ===
+        "pending"
+          ? 1
+          : 0
+      ),
+    0
+  );
 
 
-    $("totalCount").textContent =
-      String(
-        all.length
-      );
+const changesActions =
+  all.reduce(
+    (
+      total,
+      item
+    ) =>
+      total +
+      (
+        item.image_status ===
+        "changes_requested"
+          ? 1
+          : 0
+      ) +
+      (
+        item.fingerprint_status ===
+        "changes_requested"
+          ? 1
+          : 0
+      ),
+    0
+  );
+
+
+const approvedActions =
+  all.reduce(
+    (
+      total,
+      item
+    ) =>
+      total +
+      (
+        item.image_status ===
+        "approved"
+          ? 1
+          : 0
+      ) +
+      (
+        item.fingerprint_status ===
+        "approved"
+          ? 1
+          : 0
+      ),
+    0
+  );
+
+
+$("pendingCount").textContent =
+  String(
+    pendingActions
+  );
+
+
+$("changesCount").textContent =
+  String(
+    changesActions
+  );
+
+
+$("approvedCount").textContent =
+  String(
+    approvedActions
+  );
+
+
+$("totalCount").textContent =
+  String(
+    all.length
+  );
 
   }
 
@@ -1063,344 +1193,416 @@
   // NEW REQUEST MODAL
   // =========================================================
 
-  function openNewRequestModal() {
+function openNewRequestModal() {
 
-    requestForm.reset();
-
-    $("editingRequestId").value =
-      "";
-
-    $("requestModalTitle").textContent =
-      "New Identity Request";
-
-    $("submitRequestButton").textContent =
-      "Submit for Approval";
-
-    requestModal.classList.remove(
-      "hidden"
-    );
-
-  }
+  requestForm.reset();
 
 
-  function closeRequestModal() {
-
-    requestModal.classList.add(
-      "hidden"
-    );
-
-  }
+  $("editingRequestId").value =
+    "";
 
 
-  $("newRequestButton")
-    ?.addEventListener(
-      "click",
-      openNewRequestModal
-    );
+  $("requestSelectionSection")
+    .classList
+    .remove("hidden");
 
 
-  $("closeRequestModalButton")
-    ?.addEventListener(
-      "click",
-      closeRequestModal
-    );
+  $("initialLocationField")
+    .classList
+    .remove("hidden");
 
 
-  $("cancelRequestButton")
-    ?.addEventListener(
-      "click",
-      closeRequestModal
-    );
+  $("lastKnownLocation")
+    .required =
+    true;
 
+
+  $("requestModalTitle").textContent =
+    "New IdentityLink Subject File";
+
+
+  $("submitRequestButton").textContent =
+    "Submit for Approval";
+
+
+  requestModal.classList.remove(
+    "hidden"
+  );
+
+}
 
 
   // =========================================================
   // FORM VALUES
   // =========================================================
 
-  function getRequestFormValues() {
+ function getSubjectFormValues() {
 
-    return {
+  return {
 
-      p_request_type:
-        $("requestType").value,
+    p_patient_alias:
+      $("patientAlias")
+        .value
+        .trim(),
 
-      p_patient_alias:
-        $("patientAlias").value.trim(),
+    p_mrn_patient_number:
+      $("mrnPatientNumber")
+        .value
+        .trim(),
 
-      p_mrn_patient_number:
-        $("mrnPatientNumber").value.trim(),
+    p_identifying_factors:
+      $("identifyingFactors")
+        .value
+        .trim() ||
+      null,
 
-      p_room_last_known_location:
-        $("lastKnownLocation").value.trim(),
+    p_source_organization:
+      $("sourceOrganization")
+        .value
+        .trim() ||
+      null,
 
-      p_identifying_factors:
-        $("identifyingFactors").value.trim() ||
-        null,
+    p_source_requester_name:
+      $("sourceRequesterName")
+        .value
+        .trim() ||
+      null,
 
-      p_source_organization:
-        $("sourceOrganization").value.trim() ||
-        null,
+    p_source_requester_email:
+      $("sourceRequesterEmail")
+        .value
+        .trim() ||
+      null,
 
-      p_source_requester_name:
-        $("sourceRequesterName").value.trim() ||
-        null,
+    p_source_requester_phone:
+      $("sourceRequesterPhone")
+        .value
+        .trim() ||
+      null,
 
-      p_source_requester_email:
-        $("sourceRequesterEmail").value.trim() ||
-        null,
+    p_source_reference_number:
+      $("sourceReferenceNumber")
+        .value
+        .trim() ||
+      null,
 
-      p_source_requester_phone:
-        $("sourceRequesterPhone").value.trim() ||
-        null,
+    p_manager_notes:
+      $("managerNotes")
+        .value
+        .trim() ||
+      null
 
-      p_source_reference_number:
-        $("sourceReferenceNumber").value.trim() ||
-        null,
+  };
 
-      p_manager_notes:
-        $("managerNotes").value.trim() ||
-        null
-
-    };
-
-  }
-
+}
 
 
   // =========================================================
   // CREATE / UPDATE REQUEST
   // =========================================================
 
-  requestForm
-    ?.addEventListener(
-      "submit",
-      async event => {
+ requestForm
+  ?.addEventListener(
+    "submit",
+    async event => {
 
-        event.preventDefault();
-
-
-        const submitButton =
-          $("submitRequestButton");
+      event.preventDefault();
 
 
-        submitButton.disabled =
-          true;
+      const submitButton =
+        $("submitRequestButton");
 
 
-        const originalText =
-          submitButton.textContent;
+      submitButton.disabled =
+        true;
 
 
-        submitButton.textContent =
-          "Saving…";
+      const originalText =
+        submitButton.textContent;
 
 
-        try {
-
-          const values =
-            getRequestFormValues();
+      submitButton.textContent =
+        "Saving…";
 
 
-          const editingId =
-            $("editingRequestId")
-              .value;
+      try {
+
+        const editingId =
+          $("editingRequestId")
+            .value;
 
 
-          let result;
+        const subjectValues =
+          getSubjectFormValues();
 
 
-          if (editingId) {
-
-            result =
-              await db.rpc(
-                "update_identitylink_request",
-                {
-                  p_request_id:
-                    editingId,
-
-                  ...values
-                }
-              );
-
-          }
-          else {
-
-            result =
-              await db.rpc(
-                "create_identitylink_request",
-                values
-              );
-
-          }
+        let result;
 
 
-          if (result.error) {
-            throw result.error;
-          }
+        // =====================================================
+        // EDIT EXISTING SUBJECT INFORMATION
+        // =====================================================
+
+        if (editingId) {
+
+          result =
+            await db.rpc(
+              "update_identitylink_subject_file",
+              {
+                p_request_id:
+                  editingId,
+
+                ...subjectValues
+              }
+            );
+
+        }
 
 
-          closeRequestModal();
+        // =====================================================
+        // CREATE NEW SUBJECT FILE
+        // =====================================================
+
+        else {
+
+          const requestImage =
+            $("requestImage")
+              .checked;
 
 
-          showMessage(
-            editingId
-              ? "IdentityLink request updated and submitted for approval."
-              : `IdentityLink request ${result.data?.request_number || ""} submitted for approval.`,
-            "success"
-          );
-
-
-          await Promise.all([
-            loadRequests(),
-            loadDashboardCounts()
-          ]);
+          const requestFingerprint =
+            $("requestFingerprint")
+              .checked;
 
 
           if (
-            result.data?.request_id
+            !requestImage &&
+            !requestFingerprint
           ) {
 
-            await openRequestDetail(
-              result.data.request_id
+            throw new Error(
+              "Select Image Request, Fingerprint Request, or both."
             );
 
           }
 
-        }
-        catch (error) {
 
-          console.error(
-            "IdentityLink request save error:",
-            error
+          const currentLocation =
+            $("lastKnownLocation")
+              .value
+              .trim();
+
+
+          if (!currentLocation) {
+
+            throw new Error(
+              "Current patient location is required."
+            );
+
+          }
+
+
+          result =
+            await db.rpc(
+              "create_identitylink_subject_file",
+              {
+
+                p_request_image:
+                  requestImage,
+
+                p_request_fingerprint:
+                  requestFingerprint,
+
+                p_room_last_known_location:
+                  currentLocation,
+
+                ...subjectValues
+
+              }
+            );
+
+        }
+
+
+        if (result.error) {
+          throw result.error;
+        }
+
+
+        closeRequestModal();
+
+
+        showMessage(
+          editingId
+            ? "IdentityLink subject information updated."
+            : `IdentityLink file ${result.data?.request_number || ""} submitted for approval.`,
+          "success"
+        );
+
+
+        await Promise.all([
+          loadRequests(),
+          loadDashboardCounts()
+        ]);
+
+
+        if (
+          result.data?.request_id
+        ) {
+
+          await openRequestDetail(
+            result.data.request_id
           );
 
-
-          showMessage(
-            error.message ||
-            "Unable to save IdentityLink request.",
-            "error"
-          );
-
         }
-        finally {
+        else if (
+          editingId
+        ) {
 
-          submitButton.disabled =
-            false;
-
-          submitButton.textContent =
-            originalText;
+          await openRequestDetail(
+            editingId
+          );
 
         }
 
       }
-    );
+      catch (error) {
 
+        console.error(
+          "IdentityLink save error:",
+          error
+        );
+
+
+        showMessage(
+          error.message ||
+          "Unable to save IdentityLink record.",
+          "error"
+        );
+
+      }
+      finally {
+
+        submitButton.disabled =
+          false;
+
+        submitButton.textContent =
+          originalText;
+
+      }
+
+    }
+  );
 
 
   // =========================================================
   // EDIT REQUEST
   // =========================================================
 
-  function openEditRequest(
-    request
+function openEditRequest(
+  request
+) {
+
+  if (
+    request.case_status !==
+    "open"
   ) {
 
-    if (
-      ![
-        "pending",
-        "changes_requested"
-      ].includes(
-        request.status
-      )
-    ) {
-
-      showMessage(
-        "This IdentityLink request can no longer be edited.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    $("editingRequestId").value =
-      request.id;
-
-
-    $("requestType").value =
-      request.request_type ||
-      "";
-
-
-    $("patientAlias").value =
-      request.patient_alias ||
-      "";
-
-
-    $("mrnPatientNumber").value =
-      request.mrn_patient_number ||
-      "";
-
-
-    $("lastKnownLocation").value =
-      request.room_last_known_location ||
-      "";
-
-
-    $("identifyingFactors").value =
-      request.identifying_factors ||
-      "";
-
-
-    $("sourceOrganization").value =
-      request.source_organization ||
-      "";
-
-
-    $("sourceRequesterName").value =
-      request.source_requester_name ||
-      "";
-
-
-    $("sourceRequesterEmail").value =
-      request.source_requester_email ||
-      "";
-
-
-    $("sourceRequesterPhone").value =
-      request.source_requester_phone ||
-      "";
-
-
-    $("sourceReferenceNumber").value =
-      request.source_reference_number ||
-      "";
-
-
-    $("managerNotes").value =
-      request.manager_notes ||
-      "";
-
-
-    $("requestModalTitle").textContent =
-      `Edit ${request.request_number}`;
-
-
-    $("submitRequestButton").textContent =
-      request.status ===
-      "changes_requested"
-        ? "Save & Resubmit"
-        : "Save Changes";
-
-
-    requestModal.classList.remove(
-      "hidden"
+    showMessage(
+      "This IdentityLink subject file is no longer open.",
+      "error"
     );
+
+    return;
 
   }
 
+
+  requestForm.reset();
+
+
+  $("editingRequestId").value =
+    request.id;
+
+
+  // Existing authorization tracks are managed
+  // from the subject file, not from normal editing.
+
+  $("requestSelectionSection")
+    .classList
+    .add("hidden");
+
+
+  // Location has its own audited workflow.
+
+  $("initialLocationField")
+    .classList
+    .add("hidden");
+
+
+  $("lastKnownLocation")
+    .required =
+    false;
+
+
+  $("patientAlias").value =
+    request.patient_alias ||
+    "";
+
+
+  $("mrnPatientNumber").value =
+    request.mrn_patient_number ||
+    "";
+
+
+  $("identifyingFactors").value =
+    request.identifying_factors ||
+    "";
+
+
+  $("sourceOrganization").value =
+    request.source_organization ||
+    "";
+
+
+  $("sourceRequesterName").value =
+    request.source_requester_name ||
+    "";
+
+
+  $("sourceRequesterEmail").value =
+    request.source_requester_email ||
+    "";
+
+
+  $("sourceRequesterPhone").value =
+    request.source_requester_phone ||
+    "";
+
+
+  $("sourceReferenceNumber").value =
+    request.source_reference_number ||
+    "";
+
+
+  $("managerNotes").value =
+    request.manager_notes ||
+    "";
+
+
+  $("requestModalTitle").textContent =
+    `Edit ${request.request_number}`;
+
+
+  $("submitRequestButton").textContent =
+    "Save Subject Information";
+
+
+  requestModal.classList.remove(
+    "hidden"
+  );
+
+}
 
 
   // =========================================================
