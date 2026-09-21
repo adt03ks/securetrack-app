@@ -1767,3 +1767,227 @@ textarea {
   height: auto;
   object-fit: contain;
 }
+/* =========================================================
+   MULTI-IMAGE LABELING
+========================================================= */
+
+.selected-image-label-list {
+
+  display: grid;
+
+  gap: 10px;
+
+  margin-top: 12px;
+
+}
+
+
+.selected-image-label-row {
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(220px, 0.8fr)
+    minmax(240px, 1.2fr);
+
+  gap: 14px;
+
+  align-items: center;
+
+  padding: 12px;
+
+  border: 1px solid #d7e5f5;
+
+  border-radius: 11px;
+
+  background: #f8fbff;
+
+}
+
+
+.selected-image-file {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 0;
+
+}
+
+
+.selected-image-file strong {
+
+  display: block;
+
+  color: #0b2e59;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+}
+
+
+.selected-image-file span:not(.selected-image-number) {
+
+  display: block;
+
+  margin-top: 3px;
+
+  color: #64748b;
+
+  font-size: 0.75rem;
+
+}
+
+
+.selected-image-number {
+
+  width: 30px;
+
+  height: 30px;
+
+  flex: 0 0 30px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: #1769e0;
+
+  color: white;
+
+  font-size: 0.78rem;
+
+  font-weight: 900;
+
+}
+
+
+.selected-image-label-row label {
+
+  display: grid;
+
+  gap: 5px;
+
+}
+
+
+.selected-image-label-row label > span {
+
+  color: #0b2e59;
+
+  font-size: 0.76rem;
+
+  font-weight: 800;
+
+}
+
+
+.selected-image-label-row input {
+
+  width: 100%;
+
+  min-height: 42px;
+
+  padding: 9px 11px;
+
+  border: 1px solid #bfd6ee;
+
+  border-radius: 9px;
+
+  background: white;
+
+  color: #334155;
+
+}
+
+
+
+/* =========================================================
+   SUBJECT IMAGE DELETE
+========================================================= */
+
+.subject-image-card {
+
+  position: relative;
+
+}
+
+
+.subject-image-delete-button {
+
+  position: absolute;
+
+  z-index: 5;
+
+  top: 8px;
+
+  right: 8px;
+
+  width: 34px;
+
+  height: 34px;
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 0;
+
+  border: 2px solid white;
+
+  border-radius: 50%;
+
+  background: #b42318;
+
+  color: white;
+
+  font-size: 1.35rem;
+
+  font-weight: 900;
+
+  line-height: 1;
+
+  box-shadow:
+    0 4px 12px
+    rgba(0, 0, 0, 0.28);
+
+}
+
+
+.subject-image-delete-button:hover {
+
+  background: #8f1b13;
+
+  transform: scale(1.05);
+
+}
+
+
+.subject-image-delete-button:disabled {
+
+  opacity: 0.5;
+
+  cursor: wait;
+
+}
+
+
+@media (max-width: 760px) {
+
+  .selected-image-label-row {
+
+    grid-template-columns:
+      1fr;
+
+  }
+
+}
