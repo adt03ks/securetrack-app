@@ -1627,6 +1627,93 @@ function openEditRequest(
 
 }
 
+  async function requestAdditionalAction(
+  requestId,
+  actionType
+) {
+
+  const label =
+    actionType ===
+    "image_request"
+      ? "Image Request"
+      : "Fingerprint Request";
+
+
+  const confirmed =
+    window.confirm(
+      `Submit ${label} for approval on this existing IdentityLink file?`
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    const {
+      error
+    } =
+      await db.rpc(
+        "request_identitylink_action",
+        {
+          p_request_id:
+            requestId,
+
+          p_action_type:
+            actionType
+        }
+      );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    showMessage(
+      `${label} submitted for approval.`,
+      "success"
+    );
+
+
+    await Promise.all([
+      loadRequests(),
+      loadDashboardCounts()
+    ]);
+
+
+    if (
+      !detailModal
+        .classList
+        .contains("hidden")
+    ) {
+
+      await openRequestDetail(
+        requestId
+      );
+
+    }
+
+  }
+  catch (error) {
+
+    console.error(
+      "IdentityLink additional request error:",
+      error
+    );
+
+
+    showMessage(
+      error.message ||
+      `Unable to submit ${label}.`,
+      "error"
+    );
+
+  }
+
+}
 
   // =========================================================
   // REQUEST DETAIL
@@ -1691,15 +1778,28 @@ function openEditRequest(
     const request =
       currentDetail.request;
 
+   const actions =
+  currentDetail.actions ||
+  [];
+
+
+const actionApprovals =
+  currentDetail.action_approvals ||
+  [];
+
+
+const locationHistory =
+  currentDetail.location_history ||
+  []; 
 
     const files =
       currentDetail.files ||
       [];
 
 
-    const approvals =
-      currentDetail.approvals ||
-      [];
+   const legacyApprovals =
+  currentDetail.legacy_approvals ||
+  [];
 
 
     const activity =
@@ -1848,6 +1948,87 @@ function openEditRequest(
 
             <div>
 
+<section class="detail-section">
+
+  <div class="detail-section-head">
+
+    <div>
+
+      <h3>
+        Identification Authorizations
+      </h3>
+
+      <div class="request-detail-small">
+        Image and fingerprint authorization are tracked independently.
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="authorization-grid">
+
+    ${renderAuthorizationCard(
+      request,
+      actions,
+      actionApprovals,
+      "image_request",
+      "Image Request"
+    )}
+
+    ${renderAuthorizationCard(
+      request,
+      actions,
+      actionApprovals,
+      "fingerprint",
+      "Fingerprint Request"
+    )}
+
+  </div>
+
+</section>
+
+      </section>
+
+    `;
+
+
+    // =========================================================
+    // REQUEST AN UNREQUESTED AUTHORIZATION
+    // =========================================================
+
+    document
+      .querySelectorAll(
+        ".request-detail-action-button"
+      )
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            () =>
+              requestAdditionalAction(
+                button.dataset.requestId,
+                button.dataset.actionType
+              )
+          );
+
+        }
+      );
+
+
+    $("editCurrentRequestButton")
+      ?.addEventListener(
+        "click",
+        () => {
+
+          openEditRequest(
+            request
+          );
+
+        }
+      );
               <h3>
                 Subject Images
               </h3>
@@ -2093,6 +2274,146 @@ function openEditRequest(
 
   }
 
+ // =========================================================
+  // AUTHORIZATION CARD
+  // =========================================================
+
+  function renderAuthorizationCard(
+    request,
+    actions,
+    approvals,
+    actionType,
+    label
+  ) {
+
+    const action =
+      actions.find(
+        item =>
+          item.action_type ===
+          actionType
+      );
+
+
+    const status =
+      action?.status ||
+      "not_requested";
+
+
+    const approverInitiated =
+      approvals.some(
+        approval =>
+          approval.action_type ===
+            actionType &&
+          approval.action_snapshot
+            ?.approver_activated_action ===
+            true
+      );
+
+
+    if (
+      status ===
+      "not_requested"
+    ) {
+
+      return `
+        <article class="authorization-card not-requested">
+
+          <h4>
+            ${escapeHtml(label)}
+          </h4>
+
+          <div class="authorization-status">
+
+            <span class="not-requested-pill">
+              Not Requested
+            </span>
+
+          </div>
+
+          <div class="authorization-meta">
+            This authorization has not been requested.
+          </div>
+
+          <div class="authorization-actions">
+
+            <button
+              class="button secondary request-detail-action-button"
+              type="button"
+              data-request-id="${escapeHtml(request.id)}"
+              data-action-type="${escapeHtml(actionType)}"
+            >
+              ${
+                actionType === "image_request"
+                  ? "Request Image Approval"
+                  : "Request Fingerprint Approval"
+              }
+            </button>
+
+          </div>
+
+        </article>
+      `;
+
+    }
+
+
+    return `
+      <article class="authorization-card ${escapeHtml(status)}">
+
+        <h4>
+          ${escapeHtml(label)}
+        </h4>
+
+        <div class="authorization-status">
+
+          <span class="status-pill status-${escapeHtml(status)}">
+            ${escapeHtml(statusLabel(status))}
+          </span>
+
+        </div>
+
+
+        ${
+          approverInitiated
+            ? `
+                <span class="approver-initiated-badge">
+                  APPROVER INITIATED
+                </span>
+              `
+            : ""
+        }
+
+
+        <div class="authorization-meta">
+
+          ${
+            action?.requested_by_name
+              ? `
+                  Requested / Activated by:
+                  <strong>
+                    ${escapeHtml(action.requested_by_name)}
+                  </strong>
+                  <br>
+                `
+              : ""
+          }
+
+          ${
+            action?.requested_at
+              ? escapeHtml(
+                  formatDateTime(
+                    action.requested_at
+                  )
+                )
+              : ""
+          }
+
+        </div>
+
+      </article>
+    `;
+
+  }
 
 
   function detailItem(
