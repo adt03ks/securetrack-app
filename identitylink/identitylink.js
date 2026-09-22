@@ -1755,23 +1755,28 @@ function openEditRequest(
   // =========================================================
 
   async function openRequestDetail(
+  requestId
+) {
+
+  detailModal.classList.remove(
+    "hidden"
+  );
+
+
+  detailBody.innerHTML =
+    '<div class="loading-state">Loading IdentityLink request…</div>';
+
+
+  console.log(
+    "IdentityLink: loading request detail",
     requestId
-  ) {
-
-    detailModal.classList.remove(
-      "hidden"
-    );
+  );
 
 
-    detailBody.innerHTML =
-      '<div class="loading-state">Loading IdentityLink request…</div>';
+  try {
 
-
-    const {
-      data,
-      error
-    } =
-      await db.rpc(
+    const detailRequest =
+      db.rpc(
         "get_identitylink_management_request_detail",
         {
           p_request_id:
@@ -1780,154 +1785,107 @@ function openEditRequest(
       );
 
 
-    if (error) {
+    const timeout =
+      new Promise(
+        (
+          resolve,
+          reject
+        ) => {
 
-      detailModal.classList.add(
-        "hidden"
+          setTimeout(
+            () => {
+
+              reject(
+                new Error(
+                  "IdentityLink request detail timed out after 15 seconds."
+                )
+              );
+
+            },
+            15000
+          );
+
+        }
       );
 
+
+    const {
+      data,
+      error
+    } =
+      await Promise.race([
+        detailRequest,
+        timeout
+      ]);
+
+
+    console.log(
+      "IdentityLink detail response:",
+      {
+        data,
+        error
+      }
+    );
+
+
+    if (error) {
       throw error;
+    }
+
+
+    if (!data?.request) {
+
+      throw new Error(
+        "The IdentityLink detail request returned no subject record."
+      );
 
     }
 
 
-        currentDetail =
+    currentDetail =
       data;
 
 
-    renderRequestDetail();
+    await renderRequestDetail();
+
+  }
+  catch (error) {
+
+    console.error(
+      "IdentityLink request detail error:",
+      error
+    );
+
+
+    detailBody.innerHTML =
+      `
+        <div class="empty-state">
+          <strong>
+            Unable to load IdentityLink request.
+          </strong>
+
+          <div
+            class="request-detail-small"
+            style="margin-top: 8px;"
+          >
+            ${escapeHtml(
+              error.message ||
+              "Unknown request-detail error."
+            )}
+          </div>
+        </div>
+      `;
+
+
+    showMessage(
+      error.message ||
+      "Unable to load IdentityLink request.",
+      "error"
+    );
 
   }
 
-
-
-  async function renderRequestDetail() {
-
-    if (!currentDetail?.request) {
-      return;
-    }
-
-
-    const request =
-      currentDetail.request;
-
-
-    const actions =
-      currentDetail.actions ||
-      [];
-
-
-    const actionApprovals =
-      currentDetail.action_approvals ||
-      [];
-
-
-    const locationHistory =
-      currentDetail.location_history ||
-      [];
-
-
-    const files =
-      currentDetail.files ||
-      [];
-
-
-    const activity =
-      currentDetail.activity ||
-      [];
-
-
-    $("detailRequestNumber").textContent =
-      request.request_number;
-
-
-    // The SUBJECT FILE remains editable while open.
-    // Image and fingerprint approvals are tracked separately.
-
-    const canModify =
-      request.case_status ===
-      "open";
-
-
-    detailBody.innerHTML = `
-
-      <div class="detail-top">
-
-        <div>
-
-          <span
-            class="status-pill ${
-              request.case_status === "open"
-                ? "status-pending"
-                : "status-completed"
-            }"
-          >
-            ${
-              request.case_status === "open"
-                ? "Open Subject File"
-                : escapeHtml(
-                    request.case_status ||
-                    "Closed"
-                  )
-            }
-          </span>
-
-
-          <div class="request-detail-small">
-
-            Submitted
-            ${escapeHtml(
-              formatDateTime(
-                request.submitted_at
-              )
-            )}
-
-            by
-
-            ${escapeHtml(
-              request.submitted_by_name
-            )}
-
-          </div>
-
-        </div>
-
-
-        <div class="detail-actions">
-
-          ${
-            canModify
-              ? `
-                  <button
-                    id="editCurrentRequestButton"
-                    class="button secondary"
-                    type="button"
-                  >
-                    Edit Subject Information
-                  </button>
-                `
-              : ""
-          }
-
-
-          ${
-            canModify
-              ? `
-                  <button
-                    id="cancelCurrentRequestButton"
-                    class="button danger"
-                    type="button"
-                  >
-                    Cancel File
-                  </button>
-                `
-              : ""
-          }
-
-        </div>
-
-      </div>
-
+}
 
 
       <!-- ================================================
