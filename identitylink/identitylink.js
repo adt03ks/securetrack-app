@@ -2500,7 +2500,52 @@ function openEditRequest(
       );
 
 
+// =========================================================
+// SUBJECT IMAGE UPLOAD EVENTS
+// =========================================================
 
+$("subjectImageFile")
+  ?.addEventListener(
+    "change",
+    renderSelectedImageLabels
+  );
+
+
+$("uploadSubjectImageButton")
+  ?.addEventListener(
+    "click",
+    () =>
+      uploadSubjectImage(
+        request.id
+      )
+  );
+
+
+
+// =========================================================
+// RENDER IMAGES / HISTORY
+// =========================================================
+
+await renderSubjectImages(
+  files.filter(
+    file =>
+      file.file_type ===
+      "subject_image"
+  )
+);
+
+
+renderApprovalHistory(
+  actionApprovals
+);
+
+
+renderActivityHistory(
+  activity
+);
+
+
+} // <-- closes renderRequestDetail()
      // =========================================================
   // SUBJECT IMAGE UPLOAD
   // =========================================================
