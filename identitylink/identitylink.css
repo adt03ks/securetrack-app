@@ -631,6 +631,56 @@ textarea {
 }
 
 
+/* Optional fingerprint-result indicator column.
+   The current 6-column layout remains intact until .result-column exists. */
+.request-row:has(.result-column) {
+  grid-template-columns:
+    52px
+    145px
+    minmax(190px, 1.4fr)
+    minmax(150px, 1fr)
+    minmax(150px, 1fr)
+    150px
+    auto;
+}
+
+.result-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subject-result-indicator {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  font-size: 1.4rem;
+  font-weight: 950;
+}
+
+.subject-result-indicator.positive {
+  color: var(--success);
+  background: var(--success-soft);
+  border: 2px solid var(--success);
+}
+
+.subject-result-indicator.negative {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border: 2px solid var(--danger);
+}
+
+.subject-result-indicator.pending {
+  color: #94a3b8;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+}
+
 .request-row:hover {
   border-color: #a9cdef;
 }
@@ -1660,100 +1710,7 @@ textarea {
 
   padding: 2px 4px;
 }
-/* =========================================================
-   RESPONSIVE
-========================================================= */
 
-@media (max-width: 1050px) {
-
-  .stats-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-
-  .request-row {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-
-  .detail-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-}
-
-
-@media (max-width: 720px) {
-.identitylink-logo {
-  width: 190px;
-}
-  .app-shell {
-    width:
-      min(100% - 18px, 1500px);
-
-    padding-top: 10px;
-  }
-
-  
-.request-choice-grid,
-.authorization-grid {
-  grid-template-columns: 1fr;
-}
-
-  .topbar,
-  .hero,
-  .user-strip {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-
-  .header-actions {
-    width: 100%;
-  }
-
-
-  .header-actions .button {
-    flex: 1;
-  }
-
-
-  .stats-grid,
-  .search-grid,
-  .field-grid.two,
-  .detail-grid,
-  .upload-row {
-    grid-template-columns: 1fr;
-  }
-
-
-  .request-row {
-    grid-template-columns: 1fr;
-  }
-
-
-  .span-two,
-  .detail-item.wide {
-    grid-column: auto;
-  }
-
-
-  .modal-backdrop {
-    padding: 8px;
-  }
-
-
-  .modal {
-    max-height:
-      calc(100vh - 16px);
-
-    border-radius: 14px;
-  }
-
-}
 .identitylink-brand {
   display: inline-flex;
   align-items: center;
@@ -1767,6 +1724,15 @@ textarea {
   height: auto;
   object-fit: contain;
 }
+.upload-selection {
+  display: grid;
+  gap: 12px;
+}
+
+.upload-selection > .button {
+  justify-self: start;
+}
+
 /* =========================================================
    MULTI-IMAGE LABELING
 ========================================================= */
@@ -1980,14 +1946,115 @@ textarea {
 
 }
 
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1050px) {
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .request-row {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .request-row:has(.result-column) {
+    grid-template-columns:
+      52px
+      minmax(0, 1fr);
+  }
+
+  .request-row:has(.result-column) .result-column {
+    grid-row: 1 / span 6;
+  }
+
+  .detail-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
 
 @media (max-width: 760px) {
 
   .selected-image-label-row {
-
     grid-template-columns:
       1fr;
+  }
 
+}
+
+
+@media (max-width: 720px) {
+
+  .identitylink-logo {
+    width: 190px;
+  }
+
+  .app-shell {
+    width:
+      min(100% - 18px, 1500px);
+
+    padding-top: 10px;
+  }
+
+  .request-choice-grid,
+  .authorization-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar,
+  .hero,
+  .user-strip {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions .button {
+    flex: 1;
+  }
+
+  .stats-grid,
+  .search-grid,
+  .field-grid.two,
+  .detail-grid,
+  .upload-row {
+    grid-template-columns: 1fr;
+  }
+
+  .request-row,
+  .request-row:has(.result-column) {
+    grid-template-columns: 1fr;
+  }
+
+  .request-row:has(.result-column) .result-column {
+    grid-row: auto;
+    justify-content: flex-start;
+  }
+
+  .span-two,
+  .detail-item.wide {
+    grid-column: auto;
+  }
+
+  .modal-backdrop {
+    padding: 8px;
+  }
+
+  .modal {
+    max-height:
+      calc(100vh - 16px);
+
+    border-radius: 14px;
   }
 
 }
