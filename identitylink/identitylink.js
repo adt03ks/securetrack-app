@@ -2548,6 +2548,244 @@ renderActivityHistory(
 
 
 } 
+
+  // =========================================================
+// AUTHORIZATION CARD
+// =========================================================
+
+function renderAuthorizationCard(
+  request,
+  actions,
+  approvals,
+  actionType,
+  label
+) {
+
+  const action =
+    actions.find(
+      item =>
+        item.action_type ===
+        actionType
+    );
+
+
+  const status =
+    action?.status ||
+    "not_requested";
+
+
+  const approverInitiated =
+    approvals.some(
+      approval =>
+        approval.action_type ===
+          actionType &&
+        approval.action_snapshot
+          ?.approver_activated_action ===
+          true
+    );
+
+
+  if (
+    status ===
+    "not_requested"
+  ) {
+
+    return `
+      <article class="authorization-card not-requested">
+
+        <h4>
+          ${escapeHtml(label)}
+        </h4>
+
+        <div class="authorization-status">
+
+          <span class="not-requested-pill">
+            Not Requested
+          </span>
+
+        </div>
+
+        <div class="authorization-meta">
+          This authorization has not been requested.
+        </div>
+
+        <div class="authorization-actions">
+
+          <button
+            class="button secondary request-detail-action-button"
+            type="button"
+            data-request-id="${escapeHtml(request.id)}"
+            data-action-type="${escapeHtml(actionType)}"
+          >
+            ${
+              actionType === "image_request"
+                ? "Request Image Approval"
+                : "Request Fingerprint Approval"
+            }
+          </button>
+
+        </div>
+
+      </article>
+    `;
+
+  }
+
+
+  return `
+    <article class="authorization-card ${escapeHtml(status)}">
+
+      <h4>
+        ${escapeHtml(label)}
+      </h4>
+
+      <div class="authorization-status">
+
+        <span class="status-pill status-${escapeHtml(status)}">
+          ${escapeHtml(statusLabel(status))}
+        </span>
+
+      </div>
+
+
+      ${
+        approverInitiated
+          ? `
+              <span class="approver-initiated-badge">
+                APPROVER INITIATED
+              </span>
+            `
+          : ""
+      }
+
+
+      <div class="authorization-meta">
+
+        ${
+          action?.requested_by_name
+            ? `
+                Requested / Activated by:
+                <strong>
+                  ${escapeHtml(action.requested_by_name)}
+                </strong>
+                <br>
+              `
+            : ""
+        }
+
+        ${
+          action?.requested_at
+            ? escapeHtml(
+                formatDateTime(
+                  action.requested_at
+                )
+              )
+            : ""
+        }
+
+      </div>
+
+    </article>
+  `;
+
+}
+
+
+// =========================================================
+// LOCATION HISTORY
+// =========================================================
+
+function renderLocationHistory(
+  history
+) {
+
+  if (
+    !history.length
+  ) {
+
+    return `
+      <div class="empty-state">
+        No location history recorded.
+      </div>
+    `;
+
+  }
+
+
+  return history
+    .map(
+      item => `
+        <article class="location-history-item">
+
+          <strong>
+            ${escapeHtml(item.new_location)}
+          </strong>
+
+          ${
+            item.previous_location
+              ? `
+                  <div>
+                    Previous:
+                    ${escapeHtml(item.previous_location)}
+                  </div>
+                `
+              : `
+                  <div>
+                    Initial location
+                  </div>
+                `
+          }
+
+          ${
+            item.change_reason
+              ? `
+                  <div>
+                    ${escapeHtml(item.change_reason)}
+                  </div>
+                `
+              : ""
+          }
+
+          <span>
+            ${escapeHtml(item.changed_by_name)}
+            •
+            ${escapeHtml(formatDateTime(item.changed_at))}
+          </span>
+
+        </article>
+      `
+    )
+    .join("");
+
+}
+
+
+// =========================================================
+// DETAIL ITEM
+// =========================================================
+
+function detailItem(
+  label,
+  value,
+  wide = false
+) {
+
+  return `
+    <div class="detail-item ${wide ? "wide" : ""}">
+
+      <span class="label">
+        ${escapeHtml(label)}
+      </span>
+
+      <div class="value">
+        ${escapeHtml(value || "—")}
+      </div>
+
+    </div>
+  `;
+
+}
+  
      // =========================================================
   // SUBJECT IMAGE UPLOAD
   // =========================================================
