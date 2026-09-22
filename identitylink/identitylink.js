@@ -1750,11 +1750,11 @@ function openEditRequest(
 
 }
 
-  // =========================================================
-  // REQUEST DETAIL
-  // =========================================================
+// =========================================================
+// REQUEST DETAIL
+// =========================================================
 
-  async function openRequestDetail(
+async function openRequestDetail(
   requestId
 ) {
 
@@ -1767,126 +1767,37 @@ function openEditRequest(
     '<div class="loading-state">Loading IdentityLink request…</div>';
 
 
-  console.log(
-    "IdentityLink: loading request detail",
-    requestId
-  );
-
-
-  try {
-
-    const detailRequest =
-      db.rpc(
-        "get_identitylink_management_request_detail",
-        {
-          p_request_id:
-            requestId
-        }
-      );
-
-
-    const timeout =
-      new Promise(
-        (
-          resolve,
-          reject
-        ) => {
-
-          setTimeout(
-            () => {
-
-              reject(
-                new Error(
-                  "IdentityLink request detail timed out after 15 seconds."
-                )
-              );
-
-            },
-            15000
-          );
-
-        }
-      );
-
-
-    const {
-      data,
-      error
-    } =
-      await Promise.race([
-        detailRequest,
-        timeout
-      ]);
-
-
-    console.log(
-      "IdentityLink detail response:",
+  const {
+    data,
+    error
+  } =
+    await db.rpc(
+      "get_identitylink_management_request_detail",
       {
-        data,
-        error
+        p_request_id:
+          requestId
       }
     );
 
 
-    if (error) {
-      throw error;
-    }
+  if (error) {
 
-
-    if (!data?.request) {
-
-      throw new Error(
-        "The IdentityLink detail request returned no subject record."
-      );
-
-    }
-
-
-    currentDetail =
-      data;
-
-
-    await renderRequestDetail();
-
-  }
-  catch (error) {
-
-    console.error(
-      "IdentityLink request detail error:",
-      error
+    detailModal.classList.add(
+      "hidden"
     );
 
-
-    detailBody.innerHTML =
-      `
-        <div class="empty-state">
-          <strong>
-            Unable to load IdentityLink request.
-          </strong>
-
-          <div
-            class="request-detail-small"
-            style="margin-top: 8px;"
-          >
-            ${escapeHtml(
-              error.message ||
-              "Unknown request-detail error."
-            )}
-          </div>
-        </div>
-      `;
-
-
-    showMessage(
-      error.message ||
-      "Unable to load IdentityLink request.",
-      "error"
-    );
+    throw error;
 
   }
+
+
+  currentDetail =
+    data;
+
+
+  await renderRequestDetail();
 
 }
-
 
       <!-- ================================================
            SUBJECT INFORMATION
