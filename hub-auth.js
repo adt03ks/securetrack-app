@@ -117,6 +117,17 @@ endOfShift: [
   ],
 
 
+  // Notification Settings
+  notifications: [
+    "officer",
+    "senior_officer",
+    "team_lead",
+    "manager",
+    "director",
+    "admin"
+  ],
+
+
   // Management Command Center
   manager: [
     "manager",
