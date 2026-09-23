@@ -114,38 +114,35 @@ document
 
     try {
 
-      await ST.rpc(
-        "record_device_inspection",
-        {
+     await ST.rpc(
+  "record_device_inspection",
+  {
 
-          p_public_token:
-            ST.assetToken(),
+    p_public_token:
+      ST.assetToken(),
 
-          p_employee_number:
-            String(
-              form.get(
-                "employee_number"
-              ) || ""
-            ).trim(),
+    p_employee_number:
+      String(
+        form.get(
+          "employee_number"
+        ) || ""
+      ).trim(),
 
-          p_badge_number:
-            String(
-              form.get(
-                "badge_number"
-              ) || ""
-            ).trim(),
+    p_checklist:
+      checklist,
 
-          p_checklist:
-            checklist,
+    p_overall_result:
+      overall,
 
-          p_overall_result:
-            overall,
+    p_notes:
+      String(
+        form.get(
+          "notes"
+        ) || ""
+      ).trim() || null
 
-          p_notes:
-            notes || null
-
-        }
-      );
+  }
+);
 
 
       ST.showResult(
