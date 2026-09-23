@@ -11,14 +11,39 @@ document.getElementById("issueForm").addEventListener("submit", async (ev) => {
   submit.textContent = "Submitting report…";
 
   try {
-    const data = await ST.rpc("report_device_issue", {
-      p_public_token: ST.assetToken(),
-      p_employee_number: String(form.get("employee_number") || "").trim(),
-      p_badge_number: String(form.get("badge_number") || "").trim(),
-      p_category: form.get("category"),
-      p_severity: form.get("severity"),
-      p_description: String(form.get("description") || "").trim()
-    });
+   const data = await ST.rpc(
+  "report_device_issue",
+  {
+
+    p_public_token:
+      ST.assetToken(),
+
+    p_employee_number:
+      String(
+        form.get(
+          "employee_number"
+        ) || ""
+      ).trim(),
+
+    p_category:
+      form.get(
+        "category"
+      ),
+
+    p_severity:
+      form.get(
+        "severity"
+      ),
+
+    p_description:
+      String(
+        form.get(
+          "description"
+        ) || ""
+      ).trim()
+
+  }
+);
 
     const ref = data?.issue_reference
       ? ` Reference: ${data.issue_reference}.`
