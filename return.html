@@ -28,7 +28,9 @@
           <p class="subtle">Release the verified device from your custody and create a permanent timestamped return record.</p>
           <div class="status-strip">
             <span class="status-dot success"></span>
-            <span>Device verification confirmed. Verify your employee credentials to complete the return.</span>
+           <span>
+  Device verification confirmed. Enter your employee number to complete the return.
+</span>
           </div>
         </div>
       </header>
@@ -46,24 +48,36 @@
               <div class="callout-icon">↩</div>
               <div>
                 <strong>Return instructions</strong>
-                <p>Confirm the device shown is the equipment you are physically returning. Enter your employee and badge numbers, add any return-condition notes, then submit the return.</p>
+                <p>
+  Confirm the device shown is the equipment you are physically returning.
+  Enter your employee number, add any return-condition notes,
+  then submit the return.
+</p>
               </div>
             </div>
 
             <form id="returnForm">
               <input id="assetToken" type="hidden">
 
-              <div class="field-grid">
-                <div class="field">
-                  <label for="employee_number">Employee Number</label>
-                  <input id="employee_number" name="employee_number" autocomplete="off" inputmode="numeric" required>
-                </div>
+            <div class="field-grid">
 
-                <div class="field">
-                  <label for="badge_number">Badge Number</label>
-                  <input id="badge_number" name="badge_number" autocomplete="off" inputmode="numeric" required>
-                </div>
-              </div>
+  <div class="field">
+
+    <label for="employee_number">
+      Employee Number
+    </label>
+
+    <input
+      id="employee_number"
+      name="employee_number"
+      autocomplete="off"
+      inputmode="numeric"
+      required
+    >
+
+  </div>
+
+</div>
 
               <div class="field">
                 <label for="notes">Return Notes <span class="subtle">(optional)</span></label>
