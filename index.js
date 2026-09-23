@@ -48,7 +48,10 @@
     document.getElementById(
       "errorBox"
     );
-
+const changeDeviceAction =
+  document.getElementById(
+    "changeDeviceAction"
+  );
 
   const identificationSection =
     document.getElementById(
@@ -829,26 +832,33 @@
   }
 
 
-  function setVerified() {
+ function setVerified() {
 
-    verifyBtn.classList.add(
-      "verified"
-    );
+  verifyBtn.classList.add(
+    "verified"
+  );
 
-    verifyBtn.disabled =
-      true;
+  verifyBtn.disabled =
+    true;
 
-    verifyBtn.textContent =
-      "✓ Device Verified";
+  verifyBtn.textContent =
+    "✓ Device Verified";
 
-    statusText.textContent =
-      "Device verified. Select an action to continue.";
+  statusText.textContent =
+    "Device verified. Complete the required inspection before checkout.";
 
-    setActionState(
-      true
-    );
+  if (changeDeviceAction) {
+
+    changeDeviceAction.hidden =
+      false;
 
   }
+
+  setActionState(
+    true
+  );
+
+}
 
 
   setActionState(
