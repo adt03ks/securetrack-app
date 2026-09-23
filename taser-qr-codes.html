@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Taser QR Codes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f4f4;
+      color: #111;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #555;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      page-break-inside: avoid;
+    }
+
+    .device-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .serial {
+      font-size: 14px;
+      color: #444;
+      margin-bottom: 4px;
+    }
+
+    .location {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .qr-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 8px 0 10px;
+      min-height: 170px;
+    }
+
+    .scan-url {
+      font-size: 11px;
+      color: #666;
+      word-break: break-all;
+      margin-top: 8px;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        margin: 10px;
+      }
+
+      .grid {
+        gap: 12px;
+      }
+
+      .card {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>SecureTrack Taser QR Codes</h1>
+  <div class="subtitle">Scan to open the SecureTrack device verification page</div>
+
+  <div id="qrGrid" class="grid"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script>
+    // REPLACE THIS with your actual live device page URL
+    const BASE_URL = "https://securetrackop.com/device.html";
+
+    const devices = [
+      { name: "Taser-001", serial: "X4001MD6D", location: "TMC" },
+      { name: "Taser-002", serial: "X4001WX9C", location: "TMC" },
+      { name: "Taser-003", serial: "X4001WX88", location: "TMC" },
+      { name: "Taser-004", serial: "X4001MCKX", location: "TMC" },
+      { name: "Taser-005", serial: "X4001MAYK", location: "TMC" },
+      { name: "Taser-006", serial: "X4001WX82", location: "TMC" },
+      { name: "Taser-007", serial: "X4001MC1D", location: "TMC" },
+      { name: "Taser-008", serial: "X4001MC1V", location: "TMC" },
+      { name: "Taser-009", serial: "X4001WXAC", location: "TMC" },
+      { name: "Taser-010", serial: "X4001MAYD", location: "TMC" },
+      { name: "Taser-011", serial: "X4001MAYH", location: "TMC" },
+      { name: "Taser-012", serial: "X4001MD4D", location: "TMC" },
+      { name: "Taser-013", serial: "X4001MC1T", location: "TMC" },
+      { name: "Taser-014", serial: "X4001MD82", location: "TMC" },
+      { name: "Taser-015", serial: "X4001MC1E", location: "TMC" },
+      { name: "Taser-016", serial: "X4001MAYM", location: "TMC" }
+    ];
+
+    const qrGrid = document.getElementById("qrGrid");
+
+    devices.forEach(device => {
+      const url = `${BASE_URL}?asset=${encodeURIComponent(device.name)}`;
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="device-name">${device.name}</div>
+        <div class="serial">Serial: ${device.serial}</div>
+        <div class="location">Home Location: ${device.location}</div>
+        <div class="qr-wrap"><canvas></canvas></div>
+        <div class="scan-url">${url}</div>
+      `;
+
+      qrGrid.appendChild(card);
+
+      const canvas = card.querySelector("canvas");
+
+      QRCode.toCanvas(canvas, url, {
+        width: 150,
+        margin: 1
+      }, function (error) {
+        if (error) console.error(error);
+      });
+    });
+  </script>
+</body>
+</html>
