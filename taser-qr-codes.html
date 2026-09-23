@@ -1,150 +1,492 @@
 <!doctype html>
+
 <html lang="en">
+
 <head>
+
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Taser QR Codes</title>
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>
+    SecureTrack Taser QR Codes
+  </title>
+
   <style>
+
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f4f4f4;
-      color: #111;
+      font-family:
+        Arial,
+        sans-serif;
+
+      margin:
+        20px;
+
+      background:
+        #f4f4f4;
+
+      color:
+        #111;
     }
+
 
     h1 {
-      text-align: center;
-      margin-bottom: 8px;
+      text-align:
+        center;
+
+      margin-bottom:
+        8px;
     }
+
 
     .subtitle {
-      text-align: center;
-      margin-bottom: 24px;
-      color: #555;
+      text-align:
+        center;
+
+      margin-bottom:
+        24px;
+
+      color:
+        #555;
     }
+
 
     .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          4,
+          minmax(0, 1fr)
+        );
+
+      gap:
+        18px;
     }
+
 
     .card {
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      padding: 14px;
-      text-align: center;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      page-break-inside: avoid;
+      background:
+        #fff;
+
+      border:
+        1px solid #ccc;
+
+      border-radius:
+        12px;
+
+      padding:
+        14px;
+
+      text-align:
+        center;
+
+      box-shadow:
+        0 1px 4px
+        rgba(0,0,0,.08);
+
+      page-break-inside:
+        avoid;
     }
+
 
     .device-name {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 6px;
+      font-size:
+        18px;
+
+      font-weight:
+        700;
+
+      margin-bottom:
+        6px;
     }
+
 
     .serial {
-      font-size: 14px;
-      color: #444;
-      margin-bottom: 4px;
+      font-size:
+        14px;
+
+      color:
+        #444;
+
+      margin-bottom:
+        4px;
     }
+
 
     .location {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 10px;
+      font-size:
+        13px;
+
+      color:
+        #666;
+
+      margin-bottom:
+        12px;
     }
 
-    .qr-wrap {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 8px 0 10px;
-      min-height: 170px;
+
+    .qr-code {
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      min-height:
+        170px;
+
+      margin:
+        8px auto 10px;
     }
 
-    .scan-url {
-      font-size: 11px;
-      color: #666;
-      word-break: break-all;
-      margin-top: 8px;
+
+    .qr-code img,
+    .qr-code canvas {
+      display:
+        block;
+
+      margin:
+        auto;
     }
 
-    @media print {
-      body {
-        background: #fff;
-        margin: 10px;
-      }
+
+    .scan-label {
+      margin-top:
+        8px;
+
+      font-size:
+        11px;
+
+      font-weight:
+        700;
+
+      color:
+        #555;
+    }
+
+
+    @media
+    (max-width: 1000px) {
 
       .grid {
-        gap: 12px;
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0, 1fr)
+          );
       }
+
+    }
+
+
+    @media
+    (max-width: 600px) {
+
+      .grid {
+        grid-template-columns:
+          1fr;
+      }
+
+    }
+
+
+    @media print {
+
+      body {
+        margin:
+          10px;
+
+        background:
+          #fff;
+      }
+
+
+      .grid {
+        grid-template-columns:
+          repeat(
+            4,
+            1fr
+          );
+
+        gap:
+          10px;
+      }
+
 
       .card {
-        box-shadow: none;
+        box-shadow:
+          none;
       }
+
     }
+
   </style>
+
 </head>
+
+
 <body>
-  <h1>SecureTrack Taser QR Codes</h1>
-  <div class="subtitle">Scan to open the SecureTrack device verification page</div>
 
-  <div id="qrGrid" class="grid"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <h1>
+    SecureTrack Taser QR Codes
+  </h1>
+
+
+  <div class="subtitle">
+    Scan to open the SecureTrack device verification page
+  </div>
+
+
+  <div
+    id="qrGrid"
+    class="grid"
+  ></div>
+
+
+  <!--
+    Browser-compatible QR generator.
+  -->
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+  ></script>
+
+
   <script>
-    // REPLACE THIS with your actual live device page URL
-    const BASE_URL = "https://securetrackop.com/device.html";
+
+    const BASE_URL =
+      "https://securetrackop.com/device.html";
+
+
+    /*
+      IMPORTANT:
+      asset = SecureTrack public_token
+
+      Do NOT place serial numbers
+      in the QR URL.
+    */
 
     const devices = [
-      { name: "Taser-001", serial: "X4001MD6D", location: "TMC" },
-      { name: "Taser-002", serial: "X4001WX9C", location: "TMC" },
-      { name: "Taser-003", serial: "X4001WX88", location: "TMC" },
-      { name: "Taser-004", serial: "X4001MCKX", location: "TMC" },
-      { name: "Taser-005", serial: "X4001MAYK", location: "TMC" },
-      { name: "Taser-006", serial: "X4001WX82", location: "TMC" },
-      { name: "Taser-007", serial: "X4001MC1D", location: "TMC" },
-      { name: "Taser-008", serial: "X4001MC1V", location: "TMC" },
-      { name: "Taser-009", serial: "X4001WXAC", location: "TMC" },
-      { name: "Taser-010", serial: "X4001MAYD", location: "TMC" },
-      { name: "Taser-011", serial: "X4001MAYH", location: "TMC" },
-      { name: "Taser-012", serial: "X4001MD4D", location: "TMC" },
-      { name: "Taser-013", serial: "X4001MC1T", location: "TMC" },
-      { name: "Taser-014", serial: "X4001MD82", location: "TMC" },
-      { name: "Taser-015", serial: "X4001MC1E", location: "TMC" },
-      { name: "Taser-016", serial: "X4001MAYM", location: "TMC" }
+
+      {
+        name: "Taser-001",
+        serial: "X4001MD6D",
+        location: "TMC",
+        token: "ZLLELXP33NWS86ZD687T"
+      },
+
+      {
+        name: "Taser-002",
+        serial: "X4001WX9C",
+        location: "TMC",
+        token: "KNMP3AE4XPSHDBDDUD82"
+      },
+
+      {
+        name: "Taser-003",
+        serial: "X4001WX88",
+        location: "TMC",
+        token: "3Z922RKLWRPKTF9RZ2QN"
+      },
+
+      {
+        name: "Taser-004",
+        serial: "X4001MCKX",
+        location: "TMC",
+        token: "PT3LPL62XVWH3LVWHEQJ"
+      },
+
+      {
+        name: "Taser-005",
+        serial: "X4001MAYK",
+        location: "TMC",
+        token: "K29W64GVJ96L4BPT3CWW"
+      },
+
+      {
+        name: "Taser-006",
+        serial: "X4001WX82",
+        location: "TMC",
+        token: "27MYMRH3PG9DHC5UVTG8"
+      },
+
+      {
+        name: "Taser-007",
+        serial: "X4001MC1D",
+        location: "TMC",
+        token: "A4VK92RAFRYMQBQRZ8B2"
+      },
+
+      {
+        name: "Taser-008",
+        serial: "X4001MC1V",
+        location: "TMC",
+        token: "T3BXFDH8KCKEBQKNNGAM"
+      },
+
+      {
+        name: "Taser-009",
+        serial: "X4001WXAC",
+        location: "TMC",
+        token: "9F2766YUNTB3H7AVWKBY"
+      },
+
+      {
+        name: "Taser-010",
+        serial: "X4001MAYD",
+        location: "TMC",
+        token: "XHCG8C6BLGPE4CJMYN7K"
+      },
+
+      {
+        name: "Taser-011",
+        serial: "X4001MAYH",
+        location: "TMC",
+        token: "BML34S37HXVQ9GRSXLAT"
+      },
+
+      {
+        name: "Taser-012",
+        serial: "X4001MD4D",
+        location: "TMC",
+        token: "PCWX3988HCBHEZNH6ZQ6"
+      },
+
+      {
+        name: "Taser-013",
+        serial: "X4001MC1T",
+        location: "TMC",
+        token: "RJU2LSWLHW4JZFUUAXBA"
+      },
+
+      {
+        name: "Taser-014",
+        serial: "X4001MD82",
+        location: "TMC",
+        token: "XRGFEVH5NLRUTTNQS6EF"
+      },
+
+      {
+        name: "Taser-015",
+        serial: "X4001MC1E",
+        location: "TMC",
+        token: "DM9KLKRDVBBFLPD2TDTN"
+      },
+
+      {
+        name: "Taser-016",
+        serial: "X4001MAYM",
+        location: "TMC",
+        token: "XJ6W7JLJCGGB59L668VZ"
+      }
+
     ];
 
-    const qrGrid = document.getElementById("qrGrid");
 
-    devices.forEach(device => {
-      const url = `${BASE_URL}?asset=${encodeURIComponent(device.name)}`;
+    const qrGrid =
+      document.getElementById(
+        "qrGrid"
+      );
 
-      const card = document.createElement("div");
-      card.className = "card";
 
-      card.innerHTML = `
-        <div class="device-name">${device.name}</div>
-        <div class="serial">Serial: ${device.serial}</div>
-        <div class="location">Home Location: ${device.location}</div>
-        <div class="qr-wrap"><canvas></canvas></div>
-        <div class="scan-url">${url}</div>
-      `;
+    devices.forEach(
+      (
+        device,
+        index
+      ) => {
 
-      qrGrid.appendChild(card);
+        const url =
+          `${BASE_URL}?asset=${
+            encodeURIComponent(
+              device.token
+            )
+          }`;
 
-      const canvas = card.querySelector("canvas");
 
-      QRCode.toCanvas(canvas, url, {
-        width: 150,
-        margin: 1
-      }, function (error) {
-        if (error) console.error(error);
-      });
-    });
+        const card =
+          document.createElement(
+            "article"
+          );
+
+
+        card.className =
+          "card";
+
+
+        const qrId =
+          `qr-${index + 1}`;
+
+
+        card.innerHTML =
+          `
+
+            <div class="device-name">
+              ${device.name}
+            </div>
+
+            <div class="serial">
+              Serial:
+              ${device.serial}
+            </div>
+
+            <div class="location">
+              Home Location:
+              ${device.location}
+            </div>
+
+            <div
+              id="${qrId}"
+              class="qr-code"
+            ></div>
+
+            <div class="scan-label">
+              SCAN FOR SECURETRACK
+            </div>
+
+          `;
+
+
+        qrGrid.appendChild(
+          card
+        );
+
+
+        new QRCode(
+          document.getElementById(
+            qrId
+          ),
+          {
+
+            text:
+              url,
+
+            width:
+              160,
+
+            height:
+              160,
+
+            correctLevel:
+              QRCode.CorrectLevel.H
+
+          }
+        );
+
+      }
+    );
+
   </script>
+
+
 </body>
+
 </html>
