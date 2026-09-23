@@ -2759,3 +2759,26 @@ h2.form-title { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.08; margin-b
   }
 
 }
+/* =========================================================
+   CHANGE DEVICE ACTION
+   ========================================================= */
+
+.actions-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+#changeDeviceAction {
+  white-space: nowrap;
+}
+
+@media (max-width: 650px) {
+
+  .actions-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+}
