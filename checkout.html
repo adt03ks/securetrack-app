@@ -24,7 +24,9 @@
         <div class="action-hero-copy">
           <div class="eyebrow">Verified device workflow</div>
           <h1>Check out equipment.</h1>
-          <p class="subtle">Create a professional custody record for the verified device. Officer identity, timestamp, device information, and notes are recorded through Supabase.</p>
+          <p class="subtle">
+  Enter your employee number to establish custody of this verified item.
+</p>
           <div class="status-strip"><span class="status-dot success"></span><span>Device verification confirmed. Complete the checkout form below.</span></div>
         </div>
       </header>
@@ -50,14 +52,21 @@
               <input id="assetToken" type="hidden">
               <div class="field-grid">
                 <div class="field">
-                  <label for="employee_number">Employee Number</label>
-                  <input id="employee_number" name="employee_number" autocomplete="off" inputmode="numeric" required>
-                </div>
-                <div class="field">
-                  <label for="badge_number">Badge Number</label>
-                  <input id="badge_number" name="badge_number" autocomplete="off" inputmode="numeric" required>
-                </div>
-              </div>
+              <div class="field">
+
+  <label for="employee_number">
+    Employee Number
+  </label>
+
+  <input
+    id="employee_number"
+    name="employee_number"
+    autocomplete="off"
+    inputmode="numeric"
+    required
+  >
+
+</div>
               <div class="field">
                 <label for="notes">Checkout Notes <span class="subtle">(optional)</span></label>
                 <textarea id="notes" name="notes" placeholder="Shift assignment, deployment area, special condition, or other note"></textarea>
