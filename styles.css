@@ -2551,3 +2551,211 @@ h2.form-title { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.08; margin-b
 .management-card:hover * {
   text-decoration: none;
 }
+/* =========================================================
+   SECURETRACK DEVICE IDENTIFICATION
+   ========================================================= */
+
+.device-identification {
+  padding: 26px;
+  border-top: 1px solid #2d3339;
+}
+
+.identification-heading {
+  margin-bottom: 20px;
+}
+
+.identification-heading h2 {
+  margin: 5px 0 8px;
+}
+
+.identify-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+.identify-card {
+  border: 1px solid #343a41;
+  border-radius: 17px;
+
+  padding: 22px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #0b0e11,
+      #11151a
+    );
+
+  display: flex;
+  flex-direction: column;
+
+  min-height: 280px;
+}
+
+.identify-card h3 {
+  margin: 7px 0 8px;
+  font-size: 22px;
+}
+
+.identify-card p {
+  color: #9ba3ad;
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+.identify-icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 15px;
+
+  border-radius: 13px;
+
+  background:
+    rgba(255,120,0,.10);
+
+  border:
+    1px solid rgba(255,120,0,.28);
+
+  color: #ff8c1a;
+
+  font-size: 25px;
+  font-weight: 900;
+}
+
+.identify-button {
+  width: 100%;
+
+  margin-top: auto;
+
+  border: 0;
+  border-radius: 10px;
+
+  padding: 13px 16px;
+
+  background: #ff7800;
+  color: #111;
+
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.identify-button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+.nfc-ready {
+  margin-top: auto;
+
+  padding: 11px 13px;
+
+  border-radius: 10px;
+
+  border:
+    1px solid rgba(255,120,0,.28);
+
+  background:
+    rgba(255,120,0,.08);
+
+  color: #ff9b45;
+
+  text-align: center;
+
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.serial-lookup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  margin-top: auto;
+}
+
+.serial-lookup-form label {
+  color: #c8cfd6;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.serial-lookup-form input {
+  width: 100%;
+
+  border:
+    1px solid #3a4148;
+
+  border-radius: 9px;
+
+  background: #15191d;
+  color: #fff;
+
+  padding: 12px;
+
+  font-size: 15px;
+
+  text-transform: uppercase;
+}
+
+.qr-scanner-panel {
+  margin-top: 22px;
+
+  padding: 20px;
+
+  border:
+    1px solid rgba(255,120,0,.35);
+
+  border-radius: 16px;
+
+  background: #090c0f;
+}
+
+.qr-scanner-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin-bottom: 16px;
+}
+
+.qr-scanner-head h3 {
+  margin: 5px 0 0;
+}
+
+#qrReader {
+  width: 100%;
+  max-width: 620px;
+
+  margin: 0 auto;
+
+  overflow: hidden;
+
+  border-radius: 14px;
+}
+
+@media (max-width: 850px) {
+
+  .identify-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .identify-card {
+    min-height: 0;
+  }
+
+  .qr-scanner-head {
+    flex-direction: column;
+  }
+
+}
