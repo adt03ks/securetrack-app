@@ -663,30 +663,6 @@ their SecureTrack setup invitation.
               </div>
 
 
-              <div
-                class="onboarding-field"
-              >
-
-                <label for="newBadgeNumber">
-                  Badge Number *
-                </label>
-
-                <input
-                  id="newBadgeNumber"
-                  type="password"
-                  inputmode="numeric"
-                  autocomplete="new-password"
-                >
-
-                <small class="subtle">
-                  The badge number is converted to
-                  a secure hash and is not stored
-                  in readable form.
-                </small>
-
-              </div>
-
-
             </div>
 
           </section>
@@ -973,11 +949,6 @@ their SecureTrack setup invitation.
       "newEmployeeNumber"
     );
 
-  const badgeNumber =
-    document.getElementById(
-      "newBadgeNumber"
-    );
-
   const hireDate =
     document.getElementById(
       "newHireDate"
@@ -1080,8 +1051,6 @@ their SecureTrack setup invitation.
     email.value = "";
 
     employeeNumber.value = "";
-
-    badgeNumber.value = "";
 
     hireDate.value = "";
 
@@ -1455,9 +1424,6 @@ their SecureTrack setup invitation.
       const employeeNo =
         employeeNumber.value.trim();
 
-      const badge =
-        badgeNumber.value.trim();
-
       const telephone =
         phone.value.trim();
 
@@ -1513,19 +1479,6 @@ their SecureTrack setup invitation.
         return;
 
       }
-
-
-      if (!badge) {
-
-        showMessage(
-          "Badge number is required.",
-          "error"
-        );
-
-        return;
-
-      }
-
 
       if (!telephone) {
 
@@ -1632,9 +1585,6 @@ their SecureTrack setup invitation.
                 employee_number:
                   employeeNo,
 
-                badge_number:
-                  badge,
-
                 phone_number:
                   telephone,
 
@@ -1704,10 +1654,6 @@ their SecureTrack setup invitation.
           Clear badge value as soon as the
           account creation succeeds.
         */
-
-        badgeNumber.value =
-          "";
-
 
         // -----------------------------------------
         // OPTIONAL PHOTO
