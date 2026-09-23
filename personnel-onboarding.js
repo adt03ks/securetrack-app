@@ -457,8 +457,8 @@
               class="subtle"
               style="margin-bottom:0;"
             >
-              Create the officer's SecureTrack
-              account and personnel record.
+            Create the officer's personnel profile
+and SecureTrack record.
             </p>
 
           </div>
@@ -483,15 +483,14 @@
 
           <div class="onboarding-note">
 
-            <strong>
-              Secure onboarding:
-            </strong>
+           <strong>
+  Personnel setup:
+</strong>
 
-            The officer will receive an email
-            invitation and create their own password.
-            Managers never create or view the
-            officer's password.
-
+The officer's profile will be saved without
+sending an account setup email. When you are
+ready, use Account Access to send the officer
+their SecureTrack setup invitation.
           </div>
 
 
@@ -912,7 +911,7 @@
             class="onboarding-primary"
             type="button"
           >
-            Create Officer & Send Invitation
+           Save Employee Profile
           </button>
 
         </footer>
@@ -1579,10 +1578,10 @@
       }
 
 
-      const confirmed =
-        window.confirm(
-          "Create this SecureTrack officer account and send the invitation email?"
-        );
+     const confirmed =
+  window.confirm(
+    "Save this employee profile? No account setup email will be sent."
+  );
 
 
       if (!confirmed) {
@@ -1754,24 +1753,22 @@
         }
 
 
-        if (photoWarning) {
+       if (photoWarning) {
 
-          showMessage(
-            "Officer account created and invitation sent. The profile photo could not be saved, but it can be added later from Edit Personnel.",
-            "warning"
-          );
+  showMessage(
+    "Employee profile saved. No account setup email was sent. The profile photo could not be saved, but it can be added later from Edit Personnel.",
+    "warning"
+  );
 
-        }
-        else {
+}
+else {
 
-          showMessage(
-            "Officer created successfully. The SecureTrack account invitation has been sent to " +
-            emailAddress +
-            ".",
-            "success"
-          );
+  showMessage(
+    "Employee profile saved successfully. No account setup email was sent. Account Access will remain Not Set Up until you send an invitation.",
+    "success"
+  );
 
-        }
+}
 
 
         /*
@@ -1809,8 +1806,8 @@
         createButton.disabled =
           false;
 
-        createButton.textContent =
-          "Create Officer & Send Invitation";
+       createButton.textContent =
+  "Save Employee Profile";
 
       }
 
