@@ -3,12 +3,22 @@
   "use strict";
 
 
-  const ST =
-    window.SecureTrack;
+ const ST =
+  window.SecureTrack;
 
-  const token =
-    ST.assetToken();
+const pageParams =
+  new URLSearchParams(
+    window.location.search
+  );
 
+const selectionMode =
+  pageParams.get("mode") ===
+  "select";
+
+const token =
+  selectionMode
+    ? ""
+    : ST.assetToken();
 
   // =========================================================
   // PAGE ELEMENTS
@@ -52,7 +62,41 @@ const changeDeviceAction =
   document.getElementById(
     "changeDeviceAction"
   );
+if (changeDeviceAction) {
 
+  changeDeviceAction.addEventListener(
+    "click",
+    () => {
+
+      const cleanUrl =
+        new URL(
+          window.location.href
+        );
+
+      // Remove the currently selected device.
+      cleanUrl.searchParams.delete(
+        "asset"
+      );
+
+      // Explicitly tell Device Management
+      // to return to device-selection mode.
+      cleanUrl.searchParams.set(
+        "mode",
+        "select"
+      );
+
+      cleanUrl.hash =
+        "";
+
+      window.location.replace(
+        cleanUrl.toString()
+      );
+
+    }
+  );
+
+}
+  
   const identificationSection =
     document.getElementById(
       "deviceIdentificationSection"
