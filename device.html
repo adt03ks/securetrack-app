@@ -56,6 +56,207 @@
         <div class="status-strip"><span class="status-dot"></span><span id="statusText">Locating device…</span></div>
       </div>
 
+<!-- =========================================================
+     DEVICE IDENTIFICATION
+     ========================================================= -->
+
+<section
+  id="deviceIdentificationSection"
+  class="device-identification"
+  hidden
+>
+
+  <div class="identification-heading">
+
+    <div class="eyebrow">
+      Step 1
+    </div>
+
+    <h2>
+      Identify Your Device
+    </h2>
+
+    <p class="subtle">
+      Scan the SecureTrack QR code,
+      tap the NFC tag, or enter the
+      device serial number manually.
+    </p>
+
+  </div>
+
+
+  <div class="identify-grid">
+
+
+    <!-- =========================================
+         QR CODE
+         ========================================= -->
+
+    <article class="identify-card">
+
+      <div class="identify-icon">
+        ▦
+      </div>
+
+      <div class="eyebrow">
+        Camera
+      </div>
+
+      <h3>
+        Scan QR Code
+      </h3>
+
+      <p>
+        Use this phone or tablet's camera
+        to scan the SecureTrack QR code
+        attached to the Taser.
+      </p>
+
+      <button
+        id="scanQrButton"
+        class="identify-button"
+        type="button"
+      >
+        Open Camera
+      </button>
+
+    </article>
+
+
+    <!-- =========================================
+         NFC
+         ========================================= -->
+
+    <article class="identify-card">
+
+      <div class="identify-icon">
+        ◉
+      </div>
+
+      <div class="eyebrow">
+        Contactless
+      </div>
+
+      <h3>
+        Tap NFC Tag
+      </h3>
+
+      <p>
+        Hold your phone near the SecureTrack
+        NFC tag attached to the Taser.
+        The device record will open automatically.
+      </p>
+
+      <div class="nfc-ready">
+        NFC READY
+      </div>
+
+    </article>
+
+
+    <!-- =========================================
+         SERIAL NUMBER
+         ========================================= -->
+
+    <article class="identify-card">
+
+      <div class="identify-icon">
+        #
+      </div>
+
+      <div class="eyebrow">
+        Manual Entry
+      </div>
+
+      <h3>
+        Enter Serial Number
+      </h3>
+
+      <p>
+        Enter the manufacturer's complete
+        serial number to locate the device.
+      </p>
+
+      <form
+        id="serialLookupForm"
+        class="serial-lookup-form"
+      >
+
+        <label for="serialNumberInput">
+          Serial Number
+        </label>
+
+        <input
+          id="serialNumberInput"
+          type="text"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          placeholder="Example: X4001MD6D"
+          required
+        >
+
+        <button
+          id="serialLookupButton"
+          class="identify-button"
+          type="submit"
+        >
+          Find Device
+        </button>
+
+      </form>
+
+    </article>
+
+  </div>
+
+
+  <!-- =========================================
+       QR CAMERA
+       ========================================= -->
+
+  <section
+    id="qrScannerPanel"
+    class="qr-scanner-panel"
+    hidden
+  >
+
+    <div class="qr-scanner-head">
+
+      <div>
+
+        <div class="eyebrow">
+          SecureTrack QR Scanner
+        </div>
+
+        <h3>
+          Point the camera at the device QR code.
+        </h3>
+
+      </div>
+
+      <button
+        id="closeQrScannerButton"
+        class="back-link"
+        type="button"
+      >
+        Close Camera
+      </button>
+
+    </div>
+
+    <div id="qrReader"></div>
+
+  </section>
+
+
+  <div
+    id="deviceIdentificationResult"
+    class="result"
+  ></div>
+
+</section>
+      
       <div class="verify-section">
         <div id="demoBanner" class="demo-banner">Prototype mode: update <strong>config.js</strong> with Supabase credentials and set demoMode to false for live records.</div>
         <div class="verify-grid">
