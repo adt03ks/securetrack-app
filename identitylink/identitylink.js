@@ -1767,166 +1767,82 @@ async function openRequestDetail(
     '<div class="loading-state">Loading IdentityLink request…</div>';
 
 
-  const {
-    data,
-    error
-  } =
-    await db.rpc(
-      "get_identitylink_management_request_detail",
-      {
-        p_request_id:
-          requestId
-      }
-    );
+  const [
+    detailResult,
+    imageProcessingResult,
+    fingerprintProcessingResult
+  ] =
+    await Promise.all([
+
+      db.rpc(
+        "get_identitylink_management_request_detail",
+        {
+          p_request_id:
+            requestId
+        }
+      ),
+
+      db.rpc(
+        "get_identitylink_image_processing",
+        {
+          p_request_id:
+            requestId
+        }
+      ),
+
+      db.rpc(
+        "get_identitylink_fingerprint_processing",
+        {
+          p_request_id:
+            requestId
+        }
+      )
+
+    ]);
 
 
-  if (error) {
+  if (detailResult.error) {
 
     detailModal.classList.add(
       "hidden"
     );
 
-    throw error;
+    throw detailResult.error;
 
+  }
+
+
+  if (imageProcessingResult.error) {
+    throw imageProcessingResult.error;
+  }
+
+
+  if (fingerprintProcessingResult.error) {
+    throw fingerprintProcessingResult.error;
   }
 
 
   currentDetail =
-    data;
+    detailResult.data;
 
 
-    await renderRequestDetail();
+  currentDetail.image_processing =
+    imageProcessingResult.data || {
+      status: "not_started"
+    };
+
+
+  currentDetail.fingerprint_processing =
+    fingerprintProcessingResult.data || {
+      status: "not_started",
+      identity_result: null,
+      next_of_kin_result: null
+    };
+
+
+  await renderRequestDetail();
 
 }
-
-
-async function renderRequestDetail() {
-
-  if (!currentDetail?.request) {
-    return;
-  }
-
-
-  const request =
-    currentDetail.request;
-
-
-  const actions =
-    currentDetail.actions ||
-    [];
-
-
-  const actionApprovals =
-    currentDetail.action_approvals ||
-    [];
-
-
-  const locationHistory =
-    currentDetail.location_history ||
-    [];
-
-
-  const files =
-    currentDetail.files ||
-    [];
-
-
-  const activity =
-    currentDetail.activity ||
-    [];
-
-
-  $("detailRequestNumber").textContent =
-    request.request_number;
-
-
-  // The SUBJECT FILE remains editable while open.
-  // Image and fingerprint approvals are tracked separately.
-
-  const canModify =
-    request.case_status ===
-    "open";
-
-
-  detailBody.innerHTML = `
-
-    <div class="detail-top">
-
-      <div>
-
-        <span
-          class="status-pill ${
-            request.case_status === "open"
-              ? "status-pending"
-              : "status-completed"
-          }"
-        >
-          ${
-            request.case_status === "open"
-              ? "Open Subject File"
-              : escapeHtml(
-                  request.case_status ||
-                  "Closed"
-                )
-          }
-        </span>
-
-
-        <div class="request-detail-small">
-
-          Submitted
-          ${escapeHtml(
-            formatDateTime(
-              request.submitted_at
-            )
-          )}
-
-          by
-
-          ${escapeHtml(
-            request.submitted_by_name
-          )}
-
-        </div>
-
-      </div>
-
-
-      <div class="detail-actions">
-
-        ${
-          canModify
-            ? `
-                <button
-                  id="editCurrentRequestButton"
-                  class="button secondary"
-                  type="button"
-                >
-                  Edit Subject Information
-                </button>
-              `
-            : ""
-        }
-
-
-        ${
-          canModify
-            ? `
-                <button
-                  id="cancelCurrentRequestButton"
-                  class="button danger"
-                  type="button"
-                >
-                  Cancel File
-                </button>
-              `
-            : ""
-        }
-
-      </div>
-
-    </div>
-
 
       <!-- ================================================
            SUBJECT INFORMATION
