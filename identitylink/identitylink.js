@@ -2627,16 +2627,6 @@ document
   return;
 }
 
-          showMessage(
-            "Select at least one fingerprint processing result.",
-            "error"
-          );
-
-          return;
-
-        }
-
-
         button.disabled =
           true;
 
@@ -3257,6 +3247,11 @@ function renderAuthorizationProgressControls(
 
   const identityResult =
     processing?.identity_result ||
+    "";
+
+
+  const identityName =
+    processing?.identity_name ||
     "";
 
 
