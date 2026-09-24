@@ -2151,22 +2151,26 @@ async function renderRequestDetail() {
 
         <div class="authorization-grid">
 
-          ${renderAuthorizationCard(
-            request,
-            actions,
-            actionApprovals,
-            "image_request",
-            "Image Request"
-          )}
+         ${renderAuthorizationCard(
+  request,
+  actions,
+  actionApprovals,
+  "image_request",
+  "Image Request",
+  imageProcessing,
+  canModify
+)}
 
 
-          ${renderAuthorizationCard(
-            request,
-            actions,
-            actionApprovals,
-            "fingerprint",
-            "Fingerprint Request"
-          )}
+${renderAuthorizationCard(
+  request,
+  actions,
+  actionApprovals,
+  "fingerprint",
+  "Fingerprint Request",
+  fingerprintProcessing,
+  canModify
+)}
 
         </div>
 
@@ -2327,8 +2331,305 @@ async function renderRequestDetail() {
         }
       );
 
+    // =========================================================
+    // AUTHORIZATION PROGRESS
+    // =========================================================
+
+    wireAuthorizationProgressControls(
+      request.id
+    );
+function wireAuthorizationProgressControls(
+  requestId
+) {
+
+  // =======================================================
+  // IMAGE COMPLETED
+  // =======================================================
+
+  $("imageCompletedCheckbox")
+    ?.addEventListener(
+      "change",
+      async event => {
+
+        if (!event.target.checked) {
+          return;
+        }
 
 
+        event.target.disabled =
+          true;
+
+
+        try {
+
+          const {
+            error
+          } =
+            await db.rpc(
+              "mark_identitylink_image_completed",
+              {
+                p_request_id:
+                  requestId
+              }
+            );
+
+
+          if (error) {
+            throw error;
+          }
+
+
+          showMessage(
+            "Image marked completed.",
+            "success"
+          );
+
+
+          await openRequestDetail(
+            requestId
+          );
+
+        }
+        catch (error) {
+
+          event.target.checked =
+            false;
+
+          event.target.disabled =
+            false;
+
+
+          showMessage(
+            error.message ||
+            "Unable to mark image completed.",
+            "error"
+          );
+
+        }
+
+      }
+    );
+
+
+  // =======================================================
+  // FINGERPRINTS SUBMITTED
+  // =======================================================
+
+  $("fingerprintSubmittedCheckbox")
+    ?.addEventListener(
+      "change",
+      async event => {
+
+        if (!event.target.checked) {
+          return;
+        }
+
+
+        event.target.disabled =
+          true;
+
+
+        try {
+
+          const {
+            error
+          } =
+            await db.rpc(
+              "mark_identitylink_fingerprints_submitted",
+              {
+                p_request_id:
+                  requestId,
+
+                p_submission_notes:
+                  null
+              }
+            );
+
+
+          if (error) {
+            throw error;
+          }
+
+
+          showMessage(
+            "Fingerprints marked submitted for processing.",
+            "success"
+          );
+
+
+          await openRequestDetail(
+            requestId
+          );
+
+        }
+        catch (error) {
+
+          event.target.checked =
+            false;
+
+          event.target.disabled =
+            false;
+
+
+          showMessage(
+            error.message ||
+            "Unable to mark fingerprints submitted.",
+            "error"
+          );
+
+        }
+
+      }
+    );
+
+
+  // =======================================================
+  // PROCESSED
+  // =======================================================
+
+  const processedCheckbox =
+    $("fingerprintProcessedCheckbox");
+
+
+  const resultsPanel =
+    $("fingerprintResultsPanel");
+
+
+  processedCheckbox
+    ?.addEventListener(
+      "change",
+      event => {
+
+        if (!resultsPanel) {
+          return;
+        }
+
+
+        resultsPanel.hidden =
+          !event.target.checked;
+
+      }
+    );
+
+
+  // =======================================================
+  // SAVE RESULTS
+  // =======================================================
+
+  $("saveFingerprintResultsButton")
+    ?.addEventListener(
+      "click",
+      async event => {
+
+        const button =
+          event.currentTarget;
+
+
+        const identityResult =
+          document.querySelector(
+            'input[name="fingerprintIdentityResult"]:checked'
+          )
+            ?.value ||
+          null;
+
+
+        const nextOfKinResult =
+          document.querySelector(
+            'input[name="fingerprintNokResult"]:checked'
+          )
+            ?.value ||
+          null;
+
+
+        if (
+          !identityResult &&
+          !nextOfKinResult
+        ) {
+
+          showMessage(
+            "Select at least one fingerprint processing result.",
+            "error"
+          );
+
+          return;
+
+        }
+
+
+        button.disabled =
+          true;
+
+        button.textContent =
+          "Saving Results…";
+
+
+        try {
+
+          const {
+            error
+          } =
+            await db.rpc(
+              "record_identitylink_fingerprint_results",
+              {
+                p_request_id:
+                  requestId,
+
+                p_identity_result:
+                  identityResult,
+
+                p_next_of_kin_result:
+                  nextOfKinResult,
+
+                p_results_notes:
+                  null
+              }
+            );
+
+
+          if (error) {
+            throw error;
+          }
+
+
+          showMessage(
+            "Fingerprint processing results saved.",
+            "success"
+          );
+
+
+          await Promise.all([
+            loadRequests(),
+            loadDashboardCounts()
+          ]);
+
+
+          await openRequestDetail(
+            requestId
+          );
+
+        }
+        catch (error) {
+
+          button.disabled =
+            false;
+
+          button.textContent =
+            "Save Processing Results";
+
+
+          showMessage(
+            error.message ||
+            "Unable to save fingerprint processing results.",
+            "error"
+          );
+
+        }
+
+      }
+    );
+
+}
+  
     // =========================================================
     // EDIT SUBJECT
     // =========================================================
@@ -2612,7 +2913,9 @@ function renderAuthorizationCard(
   actions,
   approvals,
   actionType,
-  label
+  label,
+  processing,
+  canModify
 ) {
 
   const action =
@@ -2713,7 +3016,7 @@ function renderAuthorizationCard(
       }
 
 
-      <div class="authorization-meta">
+         <div class="authorization-meta">
 
         ${
           action?.requested_by_name
@@ -2739,12 +3042,313 @@ function renderAuthorizationCard(
 
       </div>
 
+
+      ${
+        status === "approved"
+          ? renderAuthorizationProgressControls(
+              request.id,
+              actionType,
+              processing,
+              canModify
+            )
+          : ""
+      }
+
+
     </article>
   `;
 
 }
 
+// =========================================================
+// AUTHORIZATION PROGRESS CONTROLS
+// =========================================================
 
+function renderAuthorizationProgressControls(
+  requestId,
+  actionType,
+  processing,
+  canModify
+) {
+
+  const status =
+    processing?.status ||
+    "not_started";
+
+
+  // =======================================================
+  // IMAGE COMPLETED
+  // =======================================================
+
+  if (
+    actionType ===
+    "image_request"
+  ) {
+
+    const completed =
+      status ===
+      "completed";
+
+
+    return `
+      <div class="authorization-progress">
+
+        <label class="workflow-checkbox">
+
+          <input
+            id="imageCompletedCheckbox"
+            type="checkbox"
+            data-request-id="${escapeHtml(requestId)}"
+            ${completed ? "checked" : ""}
+            ${
+              completed || !canModify
+                ? "disabled"
+                : ""
+            }
+          >
+
+          <span>
+            Image Completed
+          </span>
+
+        </label>
+
+
+        ${
+          completed
+            ? `
+                <div class="workflow-complete-meta">
+
+                  ✓ Image Completed
+
+                  ${
+                    processing.completed_by_name
+                      ? `
+                          by
+                          ${escapeHtml(
+                            processing.completed_by_name
+                          )}
+                        `
+                      : ""
+                  }
+
+                  ${
+                    processing.completed_at
+                      ? `
+                          <br>
+                          ${escapeHtml(
+                            formatDateTime(
+                              processing.completed_at
+                            )
+                          )}
+                        `
+                      : ""
+                  }
+
+                </div>
+              `
+            : ""
+        }
+
+      </div>
+    `;
+
+  }
+
+
+  // =======================================================
+  // FINGERPRINT PROCESSING
+  // =======================================================
+
+  const submitted =
+    status === "submitted" ||
+    status === "completed";
+
+
+  const processed =
+    status === "completed";
+
+
+  const identityResult =
+    processing?.identity_result ||
+    "";
+
+
+  const nextOfKinResult =
+    processing?.next_of_kin_result ||
+    "";
+
+
+  return `
+    <div class="authorization-progress fingerprint-progress">
+
+
+      <label class="workflow-checkbox">
+
+        <input
+          id="fingerprintSubmittedCheckbox"
+          type="checkbox"
+          data-request-id="${escapeHtml(requestId)}"
+          ${submitted ? "checked" : ""}
+          ${
+            submitted || !canModify
+              ? "disabled"
+              : ""
+          }
+        >
+
+        <span>
+          Fingerprints Submitted
+        </span>
+
+      </label>
+
+
+      <label class="workflow-checkbox">
+
+        <input
+          id="fingerprintProcessedCheckbox"
+          type="checkbox"
+          data-request-id="${escapeHtml(requestId)}"
+          ${processed ? "checked" : ""}
+          ${
+            !submitted ||
+            processed ||
+            !canModify
+              ? "disabled"
+              : ""
+          }
+        >
+
+        <span>
+          Processed
+        </span>
+
+      </label>
+
+
+      <div
+        id="fingerprintResultsPanel"
+        class="fingerprint-results-panel"
+        ${processed ? "" : "hidden"}
+      >
+
+
+        <div class="fingerprint-result-group">
+
+          <strong>
+            Identity Result
+          </strong>
+
+
+          <label class="workflow-radio">
+
+            <input
+              type="radio"
+              name="fingerprintIdentityResult"
+              value="verified"
+              ${
+                identityResult === "verified"
+                  ? "checked"
+                  : ""
+              }
+            >
+
+            Identity Verified
+
+          </label>
+
+
+          <label class="workflow-radio">
+
+            <input
+              type="radio"
+              name="fingerprintIdentityResult"
+              value="unverified"
+              ${
+                identityResult === "unverified"
+                  ? "checked"
+                  : ""
+              }
+            >
+
+            Identity Not Verified
+
+          </label>
+
+        </div>
+
+
+        <div class="fingerprint-result-group">
+
+          <strong>
+            Next of Kin
+          </strong>
+
+
+          <label class="workflow-radio">
+
+            <input
+              type="radio"
+              name="fingerprintNokResult"
+              value="provided"
+              ${
+                nextOfKinResult === "provided"
+                  ? "checked"
+                  : ""
+              }
+            >
+
+            Next of Kin Provided
+
+          </label>
+
+
+          <label class="workflow-radio">
+
+            <input
+              type="radio"
+              name="fingerprintNokResult"
+              value="no_next_of_kin"
+              ${
+                nextOfKinResult === "no_next_of_kin"
+                  ? "checked"
+                  : ""
+              }
+            >
+
+            No Next of Kin
+
+          </label>
+
+        </div>
+
+
+        ${
+          canModify
+            ? `
+                <button
+                  id="saveFingerprintResultsButton"
+                  class="button primary"
+                  type="button"
+                >
+                  ${
+                    processed
+                      ? "Update Processing Results"
+                      : "Save Processing Results"
+                  }
+                </button>
+              `
+            : ""
+        }
+
+      </div>
+
+    </div>
+  `;
+
+}
+  
 // =========================================================
 // LOCATION HISTORY
 // =========================================================
