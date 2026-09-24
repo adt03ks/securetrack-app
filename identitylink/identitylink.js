@@ -3,7 +3,7 @@
   "use strict";
 
  console.log(
-    "IdentityLink JS build 2026-09-22 01:08 loaded"
+    "IdentityLink JS build 2026-09-23 fingerprint-rpc-v4 loaded"
   );
 
   
@@ -2444,23 +2444,47 @@ function wireAuthorizationProgressControls(
 
         try {
 
-          const {
-            error
-          } =
+          // First try the simple RPC signature.
+          // Older/newer database versions may only accept p_request_id.
+          let result =
             await db.rpc(
               "mark_identitylink_fingerprints_submitted",
               {
                 p_request_id:
-                  requestId,
-
-                p_submission_notes:
-                  null
+                  requestId
               }
             );
 
 
-          if (error) {
-            throw error;
+          // If this deployment expects the optional notes parameter,
+          // retry with the two-argument signature.
+          if (
+            result.error &&
+            (
+              result.error.code === "PGRST202" ||
+              /function|schema cache|parameter|argument/i.test(
+                result.error.message || ""
+              )
+            )
+          ) {
+
+            result =
+              await db.rpc(
+                "mark_identitylink_fingerprints_submitted",
+                {
+                  p_request_id:
+                    requestId,
+
+                  p_submission_notes:
+                    null
+                }
+              );
+
+          }
+
+
+          if (result.error) {
+            throw result.error;
           }
 
 
@@ -2476,6 +2500,11 @@ function wireAuthorizationProgressControls(
 
         }
         catch (error) {
+
+          console.error(
+            "IdentityLink fingerprint submission error:",
+            error
+          );
 
           event.target.checked =
             false;
