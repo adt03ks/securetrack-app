@@ -4,312 +4,1649 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0d10">
-  <title>SecureTrack | Duty Station Assignment</title>
-  <link rel="stylesheet" href="assignments.css">
-</head>
 
-<body data-securetrack-roles="senior_officer,team_lead,manager,director,admin">
-  <main class="shell">
-    <header class="topbar">
-      <div>
-        <div class="brand">SECURE<span>TRACK</span></div>
-        <div class="eyebrow">OPERATIONS HUB</div>
-        <h1>Duty Station Assignment</h1>
-        <p class="subtle">
-  Confirm shift attendance, establish shift supervision,
-  generate prioritized duty assignments, review placements,
-  and publish the final shift assignment.
-</p>
-      </div>
+  <title>
+    SecureTrack | Duty Station Assignment
+  </title>
 
-      <div class="top-actions">
-        <a class="button secondary" href="live.html">Live Duty Board</a>
-        <a class="button secondary" href="../hub.html">Operations Hub</a>
-        <button id="signOutButton" class="button ghost" type="button">Sign Out</button>
-      </div>
-    </header>
-
-    <section class="user-strip">
-      <span>Signed in as</span>
-      <strong id="currentUserName">Loading…</strong>
-      <span id="currentUserRole" class="role-pill"></span>
-    </section>
-
-    <div id="pageMessage" class="message" role="status" aria-live="polite"></div>
-
-    <section class="grid">
-      <article class="card">
-        <div class="eyebrow">STEP 1</div>
-        <h2>Open Shift</h2>
-
-        <form id="shiftForm">
-          <div class="field-grid">
-            <label>
-              <span>Shift Date <b>*</b></span>
-              <input id="shiftDate" type="date" required>
-            </label>
-
-            <label>
-              <span>Shift Name <b>*</b></span>
-             <select id="shiftName" required>
-
-  <option value="">
-    Select Shift
-  </option>
-
-  <option value="Alpha">
-    Alpha
-  </option>
-
-  <option value="Bravo">
-    Bravo
-  </option>
-
-  <option value="Charlie">
-    Charlie
-  </option>
-
-  <option value="Delta">
-    Delta
-  </option>
-
-</select>
-            </label>
-          </div>
-
-          <button id="openShiftButton" class="button primary" type="submit">
-            Open Shift
-          </button>
-        </form>
-
-        <div id="shiftStatus" class="shift-status" hidden>
-          <span>Current Shift</span>
-          <strong id="shiftStatusText">—</strong>
-        </div>
-      </article>
-<!-- =========================================================
-     SHIFT SUPERVISOR
-     ========================================================= -->
-
-<section
-  id="supervisorPanel"
-  class="supervisor-panel"
-  hidden
->
-
-  <div class="supervisor-header">
-
-    <div>
-
-      <div class="eyebrow">
-        PRIORITY 1
-      </div>
-
-      <h2>
-        Shift Supervisor
-      </h2>
-
-      <p class="subtle">
-        The designated Team Lead serves as Supervisor when
-        present. If unavailable, a configured Senior Officer
-        must be selected as Acting Supervisor.
-      </p>
-
-    </div>
-
-    <div
-      id="supervisorBadge"
-      class="supervisor-badge"
-    >
-      NOT RESOLVED
-    </div>
-
-  </div>
-
-
-  <div class="supervisor-grid">
-
-    <div class="supervisor-detail">
-
-      <span>
-        Designated Team Lead
-      </span>
-
-      <strong id="designatedTeamLead">
-        —
-      </strong>
-
-      <small id="teamLeadAttendance">
-        Attendance not confirmed
-      </small>
-
-    </div>
-
-
-    <div class="supervisor-detail">
-
-      <span>
-        Current Supervisor
-      </span>
-
-      <strong id="currentSupervisorName">
-        —
-      </strong>
-
-      <small id="currentSupervisorSource">
-        —
-      </small>
-
-    </div>
-
-  </div>
-
-
-  <div
-    id="actingSupervisorSection"
-    class="acting-supervisor"
-    hidden
+  <link
+    rel="stylesheet"
+    href="assignments.css"
   >
 
-    <div class="acting-warning">
 
-      <strong>
-        Acting Supervisor Required
-      </strong>
+  <style>
 
-      <p>
-        The designated Team Lead is not marked present.
-        Select one of the present Senior Officers below.
-      </p>
-
-    </div>
+    .workflow-card,
+    .special-post-card {
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      background: rgba(255,255,255,.025);
+      padding: 16px;
+    }
 
 
-    <label>
+    .workflow-grid,
+    .special-post-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+
+    .workflow-detail,
+    .special-detail {
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+
+    .workflow-detail span,
+    .special-detail span {
+      display: block;
+      font-size: 11px;
+      color: #9ba3ad;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+
+
+    .workflow-actions,
+    .special-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+
+    .status-chip,
+    .priority-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+    }
+
+
+    .status-chip.good {
+      color: #baf2d4;
+      border-color: rgba(25,182,106,.38);
+      background: rgba(25,182,106,.10);
+    }
+
+
+    .status-chip.warn {
+      color: #ffd7a6;
+      border-color: rgba(255,120,0,.38);
+      background: rgba(255,120,0,.10);
+    }
+
+
+    .status-chip.bad {
+      color: #ffc5c7;
+      border-color: rgba(229,72,77,.36);
+      background: rgba(229,72,77,.10);
+    }
+
+
+    .advance-notice,
+    .revision-notice,
+    .protected-note {
+      margin-top: 12px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,120,0,.26);
+      background: rgba(255,120,0,.07);
+      color: #d8dde2;
+      font-size: 13px;
+    }
+
+
+    .special-post-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+
+    .special-post-head {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+
+    .special-post-head h3 {
+      margin: 0 0 5px;
+    }
+
+
+    .special-post-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+
+    .coverage-list {
+      display: grid;
+      gap: 8px;
+      max-height: 420px;
+      overflow: auto;
+      margin-top: 12px;
+    }
+
+
+    .coverage-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: flex-start;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 10px;
+      padding: 11px;
+      background: rgba(255,255,255,.025);
+    }
+
+
+    .coverage-row.recommended {
+      border-color: rgba(255,120,0,.45);
+      background: rgba(255,120,0,.07);
+    }
+
+
+    .coverage-row.protected {
+      opacity: .62;
+    }
+
+
+    .coverage-row small {
+      display: block;
+      margin-top: 4px;
+      color: #9ba3ad;
+    }
+
+
+    .field-grid.three {
+      grid-template-columns:
+        repeat(3, minmax(0,1fr));
+    }
+
+
+    .field-grid.four {
+      grid-template-columns:
+        repeat(4, minmax(0,1fr));
+    }
+
+
+    .special-form-section {
+      display: grid;
+      gap: 12px;
+    }
+
+
+    .modal-card.wide {
+      width: min(
+        920px,
+        calc(100vw - 28px)
+      );
+
+      max-height:
+        calc(100vh - 36px);
+
+      overflow: auto;
+    }
+
+
+    @media (max-width: 900px) {
+
+      .workflow-grid,
+      .special-post-grid,
+      .field-grid.three,
+      .field-grid.four {
+        grid-template-columns:
+          1fr 1fr;
+      }
+
+    }
+
+
+    @media (max-width: 620px) {
+
+      .workflow-grid,
+      .special-post-grid,
+      .field-grid.three,
+      .field-grid.four {
+        grid-template-columns:
+          1fr;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body
+
+  data-securetrack-roles="
+    senior_officer,
+    team_lead,
+    manager,
+    director,
+    admin
+  "
+
+  data-end-of-shift-url="
+    ../end-of-shift-report.html
+  "
+
+>
+
+
+  <main class="shell">
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header class="topbar">
+
+      <div>
+
+        <div class="brand">
+          SECURE<span>TRACK</span>
+        </div>
+
+        <div class="eyebrow">
+          OPERATIONS HUB
+        </div>
+
+        <h1>
+          Duty Station Assignment
+        </h1>
+
+        <p class="subtle">
+
+          Plan assignments in advance,
+          confirm actual attendance and shift leadership,
+          receive the prior handoff,
+          manage Special Posts,
+          and document operational assignment revisions
+          throughout the shift.
+
+        </p>
+
+      </div>
+
+
+      <div class="top-actions">
+
+        <a
+          class="button secondary"
+          href="live.html"
+        >
+          Live Duty Board
+        </a>
+
+        <a
+          class="button secondary"
+          href="../hub.html"
+        >
+          Operations Hub
+        </a>
+
+        <button
+          id="signOutButton"
+          class="button ghost"
+          type="button"
+        >
+          Sign Out
+        </button>
+
+      </div>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         USER
+         ===================================================== -->
+
+    <section class="user-strip">
 
       <span>
-        Acting Supervisor
+        Signed in as
       </span>
 
-      <select id="actingSupervisorSelect">
+      <strong id="currentUserName">
+        Loading…
+      </strong>
 
-        <option value="">
-          Select Senior Officer
-        </option>
+      <span
+        id="currentUserRole"
+        class="role-pill"
+      ></span>
 
-      </select>
-
-    </label>
+    </section>
 
 
-    <button
-      id="saveActingSupervisorButton"
-      class="button primary"
-      type="button"
-    >
-      Confirm Acting Supervisor
-    </button>
+    <div
+      id="pageMessage"
+      class="message"
+      role="status"
+      aria-live="polite"
+    ></div>
 
-  </div>
 
-</section>
+
+    <!-- =====================================================
+         STEPS 1 + 2
+         ===================================================== -->
+
+    <section class="grid">
+
+
+      <!-- STEP 1 -->
+
       <article class="card">
-        <div class="eyebrow">STEP 2</div>
-        <h2>Who’s Here Today?</h2>
-        <p class="muted">Only employees marked present can be assigned.</p>
 
-        <div id="attendanceList" class="attendance-list">
-          <div class="empty">Open a shift first.</div>
+        <div class="eyebrow">
+          STEP 1
         </div>
 
-        <button id="saveAttendanceButton" class="button secondary" type="button" disabled>
+        <h2>
+          Open Shift
+        </h2>
+
+
+        <form id="shiftForm">
+
+
+          <div class="field-grid">
+
+
+            <label>
+
+              <span>
+                Shift Date <b>*</b>
+              </span>
+
+              <input
+                id="shiftDate"
+                type="date"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Shift Name <b>*</b>
+              </span>
+
+              <select
+                id="shiftName"
+                required
+              >
+
+                <option value="">
+                  Select Shift
+                </option>
+
+                <option value="Alpha">
+                  Alpha
+                </option>
+
+                <option value="Bravo">
+                  Bravo
+                </option>
+
+                <option value="Charlie">
+                  Charlie
+                </option>
+
+                <option value="Delta">
+                  Delta
+                </option>
+
+              </select>
+
+            </label>
+
+
+          </div>
+
+
+          <button
+            id="openShiftButton"
+            class="button primary"
+            type="submit"
+          >
+            Open Shift
+          </button>
+
+
+        </form>
+
+
+        <div
+          id="shiftStatus"
+          class="shift-status"
+          hidden
+        >
+
+          <span>
+            Current Shift
+          </span>
+
+          <strong id="shiftStatusText">
+            —
+          </strong>
+
+        </div>
+
+
+      </article>
+
+
+
+      <!-- STEP 2 -->
+
+      <article class="card">
+
+        <div class="eyebrow">
+          STEP 2
+        </div>
+
+        <h2>
+          Who’s Here Today?
+        </h2>
+
+        <p class="muted">
+
+          Save expected attendance during advance planning,
+          then update it to actual attendance at shift start.
+
+          Published rosters remain revisable for operational
+          attendance changes.
+
+        </p>
+
+
+        <div
+          id="attendanceList"
+          class="attendance-list"
+        >
+
+          <div class="empty">
+            Open a shift first.
+          </div>
+
+        </div>
+
+
+        <button
+          id="saveAttendanceButton"
+          class="button secondary"
+          type="button"
+          disabled
+        >
           Save Attendance
         </button>
+
+
       </article>
+
+
     </section>
 
-    <section class="card">
-      <div class="section-head">
+
+
+    <!-- =====================================================
+         SHIFT SUPERVISOR
+         ===================================================== -->
+
+    <section
+      id="supervisorPanel"
+      class="supervisor-panel card"
+      hidden
+    >
+
+
+      <div class="supervisor-header">
+
+
         <div>
-          <div class="eyebrow">STEP 3</div>
-          <h2>Generate Assignments</h2>
-          <p class="muted">Locked assignments are preserved. Recent station history is used to reduce repeats.</p>
+
+          <div class="eyebrow">
+            PROTECTED POST
+          </div>
+
+          <h2>
+            Shift Supervisor
+          </h2>
+
+          <p class="subtle">
+
+            A present Team Lead always serves as Supervisor.
+
+            If the Team Lead is absent,
+            a configured Senior Officer must be formally
+            designated Acting Team Lead.
+
+          </p>
+
         </div>
 
-        <button id="generateButton" class="button primary" type="button" disabled>
+
+        <div
+          id="supervisorBadge"
+          class="supervisor-badge"
+        >
+          NOT RESOLVED
+        </div>
+
+
+      </div>
+
+
+
+      <div class="supervisor-grid">
+
+
+        <div class="supervisor-detail">
+
+          <span>
+            Designated Team Lead
+          </span>
+
+          <strong id="designatedTeamLead">
+            —
+          </strong>
+
+          <small id="teamLeadAttendance">
+            Attendance not confirmed
+          </small>
+
+        </div>
+
+
+
+        <div class="supervisor-detail">
+
+          <span>
+            Current Supervisor
+          </span>
+
+          <strong id="currentSupervisorName">
+            —
+          </strong>
+
+          <small id="currentSupervisorSource">
+            —
+          </small>
+
+        </div>
+
+
+      </div>
+
+
+
+      <div
+        id="actingSupervisorSection"
+        class="acting-supervisor"
+        hidden
+      >
+
+
+        <div class="acting-warning">
+
+          <strong>
+            Acting Team Lead Required
+          </strong>
+
+          <p>
+
+            The designated Team Lead is not marked present.
+
+            Select one of the configured,
+            present Senior Officers below.
+
+          </p>
+
+        </div>
+
+
+        <label>
+
+          <span>
+            Acting Team Lead
+          </span>
+
+          <select id="actingSupervisorSelect">
+
+            <option value="">
+              Select Senior Officer
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <button
+          id="saveActingSupervisorButton"
+          class="button primary"
+          type="button"
+        >
+          Confirm Acting Team Lead
+        </button>
+
+
+      </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         STEP 3
+         HANDOFF / SHIFT ACTIVATION
+         ===================================================== -->
+
+    <section
+      id="handoffPanel"
+      class="card"
+      hidden
+    >
+
+
+      <div class="section-head">
+
+
+        <div>
+
+          <div class="eyebrow">
+            STEP 3
+          </div>
+
+          <h2>
+            Receive Handoff &amp; Activate Shift
+          </h2>
+
+          <p class="muted">
+
+            At actual shift start,
+            the current Team Lead or Acting Team Lead
+            receives the prior End-of-Shift handoff.
+
+            Ongoing Special Posts are then copied into
+            this shift before operational coverage is
+            finalized.
+
+          </p>
+
+        </div>
+
+
+        <span
+          id="handoffStatusBadge"
+          class="status-chip warn"
+        >
+          NOT STARTED
+        </span>
+
+
+      </div>
+
+
+
+      <div class="workflow-card">
+
+
+        <div class="workflow-grid">
+
+
+          <div class="workflow-detail">
+
+            <span>
+              Receiving Leader
+            </span>
+
+            <strong id="handoffLeader">
+              —
+            </strong>
+
+          </div>
+
+
+
+          <div class="workflow-detail">
+
+            <span>
+              Prior Report
+            </span>
+
+            <strong id="handoffPriorReport">
+              —
+            </strong>
+
+          </div>
+
+
+
+          <div class="workflow-detail">
+
+            <span>
+              Handoff
+            </span>
+
+            <strong id="handoffReceiptStatus">
+              —
+            </strong>
+
+          </div>
+
+
+
+          <div class="workflow-detail">
+
+            <span>
+              Carry-Forward Special Posts
+            </span>
+
+            <strong id="handoffCarryCount">
+              0
+            </strong>
+
+          </div>
+
+
+        </div>
+
+
+
+        <div
+          id="handoffAdvanceNotice"
+          class="advance-notice"
+          hidden
+        >
+
+          This roster may be prepared and published in advance.
+
+          Handoff activation is completed at the actual start
+          of the shift and does not invalidate the advance plan.
+
+        </div>
+
+
+
+        <div class="workflow-actions">
+
+
+          <button
+            id="openHandoffButton"
+            class="button secondary"
+            type="button"
+            hidden
+          >
+            Open Prior Handoff
+          </button>
+
+
+          <button
+            id="refreshHandoffButton"
+            class="button secondary"
+            type="button"
+          >
+            Refresh Handoff Status
+          </button>
+
+
+          <button
+            id="confirmHandoffButton"
+            class="button primary"
+            type="button"
+            disabled
+          >
+            Confirm Operational Handoff
+          </button>
+
+
+        </div>
+
+
+      </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         STEP 4
+         SPECIAL POSTS
+         ===================================================== -->
+
+    <section
+      id="specialPostPanel"
+      class="card"
+      hidden
+    >
+
+
+      <div class="section-head">
+
+
+        <div>
+
+          <div class="eyebrow">
+            STEP 4
+          </div>
+
+          <h2>
+            Special Post Assignments
+          </h2>
+
+          <p class="muted">
+
+            Add known Special Posts before generation
+            or add them later as an operational revision.
+
+            Coverage recommendations compare Special Post
+            importance with the officer’s current standing
+            assignment.
+
+          </p>
+
+        </div>
+
+
+        <button
+          id="addSpecialPostButton"
+          class="button primary"
+          type="button"
+          disabled
+        >
+          + Add Special Post
+        </button>
+
+
+      </div>
+
+
+
+      <div class="protected-note">
+
+        <strong>
+          Protected — never displaced by a Special Post:
+        </strong>
+
+        Supervisor / Team Lead,
+        Dispatch 1,
+        and Dispatch 2.
+
+      </div>
+
+
+
+      <div
+        id="specialPostList"
+        class="special-post-list"
+      >
+
+        <div class="empty">
+          Open a shift to review Special Posts.
+        </div>
+
+      </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         STEP 5
+         DUTY ASSIGNMENTS
+         ===================================================== -->
+
+    <section class="card">
+
+
+      <div class="section-head">
+
+
+        <div>
+
+          <div class="eyebrow">
+            STEP 5
+          </div>
+
+          <h2>
+            Generate / Revise Duty Assignments
+          </h2>
+
+          <p class="muted">
+
+            During planning,
+            generate the initial roster.
+
+            Once published,
+            use Operational Change instead of regenerating
+            the shift so the original published plan remains
+            historically intact.
+
+          </p>
+
+        </div>
+
+
+        <button
+          id="generateButton"
+          class="button primary"
+          type="button"
+          disabled
+        >
           Generate Assignments
         </button>
+
+
       </div>
+
+
+
+      <div
+        id="postPublicationNotice"
+        class="revision-notice"
+        hidden
+      >
+
+        <strong>
+          Published roster:
+        </strong>
+
+        changes below are operational revisions.
+
+        They are timestamped in assignment history;
+        the original published plan remains preserved.
+
+      </div>
+
+
 
       <div class="table-wrap">
+
+
         <table class="assignment-table">
+
+
           <thead>
+
             <tr>
-              <th>Station</th>
-              <th>Officer</th>
-              <th>Source</th>
-              <th>Lock</th>
-              <th>Manual Change</th>
+
+              <th>
+                Station
+              </th>
+
+              <th>
+                Officer
+              </th>
+
+              <th>
+                Source
+              </th>
+
+              <th>
+                Lock
+              </th>
+
+              <th>
+                Assignment Action
+              </th>
+
             </tr>
+
           </thead>
+
+
           <tbody id="assignmentBody">
+
             <tr>
-              <td colspan="5" class="empty">Open a shift to begin.</td>
+
+              <td
+                colspan="5"
+                class="empty"
+              >
+                Open a shift to begin.
+              </td>
+
             </tr>
+
           </tbody>
+
+
         </table>
+
+
       </div>
+
+
 
       <div class="publish-row">
+
+
         <div>
-          <span class="muted">Publishing finalizes the roster for the shift.</span>
+
+          <span class="muted">
+
+            Publishing records the official planned roster.
+
+            Operational revisions remain available afterward.
+
+          </span>
+
         </div>
-        <button id="publishButton" class="button primary" type="button" disabled>
+
+
+        <button
+          id="publishButton"
+          class="button primary"
+          type="button"
+          disabled
+        >
           Publish Assignments
         </button>
+
+
       </div>
+
+
     </section>
+
+
+
+    <!-- =====================================================
+         STATION SETUP
+         ===================================================== -->
 
     <section class="card">
-      <div class="eyebrow">STATION SETUP</div>
-      <h2>Active Duty Stations</h2>
-      <p class="muted">These are pulled from Supabase. Add your real post names there before production use.</p>
-      <div id="stationList" class="station-list">
-        <div class="empty">Loading stations…</div>
+
+
+      <div class="eyebrow">
+        STATION SETUP
       </div>
+
+
+      <h2>
+        Active Duty Stations
+      </h2>
+
+
+      <p class="muted">
+
+        Standing-post priority is pulled from Supabase.
+
+        Special Post priority is managed separately
+        on the 1–5 operational scale.
+
+      </p>
+
+
+      <div
+        id="stationList"
+        class="station-list"
+      >
+
+        <div class="empty">
+          Loading stations…
+        </div>
+
+      </div>
+
+
     </section>
+
+
   </main>
 
-  <div id="manualModal" class="modal-backdrop" aria-hidden="true">
-    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="manualTitle">
-      <div class="eyebrow">MANUAL CHANGE</div>
-      <h2 id="manualTitle">Assign Officer to Station</h2>
+
+
+  <!-- =====================================================
+       STANDING POST ASSIGNMENT MODAL
+       ===================================================== -->
+
+  <div
+    id="manualModal"
+    class="modal-backdrop"
+    aria-hidden="true"
+  >
+
+
+    <section
+      class="modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="manualTitle"
+    >
+
+
+      <div class="eyebrow">
+        ASSIGNMENT CHANGE
+      </div>
+
+
+      <h2 id="manualTitle">
+        Assign Officer to Station
+      </h2>
+
+
       <form id="manualForm">
-        <input id="manualStationId" type="hidden">
+
+
+        <input
+          id="manualStationId"
+          type="hidden"
+        >
+
 
         <label>
-          <span>Officer <b>*</b></span>
-          <select id="manualUserId" required></select>
+
+          <span>
+            Officer <b>*</b>
+          </span>
+
+          <select
+            id="manualUserId"
+            required
+          ></select>
+
         </label>
 
+
         <label>
-          <span>Reason</span>
-          <textarea id="manualReason" rows="3" placeholder="Optional reason / note"></textarea>
+
+          <span>
+            Reason
+          </span>
+
+          <textarea
+            id="manualReason"
+            rows="3"
+            placeholder="Required for post-publication revisions"
+          ></textarea>
+
         </label>
+
 
         <div class="modal-actions">
-          <button id="confirmManualButton" class="button primary" type="submit">
+
+
+          <button
+            id="confirmManualButton"
+            class="button primary"
+            type="submit"
+          >
             Save Assignment
           </button>
-          <button class="button secondary modal-cancel" type="button">Cancel</button>
+
+
+          <button
+            class="button secondary modal-cancel"
+            type="button"
+          >
+            Cancel
+          </button>
+
+
         </div>
+
+
       </form>
+
+
     </section>
+
+
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+  <!-- =====================================================
+       ADD SPECIAL POST MODAL
+       ===================================================== -->
+
+  <div
+    id="specialPostModal"
+    class="modal-backdrop"
+    aria-hidden="true"
+  >
+
+
+    <section
+      class="modal-card wide"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="specialPostTitle"
+    >
+
+
+      <div class="eyebrow">
+        SPECIAL POST
+      </div>
+
+
+      <h2 id="specialPostTitle">
+        Add Special Post Assignment
+      </h2>
+
+
+      <form
+        id="specialPostForm"
+        class="special-form-section"
+      >
+
+
+        <div class="field-grid three">
+
+
+          <label>
+
+            <span>
+              Special Post / Assignment <b>*</b>
+            </span>
+
+            <input
+              id="specialAssignmentName"
+              type="text"
+              required
+            >
+
+          </label>
+
+
+          <label>
+
+            <span>
+              Location
+            </span>
+
+            <input
+              id="specialLocation"
+              type="text"
+            >
+
+          </label>
+
+
+          <label>
+
+            <span>
+              Coverage Priority <b>*</b>
+            </span>
+
+            <select
+              id="specialPriority"
+              required
+            >
+
+              <option value="">
+                Select priority
+              </option>
+
+              <option value="1">
+                1 — MUST COVER
+              </option>
+
+              <option value="2">
+                2 — HIGH PRIORITY
+              </option>
+
+              <option value="3">
+                3 — IMPORTANT
+              </option>
+
+              <option value="4">
+                4 — PREFERRED
+              </option>
+
+              <option value="5">
+                5 — GOOD TO HAVE / ROUNDS ACCEPTABLE
+              </option>
+
+            </select>
+
+          </label>
+
+
+        </div>
+
+
+
+        <div class="field-grid three">
+
+
+          <label>
+
+            <span>
+              Requesting Unit / Department
+            </span>
+
+            <input
+              id="specialRequestingUnit"
+              type="text"
+            >
+
+          </label>
+
+
+          <label>
+
+            <span>
+              Requested By
+            </span>
+
+            <input
+              id="specialRequestedBy"
+              type="text"
+            >
+
+          </label>
+
+
+          <label>
+
+            <span>
+              Approved By <b>*</b>
+            </span>
+
+            <input
+              id="specialApprovedBy"
+              type="text"
+              required
+            >
+
+          </label>
+
+
+        </div>
+
+
+
+        <div class="field-grid four">
+
+
+          <label>
+
+            <span>
+              Bill To <b>*</b>
+            </span>
+
+            <input
+              id="specialBillTo"
+              type="text"
+              required
+            >
+
+          </label>
+
+
+          <label>
+
+            <span>
+              Cost Center
+            </span>
+
+            <input
+              id="specialCostCenter"
+              type="text"
+            >
+
+          </label>
+
+
+          <label>
+
+            <span>
+              Start Time
+            </span>
+
+            <input
+              id="specialStartTime"
+              type="time"
+            >
+
+          </label>
+
+
+          <label>
+
+            <span>
+              Expected End
+            </span>
+
+            <input
+              id="specialEndTime"
+              type="time"
+            >
+
+          </label>
+
+
+        </div>
+
+
+
+        <label>
+
+          <span>
+            Instructions / Notes
+          </span>
+
+          <textarea
+            id="specialNotes"
+            rows="4"
+            placeholder="Coverage instructions, approval details, billing notes, operational expectations..."
+          ></textarea>
+
+        </label>
+
+
+
+        <label
+          style="
+            display:flex;
+            gap:9px;
+            align-items:center;
+          "
+        >
+
+          <input
+            id="specialOngoing"
+            type="checkbox"
+          >
+
+          <span>
+            Expected to continue into the next shift
+          </span>
+
+        </label>
+
+
+
+        <div class="modal-actions">
+
+
+          <button
+            id="saveSpecialPostButton"
+            class="button primary"
+            type="submit"
+          >
+            Save Special Post
+          </button>
+
+
+          <button
+            class="button secondary special-modal-cancel"
+            type="button"
+          >
+            Cancel
+          </button>
+
+
+        </div>
+
+
+      </form>
+
+
+    </section>
+
+
+  </div>
+
+
+
+  <!-- =====================================================
+       SPECIAL POST COVERAGE MODAL
+       ===================================================== -->
+
+  <div
+    id="coverageModal"
+    class="modal-backdrop"
+    aria-hidden="true"
+  >
+
+
+    <section
+      class="modal-card wide"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="coverageTitle"
+    >
+
+
+      <div class="eyebrow">
+        COVERAGE REVIEW
+      </div>
+
+
+      <h2 id="coverageTitle">
+        Assign Special Post Coverage
+      </h2>
+
+
+      <p
+        id="coverageSummary"
+        class="muted"
+      >
+        Loading coverage candidates…
+      </p>
+
+
+      <form id="coverageForm">
+
+
+        <input
+          id="coverageSpecialAssignmentId"
+          type="hidden"
+        >
+
+
+        <div
+          id="coverageCandidateList"
+          class="coverage-list"
+        >
+
+          <div class="empty">
+            Loading candidates…
+          </div>
+
+        </div>
+
+
+        <label>
+
+          <span>
+            Reason / Operational Note
+          </span>
+
+          <textarea
+            id="coverageReason"
+            rows="3"
+            placeholder="Why this officer is being assigned or reassigned"
+          ></textarea>
+
+        </label>
+
+
+        <div class="modal-actions">
+
+
+          <button
+            id="saveCoverageButton"
+            class="button primary"
+            type="submit"
+          >
+            Assign Coverage
+          </button>
+
+
+          <button
+            class="button secondary coverage-modal-cancel"
+            type="button"
+          >
+            Cancel
+          </button>
+
+
+        </div>
+
+
+      </form>
+
+
+    </section>
+
+
+  </div>
+
+
+
+  <!-- =====================================================
+       SCRIPTS
+       ===================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
   <script src="../config.js"></script>
+
   <script src="../secure-page.js"></script>
+
   <script src="assignments.js"></script>
+
+
 </body>
 </html>
