@@ -1,676 +1,806 @@
 (async function () {
   "use strict";
 
-  console.log(
-    "SecureTrack Duty Assignment build 2026-09-21-auth-fix-2"
-  );
-
-
   function waitForAuth() {
+    if (window.SecureTrackAuth) return Promise.resolve(window.SecureTrackAuth);
 
-    const existing =
-      window.SecureTrackAuth;
-
-
-    if (
-      existing?.db &&
-      existing?.user
-    ) {
-
-      return Promise.resolve(
-        existing
-      );
-
-    }
-
-
-    return new Promise(
-      (resolve, reject) => {
-
-        let finished =
-          false;
-
-
-        const cleanup =
-          () => {
-
-            document.removeEventListener(
-              "securetrack:authorized",
-              authHandler
-            );
-
-            clearInterval(
-              pollTimer
-            );
-
-            clearTimeout(
-              timeoutTimer
-            );
-
-          };
-
-
-        const finish =
-          auth => {
-
-            if (
-              finished ||
-              !auth?.db ||
-              !auth?.user
-            ) {
-              return;
-            }
-
-
-            finished =
-              true;
-
-
-            cleanup();
-
-
-            resolve(
-              auth
-            );
-
-          };
-
-
-        const authHandler =
-          event => {
-
-            finish(
-              event.detail ||
-              window.SecureTrackAuth
-            );
-
-          };
-
-
-        document.addEventListener(
+    return new Promise(resolve => {
+      const handler = event => {
+        document.removeEventListener(
           "securetrack:authorized",
-          authHandler
+          handler
         );
 
+        resolve(
+          event.detail ||
+          window.SecureTrackAuth
+        );
+      };
 
-        // -------------------------------------------------
-        // Also poll window.SecureTrackAuth.
-        // This prevents the page from hanging if the
-        // authorization event fired before assignments.js
-        // attached its listener.
-        // -------------------------------------------------
-
-        const pollTimer =
-          setInterval(
-            () => {
-
-              finish(
-                window.SecureTrackAuth
-              );
-
-            },
-            100
-          );
-
-
-        const timeoutTimer =
-          setTimeout(
-            () => {
-
-              if (finished) {
-                return;
-              }
-
-
-              finished =
-                true;
-
-
-              cleanup();
-
-
-              reject(
-                new Error(
-                  "SecureTrack authentication did not initialize."
-                )
-              );
-
-            },
-            5000
-          );
-
-      }
-    );
-
+      document.addEventListener(
+        "securetrack:authorized",
+        handler
+      );
+    });
   }
 
 
-  let auth;
+  const auth =
+    await waitForAuth();
 
 
-  try {
-
-    auth =
-      await waitForAuth();
-
-  }
-  catch (error) {
-
-    console.error(
-      "Duty Assignment authentication error:",
-      error
-    );
-
-
-    const currentUserName =
-      document.getElementById(
-        "currentUserName"
-      );
-
-
-    const pageMessage =
-      document.getElementById(
-        "pageMessage"
-      );
-
-
-    const stationList =
-      document.getElementById(
-        "stationList"
-      );
-
-
-    if (currentUserName) {
-
-      currentUserName.textContent =
-        "Authentication unavailable";
-
-    }
-
-
-    if (pageMessage) {
-
-      pageMessage.textContent =
-        error.message;
-
-      pageMessage.className =
-        "message show error";
-
-    }
-
-
-    if (stationList) {
-
-      stationList.innerHTML =
-        '<div class="empty">Unable to load duty stations until authentication is available.</div>';
-
-    }
-
-
+  if (
+    !auth?.db ||
+    !auth?.user
+  ) {
     return;
-
   }
 
 
   const db =
     auth.db;
 
-
   const profile =
     auth.profile || {};
-
 
   const roles =
     auth.roles || [];
 
-
-  console.log(
-    "Duty Assignment authenticated:",
-    auth.user?.id,
-    roles
-  );
-
-  const currentUserName =
-    document.getElementById("currentUserName");
-
-  const currentUserRole =
-    document.getElementById("currentUserRole");
-
-  const signOutButton =
-    document.getElementById("signOutButton");
-
-  const pageMessage =
-    document.getElementById("pageMessage");
-
-  const shiftForm =
-    document.getElementById("shiftForm");
-
-  const shiftDate =
-    document.getElementById("shiftDate");
-
-  const shiftName =
-    document.getElementById("shiftName");
-
-  const openShiftButton =
-    document.getElementById("openShiftButton");
-
-  const shiftStatus =
-    document.getElementById("shiftStatus");
-
-  const shiftStatusText =
-    document.getElementById("shiftStatusText");
-
-  const attendanceList =
-    document.getElementById("attendanceList");
-
-  const saveAttendanceButton =
-    document.getElementById("saveAttendanceButton");
-
-  const generateButton =
-    document.getElementById("generateButton");
-
-  const assignmentBody =
-    document.getElementById("assignmentBody");
-
-  const publishButton =
-    document.getElementById("publishButton");
-
-  const stationList =
-    document.getElementById("stationList");
-
-  const manualModal =
-    document.getElementById("manualModal");
-
-  const manualForm =
-    document.getElementById("manualForm");
-
-  const manualStationId =
-    document.getElementById("manualStationId");
-
-  const manualUserId =
-    document.getElementById("manualUserId");
-
-  const manualReason =
-    document.getElementById("manualReason");
-
-  const confirmManualButton =
-    document.getElementById("confirmManualButton");
-const supervisorPanel =
-  document.getElementById(
-    "supervisorPanel"
-  );
-
-const supervisorBadge =
-  document.getElementById(
-    "supervisorBadge"
-  );
-
-const designatedTeamLead =
-  document.getElementById(
-    "designatedTeamLead"
-  );
-
-const teamLeadAttendance =
-  document.getElementById(
-    "teamLeadAttendance"
-  );
-
-const currentSupervisorName =
-  document.getElementById(
-    "currentSupervisorName"
-  );
-
-const currentSupervisorSource =
-  document.getElementById(
-    "currentSupervisorSource"
-  );
-
-const actingSupervisorSection =
-  document.getElementById(
-    "actingSupervisorSection"
-  );
-
-const actingSupervisorSelect =
-  document.getElementById(
-    "actingSupervisorSelect"
-  );
-
-const saveActingSupervisorButton =
-  document.getElementById(
-    "saveActingSupervisorButton"
-  );
-
-let currentShift = null;
-let stations = [];
-let staff = [];
-let attendance = [];
-let assignments = [];
-let plannedUnavailability = [];
-let supervisorContext = null;
+  const currentUserId =
+    auth.user.id;
 
 
-  function roleLabel(list) {
-    const order = [
-      "admin",
-      "director",
-      "manager",
-      "team_lead",
-      "senior_officer",
-      "officer"
-    ];
-
-    const found =
-      order.find(role =>
-        list.includes(role)
+  const $ =
+    id =>
+      document.getElementById(
+        id
       );
 
+
+  const el = {
+
+    currentUserName:
+      $("currentUserName"),
+
+    currentUserRole:
+      $("currentUserRole"),
+
+    signOutButton:
+      $("signOutButton"),
+
+    pageMessage:
+      $("pageMessage"),
+
+
+    shiftForm:
+      $("shiftForm"),
+
+    shiftDate:
+      $("shiftDate"),
+
+    shiftName:
+      $("shiftName"),
+
+    openShiftButton:
+      $("openShiftButton"),
+
+    shiftStatus:
+      $("shiftStatus"),
+
+    shiftStatusText:
+      $("shiftStatusText"),
+
+
+    attendanceList:
+      $("attendanceList"),
+
+    saveAttendanceButton:
+      $("saveAttendanceButton"),
+
+
+    supervisorPanel:
+      $("supervisorPanel"),
+
+    supervisorBadge:
+      $("supervisorBadge"),
+
+    designatedTeamLead:
+      $("designatedTeamLead"),
+
+    teamLeadAttendance:
+      $("teamLeadAttendance"),
+
+    currentSupervisorName:
+      $("currentSupervisorName"),
+
+    currentSupervisorSource:
+      $("currentSupervisorSource"),
+
+    actingSupervisorSection:
+      $("actingSupervisorSection"),
+
+    actingSupervisorSelect:
+      $("actingSupervisorSelect"),
+
+    saveActingSupervisorButton:
+      $("saveActingSupervisorButton"),
+
+
+    handoffPanel:
+      $("handoffPanel"),
+
+    handoffStatusBadge:
+      $("handoffStatusBadge"),
+
+    handoffLeader:
+      $("handoffLeader"),
+
+    handoffPriorReport:
+      $("handoffPriorReport"),
+
+    handoffReceiptStatus:
+      $("handoffReceiptStatus"),
+
+    handoffCarryCount:
+      $("handoffCarryCount"),
+
+    handoffAdvanceNotice:
+      $("handoffAdvanceNotice"),
+
+    openHandoffButton:
+      $("openHandoffButton"),
+
+    refreshHandoffButton:
+      $("refreshHandoffButton"),
+
+    confirmHandoffButton:
+      $("confirmHandoffButton"),
+
+
+    specialPostPanel:
+      $("specialPostPanel"),
+
+    addSpecialPostButton:
+      $("addSpecialPostButton"),
+
+    specialPostList:
+      $("specialPostList"),
+
+
+    generateButton:
+      $("generateButton"),
+
+    assignmentBody:
+      $("assignmentBody"),
+
+    publishButton:
+      $("publishButton"),
+
+    postPublicationNotice:
+      $("postPublicationNotice"),
+
+    stationList:
+      $("stationList"),
+
+
+    manualModal:
+      $("manualModal"),
+
+    manualForm:
+      $("manualForm"),
+
+    manualStationId:
+      $("manualStationId"),
+
+    manualUserId:
+      $("manualUserId"),
+
+    manualReason:
+      $("manualReason"),
+
+    confirmManualButton:
+      $("confirmManualButton"),
+
+
+    specialPostModal:
+      $("specialPostModal"),
+
+    specialPostForm:
+      $("specialPostForm"),
+
+    specialAssignmentName:
+      $("specialAssignmentName"),
+
+    specialLocation:
+      $("specialLocation"),
+
+    specialPriority:
+      $("specialPriority"),
+
+    specialRequestingUnit:
+      $("specialRequestingUnit"),
+
+    specialRequestedBy:
+      $("specialRequestedBy"),
+
+    specialApprovedBy:
+      $("specialApprovedBy"),
+
+    specialBillTo:
+      $("specialBillTo"),
+
+    specialCostCenter:
+      $("specialCostCenter"),
+
+    specialStartTime:
+      $("specialStartTime"),
+
+    specialEndTime:
+      $("specialEndTime"),
+
+    specialNotes:
+      $("specialNotes"),
+
+    specialOngoing:
+      $("specialOngoing"),
+
+    saveSpecialPostButton:
+      $("saveSpecialPostButton"),
+
+
+    coverageModal:
+      $("coverageModal"),
+
+    coverageForm:
+      $("coverageForm"),
+
+    coverageTitle:
+      $("coverageTitle"),
+
+    coverageSummary:
+      $("coverageSummary"),
+
+    coverageSpecialAssignmentId:
+      $("coverageSpecialAssignmentId"),
+
+    coverageCandidateList:
+      $("coverageCandidateList"),
+
+    coverageReason:
+      $("coverageReason"),
+
+    saveCoverageButton:
+      $("saveCoverageButton")
+
+  };
+
+
+  const END_OF_SHIFT_URL = (
+    document.body.dataset.endOfShiftUrl ||
+    "../end-of-shift-report.html"
+  ).trim();
+
+
+  const MANAGEMENT = [
+    "manager",
+    "director",
+    "admin"
+  ];
+
+
+  const LEADERSHIP = [
+    "senior_officer",
+    "team_lead",
+    "manager",
+    "director",
+    "admin"
+  ];
+
+
+  const PROTECTED =
+    new Set([
+      "SUPERVISOR",
+      "DISPATCH-1",
+      "DISPATCH-2"
+    ]);
+
+
+  let currentShift =
+    null;
+
+  let stations =
+    [];
+
+  let staff =
+    [];
+
+  let roleMap =
+    new Map();
+
+  let attendance =
+    [];
+
+  let plannedUnavailability =
+    [];
+
+  let assignments =
+    [];
+
+  let leadershipConfig =
+    null;
+
+  let handoffStatus =
+    null;
+
+  let specialPosts =
+    [];
+
+  let specialPostAccessError =
+    null;
+
+
+  const hasAnyRole =
+    list =>
+      roles.some(
+        role =>
+          list.includes(
+            role
+          )
+      );
+
+
+  const isManagement =
+    () =>
+      hasAnyRole(
+        MANAGEMENT
+      );
+
+
+  const isCurrentShiftLead =
+    () =>
+      Boolean(
+        currentShift
+          ?.supervisor_user_id ===
+        currentUserId
+      );
+
+
+  const canManagePublishedOperations =
+    () =>
+      isManagement() ||
+      isCurrentShiftLead();
+
+
+  function isConfiguredSenior() {
+
+    if (
+      !roles.includes(
+        "senior_officer"
+      ) ||
+      !leadershipConfig
+    ) {
+      return false;
+    }
+
+
+    return [
+
+      leadershipConfig
+        .senior_officer_1_user_id,
+
+      leadershipConfig
+        .senior_officer_2_user_id
+
+    ]
+
+      .filter(Boolean)
+
+      .includes(
+        currentUserId
+      );
+
+  }
+
+
+  function canEditAttendance() {
+
+    if (!currentShift) {
+      return false;
+    }
+
+
+    if (
+      currentShift.status ===
+      "draft"
+    ) {
+
+      return hasAnyRole(
+        LEADERSHIP
+      );
+
+    }
+
+
+    if (
+      currentShift.status ===
+      "published"
+    ) {
+
+      return (
+        canManagePublishedOperations() ||
+        isConfiguredSenior()
+      );
+
+    }
+
+
+    return false;
+
+  }
+
+
+  function canManageSpecialPosts() {
+
+    return Boolean(
+
+      currentShift
+
+      &&
+
+      (
+        isManagement() ||
+        isCurrentShiftLead()
+      )
+
+    );
+
+  }
+
+
+  function operationallyConfirmed() {
+
+    return Boolean(
+
+      currentShift
+        ?.operationally_confirmed_at
+
+      ||
+
+      [
+        "acknowledged",
+        "not_required"
+      ].includes(
+        handoffStatus
+          ?.handoff_status
+      )
+
+    );
+
+  }
+
+
+  function canGenerateOrPublishDraft() {
+
+    if (
+      !currentShift ||
+      currentShift.status !==
+        "draft"
+    ) {
+
+      return false;
+
+    }
+
+
+    /*
+      Management may prepare and
+      publish a future assignment plan
+      before live handoff occurs.
+    */
+
+    if (
+      isManagement()
+    ) {
+
+      return true;
+
+    }
+
+
+    /*
+      Working shift leadership must
+      finish operational handoff first.
+    */
+
     return (
-      found ||
-      list[0] ||
-      "user"
-    ).replaceAll("_", " ");
+      isCurrentShiftLead()
+
+      &&
+
+      operationallyConfirmed()
+    );
+
   }
 
 
   function showMessage(
-    message,
+    message = "",
     type = "info"
   ) {
-    pageMessage.textContent =
+
+    el.pageMessage.textContent =
       message;
 
-    pageMessage.className =
-      `message show ${type}`;
+
+    el.pageMessage.className =
+      message
+        ? `message show ${type}`
+        : "message";
+
   }
 
 
-  function clearMessage() {
-    pageMessage.textContent =
-      "";
+  function escapeHtml(
+    value
+  ) {
 
-    pageMessage.className =
-      "message";
+    return String(
+      value ?? ""
+    )
+
+      .replaceAll(
+        "&",
+        "&amp;"
+      )
+
+      .replaceAll(
+        "<",
+        "&lt;"
+      )
+
+      .replaceAll(
+        ">",
+        "&gt;"
+      )
+
+      .replaceAll(
+        '"',
+        "&quot;"
+      )
+
+      .replaceAll(
+        "'",
+        "&#039;"
+      );
+
+  }
+
+
+  function roleLabel() {
+
+    const order = [
+
+      "admin",
+
+      "director",
+
+      "manager",
+
+      "team_lead",
+
+      "senior_officer",
+
+      "dispatcher",
+
+      "officer"
+
+    ];
+
+
+    return (
+
+      order.find(
+        role =>
+          roles.includes(
+            role
+          )
+      )
+
+      ||
+
+      roles[0]
+
+      ||
+
+      "user"
+
+    ).replaceAll(
+      "_",
+      " "
+    );
+
+  }
+
+
+  function todayLocal() {
+
+    const d =
+      new Date();
+
+
+    return new Date(
+
+      d.getTime()
+
+      -
+
+      d.getTimezoneOffset()
+      * 60000
+
+    )
+
+      .toISOString()
+
+      .slice(
+        0,
+        10
+      );
+
   }
 
 
   function formatShift(
     shift
   ) {
-    if (!shift) {
+
+    return shift
+
+      ? (
+          `${shift.shift_date} • ` +
+          `${shift.shift_name} • ` +
+          `${shift.status}`
+        )
+
+      : "—";
+
+  }
+
+
+  function attendanceFor(
+    userId
+  ) {
+
+    return (
+
+      attendance.find(
+        row =>
+          row.user_id ===
+          userId
+      )
+
+      ||
+
+      null
+
+    );
+
+  }
+
+
+  function nameForUser(
+    userId
+  ) {
+
+    if (!userId) {
       return "—";
     }
 
+
     return (
-      `${shift.shift_date} • ` +
-      `${shift.shift_name} • ` +
-      `${shift.status}`
-    );
-  }
 
+      staff.find(
+        person =>
+          person.id ===
+          userId
+      )
+        ?.display_name
 
-  function todayLocal() {
-    const d =
-      new Date();
+      ||
 
-    const offset =
-      d.getTimezoneOffset();
+      userId
 
-    const local =
-      new Date(
-        d.getTime() -
-        offset * 60000
-      );
-
-    return local
-      .toISOString()
-      .slice(0, 10);
-  }
-// ========================================================
-// SECURETRACK CANONICAL SHIFT SCHEDULE
-// ========================================================
-
-function validShiftsForDate(
-  dateValue
-) {
-
-  if (!dateValue) {
-    return [];
-  }
-
-
-  // Noon prevents timezone conversion from
-  // accidentally moving the selected calendar date.
-
-  const date =
-    new Date(
-      `${dateValue}T12:00:00`
     );
 
-
-  const day =
-    date.getDay();
-
-  // JavaScript:
-  // 0 = Sunday
-  // 1 = Monday
-  // 2 = Tuesday
-  // 3 = Wednesday
-  // 4 = Thursday
-  // 5 = Friday
-  // 6 = Saturday
-
-
-  // Sunday / Monday / Tuesday
-
-  if (
-    day === 0 ||
-    day === 1 ||
-    day === 2
-  ) {
-
-    return [
-
-      {
-        value: "Alpha",
-        label:
-          "Alpha Shift • 6:37 AM – 7:11 PM"
-      },
-
-      {
-        value: "Charlie",
-        label:
-          "Charlie Shift • 6:37 PM – 7:11 AM"
-      }
-
-    ];
-
   }
 
 
-  // Wednesday — all four split schedules
-
-  if (
-    day === 3
+  function assignmentForUser(
+    userId
   ) {
 
-    return [
+    return (
 
-      {
-        value: "Delta",
-        label:
-          "Delta Shift • 12:37 AM – 7:11 AM"
-      },
+      assignments.find(
+        row =>
+          row.user_id ===
+          userId
+      )
 
-      {
-        value: "Bravo",
-        label:
-          "Bravo Shift • 6:37 AM – 1:11 PM"
-      },
+      ||
 
-      {
-        value: "Alpha",
-        label:
-          "Alpha Shift • 12:37 PM – 7:11 PM"
-      },
+      null
 
-      {
-        value: "Charlie",
-        label:
-          "Charlie Shift • 6:37 PM – 12:11 AM"
-      }
-
-    ];
-
-  }
-
-
-  // Thursday / Friday / Saturday
-
-  return [
-
-    {
-      value: "Bravo",
-      label:
-        "Bravo Shift • 6:37 AM – 7:11 PM"
-    },
-
-    {
-      value: "Delta",
-      label:
-        "Delta Shift • 6:37 PM – 7:11 AM"
-    }
-
-  ];
-
-}
-
-
-// ========================================================
-// REFRESH SHIFT DROPDOWN WHEN DATE CHANGES
-// ========================================================
-
-function refreshShiftChoices() {
-
-  if (
-    !shiftDate ||
-    !shiftName
-  ) {
-    return;
-  }
-
-
-  const previousValue =
-    shiftName.value;
-
-
-  const availableShifts =
-    validShiftsForDate(
-      shiftDate.value
     );
 
-
-  shiftName.innerHTML =
-    "";
+  }
 
 
-  const placeholder =
-    document.createElement(
-      "option"
-    );
-
-
-  placeholder.value =
-    "";
-
-
-  placeholder.textContent =
-    shiftDate.value
-      ? "Select scheduled shift"
-      : "Select date first";
-
-
-  shiftName.appendChild(
-    placeholder
-  );
-
-
-  availableShifts.forEach(
-    shift => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-
-      option.value =
-        shift.value;
-
-
-      option.textContent =
-        shift.label;
-
-
-      shiftName.appendChild(
-        option
-      );
-
-    }
-  );
-
-
-  // Preserve the current selection only if
-  // it remains valid for the selected date.
-
-  if (
-    availableShifts.some(
-      shift =>
-        shift.value ===
-        previousValue
-    )
+  function stationForId(
+    id
   ) {
 
-    shiftName.value =
-      previousValue;
+    return (
+
+      stations.find(
+        row =>
+          row.id ===
+          id
+      )
+
+      ||
+
+      null
+
+    );
 
   }
-  else {
 
-    shiftName.value =
-      "";
-
-  }
-
-}
 
   function setUserDisplay() {
-    currentUserName.textContent =
-      profile.display_name ||
-      auth.user.email ||
+
+    el.currentUserName.textContent =
+
+      profile.display_name
+
+      ||
+
+      auth.user.email
+
+      ||
+
       "SecureTrack User";
 
-    currentUserRole.textContent =
-      roleLabel(roles);
+
+    el.currentUserRole.textContent =
+      roleLabel();
+
   }
 
 
   async function loadStations() {
+
     const {
       data,
       error
     } = await db
-      .from("duty_stations")
-     .select(
-  "id, station_code, station_name, description, is_difficult, requires_qualification, is_active, sort_order, priority_number, station_type"
-)
-      
+
+      .from(
+        "duty_stations"
+      )
+
+      .select(
+        "id, station_code, station_name, description, is_difficult, requires_qualification, is_active, sort_order, priority_number, station_type"
+      )
+
       .eq(
         "is_active",
         true
       )
+
       .order(
         "sort_order"
       )
+
       .order(
         "station_name"
       );
@@ -686,541 +816,365 @@ function refreshShiftChoices() {
 
 
     renderStations();
+
   }
 
 
   function renderStations() {
-    stationList.innerHTML =
+
+    el.stationList.innerHTML =
       "";
 
 
-    if (!stations.length) {
-      stationList.innerHTML =
-        '<div class="empty">No active duty stations found. Add stations in Supabase before generating assignments.</div>';
+    if (
+      !stations.length
+    ) {
+
+      el.stationList.innerHTML =
+        '<div class="empty">No active duty stations found.</div>';
 
       return;
+
     }
 
 
-    stations.forEach(
-      station => {
+    for (
+      const station
+      of stations
+    ) {
 
-        const card =
-          document.createElement(
-            "div"
-          );
-
-        card.className =
-          "station-card";
-
-
-        const name =
-          document.createElement(
-            "strong"
-          );
-
-        name.textContent =
-          station.station_name;
-
-
-        const code =
-          document.createElement(
-            "small"
-          );
-
-        code.textContent =
-          station.station_code || "";
-
-
-        const description =
-          document.createElement(
-            "small"
-          );
-
-        description.textContent =
-          station.description ||
-          "No description";
-
-
-        card.append(
-          name,
-          code,
-          description
+      const card =
+        document.createElement(
+          "div"
         );
 
 
-        if (
-          station.is_difficult
-        ) {
-          const flag =
-            document.createElement(
-              "span"
-            );
+      card.className =
+        "station-card";
 
-          flag.className =
-            "flag";
 
-          flag.textContent =
-            "Difficult Station";
+      card.innerHTML = `
 
-          card.appendChild(
-            flag
+        <strong>
+          ${escapeHtml(
+            station.station_name
+          )}
+        </strong>
+
+        <small>
+          ${escapeHtml(
+            station.station_code ||
+            ""
+          )}
+        </small>
+
+        <small>
+          ${escapeHtml(
+            station.description ||
+            "No description"
+          )}
+        </small>
+
+        <small>
+
+          ${
+            station.priority_number
+              != null
+
+              ? `Priority ${station.priority_number}`
+
+              : "Priority not set"
+          }
+
+        </small>
+
+      `;
+
+
+      if (
+
+        station.is_difficult
+
+        ||
+
+        PROTECTED.has(
+          station.station_code
+        )
+
+      ) {
+
+        const flag =
+          document.createElement(
+            "span"
           );
-        }
 
 
-        stationList.appendChild(
-          card
+        flag.className =
+          "flag";
+
+
+        flag.textContent =
+
+          PROTECTED.has(
+            station.station_code
+          )
+
+            ? "Protected"
+
+            : "Difficult Station";
+
+
+        card.appendChild(
+          flag
         );
+
       }
-    );
+
+
+      el.stationList.appendChild(
+        card
+      );
+
+    }
+
   }
 
 
   async function loadEligibleStaff() {
 
-  const { data: roleRows, error: roleError } = await db
-    .from("user_roles")
-    .select("user_id, role");
-
-  if (roleError) throw roleError;
-
-
-  const allowed = new Set(
-    (roleRows || [])
-      .filter(row =>
-        [
-          "officer",
-          "dispatcher",
-          "senior_officer",
-          "team_lead"
-        ].includes(row.role)
-      )
-      .map(row => row.user_id)
-  );
-
-
-  if (!allowed.size) {
-    staff = [];
-    renderAttendance();
-    return;
-  }
-
-
-  const [
-    profileResult,
-    rosterResult
-  ] = await Promise.all([
-
-    db
-      .from("profiles")
-      .select(
-        "id, display_name, employee_number, is_active"
-      )
-      .eq("is_active", true)
-      .order("display_name"),
-
-    db
-      .from("officer_shift_roster")
-      .select(
-        "user_id, shift_name, is_active"
-      )
-      .eq("is_active", true)
-
-  ]);
-
-
-  if (profileResult.error) {
-    throw profileResult.error;
-  }
-
-  if (rosterResult.error) {
-    throw rosterResult.error;
-  }
-
-
-  const rosterMap = new Map(
-    (rosterResult.data || [])
-      .map(row => [
-        row.user_id,
-        row.shift_name
-      ])
-  );
-
-
- staff =
-  (profileResult.data || [])
-    .filter(person =>
-      allowed.has(person.id)
-    )
-    .map(person => ({
-      ...person,
-      shift_name:
-        rosterMap.get(person.id) ||
-        null
-    }));
-
-
-renderAttendance();
-
-}
-
-
-function renderAttendance() {
-  attendanceList.innerHTML = "";
-
-
-  if (!currentShift) {
-
-    attendanceList.innerHTML =
-      '<div class="empty">Open a shift first.</div>';
-
-    return;
-  }
-
-
-  /*
-    Only show personnel whose normal
-    roster matches the shift being opened.
-  */
-
-  const shiftStaff =
-    staff.filter(person =>
-      person.shift_name ===
-      currentShift.shift_name
-    );
-
-
-  if (!shiftStaff.length) {
-
-    attendanceList.innerHTML =
-      `
-        <div class="empty">
-          No active officers are assigned to
-          ${currentShift.shift_name}.
-        </div>
-      `;
-
-    return;
-  }
-
-
-  const attendanceMap =
-    new Map(
-      attendance.map(row => [
-        row.user_id,
-        row
-      ])
-    );
-
-
-  const absenceMap =
-    new Map(
-      plannedUnavailability.map(row => [
-        row.user_id,
-        row
-      ])
-    );
-
-
-  shiftStaff.forEach(person => {
-
-    const existing =
-      attendanceMap.get(
-        person.id
-      );
-
-    const planned =
-      absenceMap.get(
-        person.id
-      );
-
-
-    const row =
-      document.createElement(
-        "label"
-      );
-
-    row.className =
-      "attendance-row";
-
-
-    const checkbox =
-      document.createElement(
-        "input"
-      );
-
-    checkbox.type =
-      "checkbox";
-
-    checkbox.dataset.userId =
-      person.id;
-
-
-    /*
-      Existing attendance always wins.
-
-      Otherwise a planned absence defaults
-      the officer OUT.
-
-      Officers without an attendance record
-      remain unchecked until attendance is
-      actually confirmed.
-    */
-
-    checkbox.checked =
-      existing
-        ? Boolean(
-            existing.is_present
-          )
-        : false;
-
-
-    const text =
-      document.createElement(
-        "div"
-      );
-
-    text.style.flex =
-      "1";
-
-
-    const name =
-      document.createElement(
-        "strong"
-      );
-
-    name.textContent =
-      person.display_name;
-
-
-    const employee =
-      document.createElement(
-        "small"
-      );
-
-    employee.textContent =
-      person.employee_number
-        ? `Employee # ${person.employee_number}`
-        : "SecureTrack user";
-
-
-    text.append(
-      name,
-      employee
-    );
-
-
-    // =======================================================
-    // PLANNED ABSENCE DISPLAY
-    // =======================================================
-
-    let statusBadge = null;
-    let reasonText = null;
-    let addOnSiteButton = null;
-
-
-    if (planned) {
-
-      row.dataset.plannedOut =
-        "true";
-
-
-      statusBadge =
-        document.createElement(
-          "span"
-        );
-
-      statusBadge.style.display =
-        "inline-block";
-
-      statusBadge.style.marginTop =
-        "6px";
-
-      statusBadge.style.padding =
-        "4px 8px";
-
-      statusBadge.style.borderRadius =
-        "999px";
-
-      statusBadge.style.fontSize =
-        "10px";
-
-      statusBadge.style.fontWeight =
-        "800";
-
-      statusBadge.style.letterSpacing =
-        ".04em";
-
-
-      reasonText =
-        document.createElement(
-          "small"
-        );
-
-      reasonText.style.display =
-        "block";
-
-      reasonText.style.marginTop =
-        "5px";
-
-
-      const typeLabel =
-        String(
-          planned.absence_type ||
-          "other"
+    const roleResult =
+      await db
+
+        .from(
+          "user_roles"
         )
-          .replaceAll("_", " ")
-          .replace(
-            /\b\w/g,
-            char =>
-              char.toUpperCase()
-          );
 
-
-      reasonText.textContent =
-        planned.notes
-          ? `${typeLabel}: ${planned.notes}`
-          : typeLabel;
-
-
-      addOnSiteButton =
-        document.createElement(
-          "button"
+        .select(
+          "user_id, role"
         );
 
-      addOnSiteButton.type =
-        "button";
 
-      addOnSiteButton.className =
-        "button secondary";
+    if (
+      roleResult.error
+    ) {
 
-      addOnSiteButton.style.marginLeft =
-        "12px";
+      throw roleResult.error;
 
-      addOnSiteButton.style.whiteSpace =
-        "nowrap";
+    }
 
 
-      function updatePlannedAppearance() {
+    roleMap =
+      new Map();
 
-        if (checkbox.checked) {
 
-          row.style.opacity =
-            "1";
+    for (
+      const row
+      of roleResult.data || []
+    ) {
 
-          row.style.background =
-            "rgba(255,120,0,.07)";
+      if (
+        !roleMap.has(
+          row.user_id
+        )
+      ) {
 
-          statusBadge.textContent =
-            "ON SITE OVERRIDE";
-
-          statusBadge.style.background =
-            "rgba(255,120,0,.14)";
-
-          statusBadge.style.color =
-            "#ffb36b";
-
-          addOnSiteButton.textContent =
-            "Marked On Site";
-
-          addOnSiteButton.disabled =
-            true;
-
-        } else {
-
-          row.style.opacity =
-            ".58";
-
-          row.style.background =
-            "rgba(125,135,145,.08)";
-
-          statusBadge.textContent =
-            `SCHEDULED OUT • ${typeLabel.toUpperCase()}`;
-
-          statusBadge.style.background =
-            "rgba(125,135,145,.14)";
-
-          statusBadge.style.color =
-            "#c1c7ce";
-
-          addOnSiteButton.textContent =
-            "Add On Site";
-
-          addOnSiteButton.disabled =
-            currentShift.status !==
-            "draft";
-
-        }
+        roleMap.set(
+          row.user_id,
+          new Set()
+        );
 
       }
 
 
-      addOnSiteButton.addEventListener(
-        "click",
-        event => {
-
-          event.preventDefault();
-          event.stopPropagation();
-
-          checkbox.checked =
-            true;
-
-          updatePlannedAppearance();
-
-        }
-      );
-
-
-      checkbox.addEventListener(
-        "change",
-        updatePlannedAppearance
-      );
-
-
-      text.append(
-        statusBadge,
-        reasonText
-      );
-
-
-      updatePlannedAppearance();
+      roleMap
+        .get(
+          row.user_id
+        )
+        .add(
+          row.role
+        );
 
     }
 
 
-    row.append(
-      checkbox,
-      text
-    );
+    const allowed =
+      new Set(
 
+        [
+          ...roleMap.entries()
+        ]
 
-    if (addOnSiteButton) {
+          .filter(
+            (
+              [
+                ,
+                set
+              ]
+            ) =>
 
-      row.appendChild(
-        addOnSiteButton
+              [
+                ...set
+              ].some(
+                role =>
+                  [
+                    "officer",
+                    "dispatcher",
+                    "senior_officer",
+                    "team_lead"
+                  ].includes(
+                    role
+                  )
+              )
+          )
+
+          .map(
+            (
+              [
+                userId
+              ]
+            ) =>
+              userId
+          )
+
       );
+
+
+    const [
+
+      profileResult,
+
+      rosterResult
+
+    ] = await Promise.all([
+
+
+      db
+
+        .from(
+          "profiles"
+        )
+
+        .select(
+          "id, display_name, employee_number, is_active, employment_status"
+        )
+
+        .eq(
+          "is_active",
+          true
+        )
+
+        .order(
+          "display_name"
+        ),
+
+
+      db
+
+        .from(
+          "officer_shift_roster"
+        )
+
+        .select(
+          "user_id, shift_name, is_active"
+        )
+
+        .eq(
+          "is_active",
+          true
+        )
+
+
+    ]);
+
+
+    if (
+      profileResult.error
+    ) {
+
+      throw profileResult.error;
 
     }
 
 
-    attendanceList.appendChild(
-      row
-    );
+    if (
+      rosterResult.error
+    ) {
 
-  });
-}
+      throw rosterResult.error;
+
+    }
+
+
+    const rosterMap =
+      new Map(
+
+        (
+          rosterResult.data ||
+          []
+        ).map(
+          row => [
+
+            row.user_id,
+
+            row.shift_name
+
+          ]
+        )
+
+      );
+
+
+    staff = (
+
+      profileResult.data ||
+      []
+
+    )
+
+      .filter(
+        person =>
+          allowed.has(
+            person.id
+          )
+      )
+
+      .map(
+        person => ({
+
+          ...person,
+
+          shift_name:
+
+            rosterMap.get(
+              person.id
+            )
+
+            ||
+
+            null
+
+        })
+      );
+
+
+    renderAttendance();
+
+  }
 
 
   async function loadAttendance() {
 
-    if (!currentShift) {
+    if (
+      !currentShift
+    ) {
 
-      attendance = [];
+      attendance =
+        [];
 
       renderAttendance();
 
       return;
+
     }
 
 
@@ -1229,10 +1183,12 @@ function renderAttendance() {
       error
     } = await db
 
-      .from("shift_attendance")
+      .from(
+        "shift_attendance"
+      )
 
       .select(
-        "user_id, display_name, is_present, notes"
+        "user_id, display_name, is_present, notes, confirmed_at"
       )
 
       .eq(
@@ -1241,8 +1197,12 @@ function renderAttendance() {
       );
 
 
-    if (error) {
+    if (
+      error
+    ) {
+
       throw error;
+
     }
 
 
@@ -1251,288 +1211,933 @@ function renderAttendance() {
 
 
     renderAttendance();
+
   }
 
 
+  async function loadPlannedUnavailability() {
 
-async function loadPlannedUnavailability() {
+    if (
+      !currentShift
+    ) {
 
-  if (!currentShift) {
-    plannedUnavailability = [];
-    renderAttendance();
-    return;
-  }
+      plannedUnavailability =
+        [];
+
+      renderAttendance();
+
+      return;
+
+    }
 
 
-  const { data, error } =
-    await db.rpc(
+    const {
+      data,
+      error
+    } = await db.rpc(
+
       "get_shift_unavailability",
+
       {
+
         p_shift_date:
           currentShift.shift_date,
 
         p_shift_name:
           currentShift.shift_name
+
       }
+
     );
 
 
-  if (error) {
-    throw error;
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    plannedUnavailability =
+      data || [];
+
+
+    renderAttendance();
+
   }
 
 
-  plannedUnavailability =
-    data || [];
+  function renderAttendance() {
+
+    el.attendanceList.innerHTML =
+      "";
 
 
-  renderAttendance();
-}
-// =========================================================
-// SHIFT SUPERVISOR
-// =========================================================
+    if (
+      !currentShift
+    ) {
 
-async function loadSupervisorContext() {
+      el.attendanceList.innerHTML =
+        '<div class="empty">Open a shift first.</div>';
 
-  if (!currentShift) {
+      return;
 
-    supervisorContext = null;
+    }
 
-    if (supervisorPanel) {
-      supervisorPanel.hidden =
+
+    const shiftStaff =
+      staff.filter(
+        person =>
+          person.shift_name ===
+          currentShift.shift_name
+      );
+
+
+    if (
+      !shiftStaff.length
+    ) {
+
+      el.attendanceList.innerHTML = `
+
+        <div class="empty">
+
+          No active officers are assigned to
+          ${escapeHtml(
+            currentShift.shift_name
+          )}.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    const attendanceMap =
+      new Map(
+
+        attendance.map(
+          row => [
+
+            row.user_id,
+
+            row
+
+          ]
+        )
+
+      );
+
+
+    const absenceMap =
+      new Map(
+
+        plannedUnavailability.map(
+          row => [
+
+            row.user_id,
+
+            row
+
+          ]
+        )
+
+      );
+
+
+    for (
+      const person
+      of shiftStaff
+    ) {
+
+      const existing =
+        attendanceMap.get(
+          person.id
+        );
+
+
+      const planned =
+        absenceMap.get(
+          person.id
+        );
+
+
+      const row =
+        document.createElement(
+          "label"
+        );
+
+
+      row.className =
+        "attendance-row";
+
+
+      const checkbox =
+        document.createElement(
+          "input"
+        );
+
+
+      checkbox.type =
+        "checkbox";
+
+
+      checkbox.dataset.userId =
+        person.id;
+
+
+      checkbox.checked =
+        existing
+          ? Boolean(
+              existing.is_present
+            )
+          : false;
+
+
+      checkbox.disabled =
+        !canEditAttendance();
+
+
+      const body =
+        document.createElement(
+          "div"
+        );
+
+
+      body.style.flex =
+        "1";
+
+
+      body.innerHTML = `
+
+        <strong>
+          ${escapeHtml(
+            person.display_name
+          )}
+        </strong>
+
+        <small>
+
+          ${
+            person.employee_number
+
+              ? (
+                  `Employee # ` +
+                  escapeHtml(
+                    person.employee_number
+                  )
+                )
+
+              : "SecureTrack user"
+          }
+
+        </small>
+
+      `;
+
+
+      let addOnSite =
+        null;
+
+
+      if (
+        planned
+      ) {
+
+        const typeLabel =
+          String(
+
+            planned.absence_type
+
+            ||
+
+            "other"
+
+          )
+
+            .replaceAll(
+              "_",
+              " "
+            )
+
+            .replace(
+              /\b\w/g,
+              char =>
+                char.toUpperCase()
+            );
+
+
+        const badge =
+          document.createElement(
+            "span"
+          );
+
+
+        badge.style.cssText =
+          "display:inline-block;margin-top:6px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;";
+
+
+        const reason =
+          document.createElement(
+            "small"
+          );
+
+
+        reason.style.cssText =
+          "display:block;margin-top:5px;";
+
+
+        reason.textContent =
+          planned.notes
+
+            ? (
+                `${typeLabel}: ` +
+                `${planned.notes}`
+              )
+
+            : typeLabel;
+
+
+        addOnSite =
+          document.createElement(
+            "button"
+          );
+
+
+        addOnSite.type =
+          "button";
+
+
+        addOnSite.className =
+          "button secondary";
+
+
+        addOnSite.style.cssText =
+          "margin-left:12px;white-space:nowrap;";
+
+
+        const updateAppearance =
+          () => {
+
+
+            if (
+              checkbox.checked
+            ) {
+
+              row.style.opacity =
+                "1";
+
+
+              row.style.background =
+                "rgba(255,120,0,.07)";
+
+
+              badge.textContent =
+                "ON SITE OVERRIDE";
+
+
+              badge.style.color =
+                "#ffb36b";
+
+
+              addOnSite.textContent =
+                "Marked On Site";
+
+
+              addOnSite.disabled =
+                true;
+
+            }
+
+            else {
+
+              row.style.opacity =
+                ".58";
+
+
+              row.style.background =
+                "rgba(125,135,145,.08)";
+
+
+              badge.textContent =
+                `SCHEDULED OUT • ${typeLabel.toUpperCase()}`;
+
+
+              badge.style.color =
+                "#c1c7ce";
+
+
+              addOnSite.textContent =
+                "Add On Site";
+
+
+              addOnSite.disabled =
+                !canEditAttendance();
+
+            }
+
+          };
+
+
+        addOnSite.addEventListener(
+
+          "click",
+
+          event => {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            checkbox.checked =
+              true;
+
+
+            updateAppearance();
+
+          }
+
+        );
+
+
+        checkbox.addEventListener(
+
+          "change",
+
+          updateAppearance
+
+        );
+
+
+        body.append(
+          badge,
+          reason
+        );
+
+
+        updateAppearance();
+
+      }
+
+
+      row.append(
+        checkbox,
+        body
+      );
+
+
+      if (
+        addOnSite
+      ) {
+
+        row.appendChild(
+          addOnSite
+        );
+
+      }
+
+
+      el.attendanceList.appendChild(
+        row
+      );
+
+    }
+
+  }
+
+
+  function attendanceNoteFor(
+    userId,
+    isPresent
+  ) {
+
+    const planned =
+      plannedUnavailability.find(
+        item =>
+          item.user_id ===
+          userId
+      );
+
+
+    if (
+      !planned
+    ) {
+
+      return null;
+
+    }
+
+
+    const typeLabel =
+      String(
+
+        planned.absence_type
+
+        ||
+
+        "other"
+
+      ).replaceAll(
+        "_",
+        " "
+      );
+
+
+    if (
+      isPresent
+    ) {
+
+      return planned.notes
+
+        ? (
+            `On site override — planned ` +
+            `${typeLabel}: ` +
+            `${planned.notes}`
+          )
+
+        : (
+            `On site override — planned ` +
+            `${typeLabel}`
+          );
+
+    }
+
+
+    return planned.notes
+
+      ? (
+          `Scheduled out — ${typeLabel}: ` +
+          `${planned.notes}`
+        )
+
+      : (
+          `Scheduled out — ${typeLabel}`
+        );
+
+  }
+    // ==========================================================
+  // SHIFT LEADERSHIP CONFIGURATION
+  // ==========================================================
+
+  async function loadLeadershipConfig() {
+
+    if (
+      !currentShift
+    ) {
+
+      leadershipConfig =
+        null;
+
+      renderSupervisorPanel();
+
+      return;
+
+    }
+
+
+    const {
+      data,
+      error
+    } = await db
+
+      .from(
+        "duty_shift_leadership"
+      )
+
+      .select(
+        "shift_name, team_lead_user_id, senior_officer_1_user_id, senior_officer_2_user_id"
+      )
+
+      .eq(
+        "shift_name",
+        currentShift.shift_name
+      )
+
+      .maybeSingle();
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    leadershipConfig =
+      data || null;
+
+
+    renderSupervisorPanel();
+
+  }
+
+
+
+  // ==========================================================
+  // SHIFT SUPERVISOR DISPLAY
+  // ==========================================================
+
+  function renderSupervisorPanel() {
+
+    if (
+      !currentShift
+    ) {
+
+      el.supervisorPanel.hidden =
         true;
+
+      return;
+
     }
 
-    return;
-  }
+
+    el.supervisorPanel.hidden =
+      false;
 
 
-  const {
-    data,
-    error
-  } = await db.rpc(
-    "get_shift_supervisor_context",
-    {
-      p_shift_id:
-        currentShift.id
+    const teamLeadId =
+      leadershipConfig
+        ?.team_lead_user_id
+      ||
+      null;
+
+
+    const teamLeadAttendance =
+      teamLeadId
+        ? attendanceFor(
+            teamLeadId
+          )
+        : null;
+
+
+    const teamLeadPresent =
+      Boolean(
+        teamLeadAttendance
+          ?.is_present
+      );
+
+
+    el.designatedTeamLead.textContent =
+
+      teamLeadId
+
+        ? nameForUser(
+            teamLeadId
+          )
+
+        : "Not configured";
+
+
+    el.teamLeadAttendance.textContent =
+
+      !teamLeadId
+
+        ? "Leadership configuration required"
+
+        : teamLeadPresent
+
+          ? "Present — Team Lead has precedence"
+
+          : attendance.length
+
+            ? "Not marked present"
+
+            : "Attendance not confirmed";
+
+
+    el.currentSupervisorName.textContent =
+
+      currentShift
+        .supervisor_display_name
+
+      ||
+
+      "Not resolved";
+
+
+    el.currentSupervisorSource.textContent =
+
+      currentShift
+        .supervisor_source ===
+        "team_lead"
+
+        ? "Designated Team Lead"
+
+        : currentShift
+            .supervisor_source ===
+            "acting_senior"
+
+          ? "Senior Officer / Acting Team Lead"
+
+          : "—";
+
+
+    // ========================================================
+    // DESIGNATED TEAM LEAD IS PRESENT
+    // ========================================================
+
+    if (
+      teamLeadPresent
+
+      &&
+
+      currentShift
+        .supervisor_user_id ===
+        teamLeadId
+    ) {
+
+      el.supervisorBadge.textContent =
+        "TEAM LEAD";
+
+
+      el.actingSupervisorSection.hidden =
+        true;
+
+
+      return;
+
     }
-  );
 
 
-  if (error) {
-    throw error;
-  }
+    // ========================================================
+    // VALID ACTING TEAM LEAD ALREADY ASSIGNED
+    // ========================================================
 
+    if (
 
-  supervisorContext =
-    data || null;
+      currentShift
+        .supervisor_source ===
+        "acting_senior"
 
+      &&
 
-  renderSupervisorContext();
-}
+      currentShift
+        .supervisor_user_id
 
+      &&
 
-function renderSupervisorContext() {
+      attendanceFor(
+        currentShift
+          .supervisor_user_id
+      )
+        ?.is_present
 
-  if (!supervisorPanel) {
-    return;
-  }
+    ) {
 
+      el.supervisorBadge.textContent =
+        "ACTING TEAM LEAD";
 
-  if (
-    !currentShift ||
-    !supervisorContext
-  ) {
 
-    supervisorPanel.hidden =
-      true;
+      el.actingSupervisorSection.hidden =
+        true;
 
-    return;
-  }
 
+      return;
 
-  supervisorPanel.hidden =
-    false;
+    }
 
 
-  const context =
-    supervisorContext;
+    // ========================================================
+    // LEADERSHIP STILL NEEDS TO BE RESOLVED
+    // ========================================================
 
+    el.supervisorBadge.textContent =
 
-  if (!context.configured) {
+      teamLeadPresent
 
-    designatedTeamLead.textContent =
-      "Not configured";
+        ? "RESOLVING"
 
-    teamLeadAttendance.textContent =
-      "Shift leadership configuration incomplete";
+        : "ACTING LEAD REQUIRED";
 
-    currentSupervisorName.textContent =
-      "—";
 
-    currentSupervisorSource.textContent =
-      "Configure shift leadership before generating";
+    el.actingSupervisorSection.hidden =
+      teamLeadPresent;
 
-    supervisorBadge.textContent =
-      "CONFIGURATION REQUIRED";
 
-    supervisorBadge.className =
-      "supervisor-badge warning";
+    el.actingSupervisorSelect.innerHTML =
+      '<option value="">Select Senior Officer</option>';
 
-    actingSupervisorSection.hidden =
-      true;
 
-    return;
-  }
+    const seniorIds = [
 
+      leadershipConfig
+        ?.senior_officer_1_user_id,
 
-  designatedTeamLead.textContent =
-    context.designated_team_lead_name ||
-    "Not configured";
+      leadershipConfig
+        ?.senior_officer_2_user_id
 
+    ].filter(
+      Boolean
+    );
 
-  if (
-    !context.designated_team_lead_user_id
-  ) {
 
-    teamLeadAttendance.textContent =
-      "No designated Team Lead";
+    const candidates =
+      seniorIds.filter(
+        userId =>
+          attendanceFor(
+            userId
+          )
+            ?.is_present
+      );
 
-    supervisorBadge.textContent =
-      "CONFIGURATION REQUIRED";
 
-    supervisorBadge.className =
-      "supervisor-badge warning";
-
-    actingSupervisorSection.hidden =
-      true;
-
-    return;
-  }
-
-
-  if (
-    context.designated_team_lead_present
-  ) {
-
-    teamLeadAttendance.textContent =
-      "Present • Supervisor";
-
-    currentSupervisorName.textContent =
-      context.designated_team_lead_name ||
-      "Team Lead";
-
-    currentSupervisorSource.textContent =
-      "Designated Team Lead";
-
-    supervisorBadge.textContent =
-      "SUPERVISOR READY";
-
-    supervisorBadge.className =
-      "supervisor-badge ready";
-
-    actingSupervisorSection.hidden =
-      true;
-
-    return;
-  }
-
-
-  teamLeadAttendance.textContent =
-    "Not marked present";
-
-
-  const actingName =
-    context.supervisor_source ===
-      "acting_senior"
-      ? context.supervisor_display_name
-      : null;
-
-
-  currentSupervisorName.textContent =
-    actingName ||
-    "Acting Supervisor Required";
-
-
-  currentSupervisorSource.textContent =
-    actingName
-      ? "Acting Senior Officer"
-      : "Awaiting selection";
-
-
-  supervisorBadge.textContent =
-    actingName
-      ? "ACTING SUPERVISOR READY"
-      : "SUPERVISOR REQUIRED";
-
-
-  supervisorBadge.className =
-    actingName
-      ? "supervisor-badge ready"
-      : "supervisor-badge warning";
-
-
-  actingSupervisorSection.hidden =
-    false;
-
-
-  actingSupervisorSelect.innerHTML =
-    '<option value="">Select Senior Officer</option>';
-
-
-  const candidates =
-    Array.isArray(
-      context.acting_candidates
-    )
-      ? context.acting_candidates
-      : [];
-
-
-  candidates.forEach(
-    candidate => {
+    for (
+      const userId
+      of candidates
+    ) {
 
       const option =
         document.createElement(
           "option"
         );
 
+
       option.value =
-        candidate.user_id;
+        userId;
+
 
       option.textContent =
-        candidate.display_name;
+        nameForUser(
+          userId
+        );
 
-      if (
-        candidate.user_id ===
-        context.supervisor_user_id
-      ) {
-        option.selected =
-          true;
-      }
 
-      actingSupervisorSelect
+      el.actingSupervisorSelect
         .appendChild(
           option
         );
+
     }
-  );
 
 
-  saveActingSupervisorButton.disabled =
-    currentShift.status !==
-      "draft" ||
-    candidates.length ===
-      0;
-}
+    el.saveActingSupervisorButton.disabled =
+
+      !candidates.length
+
+      ||
+
+      !hasAnyRole(
+        LEADERSHIP
+      );
+
+  }
+
+
+
+  // ==========================================================
+  // RESOLVE TEAM LEAD AUTOMATICALLY AFTER ATTENDANCE
+  // ==========================================================
+
+  async function resolveLeaderAfterAttendance() {
+
+    if (
+      !currentShift
+    ) {
+
+      return;
+
+    }
+
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "resolve_shift_operational_leader",
+
+      {
+        p_shift_id:
+          currentShift.id
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    /*
+      If this is an already-published roster and the
+      Team Lead has now been resolved, synchronize the
+      protected Supervisor duty post without reopening
+      the original published plan.
+    */
+
+    if (
+
+      currentShift.status ===
+        "published"
+
+      &&
+
+      data?.resolved
+
+    ) {
+
+      const {
+        error: syncError
+      } = await db.rpc(
+
+        "sync_shift_supervisor_station",
+
+        {
+
+          p_shift_id:
+            currentShift.id,
+
+          p_reason:
+            "Supervisor synchronized after attendance update"
+
+        }
+
+      );
+
+
+      if (
+        syncError
+      ) {
+
+        throw syncError;
+
+      }
+
+    }
+
+  }
+
+
+
+  // ==========================================================
+  // LOAD STANDING DUTY ASSIGNMENTS
+  // ==========================================================
+
   async function loadAssignments() {
 
-    if (!currentShift) {
+    if (
+      !currentShift
+    ) {
 
-      assignments = [];
+      assignments =
+        [];
 
       renderAssignments();
 
       return;
+
     }
 
 
@@ -1555,8 +2160,12 @@ function renderSupervisorContext() {
       );
 
 
-    if (error) {
+    if (
+      error
+    ) {
+
       throw error;
+
     }
 
 
@@ -1565,24 +2174,30 @@ function renderSupervisorContext() {
 
 
     renderAssignments();
+
   }
 
 
+
+  // ==========================================================
+  // PRESENT STAFF
+  // ==========================================================
+
   function currentPresentStaff() {
 
-    const checked =
+    const presentIds =
       new Set(
 
-        [
-          ...attendanceList
-            .querySelectorAll(
-              'input[type="checkbox"]:checked'
-            )
-        ]
+        attendance
+
+          .filter(
+            row =>
+              row.is_present
+          )
 
           .map(
-            input =>
-              input.dataset.userId
+            row =>
+              row.user_id
           )
 
       );
@@ -1590,68 +2205,99 @@ function renderSupervisorContext() {
 
     return staff.filter(
       person =>
-        checked.has(
+        presentIds.has(
           person.id
         )
     );
+
   }
 
 
- function renderAssignments() {
 
-  assignmentBody.innerHTML =
-    "";
+  // ==========================================================
+  // RENDER DUTY ASSIGNMENT TABLE
+  // ==========================================================
 
+  function renderAssignments() {
 
-  if (!currentShift) {
-
-    assignmentBody.innerHTML =
-      '<tr><td colspan="5" class="empty">Open a shift to begin.</td></tr>';
-
-    return;
-  }
+    el.assignmentBody.innerHTML =
+      "";
 
 
-  if (!stations.length) {
+    if (
+      !currentShift
+    ) {
 
-    assignmentBody.innerHTML =
-      '<tr><td colspan="5" class="empty">No active stations configured.</td></tr>';
-
-    return;
-  }
-
-
-  const assignmentMap =
-    new Map(
-      assignments.map(
-        assignment => [
-          assignment.station_id,
-          assignment
-        ]
-      )
-    );
+      el.assignmentBody.innerHTML =
+        `
+          <tr>
+            <td
+              colspan="5"
+              class="empty"
+            >
+              Open a shift to begin.
+            </td>
+          </tr>
+        `;
 
 
-  const published =
-    currentShift.status ===
-    "published";
+      updateActionStates();
+
+      return;
+
+    }
 
 
-  stations.forEach(
-    station => {
+    if (
+      !stations.length
+    ) {
 
-      const assignment =
-        assignmentMap.get(
-          station.id
-        );
+      el.assignmentBody.innerHTML =
+        `
+          <tr>
+            <td
+              colspan="5"
+              class="empty"
+            >
+              No active stations configured.
+            </td>
+          </tr>
+        `;
 
 
-      const isSupervisor =
-        station.station_type ===
-          "supervisor" ||
-        station.station_code ===
-          "SUPERVISOR";
+      updateActionStates();
 
+      return;
+
+    }
+
+
+    const assignmentMap =
+      new Map(
+
+        assignments.map(
+          row => [
+
+            row.station_id,
+
+            row
+
+          ]
+        )
+
+      );
+
+
+    const published =
+
+      currentShift.status ===
+      "published";
+
+
+    for (
+      const station
+      of stations
+    ) {
 
       const tr =
         document.createElement(
@@ -1659,16 +2305,15 @@ function renderSupervisorContext() {
         );
 
 
-      if (isSupervisor) {
-        tr.classList.add(
-          "supervisor-row"
+      const assignment =
+        assignmentMap.get(
+          station.id
         );
-      }
 
 
-      // =====================================================
+      // ======================================================
       // STATION
-      // =====================================================
+      // ======================================================
 
       const stationTd =
         document.createElement(
@@ -1676,26 +2321,60 @@ function renderSupervisorContext() {
         );
 
 
-      const priority =
-        station.priority_number
-          ? `<span class="priority-pill">#${station.priority_number}</span>`
-          : "";
+      stationTd.innerHTML = `
+
+        <strong>
+          ${escapeHtml(
+            station.station_name
+          )}
+        </strong>
+
+        <br>
+
+        <span class="muted">
+          ${escapeHtml(
+            station.station_code ||
+            ""
+          )}
+        </span>
+
+      `;
 
 
-      stationTd.innerHTML =
-        `${priority}<strong>${station.station_name}</strong>` +
-        `<br>` +
-        `<span class="muted">${station.station_code || ""}</span>` +
-        (
-          station.description
-            ? `<br><small class="muted">${station.description}</small>`
-            : ""
+      if (
+        PROTECTED.has(
+          station.station_code
+        )
+      ) {
+
+        const protectedText =
+          document.createElement(
+            "small"
+          );
+
+
+        protectedText.textContent =
+          "Protected post";
+
+
+        protectedText.style.display =
+          "block";
+
+
+        protectedText.style.marginTop =
+          "4px";
+
+
+        stationTd.appendChild(
+          protectedText
         );
 
+      }
 
-      // =====================================================
+
+      // ======================================================
       // OFFICER
-      // =====================================================
+      // ======================================================
 
       const officerTd =
         document.createElement(
@@ -1703,28 +2382,19 @@ function renderSupervisorContext() {
         );
 
 
-      if (assignment) {
+      officerTd.textContent =
 
-        officerTd.textContent =
-          assignment.display_name;
+        assignment
+          ?.display_name
 
-      }
-      else {
+        ||
 
-        officerTd.textContent =
-          isSupervisor
-            ? "SUPERVISOR REQUIRED"
-            : "UNFILLED — STAFFING REQUIRED";
-
-        officerTd.classList.add(
-          "unfilled-post"
-        );
-      }
+        "Unassigned";
 
 
-      // =====================================================
+      // ======================================================
       // SOURCE
-      // =====================================================
+      // ======================================================
 
       const sourceTd =
         document.createElement(
@@ -1742,27 +2412,14 @@ function renderSupervisorContext() {
         "source-pill";
 
 
-      if (
-        isSupervisor &&
+      source.textContent =
+
         assignment
-      ) {
+          ?.assignment_source
 
-        source.textContent =
-          supervisorContext
-            ?.supervisor_source ===
-            "acting_senior"
-              ? "ACTING SENIOR"
-              : "TEAM LEAD";
+        ||
 
-      }
-      else {
-
-        source.textContent =
-          assignment
-            ?.assignment_source ||
-          "—";
-
-      }
+        "—";
 
 
       sourceTd.appendChild(
@@ -1770,9 +2427,9 @@ function renderSupervisorContext() {
       );
 
 
-      // =====================================================
+      // ======================================================
       // LOCK
-      // =====================================================
+      // ======================================================
 
       const lockTd =
         document.createElement(
@@ -1781,15 +2438,8 @@ function renderSupervisorContext() {
 
 
       if (
-        assignment &&
-        isSupervisor
+        assignment
       ) {
-
-        lockTd.textContent =
-          "Locked";
-
-      }
-      else if (assignment) {
 
         const lock =
           document.createElement(
@@ -1800,26 +2450,39 @@ function renderSupervisorContext() {
         lock.className =
           "button secondary lock-button";
 
+
         lock.type =
           "button";
 
 
         lock.textContent =
+
           assignment.is_locked
+
             ? "Unlock"
+
             : "Lock";
 
+
+        /*
+          Once published, locks belong to the
+          official plan and are not edited through
+          the standard planning controls.
+        */
 
         lock.disabled =
           published;
 
 
         lock.addEventListener(
+
           "click",
+
           () =>
             toggleLock(
               assignment
             )
+
         );
 
 
@@ -1828,6 +2491,7 @@ function renderSupervisorContext() {
         );
 
       }
+
       else {
 
         lockTd.textContent =
@@ -1836,183 +2500,3804 @@ function renderSupervisorContext() {
       }
 
 
-      // =====================================================
-      // CHANGE / OVERRIDE
-      // =====================================================
+      // ======================================================
+      // ASSIGNMENT ACTION
+      // ======================================================
 
-      const manualTd =
+      const actionTd =
         document.createElement(
           "td"
         );
 
 
-      const manual =
+      const action =
         document.createElement(
           "button"
         );
 
 
-      manual.className =
+      action.className =
         "button secondary";
 
-      manual.type =
+
+      action.type =
         "button";
 
 
-      if (isSupervisor) {
+      if (
+        station.station_code ===
+        "SUPERVISOR"
+      ) {
 
-        manual.textContent =
-          "Supervisor";
+        action.textContent =
+          "Protected";
 
-        manual.disabled =
+
+        action.disabled =
           true;
 
       }
+
       else {
 
-        manual.textContent =
-          assignment
-            ? "Change"
-            : "Assign";
+        action.textContent =
 
-        manual.disabled =
-          published;
+          published
+
+            ? "Operational Change"
+
+            : "Change";
 
 
-        manual.addEventListener(
+        action.disabled =
+
+          published
+
+            ? !canManagePublishedOperations()
+
+            : !hasAnyRole(
+                LEADERSHIP
+              );
+
+
+        action.addEventListener(
+
           "click",
+
           () =>
             openManualModal(
               station
             )
+
         );
 
       }
 
 
-      manualTd.appendChild(
-        manual
+      actionTd.appendChild(
+        action
       );
 
 
       tr.append(
+
         stationTd,
+
         officerTd,
+
         sourceTd,
+
         lockTd,
-        manualTd
+
+        actionTd
+
       );
 
 
-      assignmentBody.appendChild(
+      el.assignmentBody.appendChild(
         tr
       );
 
     }
-  );
 
 
-  generateButton.disabled =
-    published;
+    updateActionStates();
+
+  }
+    // ==========================================================
+  // STEP 3
+  // HANDOFF / OPERATIONAL SHIFT ACTIVATION
+  // ==========================================================
+
+  async function loadHandoffStatus() {
+
+    if (
+      !currentShift
+    ) {
+
+      handoffStatus =
+        null;
+
+      renderHandoffStatus();
+
+      return;
+
+    }
 
 
-  publishButton.disabled =
-    published ||
-    !assignments.length;
-}
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "get_shift_handoff_workflow_status",
+
+      {
+        p_shift_id:
+          currentShift.id
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    handoffStatus =
+      data || null;
+
+
+    renderHandoffStatus();
+
+  }
+
+
+
+  // ==========================================================
+  // RENDER HANDOFF STATUS
+  // ==========================================================
+
+  function renderHandoffStatus() {
+
+    if (
+      !currentShift
+    ) {
+
+      el.handoffPanel.hidden =
+        true;
+
+      return;
+
+    }
+
+
+    el.handoffPanel.hidden =
+      false;
+
+
+    const status =
+      handoffStatus || {};
+
+
+    const leaderName =
+
+      status
+        .supervisor_display_name
+
+      ||
+
+      currentShift
+        .supervisor_display_name
+
+      ||
+
+      "Not resolved";
+
+
+    el.handoffLeader.textContent =
+      leaderName;
+
+
+    el.handoffPriorReport.textContent =
+
+      status.prior_report_code
+
+      ||
+
+      "No prior published report";
+
+
+    el.handoffCarryCount.textContent =
+      String(
+
+        status
+          .carry_forward_special_posts
+
+        ||
+
+        0
+
+      );
+
+
+    el.handoffAdvanceNotice.hidden =
+      !status.advance_plan;
+
+
+
+    // ========================================================
+    // LEADERSHIP NOT YET RESOLVED
+    // ========================================================
+
+    if (
+      !status.leadership_resolved
+    ) {
+
+      el.handoffStatusBadge.textContent =
+        "LEADERSHIP REQUIRED";
+
+
+      el.handoffStatusBadge.className =
+        "status-chip bad";
+
+
+      el.handoffReceiptStatus.textContent =
+        "Resolve Team Lead / Acting Team Lead first";
+
+    }
+
+
+    // ========================================================
+    // NO PRIOR HANDOFF EXISTS
+    // ========================================================
+
+    else if (
+      !status.handoff_required
+    ) {
+
+      el.handoffStatusBadge.textContent =
+
+        status.operational_ready
+
+          ? "READY"
+
+          : "NO PRIOR REPORT";
+
+
+      el.handoffStatusBadge.className =
+        "status-chip good";
+
+
+      el.handoffReceiptStatus.textContent =
+        "No prior published handoff found";
+
+    }
+
+
+    // ========================================================
+    // PRIOR REPORT EXISTS BUT HAS NOT BEEN ACKNOWLEDGED
+    // ========================================================
+
+    else if (
+      !status.handoff_acknowledged
+    ) {
+
+      el.handoffStatusBadge.textContent =
+        "AWAITING RECEIPT";
+
+
+      el.handoffStatusBadge.className =
+        "status-chip warn";
+
+
+      el.handoffReceiptStatus.textContent =
+        "Prior report has not been acknowledged";
+
+    }
+
+
+    // ========================================================
+    // HANDOFF ALREADY CONFIRMED
+    // ========================================================
+
+    else if (
+
+      status.handoff_status ===
+        "acknowledged"
+
+      ||
+
+      status.operational_ready
+
+    ) {
+
+      el.handoffStatusBadge.textContent =
+        "ACKNOWLEDGED";
+
+
+      el.handoffStatusBadge.className =
+        "status-chip good";
+
+
+      el.handoffReceiptStatus.textContent =
+        "Handoff received by incoming leadership";
+
+    }
+
+
+    // ========================================================
+    // ACKNOWLEDGED BUT OPERATIONAL CONFIRMATION REMAINS
+    // ========================================================
+
+    else {
+
+      el.handoffStatusBadge.textContent =
+        "READY TO CONFIRM";
+
+
+      el.handoffStatusBadge.className =
+        "status-chip good";
+
+
+      el.handoffReceiptStatus.textContent =
+        "Prior handoff acknowledged";
+
+    }
+
+
+
+    // ========================================================
+    // PRIOR REPORT BUTTON
+    // ========================================================
+
+    el.openHandoffButton.hidden =
+      !status.handoff_required;
+
+
+    el.openHandoffButton.textContent =
+
+      status.handoff_acknowledged
+
+        ? "Review Prior Handoff"
+
+        : "Open Prior Handoff";
+
+
+
+    // ========================================================
+    // ONLY THE LEGITIMATE CURRENT SHIFT LEADER MAY CONFIRM
+    // ========================================================
+
+    const canConfirm =
+
+      status.leadership_resolved
+
+      &&
+
+      (
+        status.handoff_acknowledged
+
+        ||
+
+        !status.handoff_required
+      )
+
+      &&
+
+      isCurrentShiftLead();
+
+
+
+    el.confirmHandoffButton.disabled =
+      !canConfirm;
+
+
+
+    // ========================================================
+    // ALREADY CONFIRMED
+    // ========================================================
+
+    if (
+
+      status.handoff_status ===
+        "acknowledged"
+
+      ||
+
+      status.handoff_status ===
+        "not_required"
+
+    ) {
+
+      el.confirmHandoffButton.textContent =
+        "Operational Handoff Confirmed";
+
+
+      el.confirmHandoffButton.disabled =
+        true;
+
+    }
+
+    else {
+
+      el.confirmHandoffButton.textContent =
+        "Confirm Operational Handoff";
+
+    }
+
+
+    updateActionStates();
+
+  }
+
+
+
+  // ==========================================================
+  // BUILD RETURN URL BACK TO THIS EXACT DUTY SHIFT
+  // ==========================================================
+
+  function dutyReturnUrl() {
+
+    const url =
+      new URL(
+        window.location.href
+      );
+
+
+    url.search =
+      "";
+
+
+    url.searchParams.set(
+      "shiftDate",
+      currentShift.shift_date
+    );
+
+
+    url.searchParams.set(
+      "shiftName",
+      currentShift.shift_name
+    );
+
+
+    return url.href;
+
+  }
+
+
+
+  // ==========================================================
+  // OPEN PRIOR END-OF-SHIFT HANDOFF
+  // ==========================================================
+
+  function openPriorHandoff() {
+
+    if (
+
+      !currentShift
+
+      ||
+
+      !handoffStatus
+        ?.prior_report_id
+
+    ) {
+
+      return;
+
+    }
+
+
+    const target =
+      new URL(
+
+        END_OF_SHIFT_URL,
+
+        window.location.href
+
+      );
+
+
+    target.searchParams.set(
+      "reportId",
+      handoffStatus.prior_report_id
+    );
+
+
+    target.searchParams.set(
+      "source",
+      "duty-assignments"
+    );
+
+
+    target.searchParams.set(
+      "returnTo",
+      dutyReturnUrl()
+    );
+
+
+    window.location.assign(
+      target.href
+    );
+
+  }
+
+
+
+  // ==========================================================
+  // CONFIRM OPERATIONAL HANDOFF
+  //
+  // This does three important things:
+  //
+  // 1. Confirms the incoming leader has received the handoff.
+  // 2. Imports ongoing Special Posts from the prior shift.
+  // 3. Initializes the incoming shift's live End-of-Shift
+  //    Report so it can be updated throughout the shift.
+  // ==========================================================
+
+  async function confirmOperationalHandoff() {
+
+    if (
+      !currentShift
+    ) {
+
+      return;
+
+    }
+
+
+    el.confirmHandoffButton.disabled =
+      true;
+
+
+    el.confirmHandoffButton.textContent =
+      "Confirming…";
+
+
+    try {
+
+
+      // ======================================================
+      // CONFIRM HANDOFF / IMPORT CARRY-FORWARD SPECIAL POSTS
+      // ======================================================
+
+      const {
+        error
+      } = await db.rpc(
+
+        "confirm_shift_operational_handoff",
+
+        {
+          p_shift_id:
+            currentShift.id
+        }
+
+      );
+
+
+      if (
+        error
+      ) {
+
+        throw error;
+
+      }
+
+
+
+      // ======================================================
+      // CREATE / OPEN THIS SHIFT'S LIVE END-OF-SHIFT REPORT
+      // ======================================================
+
+      const liveReport =
+        await db.rpc(
+
+          "open_end_of_shift_report",
+
+          {
+
+            p_shift_date:
+              currentShift.shift_date,
+
+            p_shift_name:
+              currentShift.shift_name
+
+          }
+
+        );
+
+
+      if (
+        liveReport.error
+      ) {
+
+        throw liveReport.error;
+
+      }
+
+
+
+      // ======================================================
+      // REFRESH HANDOFF + SPECIAL POSTS
+      // ======================================================
+
+      await Promise.all([
+
+        loadHandoffStatus(),
+
+        loadSpecialPosts()
+
+      ]);
+
+
+
+      showMessage(
+
+        "Operational handoff confirmed. Carry-forward Special Posts are now available for coverage review, and the live End-of-Shift Report has been initiated.",
+
+        "success"
+
+      );
+
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Confirm handoff error:",
+        error
+      );
+
+
+      showMessage(
+
+        error.message
+
+        ||
+
+        "Unable to confirm operational handoff.",
+
+        "error"
+
+      );
+
+
+      renderHandoffStatus();
+
+    }
+
+  }
+    // ==========================================================
+  // STEP 4
+  // SPECIAL POST ASSIGNMENTS
+  // ==========================================================
+
+  async function loadSpecialPosts() {
+
+    specialPostAccessError =
+      null;
+
+
+    if (
+      !currentShift
+    ) {
+
+      specialPosts =
+        [];
+
+      renderSpecialPosts();
+
+      return;
+
+    }
+
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "get_shift_special_assignments",
+
+      {
+        p_shift_id:
+          currentShift.id
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      specialPosts =
+        [];
+
+
+      specialPostAccessError =
+
+        error.message
+
+        ||
+
+        "Special Post access is not available yet.";
+
+
+      renderSpecialPosts();
+
+      return;
+
+    }
+
+
+    specialPosts =
+      data || [];
+
+
+    renderSpecialPosts();
+
+  }
+
+
+
+  // ==========================================================
+  // PRIORITY LABEL
+  // ==========================================================
+
+  function specialPriorityLabel(
+    value
+  ) {
+
+    const labels = {
+
+      1:
+        "1 — MUST COVER",
+
+      2:
+        "2 — HIGH PRIORITY",
+
+      3:
+        "3 — IMPORTANT",
+
+      4:
+        "4 — PREFERRED",
+
+      5:
+        "5 — GOOD TO HAVE / ROUNDS ACCEPTABLE"
+
+    };
+
+
+    return (
+
+      labels[
+        Number(
+          value
+        )
+      ]
+
+      ||
+
+      `Priority ${value ?? "—"}`
+
+    );
+
+  }
+
+
+
+  // ==========================================================
+  // RENDER SPECIAL POSTS
+  // ==========================================================
+
+  function renderSpecialPosts() {
+
+    el.specialPostPanel.hidden =
+      !currentShift;
+
+
+    el.specialPostList.innerHTML =
+      "";
+
+
+    if (
+      !currentShift
+    ) {
+
+      el.specialPostList.innerHTML =
+
+        '<div class="empty">Open a shift to review Special Posts.</div>';
+
+
+      return;
+
+    }
+
+
+
+    if (
+      specialPostAccessError
+    ) {
+
+      el.specialPostList.innerHTML = `
+
+        <div class="empty">
+
+          ${escapeHtml(
+            specialPostAccessError
+          )}
+
+        </div>
+
+      `;
+
+
+      updateActionStates();
+
+      return;
+
+    }
+
+
+
+    if (
+      !specialPosts.length
+    ) {
+
+      el.specialPostList.innerHTML =
+
+        '<div class="empty">No Special Posts have been added for this shift.</div>';
+
+
+      updateActionStates();
+
+      return;
+
+    }
+
+
+
+    for (
+      const post
+      of specialPosts
+    ) {
+
+      const card =
+        document.createElement(
+          "article"
+        );
+
+
+      card.className =
+        "special-post-card";
+
+
+
+      // ======================================================
+      // CARRY-FORWARD BADGE
+      // ======================================================
+
+      const carried =
+
+        post.carried_from_assignment_id
+
+          ? (
+              '<span class="status-chip warn">' +
+              'CARRY-FORWARD' +
+              '</span>'
+            )
+
+          : "";
+
+
+
+      // ======================================================
+      // STATUS APPEARANCE
+      // ======================================================
+
+      const statusClass =
+
+        [
+          "active",
+          "carry_forward"
+        ].includes(
+          post.assignment_status
+        )
+
+          ? "good"
+
+          : post.assignment_status ===
+              "cancelled"
+
+            ? "bad"
+
+            : "";
+
+
+
+      const priorityLabel =
+
+        post.priority_label
+
+        ||
+
+        specialPriorityLabel(
+          post.priority_rating
+        );
+
+
+
+      // ======================================================
+      // SPECIAL POST DETAILS
+      // ======================================================
+
+      card.innerHTML = `
+
+        <div class="special-post-head">
+
+          <div>
+
+            <h3>
+              ${escapeHtml(
+                post.assignment_name
+              )}
+            </h3>
+
+            <div class="special-post-meta">
+
+              <span class="priority-chip">
+
+                ${escapeHtml(
+                  priorityLabel
+                )}
+
+              </span>
+
+              <span
+                class="status-chip ${statusClass}"
+              >
+
+                ${escapeHtml(
+                  (
+                    post.assignment_status
+                    ||
+                    "active"
+                  )
+                    .replaceAll(
+                      "_",
+                      " "
+                    )
+                    .toUpperCase()
+                )}
+
+              </span>
+
+              ${carried}
+
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+
+              ${escapeHtml(
+                post.assigned_user_name
+                ||
+                "UNASSIGNED"
+              )}
+
+            </strong>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="special-post-grid">
+
+
+          <div class="special-detail">
+
+            <span>
+              Location
+            </span>
+
+            <strong>
+
+              ${escapeHtml(
+                post.location
+                ||
+                "—"
+              )}
+
+            </strong>
+
+          </div>
+
+
+
+          <div class="special-detail">
+
+            <span>
+              Requested By / Unit
+            </span>
+
+            <strong>
+
+              ${escapeHtml(
+                post.requested_by_name
+                ||
+                post.requesting_unit
+                ||
+                "—"
+              )}
+
+            </strong>
+
+          </div>
+
+
+
+          <div class="special-detail">
+
+            <span>
+              Approved By
+            </span>
+
+            <strong>
+
+              ${escapeHtml(
+                post.approved_by_name
+                ||
+                "—"
+              )}
+
+            </strong>
+
+          </div>
+
+
+
+          <div class="special-detail">
+
+            <span>
+              Bill To / Cost Center
+            </span>
+
+            <strong>
+
+              ${escapeHtml(
+                post.bill_to
+                ||
+                post.cost_center
+                ||
+                "—"
+              )}
+
+            </strong>
+
+          </div>
+
+
+        </div>
+
+
+
+        ${
+          post.start_time
+          ||
+          post.end_time
+
+            ? `
+
+              <p class="muted">
+
+                <strong>
+                  Coverage Window:
+                </strong>
+
+                ${
+                  escapeHtml(
+                    post.start_time
+                    ||
+                    "Start not specified"
+                  )
+                }
+
+                —
+
+                ${
+                  escapeHtml(
+                    post.end_time
+                    ||
+                    "Until released"
+                  )
+                }
+
+              </p>
+
+            `
+
+            : ""
+        }
+
+
+
+        ${
+          post.handoff_notes
+
+            ? `
+
+              <p class="muted">
+
+                <strong>
+                  Handoff:
+                </strong>
+
+                ${escapeHtml(
+                  post.handoff_notes
+                )}
+
+              </p>
+
+            `
+
+            : ""
+        }
+
+
+
+        ${
+          post.notes
+
+            ? `
+
+              <p class="muted">
+
+                <strong>
+                  Notes:
+                </strong>
+
+                ${escapeHtml(
+                  post.notes
+                )}
+
+              </p>
+
+            `
+
+            : ""
+        }
+
+      `;
+
+
+
+      // ======================================================
+      // SPECIAL POST ACTIONS
+      // ======================================================
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+
+      actions.className =
+        "special-actions";
+
+
+      const active =
+
+        [
+          "active",
+          "carry_forward"
+        ].includes(
+          post.assignment_status
+        );
+
+
+
+      if (
+        active
+      ) {
+
+
+        // ====================================================
+        // ASSIGN / REASSIGN COVERAGE
+        // ====================================================
+
+        const assign =
+          document.createElement(
+            "button"
+          );
+
+
+        assign.type =
+          "button";
+
+
+        assign.className =
+          "button primary";
+
+
+        assign.textContent =
+
+          post.assigned_user_id
+
+            ? "Reassign Coverage"
+
+            : "Assign Coverage";
+
+
+        assign.disabled =
+          !canManageSpecialPosts();
+
+
+        assign.addEventListener(
+
+          "click",
+
+          () =>
+            openCoverageModal(
+              post
+            )
+
+        );
+
+
+        actions.appendChild(
+          assign
+        );
+
+
+
+        // ====================================================
+        // COMPLETE
+        // ====================================================
+
+        const complete =
+          document.createElement(
+            "button"
+          );
+
+
+        complete.type =
+          "button";
+
+
+        complete.className =
+          "button secondary";
+
+
+        complete.textContent =
+          "Mark Completed";
+
+
+        complete.disabled =
+          !canManageSpecialPosts();
+
+
+        complete.addEventListener(
+
+          "click",
+
+          () =>
+            setSpecialPostStatus(
+              post,
+              "completed"
+            )
+
+        );
+
+
+        actions.appendChild(
+          complete
+        );
+
+
+
+        // ====================================================
+        // CARRY FORWARD
+        // ====================================================
+
+        const carry =
+          document.createElement(
+            "button"
+          );
+
+
+        carry.type =
+          "button";
+
+
+        carry.className =
+          "button secondary";
+
+
+        carry.textContent =
+          "Carry Forward";
+
+
+        carry.disabled =
+          !canManageSpecialPosts();
+
+
+        carry.addEventListener(
+
+          "click",
+
+          () =>
+            setSpecialPostStatus(
+              post,
+              "carry_forward"
+            )
+
+        );
+
+
+        actions.appendChild(
+          carry
+        );
+
+
+
+        // ====================================================
+        // CANCEL
+        // ====================================================
+
+        const cancel =
+          document.createElement(
+            "button"
+          );
+
+
+        cancel.type =
+          "button";
+
+
+        cancel.className =
+          "button ghost";
+
+
+        cancel.textContent =
+          "Cancel Post";
+
+
+        cancel.disabled =
+          !canManageSpecialPosts();
+
+
+        cancel.addEventListener(
+
+          "click",
+
+          () =>
+            setSpecialPostStatus(
+              post,
+              "cancelled"
+            )
+
+        );
+
+
+        actions.appendChild(
+          cancel
+        );
+
+      }
+
+
+
+      card.appendChild(
+        actions
+      );
+
+
+      el.specialPostList.appendChild(
+        card
+      );
+
+    }
+
+
+    updateActionStates();
+
+  }
+
+
+
+  // ==========================================================
+  // OPEN ADD SPECIAL POST MODAL
+  // ==========================================================
+
+  function openSpecialPostModal() {
+
+    if (
+
+      !currentShift
+
+      ||
+
+      !canManageSpecialPosts()
+
+    ) {
+
+      return;
+
+    }
+
+
+    el.specialPostForm.reset();
+
+
+    el.specialPriority.value =
+      "";
+
+
+    el.specialPostModal
+      .classList
+      .add(
+        "show"
+      );
+
+
+    el.specialPostModal.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+  }
+
+
+
+  // ==========================================================
+  // CLOSE ADD SPECIAL POST MODAL
+  // ==========================================================
+
+  function closeSpecialPostModal() {
+
+    el.specialPostModal
+      .classList
+      .remove(
+        "show"
+      );
+
+
+    el.specialPostModal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+  }
+
+
+
+  // ==========================================================
+  // SAVE NEW SPECIAL POST
+  // ==========================================================
+
+  async function saveSpecialPost(
+    event
+  ) {
+
+    event.preventDefault();
+
+
+    if (
+      !currentShift
+    ) {
+
+      return;
+
+    }
+
+
+
+    if (
+      !el.specialAssignmentName
+        .value
+        .trim()
+
+      ||
+
+      !el.specialPriority.value
+
+      ||
+
+      !el.specialApprovedBy
+        .value
+        .trim()
+
+      ||
+
+      !el.specialBillTo
+        .value
+        .trim()
+    ) {
+
+      showMessage(
+
+        "Complete the Special Post name, priority, Approved By, and Bill To fields.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    el.saveSpecialPostButton.disabled =
+      true;
+
+
+    el.saveSpecialPostButton.textContent =
+      "Saving…";
+
+
+    try {
+
+
+      const {
+        data,
+        error
+      } = await db.rpc(
+
+        "create_shift_special_assignment",
+
+        {
+
+          p_shift_id:
+            currentShift.id,
+
+
+          p_assignment_name:
+            el.specialAssignmentName
+              .value
+              .trim(),
+
+
+          p_priority_rating:
+            Number(
+              el.specialPriority.value
+            ),
+
+
+          p_approved_by_name:
+            el.specialApprovedBy
+              .value
+              .trim(),
+
+
+          p_bill_to:
+            el.specialBillTo
+              .value
+              .trim(),
+
+
+          p_location:
+            el.specialLocation
+              .value
+              .trim()
+            ||
+            null,
+
+
+          p_requesting_unit:
+            el.specialRequestingUnit
+              .value
+              .trim()
+            ||
+            null,
+
+
+          p_requested_by_name:
+            el.specialRequestedBy
+              .value
+              .trim()
+            ||
+            null,
+
+
+          p_cost_center:
+            el.specialCostCenter
+              .value
+              .trim()
+            ||
+            null,
+
+
+          p_start_time:
+            el.specialStartTime.value
+            ||
+            null,
+
+
+          p_end_time:
+            el.specialEndTime.value
+            ||
+            null,
+
+
+          p_scheduled_hours:
+            null,
+
+
+          p_ongoing_next_shift:
+            el.specialOngoing.checked,
+
+
+          p_notes:
+            el.specialNotes
+              .value
+              .trim()
+            ||
+            null
+
+        }
+
+      );
+
+
+      if (
+        error
+      ) {
+
+        throw error;
+
+      }
+
+
+
+      closeSpecialPostModal();
+
+
+      await loadSpecialPosts();
+
+
+
+      showMessage(
+
+        currentShift.status ===
+          "published"
+
+          ? (
+              "Special Post added as a post-publication operational revision. Assign coverage next."
+            )
+
+          : (
+              "Special Post added. Assign coverage before generating if its priority requires dedicated coverage."
+            ),
+
+        "success"
+
+      );
+
+
+
+      // ======================================================
+      // OPEN COVERAGE REVIEW FOR NEWLY CREATED POST
+      // ======================================================
+
+      const created =
+        specialPosts.find(
+          row =>
+            row.special_assignment_id ===
+            data?.special_assignment_id
+        );
+
+
+      if (
+        created
+      ) {
+
+        openCoverageModal(
+          created
+        );
+
+      }
+
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Special Post create error:",
+        error
+      );
+
+
+      showMessage(
+
+        error.message
+
+        ||
+
+        "Unable to add Special Post.",
+
+        "error"
+
+      );
+
+    }
+
+    finally {
+
+      el.saveSpecialPostButton.disabled =
+        false;
+
+
+      el.saveSpecialPostButton.textContent =
+        "Save Special Post";
+
+    }
+
+  }
+
+
+
+  // ==========================================================
+  // OPEN SPECIAL POST COVERAGE REVIEW
+  // ==========================================================
+
+  async function openCoverageModal(
+    post
+  ) {
+
+    if (
+      !currentShift
+    ) {
+
+      return;
+
+    }
+
+
+    el.coverageSpecialAssignmentId.value =
+      post.special_assignment_id;
+
+
+    el.coverageTitle.textContent =
+
+      `Assign Coverage — ${post.assignment_name}`;
+
+
+    el.coverageSummary.textContent =
+
+      `${
+        post.priority_label
+        ||
+        specialPriorityLabel(
+          post.priority_rating
+        )
+      } • Supervisor, Dispatch 1, and Dispatch 2 are protected and cannot be displaced.`;
+
+
+
+    el.coverageReason.value =
+      "";
+
+
+    el.coverageCandidateList.innerHTML =
+
+      '<div class="empty">Loading candidates…</div>';
+
+
+
+    el.coverageModal
+      .classList
+      .add(
+        "show"
+      );
+
+
+    el.coverageModal.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+
+
+    try {
+
+
+      const {
+        data,
+        error
+      } = await db.rpc(
+
+        "get_special_assignment_coverage_candidates",
+
+        {
+
+          p_shift_id:
+            currentShift.id,
+
+          p_special_assignment_id:
+            post.special_assignment_id
+
+        }
+
+      );
+
+
+      if (
+        error
+      ) {
+
+        throw error;
+
+      }
+
+
+      renderCoverageCandidates(
+        data || []
+      );
+
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Coverage candidate error:",
+        error
+      );
+
+
+      el.coverageCandidateList.innerHTML = `
+
+        <div class="empty">
+
+          ${escapeHtml(
+            error.message
+            ||
+            "Unable to load coverage candidates."
+          )}
+
+        </div>
+
+      `;
+
+    }
+
+  }
+
+
+
+  // ==========================================================
+  // RENDER COVERAGE CANDIDATES
+  //
+  // Backend enforcement is authoritative.
+  //
+  // Supervisor / Team Lead,
+  // Dispatch 1,
+  // and Dispatch 2
+  // cannot be displaced for Special Post coverage.
+  // ==========================================================
+
+  function renderCoverageCandidates(
+    candidates
+  ) {
+
+    el.coverageCandidateList.innerHTML =
+      "";
+
+
+    if (
+      !candidates.length
+    ) {
+
+      el.coverageCandidateList.innerHTML =
+
+        '<div class="empty">No present coverage candidates are available.</div>';
+
+
+      return;
+
+    }
+
+
+
+    for (
+      const candidate
+      of candidates
+    ) {
+
+      const row =
+        document.createElement(
+          "label"
+        );
+
+
+      row.className =
+        "coverage-row";
+
+
+
+      if (
+        candidate.recommended
+      ) {
+
+        row.classList.add(
+          "recommended"
+        );
+
+      }
+
+
+
+      if (
+        candidate.is_protected
+      ) {
+
+        row.classList.add(
+          "protected"
+        );
+
+      }
+
+
+
+      const radio =
+        document.createElement(
+          "input"
+        );
+
+
+      radio.type =
+        "radio";
+
+
+      radio.name =
+        "coverageCandidate";
+
+
+      radio.value =
+        candidate.user_id;
+
+
+      radio.disabled =
+        !candidate.eligible;
+
+
+
+      const body =
+        document.createElement(
+          "div"
+        );
+
+
+
+      const current =
+
+        candidate.is_unassigned
+
+          ? "Currently unassigned"
+
+          : (
+
+              `${
+                candidate.current_station_name
+                ||
+                "Standing post"
+              } • Priority ${
+                candidate.current_station_priority
+                ??
+                "—"
+              }`
+
+            );
+
+
+
+      body.innerHTML = `
+
+        <strong>
+
+          ${escapeHtml(
+            candidate.display_name
+          )}
+
+        </strong>
+
+
+        ${
+          candidate.recommended
+
+            ? (
+                '<span class="status-chip good" style="margin-left:7px;">' +
+                'RECOMMENDED' +
+                '</span>'
+              )
+
+            : ""
+        }
+
+
+        ${
+          candidate.is_protected
+
+            ? (
+                '<span class="status-chip bad" style="margin-left:7px;">' +
+                'PROTECTED' +
+                '</span>'
+              )
+
+            : ""
+        }
+
+
+        <small>
+
+          ${escapeHtml(
+            current
+          )}
+
+        </small>
+
+
+        <small>
+
+          ${escapeHtml(
+            candidate.eligibility_note
+            ||
+            ""
+          )}
+
+        </small>
+
+      `;
+
+
+
+      row.append(
+        radio,
+        body
+      );
+
+
+      el.coverageCandidateList.appendChild(
+        row
+      );
+
+    }
+
+  }
+
+
+
+  // ==========================================================
+  // CLOSE COVERAGE MODAL
+  // ==========================================================
+
+  function closeCoverageModal() {
+
+    el.coverageModal
+      .classList
+      .remove(
+        "show"
+      );
+
+
+    el.coverageModal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+  }
+
+
+
+  // ==========================================================
+  // SAVE SPECIAL POST COVERAGE
+  // ==========================================================
+
+  async function saveCoverage(
+    event
+  ) {
+
+    event.preventDefault();
+
+
+
+    const specialId =
+      el.coverageSpecialAssignmentId.value;
+
+
+
+    const selected =
+      el.coverageCandidateList.querySelector(
+
+        'input[name="coverageCandidate"]:checked'
+
+      );
+
+
+
+    if (
+      !selected
+    ) {
+
+      showMessage(
+
+        "Select an eligible officer for Special Post coverage.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    /*
+      Published roster changes require a reason
+      so the operational revision is auditable.
+    */
+
+    if (
+
+      currentShift
+        ?.status ===
+        "published"
+
+      &&
+
+      !el.coverageReason
+        .value
+        .trim()
+
+    ) {
+
+      showMessage(
+
+        "Enter a reason for this post-publication coverage revision.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    el.saveCoverageButton.disabled =
+      true;
+
+
+    el.saveCoverageButton.textContent =
+      "Assigning…";
+
+
+    try {
+
+
+      const {
+        data,
+        error
+      } = await db.rpc(
+
+        "assign_shift_special_assignment",
+
+        {
+
+          p_special_assignment_id:
+            specialId,
+
+          p_user_id:
+            selected.value,
+
+          p_reason:
+            el.coverageReason
+              .value
+              .trim()
+            ||
+            null
+
+        }
+
+      );
+
+
+      if (
+        error
+      ) {
+
+        throw error;
+
+      }
+
+
+
+      closeCoverageModal();
+
+
+
+      /*
+        Reload both sections because assigning a
+        Special Post may deliberately vacate a
+        lower-priority standing post.
+      */
+
+      await Promise.all([
+
+        loadSpecialPosts(),
+
+        loadAssignments()
+
+      ]);
+
+
+
+      showMessage(
+
+        data
+          ?.requires_remaining_coverage_review
+
+          ? (
+              "Special Post coverage assigned. The officer's previous standing post is now open and requires coverage review."
+            )
+
+          : (
+              "Special Post coverage assigned."
+            ),
+
+        "success"
+
+      );
+
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Assign coverage error:",
+        error
+      );
+
+
+      showMessage(
+
+        error.message
+
+        ||
+
+        "Unable to assign Special Post coverage.",
+
+        "error"
+
+      );
+
+    }
+
+    finally {
+
+      el.saveCoverageButton.disabled =
+        false;
+
+
+      el.saveCoverageButton.textContent =
+        "Assign Coverage";
+
+    }
+
+  }
+
+
+
+  // ==========================================================
+  // SPECIAL POST STATUS
+  //
+  // completed
+  // carry_forward
+  // cancelled
+  // ==========================================================
+
+  async function setSpecialPostStatus(
+    post,
+    status
+  ) {
+
+    let handoffNotes =
+      null;
+
+
+
+    // ========================================================
+    // CARRY FORWARD REQUIRES HANDOFF INSTRUCTIONS
+    // ========================================================
+
+    if (
+      status ===
+      "carry_forward"
+    ) {
+
+      handoffNotes =
+        window.prompt(
+
+          `Enter handoff instructions for ${post.assignment_name}:`,
+
+          post.handoff_notes
+
+          ||
+
+          post.notes
+
+          ||
+
+          ""
+
+        );
+
+
+      if (
+        handoffNotes ===
+        null
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        !handoffNotes.trim()
+      ) {
+
+        showMessage(
+
+          "Carry Forward requires handoff instructions.",
+
+          "error"
+
+        );
+
+
+        return;
+
+      }
+
+    }
+
+
+    // ========================================================
+    // COMPLETION / CANCELLATION CONFIRMATION
+    // ========================================================
+
+    else {
+
+      const label =
+
+        status ===
+        "completed"
+
+          ? "complete"
+
+          : "cancel";
+
+
+      const confirmed =
+        window.confirm(
+
+          `${
+            label[0].toUpperCase()
+            +
+            label.slice(1)
+          } ${post.assignment_name}?`
+
+        );
+
+
+      if (
+        !confirmed
+      ) {
+
+        return;
+
+      }
+
+    }
+
+
+
+    try {
+
+
+      const {
+        data,
+        error
+      } = await db.rpc(
+
+        "set_shift_special_assignment_status",
+
+        {
+
+          p_special_assignment_id:
+            post.special_assignment_id,
+
+          p_status:
+            status,
+
+          p_handoff_notes:
+            handoffNotes
+
+        }
+
+      );
+
+
+      if (
+        error
+      ) {
+
+        throw error;
+
+      }
+
+
+
+      await Promise.all([
+
+        loadSpecialPosts(),
+
+        loadAssignments()
+
+      ]);
+
+
+
+      showMessage(
+
+        data
+          ?.needs_duty_reassignment
+
+          ? (
+              "Special Post updated. The released officer is available for standing-post reassignment."
+            )
+
+          : (
+              "Special Post status updated."
+            ),
+
+        "success"
+
+      );
+
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Special Post status error:",
+        error
+      );
+
+
+      showMessage(
+
+        error.message
+
+        ||
+
+        "Unable to update Special Post status.",
+
+        "error"
+
+      );
+
+    }
+
+  }
+    // ==========================================================
+  // STEP 5
+  // STANDING DUTY ASSIGNMENTS
+  // ==========================================================
+
+
+  // ==========================================================
+  // REQUIRED SPECIAL POST COVERAGE CHECK
+  // ==========================================================
+
+  function uncoveredRequiredSpecialPosts() {
+
+    return specialPosts.filter(
+      post =>
+
+        post.is_active !== false
+
+        &&
+
+        [
+          "active",
+          "carry_forward"
+        ].includes(
+          post.assignment_status
+        )
+
+        &&
+
+        Number(
+          post.priority_rating
+        ) >= 1
+
+        &&
+
+        Number(
+          post.priority_rating
+        ) <= 4
+
+        &&
+
+        !post.assigned_user_id
+    );
+
+  }
+
+
+
+  // ==========================================================
+  // PROTECTED STATION VACANCY CHECK
+  //
+  // Supervisor
+  // Dispatch 1
+  // Dispatch 2
+  //
+  // These posts may never be silently sacrificed for
+  // lower-priority standing assignments.
+  // ==========================================================
+
+  function protectedStationVacancies() {
+
+    const assignedStationIds =
+      new Set(
+
+        assignments.map(
+          row =>
+            row.station_id
+        )
+
+      );
+
+
+    return stations.filter(
+      station =>
+
+        PROTECTED.has(
+          station.station_code
+        )
+
+        &&
+
+        !assignedStationIds.has(
+          station.id
+        )
+    );
+
+  }
+
+
+
+  // ==========================================================
+  // OPEN STANDING-POST ASSIGNMENT MODAL
+  // ==========================================================
+
   function openManualModal(
     station
   ) {
+
+    if (
+      !currentShift
+      ||
+      !station
+    ) {
+
+      return;
+
+    }
+
+
+    if (
+      station.station_code ===
+      "SUPERVISOR"
+    ) {
+
+      showMessage(
+
+        "The Supervisor post is controlled by the Team Lead / Acting Team Lead workflow.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
 
     const present =
       currentPresentStaff();
 
 
-    manualUserId.innerHTML =
-      "";
+    const targetIsDispatch =
 
-
-    const placeholder =
-      document.createElement(
-        "option"
+      [
+        "DISPATCH-1",
+        "DISPATCH-2"
+      ].includes(
+        station.station_code
       );
 
 
-    placeholder.value =
-      "";
+
+    el.manualUserId.innerHTML =
+
+      '<option value="">Select officer</option>';
 
 
-    placeholder.textContent =
-      "Select officer";
+
+    let eligibleCount =
+      0;
 
 
-    manualUserId.appendChild(
-      placeholder
-    );
 
+    for (
+      const person
+      of present
+    ) {
 
-    present.forEach(
-      person => {
+      // ------------------------------------------------------
+      // CURRENT SHIFT LEADER STAYS ON SUPERVISOR
+      // ------------------------------------------------------
 
-        const option =
-          document.createElement(
-            "option"
-          );
+      if (
+        person.id ===
+        currentShift.supervisor_user_id
+      ) {
 
+        continue;
 
-        option.value =
-          person.id;
-
-
-        option.textContent =
-          person.display_name;
-
-
-        manualUserId.appendChild(
-          option
-        );
       }
-    );
 
 
-    manualStationId.value =
+
+      // ------------------------------------------------------
+      // ACTIVE SPECIAL POST STAFF CANNOT ALSO HOLD A
+      // STANDING POST
+      // ------------------------------------------------------
+
+      const onActiveSpecialPost =
+        specialPosts.some(
+          post =>
+
+            [
+              "active",
+              "carry_forward"
+            ].includes(
+              post.assignment_status
+            )
+
+            &&
+
+            post.assigned_user_id ===
+            person.id
+        );
+
+
+      if (
+        onActiveSpecialPost
+      ) {
+
+        continue;
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // DO NOT PULL SOMEONE AWAY FROM DISPATCH TO AN
+      // ORDINARY STANDING POST
+      // ------------------------------------------------------
+
+      const currentAssignment =
+        assignmentForUser(
+          person.id
+        );
+
+
+      const currentStation =
+        currentAssignment
+
+          ? stationForId(
+              currentAssignment.station_id
+            )
+
+          : null;
+
+
+      const currentlyDispatch =
+
+        [
+          "DISPATCH-1",
+          "DISPATCH-2"
+        ].includes(
+          currentStation?.station_code
+        );
+
+
+      if (
+        currentlyDispatch
+        &&
+        !targetIsDispatch
+      ) {
+
+        continue;
+
+      }
+
+
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        person.id;
+
+
+      option.textContent =
+
+        currentStation
+
+          ? (
+              `${person.display_name} — ` +
+              `${currentStation.station_name}`
+            )
+
+          : (
+              `${person.display_name} — Unassigned`
+            );
+
+
+      el.manualUserId.appendChild(
+        option
+      );
+
+
+      eligibleCount +=
+        1;
+
+    }
+
+
+
+    el.manualStationId.value =
       station.id;
 
 
-    manualReason.value =
+    el.manualReason.value =
       "";
 
 
-    manualModal.classList.add(
-      "show"
-    );
+    el.manualReason.required =
+
+      currentShift.status ===
+      "published";
 
 
-    manualModal.setAttribute(
+    el.manualReason.placeholder =
+
+      currentShift.status ===
+      "published"
+
+        ? (
+            "Required — explain this post-publication operational revision"
+          )
+
+        : (
+            "Optional note for this assignment change"
+          );
+
+
+
+    if (
+      !eligibleCount
+    ) {
+
+      showMessage(
+
+        `No eligible present officers are available for ${station.station_name}.`,
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    el.manualModal
+      .classList
+      .add(
+        "show"
+      );
+
+
+    el.manualModal.setAttribute(
       "aria-hidden",
       "false"
     );
+
   }
 
+
+
+  // ==========================================================
+  // CLOSE STANDING-POST MODAL
+  // ==========================================================
 
   function closeManualModal() {
 
-    manualModal.classList.remove(
-      "show"
-    );
+    el.manualModal
+      .classList
+      .remove(
+        "show"
+      );
 
 
-    manualModal.setAttribute(
+    el.manualModal.setAttribute(
       "aria-hidden",
       "true"
     );
+
   }
 
 
+
+  // ==========================================================
+  // LOCK / UNLOCK DRAFT ASSIGNMENT
+  // ==========================================================
+
+  async function toggleLock(
+    assignment
+  ) {
+
+    if (
+      !currentShift
+      ||
+      currentShift.status !==
+        "draft"
+    ) {
+
+      return;
+
+    }
+
+
+    const station =
+      stationForId(
+        assignment.station_id
+      );
+
+
+    /*
+      The Supervisor assignment is protected by the
+      leadership workflow and should not be manually
+      unlocked here.
+    */
+
+    if (
+      station?.station_code ===
+      "SUPERVISOR"
+    ) {
+
+      showMessage(
+
+        "The Supervisor assignment is protected and cannot be unlocked from this control.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    try {
+
+
+      const {
+        error
+      } = await db.rpc(
+
+        "set_assignment_lock",
+
+        {
+
+          p_assignment_id:
+            assignment.id,
+
+          p_locked:
+            !assignment.is_locked
+
+        }
+
+      );
+
+
+      if (
+        error
+      ) {
+
+        throw error;
+
+      }
+
+
+      await loadAssignments();
+
+
+      showMessage(
+
+        assignment.is_locked
+
+          ? "Assignment unlocked."
+
+          : "Assignment locked.",
+
+        "success"
+
+      );
+
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Lock error:",
+        error
+      );
+
+
+      showMessage(
+
+        error.message
+
+        ||
+
+        "Unable to update assignment lock.",
+
+        "error"
+
+      );
+
+    }
+
+  }
+
+
+
+  // ==========================================================
+  // GENERATE INITIAL DUTY ASSIGNMENTS
+  // ==========================================================
+
+  async function generateAssignments() {
+
+    if (
+      !currentShift
+    ) {
+
+      return;
+
+    }
+
+
+
+    if (
+      currentShift.status !==
+      "draft"
+    ) {
+
+      showMessage(
+
+        "A published roster cannot be regenerated. Use Operational Change for live revisions.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    if (
+      !canGenerateOrPublishDraft()
+    ) {
+
+      showMessage(
+
+        "Complete the required shift-leadership and handoff steps before generating assignments.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    // ========================================================
+    // PRIORITY 1-4 SPECIAL POSTS MUST HAVE COVERAGE FIRST
+    // ========================================================
+
+    const uncovered =
+      uncoveredRequiredSpecialPosts();
+
+
+    if (
+      uncovered.length
+    ) {
+
+      const names =
+        uncovered
+          .map(
+            post =>
+              `${post.assignment_name} (${specialPriorityLabel(
+                post.priority_rating
+              )})`
+          )
+          .join(
+            ", "
+          );
+
+
+      showMessage(
+
+        `Assign coverage to required Special Post(s) before generating: ${names}.`,
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    el.generateButton.disabled =
+      true;
+
+
+    el.generateButton.textContent =
+      "Generating…";
+
+
+    try {
+
+
+      const {
+        data,
+        error
+      } = await db.rpc(
+
+        "generate_station_assignments_operational",
+
+        {
+          p_shift_id:
+            currentShift.id
+        }
+
+      );
+
+
+      if (
+        error
+      ) {
+
+        throw error;
+
+      }
+
+
+
+      /*
+        The generator may also resolve / synchronize
+        leadership data, so refresh the whole shift instead
+        of only reloading the assignment table.
+      */
+
+      await refreshShift();
+
+
+
+      const protectedOpen =
+        protectedStationVacancies();
+
+
+      if (
+        protectedOpen.length
+      ) {
+
+        const names =
+          protectedOpen
+            .map(
+              station =>
+                station.station_name
+            )
+            .join(
+              ", "
+            );
+
+
+        showMessage(
+
+          `Assignments generated, but protected coverage is incomplete: ${names}. The roster cannot be published until these protected posts are filled.`,
+
+          "error"
+
+        );
+
+
+        return;
+
+      }
+
+
+
+      showMessage(
+
+        `${
+          data?.assignments_generated
+          ??
+          assignments.length
+        } assignment(s) generated. Required Special Post personnel were kept outside the standing-post pool.`,
+
+        "success"
+
+      );
+
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Generate assignment error:",
+        error
+      );
+
+
+      showMessage(
+
+        error.message
+
+        ||
+
+        "Unable to generate assignments.",
+
+        "error"
+
+      );
+
+    }
+
+    finally {
+
+      el.generateButton.textContent =
+        "Generate Assignments";
+
+
+      updateActionStates();
+
+    }
+
+  }
+
+
+
+  // ==========================================================
+  // SAVE MANUAL / OPERATIONAL STANDING-POST CHANGE
+  // ==========================================================
+
+  async function saveManualAssignment(
+    event
+  ) {
+
+    event.preventDefault();
+
+
+    if (
+      !currentShift
+    ) {
+
+      return;
+
+    }
+
+
+
+    if (
+      !el.manualUserId.value
+    ) {
+
+      showMessage(
+
+        "Select an officer for the assignment.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    if (
+
+      currentShift.status ===
+        "published"
+
+      &&
+
+      !el.manualReason
+        .value
+        .trim()
+
+    ) {
+
+      showMessage(
+
+        "A reason is required for a post-publication assignment revision.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    el.confirmManualButton.disabled =
+      true;
+
+
+    el.confirmManualButton.textContent =
+      "Saving…";
+
+
+    try {
+
+
+      const {
+        data,
+        error
+      } = await db.rpc(
+
+        "assign_station_operationally",
+
+        {
+
+          p_shift_id:
+            currentShift.id,
+
+          p_station_id:
+            el.manualStationId.value,
+
+          p_user_id:
+            el.manualUserId.value,
+
+          p_reason:
+            el.manualReason
+              .value
+              .trim()
+            ||
+            null
+
+        }
+
+      );
+
+
+      if (
+        error
+      ) {
+
+        throw error;
+
+      }
+
+
+
+      closeManualModal();
+
+
+
+      await loadAssignments();
+
+
+
+      if (
+        data?.displaced_user_name
+      ) {
+
+        showMessage(
+
+          currentShift.status ===
+            "published"
+
+            ? (
+                `Operational assignment revision saved. ${data.displaced_user_name} was removed from the destination post and the change was added to assignment history.`
+              )
+
+            : (
+                `Assignment saved. ${data.displaced_user_name} was removed from the destination post.`
+              ),
+
+          "success"
+
+        );
+
+      }
+
+      else {
+
+        showMessage(
+
+          currentShift.status ===
+            "published"
+
+            ? (
+                "Operational assignment revision saved and added to assignment history."
+              )
+
+            : (
+                "Manual assignment saved."
+              ),
+
+          "success"
+
+        );
+
+      }
+
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Assignment change error:",
+        error
+      );
+
+
+      showMessage(
+
+        error.message
+
+        ||
+
+        "Unable to save assignment change.",
+
+        "error"
+
+      );
+
+    }
+
+    finally {
+
+      el.confirmManualButton.disabled =
+        false;
+
+
+      el.confirmManualButton.textContent =
+        "Save Assignment";
+
+    }
+
+  }
+
+
+
+  // ==========================================================
+  // PAGE ACTION STATES
+  // ==========================================================
+
+  function updateActionStates() {
+
+    const hasShift =
+      Boolean(
+        currentShift
+      );
+
+
+    const published =
+
+      currentShift
+        ?.status ===
+        "published";
+
+
+    const draft =
+
+      currentShift
+        ?.status ===
+        "draft";
+
+
+
+    el.saveAttendanceButton.disabled =
+
+      !hasShift
+
+      ||
+
+      !canEditAttendance();
+
+
+
+    el.addSpecialPostButton.disabled =
+
+      !hasShift
+
+      ||
+
+      !canManageSpecialPosts();
+
+
+
+    el.generateButton.disabled =
+
+      !draft
+
+      ||
+
+      !canGenerateOrPublishDraft();
+
+
+
+    el.publishButton.disabled =
+
+      !draft
+
+      ||
+
+      !assignments.length
+
+      ||
+
+      !canGenerateOrPublishDraft();
+
+
+
+    el.postPublicationNotice.hidden =
+      !published;
+
+  }
+
+
+
+  // ==========================================================
+  // PUBLISH OFFICIAL PLANNED ROSTER
+  // ==========================================================
+
+  async function publishAssignments() {
+
+    if (
+      !currentShift
+    ) {
+
+      return;
+
+    }
+
+
+
+    if (
+      currentShift.status !==
+      "draft"
+    ) {
+
+      showMessage(
+
+        "This roster has already been published.",
+
+        "info"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    if (
+      !canGenerateOrPublishDraft()
+    ) {
+
+      showMessage(
+
+        "You do not currently have authority to publish this duty roster.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    if (
+      !assignments.length
+    ) {
+
+      showMessage(
+
+        "Generate or create duty assignments before publishing.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    // ========================================================
+    // REQUIRED SPECIAL POSTS
+    // ========================================================
+
+    const uncovered =
+      uncoveredRequiredSpecialPosts();
+
+
+    if (
+      uncovered.length
+    ) {
+
+      showMessage(
+
+        "Priority 1-4 Special Posts must have assigned coverage before the duty roster can be published.",
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    // ========================================================
+    // PROTECTED POST BLOCKER
+    // ========================================================
+
+    const protectedOpen =
+      protectedStationVacancies();
+
+
+    if (
+      protectedOpen.length
+    ) {
+
+      const names =
+        protectedOpen
+          .map(
+            station =>
+              station.station_name
+          )
+          .join(
+            ", "
+          );
+
+
+      showMessage(
+
+        `Protected post coverage is incomplete: ${names}. Fill these posts before publishing.`,
+
+        "error"
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    const confirmed =
+      window.confirm(
+
+        `Publish assignments for ${currentShift.shift_date} ${currentShift.shift_name}? This records the official planned roster.`
+
+      );
+
+
+    if (
+      !confirmed
+    ) {
+
+      return;
+
+    }
+
+
+
+    el.publishButton.disabled =
+      true;
+
+
+    el.publishButton.textContent =
+      "Publishing…";
+
+
+    try {
+
+
+      const {
+        error
+      } = await db.rpc(
+
+        "publish_shift_assignments",
+
+        {
+          p_shift_id:
+            currentShift.id
+        }
+
+      );
+
+
+      if (
+        error
+      ) {
+
+        throw error;
+
+      }
+
+
+
+      await refreshShift();
+
+
+
+      showMessage(
+
+        "Assignments published successfully. The official plan is preserved; later attendance, Special Post, and standing-post changes are recorded as operational revisions.",
+
+        "success"
+
+      );
+
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Publish error:",
+        error
+      );
+
+
+      showMessage(
+
+        error.message
+
+        ||
+
+        "Unable to publish assignments.",
+
+        "error"
+
+      );
+
+    }
+
+    finally {
+
+      el.publishButton.textContent =
+        "Publish Assignments";
+
+
+      updateActionStates();
+
+    }
+
+  }
+    // ==========================================================
+  // SHIFT REFRESH
+  // ==========================================================
+
   async function refreshShift() {
 
-    if (!currentShift) {
+    if (
+      !currentShift?.id
+    ) {
+
       return;
+
     }
 
 
@@ -2026,7 +6311,24 @@ function renderSupervisorContext() {
       )
 
       .select(
-        "id, shift_date, shift_name, status, published_at"
+        `
+        id,
+        shift_date,
+        shift_name,
+        status,
+        published_at,
+        supervisor_user_id,
+        supervisor_display_name,
+        supervisor_source,
+        handoff_status,
+        handoff_source_report_id,
+        handoff_acknowledged_at,
+        handoff_acknowledged_by_user_id,
+        handoff_acknowledged_by_name,
+        operationally_confirmed_at,
+        operationally_confirmed_by_user_id,
+        operationally_confirmed_by_name
+        `
       )
 
       .eq(
@@ -2037,8 +6339,12 @@ function renderSupervisorContext() {
       .single();
 
 
-    if (error) {
+    if (
+      error
+    ) {
+
       throw error;
+
     }
 
 
@@ -2046,270 +6352,134 @@ function renderSupervisorContext() {
       data;
 
 
-    shiftStatusText.textContent =
-      formatShift(
-        currentShift
-      );
-
-
-  await Promise.all([
-  loadAttendance(),
-  loadAssignments(),
-  loadPlannedUnavailability(),
-  loadSupervisorContext()
-]);
-
-
-    saveAttendanceButton.disabled =
-      currentShift.status !==
-      "draft";
-
-
-    generateButton.disabled =
-      currentShift.status !==
-      "draft";
-  }
-
-// =========================================================
-// AUTO-RESUME CURRENT DRAFT SHIFT
-// =========================================================
-
-async function resumeCurrentDraftShift() {
-
-  if (
-    currentShift ||
-    !shiftDate?.value
-  ) {
-    return;
-  }
-
-
-  try {
-
-    // -----------------------------------------------------
-    // Determine the logged-in person's normal shift
-    // when they are part of the operational roster.
-    // -----------------------------------------------------
-
-    const currentStaffMember =
-      staff.find(
-        person =>
-          person.id ===
-          auth.user.id
-      );
-
-
-    const preferredShift =
-      currentStaffMember?.shift_name ||
-      null;
-
-
-    let query =
-      db
-        .from("shift_instances")
-        .select(
-          "id, shift_date, shift_name, status, published_at, supervisor_user_id, supervisor_display_name, supervisor_source"
-        )
-        .eq(
-          "shift_date",
-          shiftDate.value
-        )
-        .eq(
-          "status",
-          "draft"
-        );
-
-
-    if (preferredShift) {
-
-      query =
-        query.eq(
-          "shift_name",
-          preferredShift
-        );
-
-    }
-
-
-    const {
-      data,
-      error
-    } =
-      await query
-        .order(
-          "shift_name"
-        );
-
-
-    if (error) {
-      throw error;
-    }
-
-
-    const drafts =
-      data || [];
-
-
-    // -----------------------------------------------------
-    // Nothing to restore.
-    // -----------------------------------------------------
-
-    if (!drafts.length) {
-      return;
-    }
-
-
-    // -----------------------------------------------------
-    // If no roster-based preferred shift exists and there
-    // are several drafts, do not guess which one belongs
-    // on screen.
-    // -----------------------------------------------------
-
-    if (
-      !preferredShift &&
-      drafts.length > 1
-    ) {
-
-      showMessage(
-        "Multiple draft shifts are available for today. Select the shift and click Open Shift.",
-        "info"
-      );
-
-      return;
-    }
-
-
-    const draft =
-      drafts[0];
-
-
-    currentShift =
-      draft;
-
-
-    shiftDate.value =
-      draft.shift_date;
-
-
-    shiftName.value =
-      draft.shift_name;
-
-
-    shiftStatus.hidden =
+    el.shiftStatus.hidden =
       false;
 
 
-    shiftStatusText.textContent =
+    el.shiftStatusText.textContent =
       formatShift(
         currentShift
       );
 
 
-    const isDraft =
-      currentShift.status ===
-      "draft";
+    // ========================================================
+    // IMPORTANT:
+    // Load leadership configuration BEFORE rendering
+    // attendance. This allows configured Senior Officers to
+    // receive the correct attendance permissions.
+    // ========================================================
 
-
-    saveAttendanceButton.disabled =
-      !isDraft;
-
-
-    generateButton.disabled =
-      !isDraft;
+    await loadLeadershipConfig();
 
 
     await Promise.all([
+
       loadAttendance(),
+
       loadAssignments(),
-      loadPlannedUnavailability(),
-      typeof loadSupervisorContext ===
-        "function"
-          ? loadSupervisorContext()
-          : Promise.resolve()
+
+      loadPlannedUnavailability()
+
     ]);
 
 
-    showMessage(
-      `Draft ${draft.shift_name} shift restored.`,
-      "success"
-    );
+    // Re-render once all attendance-related data is present.
+
+    renderAttendance();
+
+    renderSupervisorPanel();
 
 
-    console.log(
-      "Duty Assignment draft restored:",
-      draft
-    );
+    await Promise.all([
 
-  }
-  catch (error) {
+      loadHandoffStatus(),
 
-    console.error(
-      "Unable to restore draft shift:",
-      error
-    );
+      loadSpecialPosts()
+
+    ]);
 
 
-    showMessage(
-      error.message ||
-      "Unable to restore the current draft shift.",
-      "error"
-    );
+    updateActionStates();
 
   }
-}
-  shiftForm.addEventListener(
-  "submit",
-  async event => {
 
-    event.preventDefault();
 
-    clearMessage();
+
+  // ==========================================================
+  // OPEN / CREATE SELECTED SHIFT
+  // ==========================================================
+
+  async function openSelectedShift() {
+
+    showMessage();
 
 
     if (
-      !shiftDate.value ||
-      !shiftName.value
+
+      !el.shiftDate.value
+
+      ||
+
+      !el.shiftName.value
+
     ) {
 
       showMessage(
+
         "Select a shift date and shift name.",
+
         "error"
+
       );
 
+
       return;
+
     }
 
 
-    openShiftButton.disabled =
+    el.openShiftButton.disabled =
       true;
 
-    openShiftButton.textContent =
+
+    el.openShiftButton.textContent =
       "Opening…";
 
 
     try {
 
+
       const {
         data,
         error
       } = await db.rpc(
+
         "create_shift_instance",
+
         {
+
           p_shift_date:
-            shiftDate.value,
+            el.shiftDate.value,
 
           p_shift_name:
-            shiftName.value
+            el.shiftName.value
+
         }
+
       );
 
 
-      if (error) {
+      if (
+        error
+      ) {
+
         throw error;
+
       }
 
 
       currentShift = {
+
         id:
           data.shift_id,
 
@@ -2320,48 +6490,20 @@ async function resumeCurrentDraftShift() {
           data.shift_name,
 
         status:
-          data.status ||
+          data.status
+          ||
           "draft",
 
         published_at:
-          data.published_at ||
+          data.published_at
+          ||
           null
+
       };
 
 
-      shiftStatus.hidden =
-        false;
+      await refreshShift();
 
-
-      shiftStatusText.textContent =
-        formatShift(
-          currentShift
-        );
-
-
-      const isDraft =
-        currentShift.status ===
-        "draft";
-
-
-      saveAttendanceButton.disabled =
-        !isDraft;
-
-
-      generateButton.disabled =
-        !isDraft;
-
-
-      await Promise.all([
-        loadAttendance(),
-        loadAssignments(),
-        loadPlannedUnavailability(),
-
-        typeof loadSupervisorContext ===
-          "function"
-          ? loadSupervisorContext()
-          : Promise.resolve()
-      ]);
 
 
       if (
@@ -2369,29 +6511,52 @@ async function resumeCurrentDraftShift() {
       ) {
 
         showMessage(
-          "New shift created successfully.",
+
+          "New shift created successfully. Confirm attendance and shift leadership next.",
+
           "success"
+
         );
 
-      } else if (
+      }
+
+
+      else if (
+
         currentShift.status ===
         "published"
+
       ) {
 
         showMessage(
-          "Existing published shift loaded. Published shifts cannot be regenerated from this screen.",
+
+          "Published shift loaded. Use attendance, Special Post, and Operational Change controls for live revisions. The published roster will not be regenerated.",
+
           "info"
+
         );
 
-      } else {
-
-        showMessage(
-          "Existing draft shift loaded successfully.",
-          "success"
-        );
       }
 
-    } catch (error) {
+
+      else {
+
+        showMessage(
+
+          "Existing draft shift loaded successfully.",
+
+          "success"
+
+        );
+
+      }
+
+
+    }
+
+    catch (
+      error
+    ) {
 
       console.error(
         "Open shift error:",
@@ -2400,567 +6565,643 @@ async function resumeCurrentDraftShift() {
 
 
       showMessage(
-        error.message ||
+
+        error.message
+
+        ||
+
         "Unable to open shift.",
+
         "error"
+
       );
 
-    } finally {
+    }
 
-      openShiftButton.disabled =
+    finally {
+
+      el.openShiftButton.disabled =
         false;
 
 
-      openShiftButton.textContent =
+      el.openShiftButton.textContent =
         "Open Shift";
+
     }
 
   }
-);
-
-  saveAttendanceButton.addEventListener(
-    "click",
-    async () => {
-
-      if (!currentShift) {
-        return;
-      }
 
 
-      saveAttendanceButton.disabled =
-        true;
 
+  // ==========================================================
+  // SAVE ATTENDANCE
+  //
+  // This uses the new operational attendance RPC for BOTH
+  // draft and published rosters.
+  //
+  // If a published officer becomes absent:
+  //   • their standing post becomes vacant
+  //   • active Special Posts are reopened
+  //   • Supervisor is cleared if applicable
+  //   • no silent replacement occurs
+  // ==========================================================
 
-      saveAttendanceButton.textContent =
-        "Saving…";
+  async function saveAttendance() {
 
+    if (
+      !currentShift
+    ) {
 
-      try {
+      return;
 
-        const checkboxes = [
-          ...attendanceList
-            .querySelectorAll(
-              'input[type="checkbox"]'
-            )
-        ];
-
-
-        for (
-          const checkbox
-          of checkboxes
-        ) {
-
-          const {
-            error
-          } = await db.rpc(
-            "set_shift_attendance",
-            {
-              p_shift_id:
-                currentShift.id,
-
-              p_user_id:
-                checkbox.dataset.userId,
-
-              p_is_present:
-                checkbox.checked,
-
-             p_notes: (() => {
-
-  const planned =
-    plannedUnavailability.find(
-      item =>
-        item.user_id ===
-        checkbox.dataset.userId
-    );
-
-
-  if (!planned) {
-    return null;
-  }
-
-
-  const typeLabel =
-    String(
-      planned.absence_type ||
-      "other"
-    )
-      .replaceAll("_", " ");
-
-
-  if (checkbox.checked) {
-
-    return planned.notes
-      ? `On site override — planned ${typeLabel}: ${planned.notes}`
-      : `On site override — planned ${typeLabel}`;
-
-  }
-
-
-  return planned.notes
-    ? `Scheduled out — ${typeLabel}: ${planned.notes}`
-    : `Scheduled out — ${typeLabel}`;
-
-})()
-            }
-          );
-
-
-          if (error) {
-            throw error;
-          }
-        }
-
-
-       await Promise.all([
-  loadAttendance(),
-  loadSupervisorContext()
-]);
-
-showMessage(
-  "Attendance saved.",
-  "success"
-);
-
-      } catch (error) {
-
-        console.error(
-          "Attendance save error:",
-          error
-        );
-
-
-        showMessage(
-          error.message ||
-          "Unable to save attendance.",
-          "error"
-        );
-
-      } finally {
-
-        saveAttendanceButton.disabled =
-          currentShift?.status !==
-          "draft";
-
-
-        saveAttendanceButton.textContent =
-          "Save Attendance";
-      }
     }
-  );
 
 
-  generateButton.addEventListener(
-    "click",
-    async () => {
+    if (
+      !canEditAttendance()
+    ) {
 
-      if (!currentShift) {
-        return;
-      }
+      showMessage(
 
+        "You do not currently have permission to update attendance for this shift.",
 
-      generateButton.disabled =
-        true;
+        "error"
 
-
-      generateButton.textContent =
-        "Generating…";
+      );
 
 
-      try {
+      return;
+
+    }
+
+
+    el.saveAttendanceButton.disabled =
+      true;
+
+
+    el.saveAttendanceButton.textContent =
+      "Saving…";
+
+
+    try {
+
+
+      const checkboxes = [
+
+        ...el.attendanceList
+          .querySelectorAll(
+            'input[type="checkbox"][data-user-id]'
+          )
+
+      ];
+
+
+      const revisionNotes =
+        [];
+
+
+      for (
+        const checkbox
+        of checkboxes
+      ) {
+
 
         const {
           data,
           error
         } = await db.rpc(
-          "generate_station_assignments",
+
+          "set_shift_operational_attendance",
+
           {
+
             p_shift_id:
-              currentShift.id
+              currentShift.id,
+
+            p_user_id:
+              checkbox.dataset.userId,
+
+            p_is_present:
+              checkbox.checked,
+
+            p_notes:
+              attendanceNoteFor(
+                checkbox.dataset.userId,
+                checkbox.checked
+              )
+
           }
+
         );
 
 
-        if (error) {
-          throw error;
-        }
-
-
-       await Promise.all([
-  loadAssignments(),
-  loadSupervisorContext()
-]);
-
-
-const generated =
-  data?.assignments_generated ||
-  0;
-
-
-const unfilled =
-  data?.unfilled_standard_posts ||
-  0;
-
-
-let message =
-  `${generated} assignment(s) generated.`;
-
-
-if (unfilled > 0) {
-
-  message +=
-    ` ${unfilled} standard post(s) remain unfilled due to staffing.`;
-
-}
-
-
-showMessage(
-  message,
-  unfilled > 0
-    ? "info"
-    : "success"
-);
-
-      } catch (error) {
-
-        console.error(
-          "Generate assignment error:",
+        if (
           error
-        );
+        ) {
 
+          throw error;
 
-        showMessage(
-          error.message ||
-          "Unable to generate assignments.",
-          "error"
-        );
-
-      } finally {
-
-        generateButton.disabled =
-          currentShift?.status !==
-          "draft";
-
-
-        generateButton.textContent =
-          "Generate Assignments";
-      }
-    }
-  );
-
-
-  async function toggleLock(
-    assignment
-  ) {
-
-    try {
-
-      const {
-        error
-      } = await db.rpc(
-        "set_assignment_lock",
-        {
-          p_assignment_id:
-            assignment.id,
-
-          p_locked:
-            !assignment.is_locked
         }
+
+
+
+        // ====================================================
+        // PUBLISHED ROSTER COVERAGE WARNINGS
+        // ====================================================
+
+        if (
+          data?.vacated_station_name
+        ) {
+
+          revisionNotes.push(
+
+            `${data.display_name}: ${data.vacated_station_name} now requires coverage`
+
+          );
+
+        }
+
+
+        if (
+          data?.special_posts_unassigned
+        ) {
+
+          revisionNotes.push(
+
+            `${data.display_name}: ${data.special_posts_unassigned} Special Post assignment(s) reopened`
+
+          );
+
+        }
+
+
+        if (
+          data?.supervisor_affected
+        ) {
+
+          revisionNotes.push(
+
+            `${data.display_name}: Shift Supervisor coverage must be resolved`
+
+          );
+
+        }
+
+
+        if (
+
+          [
+            "DISPATCH-1",
+            "DISPATCH-2"
+          ].includes(
+            data?.vacated_station_code
+          )
+
+        ) {
+
+          revisionNotes.push(
+
+            `${data.display_name}: protected ${data.vacated_station_name} coverage must be filled`
+
+          );
+
+        }
+
+      }
+
+
+
+      // ======================================================
+      // RELOAD ATTENDANCE FIRST
+      // ======================================================
+
+      await loadAttendance();
+
+
+
+      // ======================================================
+      // RESOLVE TEAM LEAD / ACTING LEAD STATE
+      // ======================================================
+
+      await resolveLeaderAfterAttendance();
+
+
+
+      // ======================================================
+      // FULL REFRESH
+      // ======================================================
+
+      await refreshShift();
+
+
+
+      showMessage(
+
+        revisionNotes.length
+
+          ? (
+              `Attendance saved. Operational coverage review required — ${revisionNotes.join("; ")}.`
+            )
+
+          : (
+              "Attendance saved and shift leadership refreshed."
+            ),
+
+        revisionNotes.length
+
+          ? "info"
+
+          : "success"
+
       );
 
 
-      if (error) {
-        throw error;
-      }
+    }
 
-
-      await loadAssignments();
-
-    } catch (error) {
+    catch (
+      error
+    ) {
 
       console.error(
-        "Lock error:",
+        "Attendance save error:",
         error
       );
 
 
       showMessage(
-        error.message ||
-        "Unable to update assignment lock.",
+
+        error.message
+
+        ||
+
+        "Unable to save attendance.",
+
         "error"
+
       );
+
     }
+
+    finally {
+
+      el.saveAttendanceButton.textContent =
+        "Save Attendance";
+
+
+      updateActionStates();
+
+    }
+
   }
 
 
-  manualForm.addEventListener(
-    "submit",
-    async event => {
 
-      event.preventDefault();
+  // ==========================================================
+  // CONFIRM ACTING TEAM LEAD
+  // ==========================================================
+
+  async function saveActingSupervisor() {
+
+    if (
+
+      !currentShift
+
+      ||
+
+      !el.actingSupervisorSelect.value
+
+    ) {
+
+      showMessage(
+
+        "Select a present configured Senior Officer.",
+
+        "error"
+
+      );
 
 
-      if (!currentShift) {
-        return;
-      }
+      return;
+
+    }
+
+
+    el.saveActingSupervisorButton.disabled =
+      true;
+
+
+    el.saveActingSupervisorButton.textContent =
+      "Saving…";
+
+
+    try {
+
+
+      const {
+        error
+      } = await db.rpc(
+
+        "set_shift_operational_supervisor",
+
+        {
+
+          p_shift_id:
+            currentShift.id,
+
+          p_user_id:
+            el.actingSupervisorSelect.value
+
+        }
+
+      );
 
 
       if (
-        !manualUserId.value
+        error
       ) {
 
-        showMessage(
-          "Select an officer for the manual assignment.",
-          "error"
-        );
+        throw error;
 
-        return;
       }
 
 
-      confirmManualButton.disabled =
-        true;
+      await refreshShift();
 
 
-      confirmManualButton.textContent =
-        "Saving…";
+      showMessage(
+
+        "Acting Team Lead confirmed and the protected Supervisor post has been updated.",
+
+        "success"
+
+      );
 
 
-      try {
-
-        const {
-          error
-        } = await db.rpc(
-          "assign_station_manually",
-          {
-            p_shift_id:
-              currentShift.id,
-
-            p_station_id:
-              manualStationId.value,
-
-            p_user_id:
-              manualUserId.value,
-
-            p_reason:
-              manualReason.value.trim() ||
-              null
-          }
-        );
-
-
-        if (error) {
-          throw error;
-        }
-
-
-        closeManualModal();
-
-
-        await loadAssignments();
-
-
-        showMessage(
-          "Manual assignment saved.",
-          "success"
-        );
-
-      } catch (error) {
-
-        console.error(
-          "Manual assignment error:",
-          error
-        );
-
-
-        showMessage(
-          error.message ||
-          "Unable to save manual assignment.",
-          "error"
-        );
-
-      } finally {
-
-        confirmManualButton.disabled =
-          false;
-
-
-        confirmManualButton.textContent =
-          "Save Assignment";
-      }
     }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Acting Supervisor error:",
+        error
+      );
+
+
+      showMessage(
+
+        error.message
+
+        ||
+
+        "Unable to confirm Acting Team Lead.",
+
+        "error"
+
+      );
+
+    }
+
+    finally {
+
+      el.saveActingSupervisorButton.textContent =
+        "Confirm Acting Team Lead";
+
+
+      renderSupervisorPanel();
+
+    }
+
+  }
+
+
+
+  // ==========================================================
+  // EVENT WIRING
+  // ==========================================================
+
+
+  // ----------------------------------------------------------
+  // Open Shift
+  // ----------------------------------------------------------
+
+  el.shiftForm.addEventListener(
+
+    "submit",
+
+    event => {
+
+      event.preventDefault();
+
+      openSelectedShift();
+
+    }
+
   );
 
-if (
-  saveActingSupervisorButton
-) {
-
-  saveActingSupervisorButton
-    .addEventListener(
-      "click",
-      async () => {
-
-        if (!currentShift) {
-          return;
-        }
 
 
-        const selectedUserId =
-          actingSupervisorSelect.value;
+  // ----------------------------------------------------------
+  // Attendance
+  // ----------------------------------------------------------
 
+  el.saveAttendanceButton.addEventListener(
 
-        if (!selectedUserId) {
-
-          showMessage(
-            "Select a Senior Officer to serve as Acting Supervisor.",
-            "error"
-          );
-
-          return;
-        }
-
-
-        saveActingSupervisorButton.disabled =
-          true;
-
-        saveActingSupervisorButton.textContent =
-          "Saving…";
-
-
-        try {
-
-          const {
-            error
-          } = await db.rpc(
-            "set_shift_acting_supervisor",
-            {
-              p_shift_id:
-                currentShift.id,
-
-              p_user_id:
-                selectedUserId
-            }
-          );
-
-
-          if (error) {
-            throw error;
-          }
-
-
-          await loadSupervisorContext();
-
-
-          showMessage(
-            "Acting Supervisor confirmed.",
-            "success"
-          );
-
-        }
-        catch (error) {
-
-          console.error(
-            "Acting Supervisor error:",
-            error
-          );
-
-
-          showMessage(
-            error.message ||
-            "Unable to confirm Acting Supervisor.",
-            "error"
-          );
-
-        }
-        finally {
-
-          saveActingSupervisorButton.textContent =
-            "Confirm Acting Supervisor";
-
-          saveActingSupervisorButton.disabled =
-            currentShift?.status !==
-            "draft";
-
-        }
-
-      }
-    );
-}
-  publishButton.addEventListener(
     "click",
+
+    saveAttendance
+
+  );
+
+
+
+  // ----------------------------------------------------------
+  // Acting Team Lead
+  // ----------------------------------------------------------
+
+  el.saveActingSupervisorButton.addEventListener(
+
+    "click",
+
+    saveActingSupervisor
+
+  );
+
+
+
+  // ----------------------------------------------------------
+  // Refresh Handoff
+  // ----------------------------------------------------------
+
+  el.refreshHandoffButton.addEventListener(
+
+    "click",
+
     async () => {
 
-      if (!currentShift) {
-        return;
-      }
-
-
-      const confirmed =
-        window.confirm(
-          `Publish assignments for ${currentShift.shift_date} ${currentShift.shift_name}?`
-        );
-
-
-      if (!confirmed) {
-        return;
-      }
-
-
-      publishButton.disabled =
-        true;
-
-
-      publishButton.textContent =
-        "Publishing…";
-
-
       try {
-
-        const {
-          error
-        } = await db.rpc(
-          "publish_shift_assignments",
-          {
-            p_shift_id:
-              currentShift.id
-          }
-        );
-
-
-        if (error) {
-          throw error;
-        }
 
 
         await refreshShift();
 
 
         showMessage(
-          "Assignments published successfully.",
+
+          "Handoff and operational shift status refreshed.",
+
           "success"
+
         );
 
-      } catch (error) {
+
+      }
+
+      catch (
+        error
+      ) {
 
         console.error(
-          "Publish error:",
+          "Refresh handoff error:",
           error
         );
 
 
         showMessage(
-          error.message ||
-          "Unable to publish assignments.",
+
+          error.message
+
+          ||
+
+          "Unable to refresh handoff status.",
+
           "error"
+
         );
 
-      } finally {
-
-        publishButton.textContent =
-          "Publish Assignments";
       }
+
     }
+
   );
 
+
+
+  // ----------------------------------------------------------
+  // Prior Handoff
+  // ----------------------------------------------------------
+
+  el.openHandoffButton.addEventListener(
+
+    "click",
+
+    openPriorHandoff
+
+  );
+
+
+
+  // ----------------------------------------------------------
+  // Confirm Operational Handoff
+  // ----------------------------------------------------------
+
+  el.confirmHandoffButton.addEventListener(
+
+    "click",
+
+    confirmOperationalHandoff
+
+  );
+
+
+
+  // ----------------------------------------------------------
+  // Add Special Post
+  // ----------------------------------------------------------
+
+  el.addSpecialPostButton.addEventListener(
+
+    "click",
+
+    openSpecialPostModal
+
+  );
+
+
+
+  // ----------------------------------------------------------
+  // Save Special Post
+  // ----------------------------------------------------------
+
+  el.specialPostForm.addEventListener(
+
+    "submit",
+
+    saveSpecialPost
+
+  );
+
+
+
+  // ----------------------------------------------------------
+  // Special Post Coverage
+  // ----------------------------------------------------------
+
+  el.coverageForm.addEventListener(
+
+    "submit",
+
+    saveCoverage
+
+  );
+
+
+
+  // ----------------------------------------------------------
+  // Generate
+  // ----------------------------------------------------------
+
+  el.generateButton.addEventListener(
+
+    "click",
+
+    generateAssignments
+
+  );
+
+
+
+  // ----------------------------------------------------------
+  // Manual / Operational Assignment
+  // ----------------------------------------------------------
+
+  el.manualForm.addEventListener(
+
+    "submit",
+
+    saveManualAssignment
+
+  );
+
+
+
+  // ----------------------------------------------------------
+  // Publish
+  // ----------------------------------------------------------
+
+  el.publishButton.addEventListener(
+
+    "click",
+
+    publishAssignments
+
+  );
+
+
+
+  // ==========================================================
+  // MODAL CANCEL BUTTONS
+  // ==========================================================
 
   document
     .querySelectorAll(
@@ -2970,37 +7211,187 @@ if (
       button => {
 
         button.addEventListener(
+
           "click",
+
           closeManualModal
+
         );
+
       }
     );
 
 
-  manualModal.addEventListener(
-    "click",
+  document
+    .querySelectorAll(
+      ".special-modal-cancel"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+
+          "click",
+
+          closeSpecialPostModal
+
+        );
+
+      }
+    );
+
+
+  document
+    .querySelectorAll(
+      ".coverage-modal-cancel"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+
+          "click",
+
+          closeCoverageModal
+
+        );
+
+      }
+    );
+
+
+
+  // ==========================================================
+  // CLICK OUTSIDE MODAL TO CLOSE
+  // ==========================================================
+
+  for (
+    const [
+      modal,
+      close
+    ]
+    of [
+
+      [
+        el.manualModal,
+        closeManualModal
+      ],
+
+      [
+        el.specialPostModal,
+        closeSpecialPostModal
+      ],
+
+      [
+        el.coverageModal,
+        closeCoverageModal
+      ]
+
+    ]
+  ) {
+
+    modal?.addEventListener(
+
+      "click",
+
+      event => {
+
+        if (
+          event.target ===
+          modal
+        ) {
+
+          close();
+
+        }
+
+      }
+
+    );
+
+  }
+
+
+
+  // ==========================================================
+  // ESCAPE KEY CLOSES OPEN MODALS
+  // ==========================================================
+
+  document.addEventListener(
+
+    "keydown",
+
     event => {
 
       if (
-        event.target ===
-        manualModal
+        event.key !==
+        "Escape"
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        el.manualModal
+          .classList
+          .contains(
+            "show"
+          )
       ) {
 
         closeManualModal();
+
       }
+
+
+      if (
+        el.specialPostModal
+          .classList
+          .contains(
+            "show"
+          )
+      ) {
+
+        closeSpecialPostModal();
+
+      }
+
+
+      if (
+        el.coverageModal
+          .classList
+          .contains(
+            "show"
+          )
+      ) {
+
+        closeCoverageModal();
+
+      }
+
     }
+
   );
 
 
-  signOutButton.addEventListener(
+
+  // ==========================================================
+  // SIGN OUT
+  // ==========================================================
+
+  el.signOutButton.addEventListener(
+
     "click",
+
     async () => {
 
-      signOutButton.disabled =
+      el.signOutButton.disabled =
         true;
 
 
-      signOutButton.textContent =
+      el.signOutButton.textContent =
         "Signing Out…";
 
 
@@ -3008,63 +7399,150 @@ if (
 
 
       window.location.replace(
+
         new URL(
-          "login.html",
-          auth.appRootUrl ||
-          "../"
+          "../login.html",
+          window.location.href
         ).href
+
       );
+
     }
+
   );
 
-setUserDisplay();
 
 
-shiftDate.value =
-  todayLocal();
+  // ==========================================================
+  // INITIAL PAGE LOAD
+  // ==========================================================
+
+  setUserDisplay();
 
 
-// Build the correct shift choices
-// for today's date when the page opens.
 
-refreshShiftChoices();
+  const launchParams =
+    new URLSearchParams(
+      window.location.search
+    );
 
 
-// Rebuild the shift list whenever
-// the user chooses another date.
 
-shiftDate.addEventListener(
-  "change",
-  () => {
+  // ==========================================================
+  // DATE
+  // ==========================================================
 
-    refreshShiftChoices();
+  el.shiftDate.value =
 
-    clearMessage();
+    launchParams.get(
+      "shiftDate"
+    )
+
+    ||
+
+    todayLocal();
+
+
+
+  // ==========================================================
+  // SHIFT NAME
+  // ==========================================================
+
+  const requestedShift =
+    launchParams.get(
+      "shiftName"
+    );
+
+
+  if (
+
+    [
+      "Alpha",
+      "Bravo",
+      "Charlie",
+      "Delta"
+    ].includes(
+      requestedShift
+    )
+
+  ) {
+
+    el.shiftName.value =
+      requestedShift;
 
   }
-);
 
 
-try {
 
-  await Promise.all([
-    loadStations(),
-    loadEligibleStaff()
-  ]);
+  // ==========================================================
+  // LOAD PAGE DATA
+  // ==========================================================
 
-} catch (error) {
+  try {
+
+
+    await Promise.all([
+
+      loadStations(),
+
+      loadEligibleStaff()
+
+    ]);
+
+
+
+    // ========================================================
+    // RETURNING FROM END-OF-SHIFT HANDOFF
+    //
+    // If shiftDate + shiftName are in the URL, reopen that
+    // exact shift automatically.
+    // ========================================================
+
+    if (
+
+      launchParams.get(
+        "shiftDate"
+      )
+
+      &&
+
+      requestedShift
+
+    ) {
+
+      await openSelectedShift();
+
+    }
+
+
+  }
+
+  catch (
+    error
+  ) {
 
     console.error(
+
       "Duty assignment initialization error:",
+
       error
+
     );
 
 
     showMessage(
-      error.message ||
+
+      error.message
+
+      ||
+
       "Unable to load Duty Station Assignment.",
+
       "error"
+
     );
+
   }
+
 
 })();
