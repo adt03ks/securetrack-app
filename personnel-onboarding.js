@@ -783,7 +783,7 @@ their SecureTrack setup invitation.
   MROH Day
 </option>
 
-<option value="MROH Nights">
+<option value="MROH Night">
   MROH Nights
 </option>
                 </select>
