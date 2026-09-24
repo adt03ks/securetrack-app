@@ -3,7 +3,7 @@
   "use strict";
 
  console.log(
-    "IdentityLink JS build 2026-09-23 fingerprint-rpc-v4 loaded"
+    "IdentityLink JS build 2026-09-24 fingerprint-save-v6 loaded"
   );
 
   
@@ -2684,81 +2684,33 @@ document
 
         try {
 
-          const modernParams = {
-            p_request_id:
-              requestId,
-
-            p_identity_result:
-              identityResult,
-
-            p_identity_name:
-              identityResult === "verified"
-                ? identityName
-                : null,
-
-            p_next_of_kin_result:
-              nextOfKinResult,
-
-            p_results_notes:
-              null
-          };
-
-
-          let result =
+          // Deployed Supabase signature:
+          // record_identitylink_fingerprint_results(
+          //   p_request_id uuid,
+          //   p_identity_result text,
+          //   p_next_of_kin_result text,
+          //   p_notes text
+          // )
+          const result =
             await db.rpc(
               "record_identitylink_fingerprint_results",
-              modernParams
+              {
+                p_request_id:
+                  requestId,
+
+                p_identity_result:
+                  identityResult,
+
+                p_next_of_kin_result:
+                  nextOfKinResult,
+
+                p_notes:
+                  identityResult === "verified" &&
+                  identityName
+                    ? `Verified Identity Name: ${identityName}`
+                    : null
+              }
             );
-
-
-          // Older deployed versions of the Supabase RPC do not yet
-          // accept p_identity_name. If PostgREST cannot resolve the
-          // newer signature, retry the original deployed signature so
-          // fingerprint processing can still be completed.
-          if (
-            result.error &&
-            (
-              result.error.code === "PGRST202" ||
-              /could not find the function/i.test(
-                result.error.message || ""
-              ) ||
-              /p_identity_name/i.test(
-                result.error.message || ""
-              )
-            )
-          ) {
-
-            console.warn(
-              "IdentityLink: deployed fingerprint RPC does not yet accept p_identity_name; retrying legacy signature.",
-              result.error
-            );
-
-
-            const legacyParams = {
-              p_request_id:
-                requestId,
-
-              p_identity_result:
-                identityResult,
-
-              p_next_of_kin_result:
-                nextOfKinResult,
-
-              p_results_notes:
-                identityResult === "verified" &&
-                identityName
-                  ? `Verified Identity Name: ${identityName}`
-                  : null
-            };
-
-
-            result =
-              await db.rpc(
-                "record_identitylink_fingerprint_results",
-                legacyParams
-              );
-
-          }
 
 
           if (result.error) {
@@ -3357,7 +3309,19 @@ function renderAuthorizationProgressControls(
 
   const identityName =
     processing?.identity_name ||
-    "";
+    (
+      typeof processing?.results_notes === "string" &&
+      processing.results_notes.startsWith(
+        "Verified Identity Name:"
+      )
+        ? processing.results_notes
+            .replace(
+              /^Verified Identity Name:\s*/,
+              ""
+            )
+            .trim()
+        : ""
+    );
 
 
   const nextOfKinResult =
