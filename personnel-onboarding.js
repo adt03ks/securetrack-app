@@ -779,6 +779,13 @@ their SecureTrack setup invitation.
                     Delta
                   </option>
 
+<option value="MROH Day">
+  MROH Day
+</option>
+
+<option value="MROH Nights">
+  MROH Nights
+</option>
                 </select>
 
                 <small class="subtle">
