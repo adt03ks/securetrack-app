@@ -686,6 +686,41 @@
 
   }
 
+   // ==========================================================
+  // LIVE ATTENDANCE STATE
+  //
+  // Uses the checkbox currently on screen first.
+  // Falls back to saved database attendance.
+  // ==========================================================
+
+  function attendanceMarkedPresent(
+    userId
+  ) {
+
+    const checkbox =
+      el.attendanceList
+        ?.querySelector(
+          `input[type="checkbox"][data-user-id="${userId}"]`
+        );
+
+
+    if (
+      checkbox
+    ) {
+
+      return checkbox.checked;
+
+    }
+
+
+    return Boolean(
+      attendanceFor(
+        userId
+      )
+        ?.is_present
+    );
+
+  } 
 
   function nameForUser(
     userId
@@ -1401,7 +1436,18 @@
       checkbox.disabled =
         !canEditAttendance();
 
+      checkbox.addEventListener(
 
+        "change",
+
+        () => {
+
+          renderSupervisorPanel();
+
+        }
+
+      );
+      
       const body =
         document.createElement(
           "div"
@@ -1802,26 +1848,19 @@
       false;
 
 
-    const teamLeadId =
+       const teamLeadId =
       leadershipConfig
         ?.team_lead_user_id
       ||
       null;
 
 
-    const teamLeadAttendance =
+    const teamLeadPresent =
       teamLeadId
-        ? attendanceFor(
+        ? attendanceMarkedPresent(
             teamLeadId
           )
-        : null;
-
-
-    const teamLeadPresent =
-      Boolean(
-        teamLeadAttendance
-          ?.is_present
-      );
+        : false;
 
 
     el.designatedTeamLead.textContent =
@@ -1879,18 +1918,13 @@
           : "—";
 
 
+
     // ========================================================
-    // DESIGNATED TEAM LEAD IS PRESENT
+    // TEAM LEAD IS PRESENT
     // ========================================================
 
     if (
       teamLeadPresent
-
-      &&
-
-      currentShift
-        .supervisor_user_id ===
-        teamLeadId
     ) {
 
       el.supervisorBadge.textContent =
@@ -1906,8 +1940,9 @@
     }
 
 
+
     // ========================================================
-    // VALID ACTING TEAM LEAD ALREADY ASSIGNED
+    // VALID ACTING TEAM LEAD ALREADY EXISTS
     // ========================================================
 
     if (
@@ -1923,11 +1958,10 @@
 
       &&
 
-      attendanceFor(
+      attendanceMarkedPresent(
         currentShift
           .supervisor_user_id
       )
-        ?.is_present
 
     ) {
 
@@ -1944,25 +1978,22 @@
     }
 
 
+
     // ========================================================
-    // LEADERSHIP STILL NEEDS TO BE RESOLVED
+    // TEAM LEAD ABSENT — SHOW CONFIGURED SENIORS
     // ========================================================
 
     el.supervisorBadge.textContent =
-
-      teamLeadPresent
-
-        ? "RESOLVING"
-
-        : "ACTING LEAD REQUIRED";
+      "ACTING LEAD REQUIRED";
 
 
     el.actingSupervisorSection.hidden =
-      teamLeadPresent;
+      false;
 
 
     el.actingSupervisorSelect.innerHTML =
       '<option value="">Select Senior Officer</option>';
+
 
 
     const seniorIds = [
@@ -1978,20 +2009,31 @@
     );
 
 
-    const candidates =
-      seniorIds.filter(
-        userId =>
-          attendanceFor(
-            userId
-          )
-            ?.is_present
-      );
+
+    let savedPresentCount =
+      0;
+
 
 
     for (
       const userId
-      of candidates
+      of seniorIds
     ) {
+
+      const livePresent =
+        attendanceMarkedPresent(
+          userId
+        );
+
+
+      const savedPresent =
+        Boolean(
+          attendanceFor(
+            userId
+          )
+            ?.is_present
+        );
+
 
       const option =
         document.createElement(
@@ -2003,10 +2045,29 @@
         userId;
 
 
+      option.disabled =
+        !livePresent;
+
+
       option.textContent =
-        nameForUser(
-          userId
-        );
+
+        livePresent
+
+          ? (
+              savedPresent
+
+                ? nameForUser(
+                    userId
+                  )
+
+                : (
+                    `${nameForUser(userId)} — Save Attendance First`
+                  )
+            )
+
+          : (
+              `${nameForUser(userId)} — Not Marked Present`
+            );
 
 
       el.actingSupervisorSelect
@@ -2014,11 +2075,35 @@
           option
         );
 
+
+      if (
+        savedPresent
+      ) {
+
+        savedPresentCount +=
+          1;
+
+      }
+
     }
 
 
+
+    /*
+      The dropdown can preview checkbox changes immediately,
+      but the Acting Team Lead cannot be confirmed until that
+      Senior Officer's attendance has actually been saved.
+    */
+
     el.saveActingSupervisorButton.disabled =
 
+      !savedPresentCount
+
+      ||
+
+      !hasAnyRole(
+        LEADERSHIP
+      );
       !candidates.length
 
       ||
@@ -2757,17 +2842,27 @@
     // NO PRIOR HANDOFF EXISTS
     // ========================================================
 
-    else if (
+       else if (
       !status.handoff_required
     ) {
 
+      const alreadyActive =
+
+        status.handoff_status ===
+          "not_required"
+
+        ||
+
+        status.operational_ready;
+
+
       el.handoffStatusBadge.textContent =
 
-        status.operational_ready
+        alreadyActive
 
-          ? "READY"
+          ? "SHIFT ACTIVE"
 
-          : "NO PRIOR REPORT";
+          : "NO PRIOR HANDOFF";
 
 
       el.handoffStatusBadge.className =
@@ -2775,7 +2870,12 @@
 
 
       el.handoffReceiptStatus.textContent =
-        "No prior published handoff found";
+
+        alreadyActive
+
+          ? "Shift activated without a prior handoff"
+
+          : "No prior handoff is available. Start this shift without a prior handoff.";
 
     }
 
@@ -2903,16 +3003,9 @@
     // ALREADY CONFIRMED
     // ========================================================
 
-    if (
-
+       if (
       status.handoff_status ===
-        "acknowledged"
-
-      ||
-
-      status.handoff_status ===
-        "not_required"
-
+      "acknowledged"
     ) {
 
       el.confirmHandoffButton.textContent =
@@ -2921,6 +3014,29 @@
 
       el.confirmHandoffButton.disabled =
         true;
+
+    }
+
+    else if (
+      status.handoff_status ===
+      "not_required"
+    ) {
+
+      el.confirmHandoffButton.textContent =
+        "Shift Activated — No Prior Handoff";
+
+
+      el.confirmHandoffButton.disabled =
+        true;
+
+    }
+
+    else if (
+      !status.handoff_required
+    ) {
+
+      el.confirmHandoffButton.textContent =
+        "Start Shift — No Prior Handoff";
 
     }
 
