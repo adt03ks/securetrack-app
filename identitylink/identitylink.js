@@ -3,7 +3,7 @@
   "use strict";
 
  console.log(
-    "IdentityLink JS build 2026-09-24 fingerprint-save-v6 loaded"
+    "IdentityLink JS build 2026-09-24 fingerprint-complete-v7 loaded"
   );
 
   
@@ -3327,6 +3327,132 @@ function renderAuthorizationProgressControls(
   const nextOfKinResult =
     processing?.next_of_kin_result ||
     "";
+
+
+  const identityResultLabel =
+    identityResult === "verified"
+      ? "Identity Verified"
+      : identityResult === "unverified"
+        ? "Identity Not Verified"
+        : "Not recorded";
+
+
+  const nextOfKinResultLabel =
+    nextOfKinResult === "provided"
+      ? "Next of Kin Provided"
+      : nextOfKinResult === "no_next_of_kin"
+        ? "No Next of Kin"
+        : "Not recorded";
+
+
+  if (processed) {
+
+    return `
+      <div class="authorization-progress fingerprint-progress">
+
+        <label class="workflow-checkbox">
+
+          <input
+            id="fingerprintSubmittedCheckbox"
+            type="checkbox"
+            data-request-id="${escapeHtml(requestId)}"
+            checked
+            disabled
+          >
+
+          <span>
+            Fingerprints Submitted
+          </span>
+
+        </label>
+
+
+        <label class="workflow-checkbox">
+
+          <input
+            id="fingerprintProcessedCheckbox"
+            type="checkbox"
+            data-request-id="${escapeHtml(requestId)}"
+            checked
+            disabled
+          >
+
+          <span>
+            Processed
+          </span>
+
+        </label>
+
+
+        <div class="workflow-complete-meta fingerprint-complete-meta">
+
+          <strong>
+            ✓ Fingerprint Processing Completed
+          </strong>
+
+          <div>
+            Identity Result:
+            <strong>
+              ${escapeHtml(identityResultLabel)}
+            </strong>
+          </div>
+
+          ${
+            identityResult === "verified" &&
+            identityName
+              ? `
+                  <div>
+                    Verified Identity Name:
+                    <strong>
+                      ${escapeHtml(identityName)}
+                    </strong>
+                  </div>
+                `
+              : ""
+          }
+
+          <div>
+            Next of Kin:
+            <strong>
+              ${escapeHtml(nextOfKinResultLabel)}
+            </strong>
+          </div>
+
+          ${
+            processing?.results_recorded_by_name
+              ? `
+                  <div>
+                    Recorded by:
+                    <strong>
+                      ${escapeHtml(
+                        processing.results_recorded_by_name
+                      )}
+                    </strong>
+                  </div>
+                `
+              : ""
+          }
+
+          ${
+            processing?.results_recorded_at
+              ? `
+                  <div>
+                    ${escapeHtml(
+                      formatDateTime(
+                        processing.results_recorded_at
+                      )
+                    )}
+                  </div>
+                `
+              : ""
+          }
+
+        </div>
+
+      </div>
+    `;
+
+  }
 
 
   return `
