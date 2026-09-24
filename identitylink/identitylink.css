@@ -635,9 +635,10 @@ textarea {
    The current 6-column layout remains intact until .result-column exists. */
 .request-row:has(.result-column) {
   grid-template-columns:
-    52px
+    72px
     145px
-    minmax(190px, 1.4fr)
+    minmax(190px, 1.15fr)
+    minmax(220px, 1.25fr)
     minmax(150px, 1fr)
     minmax(150px, 1fr)
     150px
@@ -769,6 +770,165 @@ textarea {
   color: var(--muted);
 }
 
+/* =========================================================
+   IDENTITYLINK LIST COMPLETION / OUTCOME
+========================================================= */
+
+.file-work-complete {
+  border-left:
+    4px solid
+    var(--success);
+}
+
+
+.result-column {
+  flex-direction: column;
+  gap: 5px;
+}
+
+
+.file-complete-label {
+  color:
+    var(--success);
+
+  font-size:
+    9px;
+
+  font-weight:
+    950;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    .55px;
+}
+
+
+.outcome-summary {
+  min-width: 0;
+
+  padding:
+    8px 12px;
+
+  border-left:
+    1px solid
+    #d7e5f5;
+}
+
+
+.outcome-summary.empty {
+  min-height:
+    50px;
+}
+
+
+.outcome-line {
+  display: flex;
+
+  align-items:
+    center;
+
+  gap:
+    7px;
+
+  margin-top:
+    6px;
+
+  line-height:
+    1.25;
+}
+
+
+.outcome-line strong {
+  font-size:
+    12px;
+
+  font-weight:
+    900;
+}
+
+
+.outcome-icon {
+  width:
+    18px;
+
+  height:
+    18px;
+
+  flex:
+    0 0 18px;
+
+  display:
+    grid;
+
+  place-items:
+    center;
+
+  border-radius:
+    50%;
+
+  font-size:
+    12px;
+
+  font-weight:
+    950;
+}
+
+
+.outcome-line.positive {
+  color:
+    var(--success);
+}
+
+
+.outcome-line.positive
+.outcome-icon {
+  background:
+    var(--success-soft);
+
+  border:
+    1px solid
+    var(--success);
+}
+
+
+.outcome-line.negative {
+  color:
+    var(--danger);
+}
+
+
+.outcome-line.negative
+.outcome-icon {
+  background:
+    var(--danger-soft);
+
+  border:
+    1px solid
+    var(--danger);
+}
+
+
+.outcome-summary.pending {
+  color:
+    var(--muted);
+}
+
+
+.outcome-pending {
+  display:
+    block;
+
+  margin-top:
+    5px;
+
+  font-size:
+    12px;
+
+  font-weight:
+    700;
+}
 
 /* =========================================================
    MODALS
@@ -2189,16 +2349,15 @@ textarea {
       repeat(2, minmax(0, 1fr));
   }
 
-  .request-row:has(.result-column) {
-    grid-template-columns:
-      52px
-      minmax(0, 1fr);
-  }
+ .request-row:has(.result-column) {
+  grid-template-columns:
+    72px
+    minmax(0, 1fr);
+}
 
-  .request-row:has(.result-column) .result-column {
-    grid-row: 1 / span 6;
-  }
-
+ .request-row:has(.result-column) .result-column {
+  grid-row: 1 / span 7;
+}
   .detail-grid {
     grid-template-columns:
       repeat(2, minmax(0, 1fr));
