@@ -2752,13 +2752,11 @@
 
     const leaderName =
 
-      status
-        .supervisor_display_name
+      status.supervisor_display_name
 
       ||
 
-      currentShift
-        .supervisor_display_name
+      currentShift.supervisor_display_name
 
       ||
 
@@ -2775,19 +2773,14 @@
 
       ||
 
-      "No prior published report";
+      "No prior handoff";
 
 
     el.handoffCarryCount.textContent =
       String(
-
-        status
-          .carry_forward_special_posts
-
+        status.carry_forward_special_posts
         ||
-
         0
-
       );
 
 
@@ -2795,9 +2788,8 @@
       !status.advance_plan;
 
 
-
     // ========================================================
-    // LEADERSHIP NOT YET RESOLVED
+    // 1. LEADERSHIP MUST BE RESOLVED FIRST
     // ========================================================
 
     if (
@@ -2819,10 +2811,10 @@
 
 
     // ========================================================
-    // NO PRIOR HANDOFF EXISTS
+    // 2. NO PRIOR HANDOFF EXISTS
     // ========================================================
 
-       else if (
+    else if (
       !status.handoff_required
     ) {
 
@@ -2861,7 +2853,7 @@
 
 
     // ========================================================
-    // PRIOR REPORT EXISTS BUT HAS NOT BEEN ACKNOWLEDGED
+    // 3. PRIOR HANDOFF EXISTS BUT HAS NOT BEEN RECEIVED
     // ========================================================
 
     else if (
@@ -2877,48 +2869,19 @@
 
 
       el.handoffReceiptStatus.textContent =
-        "Prior report has not been acknowledged";
+        "Prior handoff has not been acknowledged";
 
     }
 
 
     // ========================================================
-    // HANDOFF ALREADY CONFIRMED
-    // ========================================================
-
-    else if (
-
-      status.handoff_status ===
-        "acknowledged"
-
-      ||
-
-      status.operational_ready
-
-    ) {
-
-      el.handoffStatusBadge.textContent =
-        "ACKNOWLEDGED";
-
-
-      el.handoffStatusBadge.className =
-        "status-chip good";
-
-
-      el.handoffReceiptStatus.textContent =
-        "Handoff received by incoming leadership";
-
-    }
-
-
-    // ========================================================
-    // ACKNOWLEDGED BUT OPERATIONAL CONFIRMATION REMAINS
+    // 4. HANDOFF HAS BEEN ACKNOWLEDGED
     // ========================================================
 
     else {
 
       el.handoffStatusBadge.textContent =
-        "READY TO CONFIRM";
+        "HANDOFF RECEIVED";
 
 
       el.handoffStatusBadge.className =
@@ -2926,32 +2889,37 @@
 
 
       el.handoffReceiptStatus.textContent =
-        "Prior handoff acknowledged";
+        "Prior handoff received by incoming leadership";
 
     }
 
 
-
     // ========================================================
-    // PRIOR REPORT BUTTON
+    // PRIOR HANDOFF BUTTON
+    // Only exists when there actually IS a prior handoff.
     // ========================================================
 
     el.openHandoffButton.hidden =
       !status.handoff_required;
 
 
-    el.openHandoffButton.textContent =
+    if (
+      status.handoff_required
+    ) {
 
-      status.handoff_acknowledged
+      el.openHandoffButton.textContent =
 
-        ? "Review Prior Handoff"
+        status.handoff_acknowledged
 
-        : "Open Prior Handoff";
+          ? "Review Prior Handoff"
 
+          : "Open Prior Handoff";
+
+    }
 
 
     // ========================================================
-    // ONLY THE LEGITIMATE CURRENT SHIFT LEADER MAY CONFIRM
+    // DETERMINE WHETHER CURRENT USER MAY ACTIVATE SHIFT
     // ========================================================
 
     const canConfirm =
@@ -2960,30 +2928,28 @@
 
       &&
 
-      (
-        status.handoff_acknowledged
-
-        ||
-
-        !status.handoff_required
-      )
+      isCurrentShiftLead()
 
       &&
 
-      isCurrentShiftLead();
+      (
+        !status.handoff_required
 
+        ||
+
+        status.handoff_acknowledged
+      );
 
 
     el.confirmHandoffButton.disabled =
       !canConfirm;
 
 
-
     // ========================================================
-    // ALREADY CONFIRMED
+    // BUTTON WORDING
     // ========================================================
 
-       if (
+    if (
       status.handoff_status ===
       "acknowledged"
     ) {
@@ -2996,6 +2962,7 @@
         true;
 
     }
+
 
     else if (
       status.handoff_status ===
@@ -3011,6 +2978,7 @@
 
     }
 
+
     else if (
       !status.handoff_required
     ) {
@@ -3020,7 +2988,10 @@
 
     }
 
-    else {
+
+    else if (
+      status.handoff_acknowledged
+    ) {
 
       el.confirmHandoffButton.textContent =
         "Confirm Operational Handoff";
@@ -3028,10 +2999,17 @@
     }
 
 
+    else {
+
+      el.confirmHandoffButton.textContent =
+        "Receive Prior Handoff First";
+
+    }
+
+
     updateActionStates();
 
   }
-
 
 
   // ==========================================================
