@@ -60,7 +60,44 @@
     )
       ? auth.roles
       : [];
+  // ==========================================================
+  // LAUNCH CONTEXT FROM DUTY ASSIGNMENTS
+  // ==========================================================
 
+  const launchParams =
+    new URLSearchParams(
+      window.location.search
+    );
+
+
+  const launchReportId =
+    launchParams.get(
+      "reportId"
+    );
+
+
+  const launchShiftDate =
+    launchParams.get(
+      "shiftDate"
+    );
+
+
+  const launchShiftName =
+    launchParams.get(
+      "shiftName"
+    );
+
+
+  const launchSource =
+    launchParams.get(
+      "source"
+    );
+
+
+  const launchReturnTo =
+    launchParams.get(
+      "returnTo"
+    );
 
   const $ =
     id =>
@@ -2482,6 +2519,76 @@
 
       }
 
+           // ======================================================
+      // RETURN TO DUTY ASSIGNMENTS AFTER HANDOFF RECEIPT
+      // ======================================================
+
+      if (
+
+        launchSource ===
+          "duty-assignments"
+
+        &&
+
+        launchReturnTo
+
+      ) {
+
+        try {
+
+
+          const returnUrl =
+            new URL(
+              launchReturnTo,
+              window.location.href
+            );
+
+
+          // Only allow redirect back to this same SecureTrack
+          // site.
+
+          if (
+
+            returnUrl.origin ===
+              window.location.origin
+
+          ) {
+
+            window.setTimeout(
+
+              () => {
+
+                window.location.assign(
+                  returnUrl.href
+                );
+
+              },
+
+              650
+
+            );
+
+          }
+
+
+        }
+
+        catch (
+          redirectError
+        ) {
+
+          console.warn(
+
+            "Invalid Duty Assignment return URL",
+
+            redirectError
+
+          );
+
+        }
+
+      } 
+      
     }
     catch (
       error
@@ -2602,7 +2709,38 @@
 
       await loadHistory();
 
+  // ==========================================================
+  // DIRECT LAUNCH FROM DUTY ASSIGNMENTS
+  // ==========================================================
 
+  if (
+    launchReportId
+  ) {
+
+    await loadReportById(
+      launchReportId
+    );
+
+  }
+
+  else if (
+
+    launchShiftDate
+
+    &&
+
+    launchShiftName
+
+    &&
+
+    canDraft
+
+  ) {
+
+    await openReport();
+
+  }
+      
       if (
         !el.complianceSection.hidden
       ) {
