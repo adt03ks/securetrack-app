@@ -3263,30 +3263,7 @@ function renderAuthorizationProgressControls(
   const nextOfKinResult =
     processing?.next_of_kin_result ||
     "";
-<div
-  id="verifiedIdentityNameWrap"
-  class="verified-identity-name"
-  ${identityResult === "verified" ? "" : "hidden"}
->
 
-  <label for="verifiedIdentityName">
-    Verified Identity Name
-  </label>
-
-  <input
-    id="verifiedIdentityName"
-    type="text"
-    maxlength="150"
-    autocomplete="off"
-    placeholder="Enter verified first and last name"
-    value="${escapeHtml(identityName)}"
-  >
-
-  <small>
-    Enter the name returned through fingerprint identification.
-  </small>
-
-</div>
 
   return `
     <div class="authorization-progress fingerprint-progress">
@@ -3367,7 +3344,30 @@ function renderAuthorizationProgressControls(
 
           </label>
 
+<div
+  id="verifiedIdentityNameWrap"
+  class="verified-identity-name"
+  ${identityResult === "verified" ? "" : "hidden"}
+>
 
+  <label for="verifiedIdentityName">
+    Verified Identity Name
+  </label>
+
+  <input
+    id="verifiedIdentityName"
+    type="text"
+    maxlength="150"
+    autocomplete="off"
+    placeholder="Enter verified first and last name"
+    value="${escapeHtml(identityName)}"
+  >
+
+  <small>
+    Enter the name returned through fingerprint identification.
+  </small>
+
+</div>
           <label class="workflow-radio">
 
             <input
@@ -3380,6 +3380,7 @@ function renderAuthorizationProgressControls(
                   : ""
               }
             >
+
 
             Identity Not Verified
 
