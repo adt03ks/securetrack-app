@@ -1572,7 +1572,234 @@ textarea {
   letter-spacing: 0.5px;
 }
 
+/* =========================================================
+   AUTHORIZATION WORKFLOW PROGRESS
+========================================================= */
 
+.authorization-progress {
+  display: grid;
+  gap: 12px;
+
+  margin-top: 16px;
+  padding-top: 15px;
+
+  border-top: 1px solid #d9e3ec;
+}
+
+
+/* =========================================================
+   WORKFLOW CHECKBOXES
+========================================================= */
+
+.workflow-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: fit-content;
+
+  color: var(--navy);
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+.workflow-checkbox input {
+  width: 18px;
+  height: 18px;
+
+  margin: 0;
+
+  accent-color: var(--blue);
+
+  cursor: pointer;
+}
+
+
+.workflow-checkbox input:disabled {
+  cursor: default;
+}
+
+
+.workflow-checkbox:has(input:disabled) {
+  cursor: default;
+}
+
+
+.workflow-checkbox input:disabled + span {
+  opacity: 0.75;
+}
+
+
+.workflow-checkbox input:checked + span {
+  color: var(--navy);
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   COMPLETION META
+========================================================= */
+
+.workflow-complete-meta {
+  padding: 10px 12px;
+
+  border: 1px solid #b9e1cc;
+  border-radius: 10px;
+
+  background: #f1faf5;
+
+  color: #17653d;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   FINGERPRINT WORKFLOW
+========================================================= */
+
+.fingerprint-progress {
+  gap: 13px;
+}
+
+
+.fingerprint-results-panel {
+  display: grid;
+  gap: 16px;
+
+  margin-top: 4px;
+  padding: 15px;
+
+  border: 1px solid #bdd7f2;
+  border-radius: 12px;
+
+  background: #f8fbff;
+}
+
+
+.fingerprint-results-panel[hidden] {
+  display: none;
+}
+
+
+/* =========================================================
+   FINGERPRINT RESULT GROUPS
+========================================================= */
+
+.fingerprint-result-group {
+  display: grid;
+  gap: 8px;
+}
+
+
+.fingerprint-result-group strong {
+  display: block;
+
+  margin-bottom: 2px;
+
+  color: var(--navy);
+
+  font-size: 12px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+
+/* =========================================================
+   WORKFLOW RADIO BUTTONS
+========================================================= */
+
+.workflow-radio {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding: 9px 11px;
+
+  border: 1px solid #dbe5ef;
+  border-radius: 9px;
+
+  background: white;
+
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+
+.workflow-radio:hover {
+  border-color: #9fc5f5;
+  background: #f8fbff;
+}
+
+
+.workflow-radio:has(input:checked) {
+  border-color: var(--blue);
+  background: var(--blue-pale);
+
+  color: var(--navy);
+}
+
+
+.workflow-radio input {
+  width: 17px;
+  height: 17px;
+
+  margin: 0;
+
+  accent-color: var(--blue);
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   RESULTS BUTTON
+========================================================= */
+
+.fingerprint-results-panel > .button {
+  justify-self: start;
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+  .authorization-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .fingerprint-results-panel {
+    padding: 13px;
+  }
+
+
+  .workflow-radio {
+    width: 100%;
+  }
+
+}
 
 /* =========================================================
    LOCATION
