@@ -803,6 +803,14 @@
                   Delta
                 </option>
 
+<option value="MROH Day">
+  MROH Day
+</option>
+
+<option value="MROH Night">
+  MROH Nights
+</option>
+
               </select>
 
             </div>
