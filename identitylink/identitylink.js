@@ -2626,28 +2626,14 @@ document
             ?.value ||
           null;
 
+
         const identityName =
-  $("verifiedIdentityName")
-    ?.value
-    ?.trim() ||
-  null;
+          $("verifiedIdentityName")
+            ?.value
+            ?.trim() ||
+          null;
 
-  if (
-  identityResult === "verified" &&
-  !identityName
-) {
 
-  showMessage(
-    "Enter the verified identity name.",
-    "error"
-  );
-
-  $("verifiedIdentityName")
-    ?.focus();
-
-  return;
-
-}      
         const nextOfKinResult =
           document.querySelector(
             'input[name="fingerprintNokResult"]:checked'
@@ -2656,18 +2642,38 @@ document
           null;
 
 
-       if (
-  !identityResult ||
-  !nextOfKinResult
-) {
+        if (
+          !identityResult ||
+          !nextOfKinResult
+        ) {
 
-  showMessage(
-    "Select both an identity result and a next-of-kin result.",
-    "error"
-  );
+          showMessage(
+            "Select both an identity result and a next-of-kin result.",
+            "error"
+          );
 
-  return;
-}
+          return;
+
+        }
+
+
+        if (
+          identityResult === "verified" &&
+          !identityName
+        ) {
+
+          showMessage(
+            "Enter the verified identity name.",
+            "error"
+          );
+
+          $("verifiedIdentityName")
+            ?.focus();
+
+          return;
+
+        }
+
 
         button.disabled =
           true;
@@ -2678,34 +2684,85 @@ document
 
         try {
 
-          const {
-            error
-          } =
+          const modernParams = {
+            p_request_id:
+              requestId,
+
+            p_identity_result:
+              identityResult,
+
+            p_identity_name:
+              identityResult === "verified"
+                ? identityName
+                : null,
+
+            p_next_of_kin_result:
+              nextOfKinResult,
+
+            p_results_notes:
+              null
+          };
+
+
+          let result =
             await db.rpc(
               "record_identitylink_fingerprint_results",
-              {
-                p_request_id:
-                  requestId,
-
-                p_identity_result:
-                  identityResult,
-
- p_identity_name:
-    identityResult === "verified"
-      ? identityName
-      : null,
-                
-                p_next_of_kin_result:
-                  nextOfKinResult,
-
-                p_results_notes:
-                  null
-              }
+              modernParams
             );
 
 
-          if (error) {
-            throw error;
+          // Older deployed versions of the Supabase RPC do not yet
+          // accept p_identity_name. If PostgREST cannot resolve the
+          // newer signature, retry the original deployed signature so
+          // fingerprint processing can still be completed.
+          if (
+            result.error &&
+            (
+              result.error.code === "PGRST202" ||
+              /could not find the function/i.test(
+                result.error.message || ""
+              ) ||
+              /p_identity_name/i.test(
+                result.error.message || ""
+              )
+            )
+          ) {
+
+            console.warn(
+              "IdentityLink: deployed fingerprint RPC does not yet accept p_identity_name; retrying legacy signature.",
+              result.error
+            );
+
+
+            const legacyParams = {
+              p_request_id:
+                requestId,
+
+              p_identity_result:
+                identityResult,
+
+              p_next_of_kin_result:
+                nextOfKinResult,
+
+              p_results_notes:
+                identityResult === "verified" &&
+                identityName
+                  ? `Verified Identity Name: ${identityName}`
+                  : null
+            };
+
+
+            result =
+              await db.rpc(
+                "record_identitylink_fingerprint_results",
+                legacyParams
+              );
+
+          }
+
+
+          if (result.error) {
+            throw result.error;
           }
 
 
@@ -2727,6 +2784,12 @@ document
 
         }
         catch (error) {
+
+          console.error(
+            "IdentityLink fingerprint results save error:",
+            error
+          );
+
 
           button.disabled =
             false;
