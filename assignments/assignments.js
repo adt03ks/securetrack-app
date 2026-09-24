@@ -1791,6 +1791,7 @@
       leadershipConfig =
         null;
 
+
       renderSupervisorPanel();
 
       return;
@@ -1801,27 +1802,24 @@
     const {
       data,
       error
-    } = await db
-
-      .from(
-        "duty_shift_leadership"
-      )
-
-      .select(
-        "shift_name, team_lead_user_id, senior_officer_1_user_id, senior_officer_2_user_id"
-      )
-
-      .eq(
-        "shift_name",
-        currentShift.shift_name
-      )
-
-      .maybeSingle();
+    } =
+      await db.rpc(
+        "get_duty_shift_leadership_config",
+        {
+          p_shift_name:
+            currentShift.shift_name
+        }
+      );
 
 
     if (
       error
     ) {
+
+      console.error(
+        "Leadership configuration load error:",
+        error
+      );
 
       throw error;
 
@@ -1832,10 +1830,15 @@
       data || null;
 
 
+    console.log(
+      "Loaded leadership configuration:",
+      leadershipConfig
+    );
+
+
     renderSupervisorPanel();
 
   }
-
 
 
   // ==========================================================
