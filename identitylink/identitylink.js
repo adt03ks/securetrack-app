@@ -1847,6 +1847,7 @@ async function openRequestDetail(
     fingerprintProcessingResult.data || {
       status: "not_started",
       identity_result: null,
+      identity_name: null,
       next_of_kin_result: null
     };
 
@@ -1901,6 +1902,7 @@ async function renderRequestDetail() {
     currentDetail.fingerprint_processing || {
       status: "not_started",
       identity_result: null,
+      identity_name: null,
       next_of_kin_result: null
     };
 
@@ -3188,7 +3190,7 @@ function renderAuthorizationProgressControls(
             data-request-id="${escapeHtml(requestId)}"
             ${completed ? "checked" : ""}
             ${
-              completed || !canModify
+              completed
                 ? "disabled"
                 : ""
             }
@@ -3283,7 +3285,7 @@ function renderAuthorizationProgressControls(
           data-request-id="${escapeHtml(requestId)}"
           ${submitted ? "checked" : ""}
           ${
-            submitted || !canModify
+            submitted
               ? "disabled"
               : ""
           }
@@ -3305,8 +3307,7 @@ function renderAuthorizationProgressControls(
           ${processed ? "checked" : ""}
           ${
             !submitted ||
-            processed ||
-            !canModify
+            processed
               ? "disabled"
               : ""
           }
@@ -3440,23 +3441,17 @@ function renderAuthorizationProgressControls(
         </div>
 
 
-        ${
-          canModify
-            ? `
-                <button
-                  id="saveFingerprintResultsButton"
-                  class="button primary"
-                  type="button"
-                >
-                  ${
-                    processed
-                      ? "Update Processing Results"
-                      : "Save Processing Results"
-                  }
-                </button>
-              `
-            : ""
-        }
+        <button
+          id="saveFingerprintResultsButton"
+          class="button primary"
+          type="button"
+        >
+          ${
+            processed
+              ? "Update Processing Results"
+              : "Save Processing Results"
+          }
+        </button>
 
       </div>
 
