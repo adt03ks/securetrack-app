@@ -130,6 +130,18 @@
     };
 
 
+  const isRequestOpen =
+    request =>
+      String(
+        request?.case_status ??
+        request?.status ??
+        ""
+      )
+        .trim()
+        .toLowerCase() ===
+      "open";
+
+
   function showMessage(
     message,
     type = "success"
@@ -1562,8 +1574,7 @@ function openEditRequest(
 ) {
 
   if (
-    request.case_status !==
-    "open"
+    !isRequestOpen(request)
   ) {
 
     showMessage(
@@ -1899,8 +1910,7 @@ async function renderRequestDetail() {
 
 
   const canModify =
-    request.case_status ===
-    "open";
+    isRequestOpen(request);
 
 
   detailBody.innerHTML = `
@@ -1911,16 +1921,17 @@ async function renderRequestDetail() {
 
         <span
           class="status-pill ${
-            request.case_status === "open"
+            isRequestOpen(request)
               ? "status-pending"
               : "status-completed"
           }"
         >
           ${
-            request.case_status === "open"
+            isRequestOpen(request)
               ? "Open Subject File"
               : escapeHtml(
                   request.case_status ||
+                  request.status ||
                   "Closed"
                 )
           }
@@ -4168,10 +4179,9 @@ function detailItem(
           <article class="image-card subject-image-card">
 
             ${
-              currentDetail
-                ?.request
-                ?.case_status ===
-                "open"
+              isRequestOpen(
+                currentDetail?.request
+              )
                   ? `
                       <button
                         class="subject-image-delete-button"
