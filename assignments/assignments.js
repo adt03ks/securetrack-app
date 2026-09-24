@@ -2088,9 +2088,9 @@
 
       ||
 
-      !hasAnyRole(
-        LEADERSHIP
-      );
+     !hasAnyRole(
+  leadershipRoles
+);
 
   }
 
