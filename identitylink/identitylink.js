@@ -2511,7 +2511,59 @@ function wireAuthorizationProgressControls(
       }
     );
 
+// =======================================================
+// VERIFIED IDENTITY NAME
+// =======================================================
 
+const identityNameWrap =
+  $("verifiedIdentityNameWrap");
+
+
+const identityNameInput =
+  $("verifiedIdentityName");
+
+
+document
+  .querySelectorAll(
+    'input[name="fingerprintIdentityResult"]'
+  )
+  .forEach(
+    radio => {
+
+      radio.addEventListener(
+        "change",
+        event => {
+
+          const verified =
+            event.target.value ===
+              "verified" &&
+            event.target.checked;
+
+
+          if (identityNameWrap) {
+
+            identityNameWrap.hidden =
+              !verified;
+
+          }
+
+
+          if (
+            !verified &&
+            identityNameInput
+          ) {
+
+            identityNameInput.value =
+              "";
+
+          }
+
+        }
+      );
+
+    }
+  );
+  
   // =======================================================
   // SAVE RESULTS
   // =======================================================
@@ -2532,7 +2584,28 @@ function wireAuthorizationProgressControls(
             ?.value ||
           null;
 
+        const identityName =
+  $("verifiedIdentityName")
+    ?.value
+    ?.trim() ||
+  null;
 
+  if (
+  identityResult === "verified" &&
+  !identityName
+) {
+
+  showMessage(
+    "Enter the verified identity name.",
+    "error"
+  );
+
+  $("verifiedIdentityName")
+    ?.focus();
+
+  return;
+
+}      
         const nextOfKinResult =
           document.querySelector(
             'input[name="fingerprintNokResult"]:checked'
@@ -2541,10 +2614,18 @@ function wireAuthorizationProgressControls(
           null;
 
 
-        if (
-          !identityResult &&
-          !nextOfKinResult
-        ) {
+       if (
+  !identityResult ||
+  !nextOfKinResult
+) {
+
+  showMessage(
+    "Select both an identity result and a next-of-kin result.",
+    "error"
+  );
+
+  return;
+}{
 
           showMessage(
             "Select at least one fingerprint processing result.",
@@ -2577,6 +2658,11 @@ function wireAuthorizationProgressControls(
                 p_identity_result:
                   identityResult,
 
+ p_identity_name:
+    identityResult === "verified"
+      ? identityName
+      : null,
+                
                 p_next_of_kin_result:
                   nextOfKinResult,
 
@@ -3177,7 +3263,30 @@ function renderAuthorizationProgressControls(
   const nextOfKinResult =
     processing?.next_of_kin_result ||
     "";
+<div
+  id="verifiedIdentityNameWrap"
+  class="verified-identity-name"
+  ${identityResult === "verified" ? "" : "hidden"}
+>
 
+  <label for="verifiedIdentityName">
+    Verified Identity Name
+  </label>
+
+  <input
+    id="verifiedIdentityName"
+    type="text"
+    maxlength="150"
+    autocomplete="off"
+    placeholder="Enter verified first and last name"
+    value="${escapeHtml(identityName)}"
+  >
+
+  <small>
+    Enter the name returned through fingerprint identification.
+  </small>
+
+</div>
 
   return `
     <div class="authorization-progress fingerprint-progress">
