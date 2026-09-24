@@ -1435,7 +1435,19 @@
 
       checkbox.disabled =
         !canEditAttendance();
+      checkbox.addEventListener(
 
+        "change",
+
+        () => {
+
+          renderSupervisorPanel();
+
+        }
+
+      );
+      
+      
       checkbox.addEventListener(
 
         "change",
