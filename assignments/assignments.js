@@ -1918,11 +1918,6 @@
           : "—";
 
 
-
-    // ========================================================
-    // TEAM LEAD IS PRESENT
-    // ========================================================
-
     if (
       teamLeadPresent
     ) {
@@ -1939,11 +1934,6 @@
 
     }
 
-
-
-    // ========================================================
-    // VALID ACTING TEAM LEAD ALREADY EXISTS
-    // ========================================================
 
     if (
 
@@ -1978,11 +1968,6 @@
     }
 
 
-
-    // ========================================================
-    // TEAM LEAD ABSENT — SHOW CONFIGURED SENIORS
-    // ========================================================
-
     el.supervisorBadge.textContent =
       "ACTING LEAD REQUIRED";
 
@@ -1993,7 +1978,6 @@
 
     el.actingSupervisorSelect.innerHTML =
       '<option value="">Select Senior Officer</option>';
-
 
 
     const seniorIds = [
@@ -2009,10 +1993,8 @@
     );
 
 
-
     let savedPresentCount =
       0;
-
 
 
     for (
@@ -2088,23 +2070,9 @@
     }
 
 
-
-    /*
-      The dropdown can preview checkbox changes immediately,
-      but the Acting Team Lead cannot be confirmed until that
-      Senior Officer's attendance has actually been saved.
-    */
-
     el.saveActingSupervisorButton.disabled =
 
       !savedPresentCount
-
-      ||
-
-      !hasAnyRole(
-        LEADERSHIP
-      );
-      !candidates.length
 
       ||
 
