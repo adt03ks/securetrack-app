@@ -2625,7 +2625,7 @@ document
   );
 
   return;
-}{
+}
 
           showMessage(
             "Select at least one fingerprint processing result.",
