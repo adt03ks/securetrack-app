@@ -664,35 +664,37 @@
   // REQUEST LIST
   // =========================================================
 
-  async function loadRequests() {
+ async function loadRequests() {
 
-    if (!requestList) {
-      return;
-    }
-
-
-    requestList.innerHTML =
-      '<div class="loading-state">Loading IdentityLink records…</div>';
+  if (!requestList) {
+    return;
+  }
 
 
-    const searchValue =
-      searchInput
-        ?.value
-        ?.trim() ||
-      null;
+  requestList.innerHTML =
+    '<div class="loading-state">Loading IdentityLink records…</div>';
 
 
-    const statusValue =
-      statusFilter
-        ?.value ||
-      null;
+  const searchValue =
+    searchInput
+      ?.value
+      ?.trim() ||
+    null;
 
 
-    const {
-      data,
-      error
-    } =
-      await db.rpc(
+  const statusValue =
+    statusFilter
+      ?.value ||
+    null;
+
+
+  const [
+    requestResult,
+    outcomeResult
+  ] =
+    await Promise.all([
+
+      db.rpc(
         "get_identitylink_management_requests",
         {
           p_search:
@@ -701,23 +703,91 @@
           p_status:
             statusValue
         }
-      );
+      ),
+
+      db.rpc(
+        "get_identitylink_management_file_outcomes"
+      )
+
+    ]);
 
 
-    if (error) {
-      throw error;
-    }
-
-
-    currentRequests =
-      data ||
-      [];
-
-
-    renderRequests();
-
+  if (requestResult.error) {
+    throw requestResult.error;
   }
 
+
+  if (outcomeResult.error) {
+    throw outcomeResult.error;
+  }
+
+
+  const outcomeMap =
+    new Map(
+
+      (
+        outcomeResult.data ||
+        []
+      ).map(
+        item => [
+          item.request_id,
+          item
+        ]
+      )
+
+    );
+
+
+  currentRequests =
+    (
+      requestResult.data ||
+      []
+    ).map(
+      item => {
+
+        const outcome =
+          outcomeMap.get(
+            item.request_id
+          ) || {};
+
+
+        return {
+
+          ...item,
+
+          image_processing_status:
+            outcome.image_processing_status ||
+            "not_started",
+
+          fingerprint_processing_status:
+            outcome.fingerprint_processing_status ||
+            "not_started",
+
+          identity_result:
+            outcome.identity_result ||
+            null,
+
+          verified_identity_name:
+            outcome.verified_identity_name ||
+            null,
+
+          next_of_kin_result:
+            outcome.next_of_kin_result ||
+            null,
+
+          fingerprint_results_recorded_at:
+            outcome.fingerprint_results_recorded_at ||
+            null
+
+        };
+
+      }
+    );
+
+
+  renderRequests();
+
+}
 
 
   // =========================================================
@@ -780,7 +850,229 @@
 
   }
 
+// =========================================================
+// FILE COMPLETION / QUICK OUTCOME
+// =========================================================
 
+function isIdentityLinkFileComplete(
+  item
+) {
+
+  const fingerprintsComplete =
+    item.fingerprint_status ===
+      "approved" &&
+    item.fingerprint_processing_status ===
+      "completed";
+
+
+  // If an image request was approved,
+  // it must also be operationally completed.
+
+  const imageSatisfied =
+
+    item.image_status ===
+      "not_requested" ||
+
+    item.image_status ===
+      "denied" ||
+
+    item.image_status ===
+      "cancelled" ||
+
+    (
+      item.image_status ===
+        "approved" &&
+
+      item.image_processing_status ===
+        "completed"
+    );
+
+
+  return (
+    fingerprintsComplete &&
+    imageSatisfied
+  );
+
+}
+
+
+// =========================================================
+// LEFT-SIDE COMPLETE MARKER
+// =========================================================
+
+function renderFileCompletionMarker(
+  item
+) {
+
+  if (
+    !isIdentityLinkFileComplete(
+      item
+    )
+  ) {
+
+    return `
+      <div
+        class="result-column"
+        aria-hidden="true"
+      ></div>
+    `;
+
+  }
+
+
+  return `
+    <div
+      class="result-column"
+      title="IdentityLink file complete"
+    >
+
+      <div
+        class="subject-result-indicator positive"
+        aria-label="Complete"
+      >
+        ✓
+      </div>
+
+      <span class="file-complete-label">
+        Complete
+      </span>
+
+    </div>
+  `;
+
+}
+
+
+// =========================================================
+// OUTCOME SUMMARY
+// =========================================================
+
+function renderFileOutcomeSummary(
+  item
+) {
+
+  const processed =
+    item.fingerprint_processing_status ===
+    "completed";
+
+
+  if (!processed) {
+
+    if (
+      item.fingerprint_processing_status ===
+      "submitted"
+    ) {
+
+      return `
+        <div class="outcome-summary pending">
+
+          <span class="request-label">
+            Fingerprint Outcome
+          </span>
+
+          <span class="outcome-pending">
+            Processing pending
+          </span>
+
+        </div>
+      `;
+
+    }
+
+
+    return `
+      <div class="outcome-summary empty"></div>
+    `;
+
+  }
+
+
+  const identityVerified =
+    item.identity_result ===
+    "verified";
+
+
+  const nextOfKinProvided =
+    item.next_of_kin_result ===
+    "provided";
+
+
+  const identityText =
+    identityVerified
+      ? (
+          item.verified_identity_name ||
+          "Identity Verified"
+        )
+      : "No Identity Verified";
+
+
+  const nextOfKinText =
+    nextOfKinProvided
+      ? "Next of Kin Provided"
+      : "No Next of Kin";
+
+
+  return `
+    <div class="outcome-summary">
+
+      <span class="request-label">
+        Fingerprint Outcome
+      </span>
+
+
+      <div
+        class="outcome-line ${
+          identityVerified
+            ? "positive"
+            : "negative"
+        }"
+      >
+
+        <span class="outcome-icon">
+          ${
+            identityVerified
+              ? "✓"
+              : "×"
+          }
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            identityText
+          )}
+        </strong>
+
+      </div>
+
+
+      <div
+        class="outcome-line ${
+          nextOfKinProvided
+            ? "positive"
+            : "negative"
+        }"
+      >
+
+        <span class="outcome-icon">
+          ${
+            nextOfKinProvided
+              ? "✓"
+              : "×"
+          }
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            nextOfKinText
+          )}
+        </strong>
+
+      </div>
+
+    </div>
+  `;
+
+}
 
   function renderRequests() {
 
@@ -819,7 +1111,17 @@
 
 
             return `
-              <article class="request-row">
+             <article
+  class="request-row ${
+    isIdentityLinkFileComplete(item)
+      ? "file-work-complete"
+      : ""
+  }"
+>
+
+  ${renderFileCompletionMarker(
+    item
+  )}
 
                 <div>
 
@@ -853,7 +1155,9 @@
                   </span>
 
                 </div>
-
+                ${renderFileOutcomeSummary(
+                  item
+                )}
 
                 <div>
 
