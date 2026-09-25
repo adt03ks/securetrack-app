@@ -1497,7 +1497,627 @@
   }
 
 }
-   
+   /* ==========================================================
+   SPECIAL ASSIGNMENTS
+   ========================================================== */
+
+.special-summary-grid {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap:
+    12px;
+
+}
+
+
+.special-summary {
+
+  padding:
+    17px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    12px;
+
+  background:
+    var(--panel-2);
+
+}
+
+
+.special-summary span {
+
+  display:
+    block;
+
+  margin-bottom:
+    7px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    10px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .07em;
+
+  text-transform:
+    uppercase;
+
+}
+
+
+.special-summary strong {
+
+  font-size:
+    29px;
+
+}
+
+
+.special-summary.active {
+
+  border-color:
+    rgba(77,163,255,.35);
+
+  background:
+    var(--blue-soft);
+
+}
+
+
+.special-summary.carry {
+
+  border-color:
+    rgba(245,185,66,.35);
+
+  background:
+    var(--amber-soft);
+
+}
+
+
+.special-summary.complete {
+
+  border-color:
+    rgba(52,199,89,.35);
+
+  background:
+    var(--green-soft);
+
+}
+
+
+.special-summary.coverage {
+
+  border-color:
+    rgba(255,95,87,.4);
+
+  background:
+    var(--red-soft);
+
+}
+
+
+/* ==========================================================
+   SPECIAL ASSIGNMENT CARD
+   ========================================================== */
+
+.special-activity-card {
+
+  margin-bottom:
+    14px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    14px;
+
+  overflow:
+    hidden;
+
+  background:
+    var(--panel);
+
+}
+
+
+.special-activity-card.needs-coverage {
+
+  border-left:
+    4px solid var(--red);
+
+}
+
+
+.special-activity-card.carry-forward {
+
+  border-left:
+    4px solid var(--amber);
+
+}
+
+
+.special-activity-card.completed {
+
+  border-left:
+    4px solid var(--green);
+
+}
+
+
+.special-activity-card.active {
+
+  border-left:
+    4px solid var(--blue);
+
+}
+
+
+.special-activity-head {
+
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  gap:
+    20px;
+
+  padding:
+    17px 18px;
+
+  background:
+    rgba(255,255,255,.02);
+
+  border-bottom:
+    1px solid var(--border);
+
+}
+
+
+.special-activity-head h3 {
+
+  margin:
+    0;
+
+  font-size:
+    17px;
+
+}
+
+
+.special-card-meta {
+
+  display:
+    flex;
+
+  flex-wrap:
+    wrap;
+
+  gap:
+    7px;
+
+  margin-top:
+    8px;
+
+}
+
+
+.priority-chip {
+
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  padding:
+    5px 9px;
+
+  border-radius:
+    999px;
+
+  font-size:
+    10px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .04em;
+
+}
+
+
+.priority-chip.priority-1 {
+
+  background:
+    var(--red-soft);
+
+  color:
+    #ffaaa5;
+
+  border:
+    1px solid rgba(255,95,87,.4);
+
+}
+
+
+.priority-chip.priority-2 {
+
+  background:
+    var(--amber-soft);
+
+  color:
+    #ffd477;
+
+  border:
+    1px solid rgba(245,185,66,.35);
+
+}
+
+
+.priority-chip.priority-3 {
+
+  background:
+    var(--blue-soft);
+
+  color:
+    #a9d2ff;
+
+  border:
+    1px solid rgba(77,163,255,.35);
+
+}
+
+
+.priority-chip.priority-4,
+.priority-chip.priority-5 {
+
+  background:
+    rgba(255,255,255,.05);
+
+  color:
+    #d3d9df;
+
+  border:
+    1px solid var(--border);
+
+}
+
+
+.coverage-name {
+
+  text-align:
+    right;
+
+}
+
+
+.coverage-name span {
+
+  display:
+    block;
+
+  color:
+    var(--muted);
+
+  font-size:
+    10px;
+
+  font-weight:
+    800;
+
+  text-transform:
+    uppercase;
+
+}
+
+
+.coverage-name strong {
+
+  display:
+    block;
+
+  margin-top:
+    5px;
+
+  font-size:
+    15px;
+
+}
+
+
+.special-activity-body {
+
+  padding:
+    18px;
+
+}
+
+
+.special-detail-grid {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap:
+    10px;
+
+}
+
+
+.special-detail-box {
+
+  padding:
+    11px 12px;
+
+  background:
+    #11161b;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    9px;
+
+}
+
+
+.special-detail-box span {
+
+  display:
+    block;
+
+  margin-bottom:
+    5px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    10px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    .05em;
+
+  text-transform:
+    uppercase;
+
+}
+
+
+.special-detail-box strong {
+
+  font-size:
+    13px;
+
+  line-height:
+    1.4;
+
+}
+
+
+.special-source-note,
+.special-handoff-note {
+
+  margin-top:
+    14px;
+
+  padding:
+    13px 14px;
+
+  border-radius:
+    9px;
+
+  line-height:
+    1.5;
+
+  font-size:
+    13px;
+
+}
+
+
+.special-source-note {
+
+  border-left:
+    3px solid var(--blue);
+
+  background:
+    var(--blue-soft);
+
+}
+
+
+.special-handoff-note {
+
+  border-left:
+    3px solid var(--amber);
+
+  background:
+    var(--amber-soft);
+
+}
+
+
+.special-note-label {
+
+  display:
+    block;
+
+  margin-bottom:
+    5px;
+
+  font-size:
+    10px;
+
+  font-weight:
+    900;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    .05em;
+
+}
+
+
+.operational-note-area {
+
+  margin-top:
+    16px;
+
+  padding-top:
+    16px;
+
+  border-top:
+    1px solid var(--border);
+
+}
+
+
+.operational-note-area label {
+
+  display:
+    block;
+
+  margin-bottom:
+    7px;
+
+  font-size:
+    11px;
+
+  font-weight:
+    900;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    .05em;
+
+}
+
+
+.operational-note-area textarea {
+
+  width:
+    100%;
+
+  min-height:
+    95px;
+
+  resize:
+    vertical;
+
+  padding:
+    11px 12px;
+
+  color:
+    var(--text);
+
+  background:
+    #0f1317;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    9px;
+
+  font:
+    inherit;
+
+}
+
+
+.special-note-meta {
+
+  margin-top:
+    8px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    11px;
+
+}
+
+
+@media (
+  max-width: 1100px
+) {
+
+  .special-summary-grid {
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+  }
+
+
+  .special-detail-grid {
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+  }
+
+}
+
+
+@media (
+  max-width: 620px
+) {
+
+  .special-summary-grid,
+  .special-detail-grid {
+
+    grid-template-columns:
+      1fr;
+
+  }
+
+
+  .special-activity-head {
+
+    flex-direction:
+      column;
+
+  }
+
+
+  .coverage-name {
+
+    text-align:
+      left;
+
+  }
+
+}
   </style>
 
   <title>
@@ -1958,7 +2578,124 @@
   </div>
 
 </section>
-   
+   <!-- =====================================================
+     SPECIAL ASSIGNMENTS
+     ===================================================== -->
+
+<section class="command-card">
+
+  <div class="section-head">
+
+    <div>
+
+      <div class="eyebrow">
+        Operational Coverage
+      </div>
+
+      <h2>
+        Special Assignments
+      </h2>
+
+      <p class="section-description">
+        Special posts and temporary assignments associated with
+        this shift, including coverage, priority, operational
+        activity, and handoff requirements.
+      </p>
+
+    </div>
+
+
+    <button
+      id="refreshSpecialAssignmentsButton"
+      class="button secondary no-print"
+      type="button"
+    >
+      Refresh Special Assignments
+    </button>
+
+  </div>
+
+
+  <div class="section-body">
+
+    <div
+      id="specialAssignmentMessage"
+      class="message"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+
+    <div class="special-summary-grid">
+
+      <div class="special-summary active">
+
+        <span>
+          Active
+        </span>
+
+        <strong id="activeSpecialCount">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="special-summary carry">
+
+        <span>
+          Carry Forward
+        </span>
+
+        <strong id="carryForwardSpecialCount">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="special-summary complete">
+
+        <span>
+          Completed
+        </span>
+
+        <strong id="completedSpecialCount">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="special-summary coverage">
+
+        <span>
+          Needs Coverage
+        </span>
+
+        <strong id="needsCoverageSpecialCount">
+          0
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="divider"></div>
+
+
+    <div id="specialAssignmentList">
+
+      <div class="empty-state">
+        Loading Special Assignments…
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
   </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
