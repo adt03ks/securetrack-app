@@ -859,6 +859,84 @@
 
     }
 
+   .message {
+
+  display:
+    none;
+
+  margin:
+    0 0 18px;
+
+  padding:
+    12px 15px;
+
+  border-radius:
+    10px;
+
+  border:
+    1px solid var(--border);
+
+  background:
+    var(--panel);
+
+  font-size:
+    13px;
+
+  line-height:
+    1.5;
+
+}
+
+
+.message.show {
+
+  display:
+    block;
+
+}
+
+
+.message.success {
+
+  border-color:
+    rgba(52,199,89,.35);
+
+  background:
+    var(--green-soft);
+
+  color:
+    #9be8ae;
+
+}
+
+
+.message.error {
+
+  border-color:
+    rgba(255,95,87,.4);
+
+  background:
+    var(--red-soft);
+
+  color:
+    #ffaaa5;
+
+}
+
+
+.message.info {
+
+  border-color:
+    rgba(77,163,255,.35);
+
+  background:
+    var(--blue-soft);
+
+  color:
+    #a9d2ff;
+
+}
+
   </style>
 
   <title>
@@ -928,6 +1006,12 @@
 
           <div class="eyebrow">
             Shift Command
+          <div
+  id="pageMessage"
+  class="message"
+  role="status"
+  aria-live="polite"
+></div> 
           </div>
 
           <h2>
@@ -948,67 +1032,96 @@
 
         <div class="info-grid">
 
+  <div class="info-block">
 
-          <div class="info-block">
+    <span>Shift</span>
 
-            <span>
-              Shift
-            </span>
+    <strong id="shiftName">
+      Loading…
+    </strong>
 
-            <strong id="shiftName">
-              Loading…
-            </strong>
+    <small id="shiftDate">
+      Loading…
+    </small>
 
-          </div>
-
-
-          <div class="info-block">
-
-            <span>
-              Shift Date
-            </span>
-
-            <strong id="shiftDate">
-              Loading…
-            </strong>
-
-          </div>
+  </div>
 
 
-          <div class="info-block">
+  <div class="info-block">
 
-            <span>
-              Assigned Team Lead
-            </span>
+    <span>Assigned Team Lead</span>
 
-            <strong id="assignedTeamLead">
-              Loading…
-            </strong>
+    <strong id="assignedTeamLead">
+      Loading…
+    </strong>
 
-            <small id="teamLeadSource">
-              —
-            </small>
+    <small id="teamLeadSource">
+      —
+    </small>
 
-          </div>
+  </div>
 
 
-          <div class="info-block">
+  <div class="info-block">
 
-            <span>
-              Staffing
-            </span>
+    <span>Staffing</span>
 
-            <strong id="staffingSummary">
-              — of — Available
-            </strong>
+    <strong id="staffingSummary">
+      — of — Available
+    </strong>
 
-            <small>
-              Current attendance
-            </small>
+    <small id="staffingDetails">
+      Loading attendance…
+    </small>
 
-          </div>
+  </div>
 
-        </div>
+
+  <div class="info-block">
+
+    <span>Prior Handoff</span>
+
+    <strong id="priorHandoffBy">
+      Loading…
+    </strong>
+
+    <small id="priorHandoffTime">
+      —
+    </small>
+
+  </div>
+
+
+  <div class="info-block">
+
+    <span>Shift Activation</span>
+
+    <strong id="activatedBy">
+      Loading…
+    </strong>
+
+    <small id="activationTime">
+      —
+    </small>
+
+  </div>
+
+
+  <div class="info-block">
+
+    <span>Operational Status</span>
+
+    <strong id="operationalStatus">
+      Loading…
+    </strong>
+
+    <small id="lastRefreshed">
+      —
+    </small>
+
+  </div>
+
+</div>
 
 
         <div class="divider"></div>
