@@ -1447,19 +1447,6 @@
 
       );
       
-      
-      checkbox.addEventListener(
-
-        "change",
-
-        () => {
-
-          renderSupervisorPanel();
-
-        }
-
-      );
-      
       const body =
         document.createElement(
           "div"
@@ -1778,326 +1765,382 @@
         );
 
   }
-    // ==========================================================
-  // SHIFT LEADERSHIP CONFIGURATION
   // ==========================================================
+// SHIFT LEADERSHIP CONFIGURATION
+// ==========================================================
 
-  async function loadLeadershipConfig() {
+async function loadLeadershipConfig() {
 
-    if (
-      !currentShift
-    ) {
+  if (!currentShift) {
 
-      leadershipConfig =
-        null;
-
-
-      renderSupervisorPanel();
-
-      return;
-
-    }
-
-
-    const {
-      data,
-      error
-    } =
-      await db.rpc(
-        "get_duty_shift_leadership_config",
-        {
-          p_shift_name:
-            currentShift.shift_name
-        }
-      );
-
-
-    if (
-      error
-    ) {
-
-      console.error(
-        "Leadership configuration load error:",
-        error
-      );
-
-      throw error;
-
-    }
-
-
-    leadershipConfig =
-      data || null;
-
-
-    console.log(
-      "Loaded leadership configuration:",
-      leadershipConfig
-    );
-
+    leadershipConfig = null;
 
     renderSupervisorPanel();
 
+    return;
   }
 
 
-  // ==========================================================
-  // SHIFT SUPERVISOR DISPLAY
-  // ==========================================================
-
-  function renderSupervisorPanel() {
-
-    if (
-      !currentShift
-    ) {
-
-      el.supervisorPanel.hidden =
-        true;
-
-      return;
-
+  const {
+    data,
+    error
+  } = await db.rpc(
+    "get_duty_shift_leadership_config",
+    {
+      p_shift_name:
+        currentShift.shift_name
     }
+  );
 
+
+  if (error) {
+
+    console.error(
+      "Leadership configuration load error:",
+      {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      }
+    );
+
+    leadershipConfig = null;
+
+    renderSupervisorPanel();
+
+    throw error;
+  }
+
+
+  leadershipConfig =
+    data || null;
+
+
+  console.log(
+    "Loaded leadership configuration:",
+    leadershipConfig
+  );
+
+
+  renderSupervisorPanel();
+}
+
+
+
+// ==========================================================
+// SHIFT SUPERVISOR DISPLAY
+// ==========================================================
+
+function renderSupervisorPanel() {
+
+  if (!currentShift) {
 
     el.supervisorPanel.hidden =
-      false;
+      true;
+
+    return;
+  }
 
 
-       const teamLeadId =
-      leadershipConfig
-        ?.team_lead_user_id
-      ||
-      null;
+  el.supervisorPanel.hidden =
+    false;
 
 
-    const teamLeadPresent =
-      teamLeadId
-        ? attendanceMarkedPresent(
-            teamLeadId
-          )
-        : false;
+  const teamLeadId =
+    leadershipConfig
+      ?.team_lead_user_id
+    ||
+    null;
 
 
-    el.designatedTeamLead.textContent =
-
-      teamLeadId
-
-        ? nameForUser(
-            teamLeadId
-          )
-
-        : "Not configured";
+  const teamLeadPresent =
+    teamLeadId
+      ? attendanceMarkedPresent(
+          teamLeadId
+        )
+      : false;
 
 
-    el.teamLeadAttendance.textContent =
+  el.designatedTeamLead.textContent =
 
-      !teamLeadId
+    teamLeadId
 
-        ? "Leadership configuration required"
+      ? nameForUser(
+          teamLeadId
+        )
 
-        : teamLeadPresent
-
-          ? "Present — Team Lead has precedence"
-
-          : attendance.length
-
-            ? "Not marked present"
-
-            : "Attendance not confirmed";
+      : "Not configured";
 
 
-    el.currentSupervisorName.textContent =
+  el.teamLeadAttendance.textContent =
 
-      currentShift
-        .supervisor_display_name
+    !teamLeadId
 
-      ||
+      ? "Leadership configuration required"
 
-      "Not resolved";
+      : teamLeadPresent
 
+        ? "Present — Team Lead has precedence"
 
-    el.currentSupervisorSource.textContent =
+        : attendance.length
 
-      currentShift
-        .supervisor_source ===
-        "team_lead"
+          ? "Not marked present"
 
-        ? "Designated Team Lead"
-
-        : currentShift
-            .supervisor_source ===
-            "acting_senior"
-
-          ? "Senior Officer / Acting Team Lead"
-
-          : "—";
+          : "Attendance not confirmed";
 
 
-    if (
-      teamLeadPresent
-    ) {
+  el.currentSupervisorName.textContent =
 
-      el.supervisorBadge.textContent =
-        "TEAM LEAD";
+    currentShift
+      .supervisor_display_name
 
+    ||
 
-      el.actingSupervisorSection.hidden =
-        true;
+    "Not resolved";
 
 
-      return;
+  el.currentSupervisorSource.textContent =
 
-    }
+    currentShift
+      .supervisor_source ===
+      "team_lead"
 
+      ? "Designated Team Lead"
 
-    if (
+      : currentShift
+          .supervisor_source ===
+          "acting_senior"
 
-      currentShift
-        .supervisor_source ===
-        "acting_senior"
+        ? "Senior Officer / Acting Team Lead"
 
-      &&
-
-      currentShift
-        .supervisor_user_id
-
-      &&
-
-      attendanceMarkedPresent(
-        currentShift
-          .supervisor_user_id
-      )
-
-    ) {
-
-      el.supervisorBadge.textContent =
-        "ACTING TEAM LEAD";
+        : "—";
 
 
-      el.actingSupervisorSection.hidden =
-        true;
 
+  // ========================================================
+  // REGULAR TEAM LEAD HAS ABSOLUTE PRECEDENCE
+  // ========================================================
 
-      return;
-
-    }
-
+  if (teamLeadPresent) {
 
     el.supervisorBadge.textContent =
-      "ACTING LEAD REQUIRED";
+      "TEAM LEAD";
 
 
     el.actingSupervisorSection.hidden =
-      false;
+      true;
 
 
     el.actingSupervisorSelect.innerHTML =
       '<option value="">Select Senior Officer</option>';
 
 
-    const seniorIds = [
-
-      leadershipConfig
-        ?.senior_officer_1_user_id,
-
-      leadershipConfig
-        ?.senior_officer_2_user_id
-
-    ].filter(
-      Boolean
-    );
+    el.saveActingSupervisorButton.disabled =
+      true;
 
 
-    let savedPresentCount =
-      0;
+    return;
+  }
 
 
-    for (
-      const userId
-      of seniorIds
-    ) {
 
-      const livePresent =
-        attendanceMarkedPresent(
+  // ========================================================
+  // VALID ACTING TEAM LEAD ALREADY DESIGNATED
+  // ========================================================
+
+  if (
+
+    currentShift
+      .supervisor_source ===
+      "acting_senior"
+
+    &&
+
+    currentShift
+      .supervisor_user_id
+
+    &&
+
+    attendanceMarkedPresent(
+      currentShift
+        .supervisor_user_id
+    )
+
+  ) {
+
+    el.supervisorBadge.textContent =
+      "ACTING TEAM LEAD";
+
+
+    el.actingSupervisorSection.hidden =
+      true;
+
+
+    return;
+  }
+
+
+
+  // ========================================================
+  // TEAM LEAD ABSENT — SENIOR OFFICER MUST BE SELECTED
+  // ========================================================
+
+  el.supervisorBadge.textContent =
+    "ACTING LEAD REQUIRED";
+
+
+  el.actingSupervisorSection.hidden =
+    false;
+
+
+  el.actingSupervisorSelect.innerHTML =
+    '<option value="">Select Senior Officer</option>';
+
+
+
+  const seniorIds = [
+
+    leadershipConfig
+      ?.senior_officer_1_user_id,
+
+    leadershipConfig
+      ?.senior_officer_2_user_id
+
+  ].filter(Boolean);
+
+
+
+  let savedPresentCount =
+    0;
+
+
+
+  for (const userId of seniorIds) {
+
+    const livePresent =
+      attendanceMarkedPresent(
+        userId
+      );
+
+
+    const savedPresent =
+      Boolean(
+        attendanceFor(
           userId
-        );
+        )
+          ?.is_present
+      );
 
 
-      const savedPresent =
-        Boolean(
-          attendanceFor(
-            userId
-          )
-            ?.is_present
-        );
+    const officerName =
+      nameForUser(
+        userId
+      );
 
 
-      const option =
-        document.createElement(
-          "option"
-        );
+    const option =
+      document.createElement(
+        "option"
+      );
 
 
-      option.value =
-        userId;
+    option.value =
+      userId;
 
 
-      option.disabled =
-        !livePresent;
+    /*
+      Both configured Seniors remain visible.
 
+      They are only selectable after being marked
+      present on the attendance screen.
+    */
+
+    option.disabled =
+      !livePresent;
+
+
+    if (!livePresent) {
 
       option.textContent =
+        `${officerName} — Not Marked Present`;
 
-        livePresent
+    }
 
-          ? (
-              savedPresent
+    else if (!savedPresent) {
 
-                ? nameForUser(
-                    userId
-                  )
+      option.textContent =
+        `${officerName} — Save Attendance First`;
 
-                : (
-                    `${nameForUser(userId)} — Save Attendance First`
-                  )
-            )
+    }
 
-          : (
-              `${nameForUser(userId)} — Not Marked Present`
-            );
+    else {
+
+      option.textContent =
+        officerName;
 
 
-      el.actingSupervisorSelect
-        .appendChild(
-          option
-        );
-
-
-      if (
-        savedPresent
-      ) {
-
-        savedPresentCount +=
-          1;
-
-      }
+      savedPresentCount +=
+        1;
 
     }
 
 
-    el.saveActingSupervisorButton.disabled =
-
-      !savedPresentCount
-
-      ||
-
-     !hasAnyRole(
-  leadershipRoles
-);
+    el.actingSupervisorSelect
+      .appendChild(
+        option
+      );
 
   }
 
 
+
+  /*
+    If the leadership configuration itself is missing,
+    make that obvious rather than silently showing
+    an empty dropdown.
+  */
+
+  if (!seniorIds.length) {
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+
+    option.value =
+      "";
+
+
+    option.disabled =
+      true;
+
+
+    option.textContent =
+      "No Senior Officers configured for this shift";
+
+
+    el.actingSupervisorSelect
+      .appendChild(
+        option
+      );
+
+  }
+
+
+
+  el.saveActingSupervisorButton.disabled =
+
+    !savedPresentCount
+
+    ||
+
+    !hasAnyRole(
+      LEADERSHIP
+    );
+
+}
 
   // ==========================================================
   // RESOLVE TEAM LEAD AUTOMATICALLY AFTER ATTENDANCE
@@ -6635,10 +6678,25 @@
       error
     ) {
 
-      console.error(
-        "Open shift error:",
-        error
-      );
+    console.error(
+  "Open shift error:",
+  {
+    code:
+      error?.code,
+
+    message:
+      error?.message,
+
+    details:
+      error?.details,
+
+    hint:
+      error?.hint,
+
+    fullError:
+      error
+  }
+);
 
 
       showMessage(
