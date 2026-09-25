@@ -89,6 +89,27 @@
 
   const el = {
 
+   specialAssignmentMessage:
+  $("specialAssignmentMessage"),
+
+refreshSpecialAssignmentsButton:
+  $("refreshSpecialAssignmentsButton"),
+
+activeSpecialCount:
+  $("activeSpecialCount"),
+
+carryForwardSpecialCount:
+  $("carryForwardSpecialCount"),
+
+completedSpecialCount:
+  $("completedSpecialCount"),
+
+needsCoverageSpecialCount:
+  $("needsCoverageSpecialCount"),
+
+specialAssignmentList:
+  $("specialAssignmentList"), 
+    
 alertMessage:
   $("alertMessage"),
 
@@ -198,7 +219,18 @@ securityAlertList:
       "returnTo"
     );
 
+const returnTo =
+  params.get(
+    "returnTo"
+  );
 
+
+let specialAssignments =
+  [];
+
+
+let specialAssignmentNotes =
+  new Map();
 
   // ==========================================================
   // HELPERS
@@ -1735,6 +1767,1263 @@ async function loadSecurityAlerts(
 
   }
 
+  // ==========================================================
+// SPECIAL ASSIGNMENT HELPERS
+// ==========================================================
+
+function showSpecialAssignmentMessage(
+  message = "",
+  type = "info"
+) {
+
+  if (
+    !el.specialAssignmentMessage
+  ) {
+
+    return;
+
+  }
+
+
+  el.specialAssignmentMessage.textContent =
+    message;
+
+
+  el.specialAssignmentMessage.className =
+
+    message
+
+      ? `message show ${type}`
+
+      : "message";
+
+}
+
+
+
+function specialPriorityLabel(
+  value
+) {
+
+  const labels = {
+
+    1:
+      "1 — MUST COVER",
+
+    2:
+      "2 — HIGH PRIORITY",
+
+    3:
+      "3 — IMPORTANT",
+
+    4:
+      "4 — PREFERRED",
+
+    5:
+      "5 — GOOD TO HAVE"
+
+  };
+
+
+  return (
+
+    labels[
+      Number(
+        value
+      )
+    ]
+
+    ||
+
+    `Priority ${value ?? "—"}`
+
+  );
+
+}
+
+
+
+function formatClockTime(
+  value
+) {
+
+  if (
+    !value
+  ) {
+
+    return "—";
+
+  }
+
+
+  const parts =
+    String(
+      value
+    )
+      .split(
+        ":"
+      );
+
+
+  const hour =
+    Number(
+      parts[0]
+    );
+
+
+  const minute =
+    parts[1] || "00";
+
+
+  if (
+    !Number.isFinite(
+      hour
+    )
+  ) {
+
+    return value;
+
+  }
+
+
+  return (
+
+    `${hour % 12 || 12}:`
+
+    +
+
+    `${minute} `
+
+    +
+
+    `${hour >= 12 ? "PM" : "AM"}`
+
+  );
+
+}
+
+
+
+function addSpecialDetail(
+  container,
+  label,
+  value
+) {
+
+  const box =
+    document.createElement(
+      "div"
+    );
+
+
+  box.className =
+    "special-detail-box";
+
+
+  const name =
+    document.createElement(
+      "span"
+    );
+
+
+  name.textContent =
+    label;
+
+
+  const content =
+    document.createElement(
+      "strong"
+    );
+
+
+  content.textContent =
+    value || "—";
+
+
+  box.append(
+    name,
+    content
+  );
+
+
+  container.appendChild(
+    box
+  );
+
+}
+
+
+
+// ==========================================================
+// SPECIAL ASSIGNMENT COUNTERS
+// ==========================================================
+
+function renderSpecialAssignmentSummary() {
+
+  const active =
+    specialAssignments
+      .filter(
+        post =>
+          post.assignment_status ===
+          "active"
+      )
+      .length;
+
+
+  const carryForward =
+    specialAssignments
+      .filter(
+        post =>
+          post.assignment_status ===
+          "carry_forward"
+      )
+      .length;
+
+
+  const completed =
+    specialAssignments
+      .filter(
+        post =>
+          post.assignment_status ===
+          "completed"
+      )
+      .length;
+
+
+  const needsCoverage =
+    specialAssignments
+      .filter(
+        post =>
+
+          [
+            "active",
+            "carry_forward"
+          ].includes(
+            post.assignment_status
+          )
+
+          &&
+
+          !post.assigned_user_id
+
+      )
+      .length;
+
+
+  el.activeSpecialCount.textContent =
+    active;
+
+
+  el.carryForwardSpecialCount.textContent =
+    carryForward;
+
+
+  el.completedSpecialCount.textContent =
+    completed;
+
+
+  el.needsCoverageSpecialCount.textContent =
+    needsCoverage;
+
+}
+
+
+
+// ==========================================================
+// SAVE OPERATIONAL NOTE
+// ==========================================================
+
+async function saveSpecialAssignmentNote(
+  post,
+  textarea,
+  button
+) {
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    "Saving…";
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "save_daily_activity_special_assignment_note",
+
+      {
+
+        p_shift_id:
+          shiftInstanceId,
+
+        p_special_assignment_id:
+          post.special_assignment_id,
+
+        p_notes:
+          textarea.value.trim()
+          ||
+          null
+
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    specialAssignmentNotes.set(
+
+      post.special_assignment_id,
+
+      {
+
+        special_assignment_id:
+          post.special_assignment_id,
+
+        operational_notes:
+          data?.operational_notes || null,
+
+        updated_by_name:
+          data?.updated_by_name || null,
+
+        updated_at:
+          data?.updated_at || null
+
+      }
+
+    );
+
+
+    renderSpecialAssignments();
+
+
+    showSpecialAssignmentMessage(
+      "Operational notes saved successfully.",
+      "success"
+    );
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Special Assignment note error:",
+      error
+    );
+
+
+    showSpecialAssignmentMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to save Special Assignment notes.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    button.disabled =
+      false;
+
+
+    button.textContent =
+      "Save Operational Notes";
+
+  }
+
+}
+
+
+
+// ==========================================================
+// RENDER SPECIAL ASSIGNMENTS
+// ==========================================================
+
+function renderSpecialAssignments() {
+
+  renderSpecialAssignmentSummary();
+
+
+  el.specialAssignmentList.innerHTML =
+    "";
+
+
+  if (
+    !specialAssignments.length
+  ) {
+
+    el.specialAssignmentList.innerHTML =
+      `
+        <div class="empty-state">
+          No Special Assignments are associated with
+          this shift.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  for (
+    const post
+    of specialAssignments
+  ) {
+
+    const status =
+      post.assignment_status
+      ||
+      "active";
+
+
+    const needsCoverage =
+
+      [
+        "active",
+        "carry_forward"
+      ].includes(
+        status
+      )
+
+      &&
+
+      !post.assigned_user_id;
+
+
+    const card =
+      document.createElement(
+        "article"
+      );
+
+
+    card.className =
+      "special-activity-card";
+
+
+    if (
+      needsCoverage
+    ) {
+
+      card.classList.add(
+        "needs-coverage"
+      );
+
+    }
+
+    else if (
+      status ===
+      "carry_forward"
+    ) {
+
+      card.classList.add(
+        "carry-forward"
+      );
+
+    }
+
+    else if (
+      status ===
+      "completed"
+    ) {
+
+      card.classList.add(
+        "completed"
+      );
+
+    }
+
+    else {
+
+      card.classList.add(
+        "active"
+      );
+
+    }
+
+
+
+    // --------------------------------------------------------
+    // HEADER
+    // --------------------------------------------------------
+
+    const head =
+      document.createElement(
+        "div"
+      );
+
+
+    head.className =
+      "special-activity-head";
+
+
+    const left =
+      document.createElement(
+        "div"
+      );
+
+
+    const title =
+      document.createElement(
+        "h3"
+      );
+
+
+    title.textContent =
+      post.assignment_name
+      ||
+      "Special Assignment";
+
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+
+    meta.className =
+      "special-card-meta";
+
+
+    const priority =
+      document.createElement(
+        "span"
+      );
+
+
+    priority.className =
+      `priority-chip priority-${
+        Number(
+          post.priority_rating
+        )
+        ||
+        5
+      }`;
+
+
+    priority.textContent =
+
+      post.priority_label
+
+      ||
+
+      specialPriorityLabel(
+        post.priority_rating
+      );
+
+
+    const statusChip =
+      document.createElement(
+        "span"
+      );
+
+
+    statusChip.className =
+
+      status === "completed"
+
+        ? "status-chip good"
+
+        : status === "cancelled"
+
+          ? "status-chip bad"
+
+          : status === "carry_forward"
+
+            ? "status-chip warn"
+
+            : "status-chip info";
+
+
+    statusChip.textContent =
+      status
+        .replaceAll(
+          "_",
+          " "
+        )
+        .toUpperCase();
+
+
+    meta.append(
+      priority,
+      statusChip
+    );
+
+
+    if (
+      post.carried_from_assignment_id
+    ) {
+
+      const carried =
+        document.createElement(
+          "span"
+        );
+
+
+      carried.className =
+        "status-chip warn";
+
+
+      carried.textContent =
+        "RECEIVED FROM PRIOR SHIFT";
+
+
+      meta.appendChild(
+        carried
+      );
+
+    }
+
+
+    if (
+      needsCoverage
+    ) {
+
+      const uncovered =
+        document.createElement(
+          "span"
+        );
+
+
+      uncovered.className =
+        "status-chip bad";
+
+
+      uncovered.textContent =
+        "COVERAGE REQUIRED";
+
+
+      meta.appendChild(
+        uncovered
+      );
+
+    }
+
+
+    left.append(
+      title,
+      meta
+    );
+
+
+    const coverage =
+      document.createElement(
+        "div"
+      );
+
+
+    coverage.className =
+      "coverage-name";
+
+
+    const coverageLabel =
+      document.createElement(
+        "span"
+      );
+
+
+    coverageLabel.textContent =
+      "Assigned Officer";
+
+
+    const coveragePerson =
+      document.createElement(
+        "strong"
+      );
+
+
+    coveragePerson.textContent =
+
+      post.assigned_user_name
+
+      ||
+
+      "UNASSIGNED";
+
+
+    coverage.append(
+      coverageLabel,
+      coveragePerson
+    );
+
+
+    head.append(
+      left,
+      coverage
+    );
+
+
+
+    // --------------------------------------------------------
+    // BODY
+    // --------------------------------------------------------
+
+    const body =
+      document.createElement(
+        "div"
+      );
+
+
+    body.className =
+      "special-activity-body";
+
+
+    const details =
+      document.createElement(
+        "div"
+      );
+
+
+    details.className =
+      "special-detail-grid";
+
+
+    addSpecialDetail(
+      details,
+      "Location",
+      post.location
+    );
+
+
+    addSpecialDetail(
+
+      details,
+
+      "Requested By / Unit",
+
+      post.requested_by_name
+
+      ||
+
+      post.requesting_unit
+
+    );
+
+
+    addSpecialDetail(
+      details,
+      "Approved By",
+      post.approved_by_name
+    );
+
+
+    addSpecialDetail(
+
+      details,
+
+      "Bill To / Cost Center",
+
+      post.bill_to
+
+      ||
+
+      post.cost_center
+
+    );
+
+
+    addSpecialDetail(
+
+      details,
+
+      "Coverage Window",
+
+      (
+        post.start_time
+        ||
+        post.end_time
+      )
+
+        ? (
+            `${formatClockTime(
+              post.start_time
+            )} — ${formatClockTime(
+              post.end_time
+            )}`
+          )
+
+        : "—"
+
+    );
+
+
+    addSpecialDetail(
+
+      details,
+
+      "Scheduled Hours",
+
+      post.scheduled_hours != null
+
+        ? String(
+            post.scheduled_hours
+          )
+
+        : "—"
+
+    );
+
+
+    body.appendChild(
+      details
+    );
+
+
+
+    // --------------------------------------------------------
+    // ORIGINAL REQUEST NOTES
+    // --------------------------------------------------------
+
+    if (
+      post.notes
+    ) {
+
+      const original =
+        document.createElement(
+          "div"
+        );
+
+
+      original.className =
+        "special-source-note";
+
+
+      const label =
+        document.createElement(
+          "span"
+        );
+
+
+      label.className =
+        "special-note-label";
+
+
+      label.textContent =
+        "Original Assignment Notes";
+
+
+      const text =
+        document.createElement(
+          "div"
+        );
+
+
+      text.textContent =
+        post.notes;
+
+
+      original.append(
+        label,
+        text
+      );
+
+
+      body.appendChild(
+        original
+      );
+
+    }
+
+
+
+    // --------------------------------------------------------
+    // HANDOFF INSTRUCTIONS
+    // --------------------------------------------------------
+
+    if (
+      post.handoff_notes
+    ) {
+
+      const handoff =
+        document.createElement(
+          "div"
+        );
+
+
+      handoff.className =
+        "special-handoff-note";
+
+
+      const label =
+        document.createElement(
+          "span"
+        );
+
+
+      label.className =
+        "special-note-label";
+
+
+      label.textContent =
+        "Handoff Instructions";
+
+
+      const text =
+        document.createElement(
+          "div"
+        );
+
+
+      text.textContent =
+        post.handoff_notes;
+
+
+      handoff.append(
+        label,
+        text
+      );
+
+
+      body.appendChild(
+        handoff
+      );
+
+    }
+
+
+
+    // --------------------------------------------------------
+    // DAILY ACTIVITY OPERATIONAL NOTES
+    // --------------------------------------------------------
+
+    const savedNote =
+      specialAssignmentNotes.get(
+        post.special_assignment_id
+      );
+
+
+    const noteArea =
+      document.createElement(
+        "div"
+      );
+
+
+    noteArea.className =
+      "operational-note-area";
+
+
+    const noteLabel =
+      document.createElement(
+        "label"
+      );
+
+
+    noteLabel.textContent =
+      "Daily Activity Operational Notes";
+
+
+    const textarea =
+      document.createElement(
+        "textarea"
+      );
+
+
+    textarea.placeholder =
+      "Document activity, changes, significant events, coverage concerns, or other operational information for this Special Assignment.";
+
+
+    textarea.value =
+      savedNote?.operational_notes
+      ||
+      "";
+
+
+    const save =
+      document.createElement(
+        "button"
+      );
+
+
+    save.type =
+      "button";
+
+
+    save.className =
+      "button primary";
+
+
+    save.style.marginTop =
+      "10px";
+
+
+    save.textContent =
+      "Save Operational Notes";
+
+
+    save.addEventListener(
+      "click",
+      () => {
+
+        saveSpecialAssignmentNote(
+
+          post,
+
+          textarea,
+
+          save
+
+        );
+
+      }
+    );
+
+
+    const noteMeta =
+      document.createElement(
+        "div"
+      );
+
+
+    noteMeta.className =
+      "special-note-meta";
+
+
+    noteMeta.textContent =
+
+      savedNote?.updated_by_name
+
+        ? (
+            `Last updated by ${savedNote.updated_by_name}`
+
+            +
+
+            (
+              savedNote.updated_at
+
+                ? ` • ${formatDateTime(
+                    savedNote.updated_at
+                  )}`
+
+                : ""
+            )
+          )
+
+        : "No Daily Activity operational notes recorded.";
+
+
+    noteArea.append(
+      noteLabel,
+      textarea,
+      save,
+      noteMeta
+    );
+
+
+    body.appendChild(
+      noteArea
+    );
+
+
+    card.append(
+      head,
+      body
+    );
+
+
+    el.specialAssignmentList
+      .appendChild(
+        card
+      );
+
+  }
+
+}
+
+
+
+// ==========================================================
+// LOAD SPECIAL ASSIGNMENTS + NOTES
+// ==========================================================
+
+async function loadSpecialAssignments(
+  showSuccess = false
+) {
+
+  if (
+    !shiftInstanceId
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    el.refreshSpecialAssignmentsButton
+  ) {
+
+    el.refreshSpecialAssignmentsButton.disabled =
+      true;
+
+
+    el.refreshSpecialAssignmentsButton.textContent =
+      "Refreshing…";
+
+  }
+
+
+  try {
+
+    const [
+      specialResult,
+      noteResult
+    ] = await Promise.all([
+
+      db.rpc(
+
+        "get_shift_special_assignments",
+
+        {
+          p_shift_id:
+            shiftInstanceId
+        }
+
+      ),
+
+
+      db.rpc(
+
+        "get_daily_activity_special_assignment_notes",
+
+        {
+          p_shift_id:
+            shiftInstanceId
+        }
+
+      )
+
+    ]);
+
+
+    if (
+      specialResult.error
+    ) {
+
+      throw specialResult.error;
+
+    }
+
+
+    if (
+      noteResult.error
+    ) {
+
+      throw noteResult.error;
+
+    }
+
+
+    specialAssignments =
+      specialResult.data
+      ||
+      [];
+
+
+    specialAssignmentNotes =
+      new Map(
+
+        (
+          noteResult.data
+          ||
+          []
+        )
+          .map(
+            note => [
+
+              note.special_assignment_id,
+
+              note
+
+            ]
+          )
+
+      );
+
+
+    renderSpecialAssignments();
+
+
+    if (
+      showSuccess
+    ) {
+
+      showSpecialAssignmentMessage(
+        "Special Assignments refreshed successfully.",
+        "success"
+      );
+
+    }
+
+    else {
+
+      showSpecialAssignmentMessage();
+
+    }
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Daily Activity Special Assignment error:",
+      error
+    );
+
+
+    showSpecialAssignmentMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to load Special Assignments.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    if (
+      el.refreshSpecialAssignmentsButton
+    ) {
+
+      el.refreshSpecialAssignmentsButton.disabled =
+        false;
+
+
+      el.refreshSpecialAssignmentsButton.textContent =
+        "Refresh Special Assignments";
+
+    }
+
+  }
+
+}  
+
   catch (
     error
   ) {
@@ -1822,6 +3111,17 @@ async function loadSecurityAlerts(
 
     );
 
+el.refreshSpecialAssignmentsButton
+  ?.addEventListener(
+
+    "click",
+
+    () =>
+      loadSpecialAssignments(
+        true
+      )
+
+  );
 
 
   // ==========================================================
@@ -1832,7 +3132,9 @@ async function loadSecurityAlerts(
 
   loadShiftSummary(),
 
-  loadSecurityAlerts()
+  loadSecurityAlerts(),
+
+  loadSpecialAssignments()
 
 ]);
 
