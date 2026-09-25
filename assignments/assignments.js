@@ -3100,19 +3100,25 @@ else {
     false;
 
 
-  const canStartShift =
+ const canStartShift =
 
+  (
     currentUserIsLeader
 
-    &&
+    ||
 
-    (
-      !status.handoff_required
+    isManagement()
+  )
 
-      ||
+  &&
 
-      status.handoff_acknowledged
-    );
+  (
+    !status.handoff_required
+
+    ||
+
+    status.handoff_acknowledged
+  );
 
 
   el.confirmHandoffButton.disabled =
@@ -3123,9 +3129,17 @@ else {
     !status.handoff_required
   ) {
 
-    el.confirmHandoffButton.textContent =
-      "Start Shift — No Prior Handoff";
+  el.confirmHandoffButton.textContent =
 
+  isManagement()
+
+  &&
+
+  !currentUserIsLeader
+
+    ? `Start Shift on Behalf of ${status.supervisor_display_name || "Team Lead"}`
+
+    : "Start Shift — No Prior Handoff";
   }
 
   else if (
@@ -3461,18 +3475,19 @@ el.dailyActivityButton.textContent =
       // CONFIRM HANDOFF / IMPORT CARRY-FORWARD SPECIAL POSTS
       // ======================================================
 
-      const {
-        error
-      } = await db.rpc(
+    const {
+  data: activationResult,
+  error
+} = await db.rpc(
 
-        "confirm_shift_operational_handoff",
+  "start_shift_operationally",
 
-        {
-          p_shift_id:
-            currentShift.id
-        }
+  {
+    p_shift_id:
+      currentShift.id
+  }
 
-      );
+);
 
 
       if (
@@ -3489,32 +3504,37 @@ el.dailyActivityButton.textContent =
       // CREATE / OPEN THIS SHIFT'S LIVE END-OF-SHIFT REPORT
       // ======================================================
 
-      const liveReport =
-        await db.rpc(
+ if (
+  isCurrentShiftLead()
+) {
 
-          "open_end_of_shift_report",
+  const liveReport =
+    await db.rpc(
 
-          {
+      "open_end_of_shift_report",
 
-            p_shift_date:
-              currentShift.shift_date,
+      {
 
-            p_shift_name:
-              currentShift.shift_name
+        p_shift_date:
+          currentShift.shift_date,
 
-          }
-
-        );
-
-
-      if (
-        liveReport.error
-      ) {
-
-        throw liveReport.error;
+        p_shift_name:
+          currentShift.shift_name
 
       }
 
+    );
+
+
+  if (
+    liveReport.error
+  ) {
+
+    throw liveReport.error;
+
+  }
+
+}
 
 
       // ======================================================
@@ -3531,13 +3551,22 @@ el.dailyActivityButton.textContent =
 
 
 
-      showMessage(
+    showMessage(
 
-        "Operational handoff confirmed. Carry-forward Special Posts are now available for coverage review, and the live End-of-Shift Report has been initiated.",
+  activationResult
+    ?.management_on_behalf
 
-        "success"
+    ? (
+        `Shift started by ${activationResult.activated_by_name} on behalf of ${activationResult.supervisor_display_name}.`
+      )
 
-      );
+    : (
+        "Shift started successfully. The Daily Activity Report is ready."
+      ),
+
+  "success"
+
+);
 
 
     }
