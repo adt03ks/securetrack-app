@@ -89,6 +89,45 @@
 
   const el = {
 
+alertMessage:
+  $("alertMessage"),
+
+refreshAlertsButton:
+  $("refreshAlertsButton"),
+
+totalAlerts:
+  $("totalAlerts"),
+
+resolvedAlerts:
+  $("resolvedAlerts"),
+
+pendingAlerts:
+  $("pendingAlerts"),
+
+unreviewedAlerts:
+  $("unreviewedAlerts"),
+
+codeGreenCount:
+  $("codeGreenCount"),
+
+taserPullCount:
+  $("taserPullCount"),
+
+ctwCount:
+  $("ctwCount"),
+
+officerInjuryCount:
+  $("officerInjuryCount"),
+
+slipFallCount:
+  $("slipFallCount"),
+
+staffingAlertCount:
+  $("staffingAlertCount"),
+
+securityAlertList:
+  $("securityAlertList"),
+    
     pageMessage:
       $("pageMessage"),
 
@@ -687,13 +726,1057 @@
         el.refreshShiftStatusButton.textContent =
           "Refresh Shift Status";
 
+        el.refreshAlertsButton
+  ?.addEventListener(
+
+    "click",
+
+    () =>
+      loadSecurityAlerts(
+        true
+      )
+
+  );
       }
 
     }
 
   }
 
+// ==========================================================
+// SECURITY ALERT HELPERS
+// ==========================================================
 
+function alertTypeLabel(
+  type
+) {
+
+  const labels = {
+
+    code_green:
+      "Code Green",
+
+    taser_pull:
+      "Taser Pull",
+
+    ctw:
+      "CTW",
+
+    officer_injury:
+      "Officer Injury",
+
+    slip_and_fall:
+      "Slip & Fall",
+
+    insufficient_staffing:
+      "Insufficient Staffing"
+
+  };
+
+
+  return (
+
+    labels[type]
+
+    ||
+
+    String(
+      type || "Security Alert"
+    )
+      .replaceAll(
+        "_",
+        " "
+      )
+      .replace(
+        /\b\w/g,
+        letter =>
+          letter.toUpperCase()
+      )
+
+  );
+
+}
+
+
+
+function showAlertMessage(
+  message = "",
+  type = "info"
+) {
+
+  if (
+    !el.alertMessage
+  ) {
+
+    return;
+
+  }
+
+
+  el.alertMessage.textContent =
+    message;
+
+
+  el.alertMessage.className =
+
+    message
+
+      ? `message show ${type}`
+
+      : "message";
+
+}
+
+
+
+function addAlertDetail(
+  container,
+  label,
+  value
+) {
+
+  if (
+    value === null
+    ||
+    value === undefined
+    ||
+    value === ""
+  ) {
+
+    return;
+
+  }
+
+
+  const box =
+    document.createElement(
+      "div"
+    );
+
+
+  box.className =
+    "alert-detail";
+
+
+  const name =
+    document.createElement(
+      "span"
+    );
+
+
+  name.textContent =
+    label;
+
+
+  const content =
+    document.createElement(
+      "strong"
+    );
+
+
+  content.textContent =
+
+    typeof value ===
+      "boolean"
+
+      ? (
+          value
+            ? "Yes"
+            : "No"
+        )
+
+      : String(
+          value
+        );
+
+
+  box.append(
+    name,
+    content
+  );
+
+
+  container.appendChild(
+    box
+  );
+
+}
+
+
+
+function renderAlertSummary(
+  summary = {}
+) {
+
+  el.totalAlerts.textContent =
+    summary.total_alerts ?? 0;
+
+
+  el.resolvedAlerts.textContent =
+    summary.resolved ?? 0;
+
+
+  el.pendingAlerts.textContent =
+    summary.pending ?? 0;
+
+
+  el.unreviewedAlerts.textContent =
+    summary.unreviewed ?? 0;
+
+
+  el.codeGreenCount.textContent =
+    summary.code_greens ?? 0;
+
+
+  el.taserPullCount.textContent =
+    summary.taser_pulls ?? 0;
+
+
+  el.ctwCount.textContent =
+    summary.ctw ?? 0;
+
+
+  el.officerInjuryCount.textContent =
+    summary.officer_injuries ?? 0;
+
+
+  el.slipFallCount.textContent =
+    summary.slip_and_falls ?? 0;
+
+
+  el.staffingAlertCount.textContent =
+    summary.staffing_alerts ?? 0;
+
+}
+
+
+
+// ==========================================================
+// SAVE ALERT REVIEW
+// ==========================================================
+
+async function saveAlertReview(
+  item,
+  status,
+  notes,
+  button
+) {
+
+  if (
+    status === "pending"
+    &&
+    !notes.trim()
+  ) {
+
+    showAlertMessage(
+      "Pending alerts require leadership notes explaining what must be carried forward.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    "Saving…";
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "update_daily_activity_alert_review",
+
+      {
+
+        p_review_id:
+          item.review_id,
+
+        p_review_status:
+          status,
+
+        p_leadership_notes:
+          notes.trim()
+          ||
+          null
+
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    renderSecurityAlerts(
+      data
+    );
+
+
+    showAlertMessage(
+      "Alert review saved successfully.",
+      "success"
+    );
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Daily Activity alert review error:",
+      error
+    );
+
+
+    showAlertMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to save alert review.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    button.disabled =
+      false;
+
+
+    button.textContent =
+      "Save Review";
+
+  }
+
+}
+
+
+
+// ==========================================================
+// RENDER ALERTS
+// ==========================================================
+
+function renderSecurityAlerts(
+  data
+) {
+
+  const summary =
+    data?.summary || {};
+
+
+  const items =
+    data?.items || [];
+
+
+  renderAlertSummary(
+    summary
+  );
+
+
+  el.securityAlertList.innerHTML =
+    "";
+
+
+  if (
+    !items.length
+  ) {
+
+    el.securityAlertList.innerHTML =
+      `
+        <div class="empty-state">
+          No Security Leadership Alerts are associated with
+          this shift at this time.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  items.forEach(
+    item => {
+
+      const incident =
+        item.incident || {};
+
+
+      const status =
+        item.review_status
+        ||
+        "unreviewed";
+
+
+      const card =
+        document.createElement(
+          "article"
+        );
+
+
+      card.className =
+        `alert-card ${status}`;
+
+
+
+      // ------------------------------------------------------
+      // HEADER
+      // ------------------------------------------------------
+
+      const head =
+        document.createElement(
+          "div"
+        );
+
+
+      head.className =
+        "alert-head";
+
+
+      const headLeft =
+        document.createElement(
+          "div"
+        );
+
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+
+      title.className =
+        "alert-title";
+
+
+      title.textContent =
+        alertTypeLabel(
+          incident.incident_type
+        );
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+
+      meta.className =
+        "alert-meta";
+
+
+      const when =
+        [
+          incident.occurrence_date,
+          incident.occurrence_time
+        ]
+          .filter(Boolean)
+          .join(" • ");
+
+
+      meta.textContent =
+
+        `${when || "Time not recorded"}`
+
+        +
+
+        (
+          incident.location
+            ? ` • ${incident.location}`
+            : ""
+        );
+
+
+      headLeft.append(
+        title,
+        meta
+      );
+
+
+      const statusChip =
+        document.createElement(
+          "span"
+        );
+
+
+      statusChip.className =
+
+        status === "resolved"
+
+          ? "status-chip good"
+
+          : status === "pending"
+
+            ? "status-chip warn"
+
+            : "status-chip bad";
+
+
+      statusChip.textContent =
+
+        status
+          .replaceAll(
+            "_",
+            " "
+          )
+          .toUpperCase();
+
+
+      head.append(
+        headLeft,
+        statusChip
+      );
+
+
+
+      // ------------------------------------------------------
+      // BODY / SOURCE DETAILS
+      // ------------------------------------------------------
+
+      const body =
+        document.createElement(
+          "div"
+        );
+
+
+      body.className =
+        "alert-body";
+
+
+      const details =
+        document.createElement(
+          "div"
+        );
+
+
+      details.className =
+        "alert-detail-grid";
+
+
+      addAlertDetail(
+        details,
+        "Location",
+        incident.location
+      );
+
+
+      addAlertDetail(
+        details,
+        "Patient Information",
+        incident.patient_information
+      );
+
+
+      addAlertDetail(
+        details,
+        "Responding Officers",
+        incident.responding_officers
+      );
+
+
+      addAlertDetail(
+        details,
+        "Deploying Officer",
+        incident.deploying_officer
+      );
+
+
+      addAlertDetail(
+        details,
+        "Taser Number",
+        incident.taser_number
+      );
+
+
+      addAlertDetail(
+        details,
+        "Trespass Subject",
+        incident.trespass_subject
+      );
+
+
+      addAlertDetail(
+        details,
+        "Reported Damages",
+        incident.reported_damages
+      );
+
+
+      addAlertDetail(
+        details,
+        "Law Enforcement Agency",
+        incident.responding_law_enforcement_agency
+      );
+
+
+      addAlertDetail(
+        details,
+        "CTW Form Completed",
+        incident.ctw_form_completed
+      );
+
+
+      addAlertDetail(
+        details,
+        "Incident Report Completed",
+        incident.incident_report_completed
+      );
+
+
+      addAlertDetail(
+        details,
+        "Officer",
+        incident.officer_name
+      );
+
+
+      addAlertDetail(
+        details,
+        "Officers On Duty",
+        incident.total_officers_on_duty
+      );
+
+
+      addAlertDetail(
+        details,
+        "Submitted By",
+        incident.submitted_by
+      );
+
+
+      addAlertDetail(
+        details,
+        "Dispatch Unit",
+        incident.dispatch_unit
+      );
+
+
+      addAlertDetail(
+        details,
+        "Additional Notes",
+        incident.additional_notes
+      );
+
+
+      addAlertDetail(
+        details,
+        "Submitted",
+        incident.submitted_at
+          ? formatDateTime(
+              incident.submitted_at
+            )
+          : null
+      );
+
+
+      body.appendChild(
+        details
+      );
+
+
+
+      // ------------------------------------------------------
+      // LEADERSHIP REVIEW
+      // ------------------------------------------------------
+
+      const review =
+        document.createElement(
+          "div"
+        );
+
+
+      review.className =
+        "alert-review";
+
+
+      const reviewTitle =
+        document.createElement(
+          "strong"
+        );
+
+
+      reviewTitle.textContent =
+        "Leadership Review";
+
+
+      review.appendChild(
+        reviewTitle
+      );
+
+
+      const statusRow =
+        document.createElement(
+          "div"
+        );
+
+
+      statusRow.className =
+        "review-status-row";
+
+
+      let selectedStatus =
+        status;
+
+
+      const buttons = {};
+
+
+      [
+        [
+          "resolved",
+          "✓ Resolved"
+        ],
+
+        [
+          "pending",
+          "◷ Pending / Carry Forward"
+        ],
+
+        [
+          "unreviewed",
+          "Reset to Unreviewed"
+        ]
+
+      ].forEach(
+        ([value, label]) => {
+
+          const choice =
+            document.createElement(
+              "button"
+            );
+
+
+          choice.type =
+            "button";
+
+
+          choice.className =
+            `review-choice ${value}`;
+
+
+          choice.textContent =
+            label;
+
+
+          if (
+            value ===
+            selectedStatus
+          ) {
+
+            choice.classList.add(
+              "active"
+            );
+
+          }
+
+
+          choice.addEventListener(
+            "click",
+            () => {
+
+              selectedStatus =
+                value;
+
+
+              Object
+                .values(
+                  buttons
+                )
+                .forEach(
+                  current =>
+                    current.classList.remove(
+                      "active"
+                    )
+                );
+
+
+              choice.classList.add(
+                "active"
+              );
+
+            }
+          );
+
+
+          buttons[value] =
+            choice;
+
+
+          statusRow.appendChild(
+            choice
+          );
+
+        }
+      );
+
+
+      const note =
+        document.createElement(
+          "textarea"
+        );
+
+
+      note.className =
+        "review-notes";
+
+
+      note.placeholder =
+        "Document resolution details, follow-up needed, or instructions for the incoming shift.";
+
+
+      note.value =
+        item.leadership_notes
+        ||
+        "";
+
+
+      const save =
+        document.createElement(
+          "button"
+        );
+
+
+      save.type =
+        "button";
+
+
+      save.className =
+        "button primary";
+
+
+      save.textContent =
+        "Save Review";
+
+
+      save.style.marginTop =
+        "10px";
+
+
+      save.addEventListener(
+        "click",
+        () => {
+
+          saveAlertReview(
+
+            item,
+
+            selectedStatus,
+
+            note.value,
+
+            save
+
+          );
+
+        }
+      );
+
+
+      const reviewed =
+        document.createElement(
+          "div"
+        );
+
+
+      reviewed.className =
+        "review-meta";
+
+
+      reviewed.textContent =
+
+        item.reviewed_by_name
+
+          ? (
+              `Last reviewed by ${item.reviewed_by_name}`
+
+              +
+
+              (
+                item.reviewed_at
+                  ? ` • ${formatDateTime(
+                      item.reviewed_at
+                    )}`
+                  : ""
+              )
+            )
+
+          : "Not yet reviewed by shift leadership.";
+
+
+      review.append(
+        statusRow,
+        note,
+        save,
+        reviewed
+      );
+
+
+      body.appendChild(
+        review
+      );
+
+
+      card.append(
+        head,
+        body
+      );
+
+
+      el.securityAlertList
+        .appendChild(
+          card
+        );
+
+    }
+  );
+
+}
+
+
+
+// ==========================================================
+// LOAD SECURITY ALERTS
+// ==========================================================
+
+async function loadSecurityAlerts(
+  showSuccess = false
+) {
+
+  if (
+    !shiftInstanceId
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    el.refreshAlertsButton
+  ) {
+
+    el.refreshAlertsButton.disabled =
+      true;
+
+
+    el.refreshAlertsButton.textContent =
+      "Refreshing…";
+
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "get_daily_activity_security_alerts",
+
+      {
+        p_shift_id:
+          shiftInstanceId
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    renderSecurityAlerts(
+      data
+    );
+
+
+    if (
+      showSuccess
+    ) {
+
+      showAlertMessage(
+        "Security alerts refreshed successfully.",
+        "success"
+      );
+
+    }
+
+    else {
+
+      showAlertMessage();
+
+    }
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Daily Activity security alert error:",
+      error
+    );
+
+
+    showAlertMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to load Security Alerts.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    if (
+      el.refreshAlertsButton
+    ) {
+
+      el.refreshAlertsButton.disabled =
+        false;
+
+
+      el.refreshAlertsButton.textContent =
+        "Refresh Alerts";
+
+    }
+
+  }
+
+}
 
   // ==========================================================
   // RETURN LINK
@@ -745,6 +1828,12 @@
   // INITIAL LOAD
   // ==========================================================
 
-  await loadShiftSummary();
+ await Promise.all([
+
+  loadShiftSummary(),
+
+  loadSecurityAlerts()
+
+]);
 
 })();
