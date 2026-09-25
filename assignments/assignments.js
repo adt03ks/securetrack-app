@@ -3052,12 +3052,21 @@ if (
     true;
 
 
-  el.dailyActivityButton.hidden =
-    !currentUserIsLeader;
+ const canOpenDailyActivity =
+
+  currentUserIsLeader
+
+  ||
+
+  isManagement();
 
 
-  el.dailyActivityButton.disabled =
-    !currentUserIsLeader;
+el.dailyActivityButton.hidden =
+  !canOpenDailyActivity;
+
+
+el.dailyActivityButton.disabled =
+  !canOpenDailyActivity;
 
 
   el.dailyActivityButton.textContent =
@@ -3287,18 +3296,24 @@ async function openDailyActivityReport() {
   }
 
 
-  if (
-    !isCurrentShiftLead()
-  ) {
+ if (
 
-    showMessage(
-      "Only the current Team Lead or designated Acting Team Lead can work this shift's Daily Activity Report.",
-      "error"
-    );
+  !isCurrentShiftLead()
 
-    return;
+  &&
 
-  }
+  !isManagement()
+
+) {
+
+  showMessage(
+    "Only the current Team Lead, Acting Team Lead, Manager, Director, or Admin may open this shift's Daily Activity Report.",
+    "error"
+  );
+
+  return;
+
+}
 
 
   el.dailyActivityButton.disabled =
