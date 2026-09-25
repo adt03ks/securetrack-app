@@ -1151,7 +1151,6 @@ notes.textContent =
                 "property_items"
               )
               .select(
-               .select(
   "id, property_number, dg_number, mrn_number, description, category, location_received, current_storage_location, clinical_staff_name, clinical_staff_badge_number, status, received_at, received_by_name, notes, created_at, updated_at"
 )
               .eq(
