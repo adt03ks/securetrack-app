@@ -2352,26 +2352,6 @@ function renderSupervisorPanel() {
           </tr>
         `;
 
-// ========================================================
-// DAILY ACTIVITY REPORT
-// Available only after the operational shift is active.
-// ========================================================
-
-const dailyActivityReady =
-
-  operationallyConfirmed()
-
-  &&
-
-  isCurrentShiftLead();
-
-
-el.dailyActivityButton.hidden =
-  !dailyActivityReady;
-
-
-el.dailyActivityButton.disabled =
-  !dailyActivityReady;
       updateActionStates();
 
       return;
@@ -3165,6 +3145,11 @@ else {
   }
 
 }
+    
+updateActionStates();
+
+}
+    
   // ==========================================================
   // BUILD RETURN URL BACK TO THIS EXACT DUTY SHIFT
   // ==========================================================
@@ -3432,21 +3417,9 @@ el.dailyActivityButton.textContent =
       false;
 
 
-    el.dailyActivityButton.textContent =
-      "Open Daily Activity Report";
+   el.dailyActivityButton.textContent =
+  "Open Daily Activity Report";
 
-// ----------------------------------------------------------
-// Daily Activity Report
-// ----------------------------------------------------------
-
-el.dailyActivityButton.addEventListener(
-
-  "click",
-
-  openDailyActivityReport
-
-);
-    
   }
 
 }
