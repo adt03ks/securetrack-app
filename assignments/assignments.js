@@ -159,9 +159,6 @@
 dailyActivityButton:
   $("dailyActivityButton"),
 
-dailyActivityButton:
-  $("dailyActivityButton"),
-
 
     specialPostPanel:
       $("specialPostPanel"),
