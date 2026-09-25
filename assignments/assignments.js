@@ -460,26 +460,31 @@ dailyActivityButton:
   }
 
 
-  function operationallyConfirmed() {
+function operationallyConfirmed() {
 
-    return Boolean(
+  return Boolean(
 
-      currentShift
-        ?.operationally_confirmed_at
+    currentShift
+      ?.operationally_confirmed_at
 
-      ||
+    ||
 
-      [
-        "acknowledged",
-        "not_required"
-      ].includes(
-        handoffStatus
-          ?.handoff_status
-      )
+    handoffStatus
+      ?.operational_ready
 
-    );
+    ||
 
-  }
+    [
+      "acknowledged",
+      "not_required"
+    ].includes(
+      handoffStatus
+        ?.handoff_status
+    )
+
+  );
+
+}
 
 
   function canGenerateOrPublishDraft() {
