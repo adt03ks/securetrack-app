@@ -937,6 +937,567 @@
 
 }
 
+.section-description {
+
+  margin:
+    5px 0 0;
+
+  color:
+    var(--muted);
+
+  font-size:
+    13px;
+
+  line-height:
+    1.5;
+
+}
+
+
+.summary-card small {
+
+  display:
+    block;
+
+  margin-top:
+    8px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    11px;
+
+}
+
+
+.alert-breakdown {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(6, minmax(0, 1fr));
+
+  gap:
+    10px;
+
+  margin-top:
+    14px;
+
+}
+
+
+.breakdown-item {
+
+  padding:
+    14px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    11px;
+
+  background:
+    var(--panel-2);
+
+}
+
+
+.breakdown-item span {
+
+  display:
+    block;
+
+  color:
+    var(--muted);
+
+  font-size:
+    10px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .06em;
+
+  text-transform:
+    uppercase;
+
+}
+
+
+.breakdown-item strong {
+
+  display:
+    block;
+
+  margin-top:
+    7px;
+
+  font-size:
+    23px;
+
+}
+
+
+.breakdown-item small {
+
+  display:
+    block;
+
+  margin-top:
+    5px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    10px;
+
+}
+
+
+.breakdown-item.future {
+
+  border-style:
+    dashed;
+
+  opacity:
+    .75;
+
+}
+
+
+.breakdown-item.operational {
+
+  border-color:
+    rgba(77,163,255,.3);
+
+}
+
+
+.alert-list-head {
+
+  margin-bottom:
+    14px;
+
+}
+
+
+.alert-list-head strong {
+
+  font-size:
+    16px;
+
+}
+
+
+.alert-list-head p {
+
+  margin:
+    4px 0 0;
+
+  color:
+    var(--muted);
+
+  font-size:
+    12px;
+
+}
+
+
+.empty-state {
+
+  padding:
+    26px;
+
+  text-align:
+    center;
+
+  color:
+    var(--muted);
+
+  border:
+    1px dashed var(--border);
+
+  border-radius:
+    12px;
+
+  background:
+    rgba(255,255,255,.015);
+
+}
+
+
+/* ==========================================================
+   ALERT CARD
+   ========================================================== */
+
+.alert-card {
+
+  margin-bottom:
+    14px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    14px;
+
+  overflow:
+    hidden;
+
+  background:
+    var(--panel);
+
+}
+
+
+.alert-card.unreviewed {
+
+  border-left:
+    4px solid var(--red);
+
+}
+
+
+.alert-card.pending {
+
+  border-left:
+    4px solid var(--amber);
+
+}
+
+
+.alert-card.resolved {
+
+  border-left:
+    4px solid var(--green);
+
+}
+
+
+.alert-head {
+
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  gap:
+    20px;
+
+  padding:
+    16px 18px;
+
+  background:
+    rgba(255,255,255,.02);
+
+  border-bottom:
+    1px solid var(--border);
+
+}
+
+
+.alert-title {
+
+  font-size:
+    16px;
+
+  font-weight:
+    900;
+
+}
+
+
+.alert-meta {
+
+  margin-top:
+    5px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    12px;
+
+}
+
+
+.alert-body {
+
+  padding:
+    18px;
+
+}
+
+
+.alert-detail-grid {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap:
+    10px;
+
+}
+
+
+.alert-detail {
+
+  padding:
+    11px 12px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    9px;
+
+  background:
+    #11161b;
+
+}
+
+
+.alert-detail span {
+
+  display:
+    block;
+
+  margin-bottom:
+    5px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    10px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    .05em;
+
+  text-transform:
+    uppercase;
+
+}
+
+
+.alert-detail strong {
+
+  font-size:
+    13px;
+
+  line-height:
+    1.45;
+
+  word-break:
+    break-word;
+
+}
+
+
+.alert-review {
+
+  margin-top:
+    16px;
+
+  padding-top:
+    16px;
+
+  border-top:
+    1px solid var(--border);
+
+}
+
+
+.review-status-row {
+
+  display:
+    flex;
+
+  flex-wrap:
+    wrap;
+
+  gap:
+    9px;
+
+  margin-bottom:
+    14px;
+
+}
+
+
+.review-choice {
+
+  border:
+    1px solid var(--border);
+
+  background:
+    #171c22;
+
+  color:
+    #dce1e6;
+
+  border-radius:
+    999px;
+
+  padding:
+    8px 12px;
+
+  cursor:
+    pointer;
+
+  font-size:
+    11px;
+
+  font-weight:
+    900;
+
+}
+
+
+.review-choice.pending.active {
+
+  border-color:
+    var(--amber);
+
+  background:
+    var(--amber-soft);
+
+  color:
+    #ffd477;
+
+}
+
+
+.review-choice.resolved.active {
+
+  border-color:
+    var(--green);
+
+  background:
+    var(--green-soft);
+
+  color:
+    #9be8ae;
+
+}
+
+
+.review-choice.unreviewed.active {
+
+  border-color:
+    var(--red);
+
+  background:
+    var(--red-soft);
+
+  color:
+    #ffaaa5;
+
+}
+
+
+.review-notes {
+
+  width:
+    100%;
+
+  min-height:
+    90px;
+
+  resize:
+    vertical;
+
+  padding:
+    11px 12px;
+
+  color:
+    var(--text);
+
+  background:
+    #0f1317;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    9px;
+
+  font:
+    inherit;
+
+}
+
+
+.review-meta {
+
+  margin-top:
+    9px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    11px;
+
+}
+
+
+@media (
+  max-width: 1100px
+) {
+
+  .alert-breakdown {
+
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+  }
+
+
+  .alert-detail-grid {
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+  }
+
+}
+
+
+@media (
+  max-width: 620px
+) {
+
+  .alert-breakdown,
+  .alert-detail-grid {
+
+    grid-template-columns:
+      1fr;
+
+  }
+
+
+  .alert-head {
+
+    flex-direction:
+      column;
+
+  }
+
+}
+   
   </style>
 
   <title>
@@ -1143,6 +1704,261 @@
 
     </section>
 
+<!-- =====================================================
+     SECURITY ALERTS
+     ===================================================== -->
+
+<section class="command-card">
+
+  <div class="section-head">
+
+    <div>
+
+      <div class="eyebrow">
+        Operational Activity
+      </div>
+
+      <h2>
+        Security Alerts
+      </h2>
+
+      <p class="section-description">
+        Review all Security Leadership Alerts associated with
+        this shift. Every alert must be reviewed before the
+        End-of-Shift Handoff can be published.
+      </p>
+
+    </div>
+
+
+    <button
+      id="refreshAlertsButton"
+      class="button secondary no-print"
+      type="button"
+    >
+      Refresh Alerts
+    </button>
+
+  </div>
+
+
+  <div class="section-body">
+
+    <div
+      id="alertMessage"
+      class="message"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+
+    <!-- ===============================================
+         PRIMARY STATUS COUNTERS
+         =============================================== -->
+
+    <div class="summary-grid">
+
+      <div class="summary-card total">
+
+        <span>
+          Total Alerts
+        </span>
+
+        <strong id="totalAlerts">
+          0
+        </strong>
+
+        <small>
+          Current shift
+        </small>
+
+      </div>
+
+
+      <div class="summary-card resolved">
+
+        <span>
+          Resolved
+        </span>
+
+        <strong id="resolvedAlerts">
+          0
+        </strong>
+
+        <small>
+          Completed review
+        </small>
+
+      </div>
+
+
+      <div class="summary-card pending">
+
+        <span>
+          Pending
+        </span>
+
+        <strong id="pendingAlerts">
+          0
+        </strong>
+
+        <small>
+          Carry-forward eligible
+        </small>
+
+      </div>
+
+
+      <div class="summary-card unreviewed">
+
+        <span>
+          Unreviewed
+        </span>
+
+        <strong id="unreviewedAlerts">
+          0
+        </strong>
+
+        <small>
+          Must be reviewed
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===============================================
+         TYPE BREAKDOWN
+         =============================================== -->
+
+    <div class="alert-breakdown">
+
+      <div class="breakdown-item">
+
+        <span>
+          Code Greens
+        </span>
+
+        <strong id="codeGreenCount">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="breakdown-item">
+
+        <span>
+          Taser Pulls
+        </span>
+
+        <strong id="taserPullCount">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="breakdown-item">
+
+        <span>
+          CTWs
+        </span>
+
+        <strong id="ctwCount">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="breakdown-item">
+
+        <span>
+          Officer Injuries
+        </span>
+
+        <strong id="officerInjuryCount">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="breakdown-item future">
+
+        <span>
+          Slip & Falls
+        </span>
+
+        <strong id="slipFallCount">
+          0
+        </strong>
+
+        <small>
+          Integration pending
+        </small>
+
+      </div>
+
+
+      <div class="breakdown-item operational">
+
+        <span>
+          Staffing Alerts
+        </span>
+
+        <strong id="staffingAlertCount">
+          0
+        </strong>
+
+        <small>
+          Operational notice
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <div class="divider"></div>
+
+
+    <!-- ===============================================
+         ALERT RECORDS
+         =============================================== -->
+
+    <div class="alert-list-head">
+
+      <div>
+
+        <strong>
+          Alert Review Queue
+        </strong>
+
+        <p>
+          Original incident details remain read-only.
+          Leadership status and review notes are recorded separately.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div id="securityAlertList">
+
+      <div class="empty-state">
+        Loading security alerts…
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+   
   </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
