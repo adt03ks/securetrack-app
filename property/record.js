@@ -1,23 +1,79 @@
 (async function () {
   "use strict";
 
-  function waitForAuth() {
-    if (window.SecureTrackAuth) {
-      return Promise.resolve(window.SecureTrackAuth);
-    }
-
-    return new Promise(resolve => {
-      const handler = event => {
-        document.removeEventListener("securetrack:authorized", handler);
-        resolve(event.detail || window.SecureTrackAuth);
-      };
-
-      document.addEventListener("securetrack:authorized", handler);
-    });
+ function waitForAuth(timeout = 10000) {
+  if (window.SecureTrackAuth?.db && window.SecureTrackAuth?.user) {
+    return Promise.resolve(window.SecureTrackAuth);
   }
 
-  const auth = await waitForAuth();
-  if (!auth?.db || !auth?.user) return;
+  return new Promise((resolve, reject) => {
+    let finished = false;
+
+    const cleanup = () => {
+      document.removeEventListener("securetrack:authorized", handler);
+      clearInterval(poll);
+      clearTimeout(timer);
+    };
+
+    const finish = auth => {
+      if (finished) return;
+
+      if (auth?.db && auth?.user) {
+        finished = true;
+        cleanup();
+        resolve(auth);
+      }
+    };
+
+    const handler = event => {
+      finish(event.detail || window.SecureTrackAuth);
+    };
+
+    document.addEventListener("securetrack:authorized", handler);
+
+    // Also poll in case the authorization event fired before
+    // record.js attached its event listener.
+    const poll = setInterval(() => {
+      finish(window.SecureTrackAuth);
+    }, 100);
+
+    const timer = setTimeout(() => {
+      if (finished) return;
+
+      finished = true;
+      cleanup();
+
+      reject(
+        new Error(
+          "SecureTrack authentication did not initialize on this page."
+        )
+      );
+    }, timeout);
+  });
+}
+
+ let auth;
+
+try {
+  auth = await waitForAuth();
+} catch (error) {
+  console.error("SecureTrack auth initialization error:", error);
+
+  const pageMessage = document.getElementById("pageMessage");
+
+  if (pageMessage) {
+    pageMessage.textContent =
+      "Unable to initialize your SecureTrack session. Please return to Property Search and try again.";
+
+    pageMessage.className = "message error";
+  }
+
+  return;
+}
+
+if (!auth?.db || !auth?.user) {
+  return;
+}
 
   const db = auth.db;
   const profile = auth.profile || {};
