@@ -276,7 +276,8 @@ dailyActivityButton:
       $("saveCoverageButton")
 
   };
-
+const DAILY_ACTIVITY_URL =
+  "../daily-activity-report.html";
 
   const END_OF_SHIFT_URL = (
     document.body.dataset.endOfShiftUrl ||
@@ -3287,7 +3288,7 @@ async function openDailyActivityReport() {
   ) {
 
     showMessage(
-      "Activate the shift before opening the Daily Activity Report.",
+      "Start the shift before opening the Daily Activity Report.",
       "error"
     );
 
@@ -3296,163 +3297,77 @@ async function openDailyActivityReport() {
   }
 
 
- if (
+  if (
 
-  !isCurrentShiftLead()
+    !isCurrentShiftLead()
 
-  &&
+    &&
 
-  !isManagement()
+    !isManagement()
 
-) {
-
-  showMessage(
-    "Only the current Team Lead, Acting Team Lead, Manager, Director, or Admin may open this shift's Daily Activity Report.",
-    "error"
-  );
-
-  return;
-
-}
-
-
-  el.dailyActivityButton.disabled =
-    true;
-
-
-el.dailyActivityButton.textContent =
-    "Opening…";
-
-
-  try {
-
-    const {
-      data,
-      error
-    } = await db.rpc(
-
-      "open_end_of_shift_report",
-
-      {
-
-        p_shift_date:
-          currentShift.shift_date,
-
-        p_shift_name:
-          currentShift.shift_name
-
-      }
-
-    );
-
-
-    if (
-      error
-    ) {
-
-      throw error;
-
-    }
-
-
-    const reportId =
-
-      data
-        ?.report
-        ?.report_id;
-
-
-    if (
-      !reportId
-    ) {
-
-      throw new Error(
-        "The Daily Activity Report was opened, but SecureTrack did not return a report ID."
-      );
-
-    }
-
-
-    const target =
-      new URL(
-
-        END_OF_SHIFT_URL,
-
-        window.location.href
-
-      );
-
-
-    target.searchParams.set(
-      "reportId",
-      reportId
-    );
-
-
-    target.searchParams.set(
-      "shiftDate",
-      currentShift.shift_date
-    );
-
-
-    target.searchParams.set(
-      "shiftName",
-      currentShift.shift_name
-    );
-
-
-    target.searchParams.set(
-      "source",
-      "daily-activity"
-    );
-
-
-    target.searchParams.set(
-      "returnTo",
-      dutyReturnUrl()
-    );
-
-
-    window.location.assign(
-      target.href
-    );
-
-  }
-
-  catch (
-    error
   ) {
 
-    console.error(
-      "Open Daily Activity Report error:",
-      error
-    );
-
-
     showMessage(
-
-      error?.message
-
-      ||
-
-      "Unable to open the Daily Activity Report.",
-
+      "Daily Activity Report access is limited to shift leadership and management.",
       "error"
-
     );
 
-
-    el.dailyActivityButton.disabled =
-      false;
-
-
-   el.dailyActivityButton.textContent =
-  "Open Daily Activity Report";
+    return;
 
   }
 
-}
 
+  const target =
+    new URL(
+
+      DAILY_ACTIVITY_URL,
+
+      window.location.href
+
+    );
+
+
+  target.searchParams.set(
+
+    "shiftInstanceId",
+
+    currentShift.id
+
+  );
+
+
+  target.searchParams.set(
+
+    "shiftDate",
+
+    currentShift.shift_date
+
+  );
+
+
+  target.searchParams.set(
+
+    "shiftName",
+
+    currentShift.shift_name
+
+  );
+
+
+  target.searchParams.set(
+
+    "returnTo",
+
+    dutyReturnUrl()
+
+  );
+
+
+  window.location.assign(
+    target.href
+  );
+
+}
   // ==========================================================
   // CONFIRM OPERATIONAL HANDOFF
   //
