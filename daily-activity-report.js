@@ -219,11 +219,6 @@ securityAlertList:
       "returnTo"
     );
 
-const returnTo =
-  params.get(
-    "returnTo"
-  );
-
 
 let specialAssignments =
   [];
@@ -758,17 +753,6 @@ let specialAssignmentNotes =
         el.refreshShiftStatusButton.textContent =
           "Refresh Shift Status";
 
-        el.refreshAlertsButton
-  ?.addEventListener(
-
-    "click",
-
-    () =>
-      loadSecurityAlerts(
-        true
-      )
-
-  );
       }
 
     }
@@ -1765,7 +1749,24 @@ async function loadSecurityAlerts(
 
     }
 
+  }  finally {
+
+    if (
+      el.refreshAlertsButton
+    ) {
+
+      el.refreshAlertsButton.disabled =
+        false;
+
+
+      el.refreshAlertsButton.textContent =
+        "Refresh Alerts";
+
+    }
+
   }
+
+}
 
   // ==========================================================
 // SPECIAL ASSIGNMENT HELPERS
@@ -3024,49 +3025,6 @@ async function loadSpecialAssignments(
 
 }  
 
-  catch (
-    error
-  ) {
-
-    console.error(
-      "Daily Activity security alert error:",
-      error
-    );
-
-
-    showAlertMessage(
-
-      error?.message
-
-      ||
-
-      "Unable to load Security Alerts.",
-
-      "error"
-
-    );
-
-  }
-
-  finally {
-
-    if (
-      el.refreshAlertsButton
-    ) {
-
-      el.refreshAlertsButton.disabled =
-        false;
-
-
-      el.refreshAlertsButton.textContent =
-        "Refresh Alerts";
-
-    }
-
-  }
-
-}
-
   // ==========================================================
   // RETURN LINK
   // ==========================================================
@@ -3123,6 +3081,18 @@ el.refreshSpecialAssignmentsButton
 
   );
 
+  
+el.refreshSpecialAssignmentsButton
+  ?.addEventListener(
+
+    "click",
+
+    () =>
+      loadSpecialAssignments(
+        true
+      )
+
+  );
 
   // ==========================================================
   // INITIAL LOAD
