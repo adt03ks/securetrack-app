@@ -153,8 +153,11 @@
     refreshHandoffButton:
       $("refreshHandoffButton"),
 
-    confirmHandoffButton:
+   confirmHandoffButton:
   $("confirmHandoffButton"),
+
+dailyActivityButton:
+  $("dailyActivityButton"),
 
 dailyActivityButton:
   $("dailyActivityButton"),
@@ -3018,68 +3021,101 @@ el.dailyActivityButton.disabled =
       !canConfirm;
 
 
-    // ========================================================
-    // BUTTON WORDING
-    // ========================================================
+   // ========================================================
+// SHIFT ACTIVATION / DAILY ACTIVITY REPORT
+// ========================================================
 
-    if (
-      status.handoff_status ===
-      "acknowledged"
-    ) {
-
-      el.confirmHandoffButton.textContent =
-        "Operational Handoff Confirmed";
+const shiftActive =
+  operationallyConfirmed();
 
 
-      el.confirmHandoffButton.disabled =
-        true;
+if (
+  shiftActive
+) {
 
-    }
+  /*
+    Shift is already active.
 
+    Do not continue showing the activation button.
+    The Team Lead now works from the Daily Activity Report.
+  */
 
-    else if (
-      status.handoff_status ===
-      "not_required"
-    ) {
-
-      el.confirmHandoffButton.textContent =
-        "Shift Activated — No Prior Handoff";
-
-
-      el.confirmHandoffButton.disabled =
-        true;
-
-    }
+  el.confirmHandoffButton.hidden =
+    true;
 
 
-    else if (
+  el.dailyActivityButton.hidden =
+    !isCurrentShiftLead();
+
+
+  el.dailyActivityButton.disabled =
+    !isCurrentShiftLead();
+
+
+  el.dailyActivityButton.textContent =
+    "Open Daily Activity Report";
+
+}
+
+else {
+
+  el.confirmHandoffButton.hidden =
+    false;
+
+
+  el.dailyActivityButton.hidden =
+    true;
+
+
+  const canConfirm =
+
+    status.leadership_resolved
+
+    &&
+
+    isCurrentShiftLead()
+
+    &&
+
+    (
       !status.handoff_required
-    ) {
 
-      el.confirmHandoffButton.textContent =
-        "Start Shift — No Prior Handoff";
+      ||
 
-    }
-
-
-    else if (
       status.handoff_acknowledged
-    ) {
-
-      el.confirmHandoffButton.textContent =
-        "Confirm Operational Handoff";
-
-    }
+    );
 
 
-    else {
-
-      el.confirmHandoffButton.textContent =
-        "Receive Prior Handoff First";
-
-    }
+  el.confirmHandoffButton.disabled =
+    !canConfirm;
 
 
+  if (
+    !status.handoff_required
+  ) {
+
+    el.confirmHandoffButton.textContent =
+      "Start Shift — No Prior Handoff";
+
+  }
+
+  else if (
+    status.handoff_acknowledged
+  ) {
+
+    el.confirmHandoffButton.textContent =
+      "Confirm Operational Handoff";
+
+  }
+
+  else {
+
+    el.confirmHandoffButton.textContent =
+      "Receive Prior Handoff First";
+
+  }
+
+}
     updateActionStates();
 
   }
@@ -3226,8 +3262,8 @@ async function openDailyActivityReport() {
     true;
 
 
-  el.dailyActivityButton.textContent =
-    "Opening Daily Activity Report…";
+el.dailyActivityButton.textContent =
+    "Opening…";
 
 
   try {
@@ -3355,6 +3391,18 @@ async function openDailyActivityReport() {
     el.dailyActivityButton.textContent =
       "Open Daily Activity Report";
 
+// ----------------------------------------------------------
+// Daily Activity Report
+// ----------------------------------------------------------
+
+el.dailyActivityButton.addEventListener(
+
+  "click",
+
+  openDailyActivityReport
+
+);
+    
   }
 
 }
