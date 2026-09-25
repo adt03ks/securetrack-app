@@ -154,7 +154,10 @@
       $("refreshHandoffButton"),
 
     confirmHandoffButton:
-      $("confirmHandoffButton"),
+  $("confirmHandoffButton"),
+
+dailyActivityButton:
+  $("dailyActivityButton"),
 
 
     specialPostPanel:
@@ -2351,7 +2354,26 @@ function renderSupervisorPanel() {
           </tr>
         `;
 
+// ========================================================
+// DAILY ACTIVITY REPORT
+// Available only after the operational shift is active.
+// ========================================================
 
+const dailyActivityReady =
+
+  operationallyConfirmed()
+
+  &&
+
+  isCurrentShiftLead();
+
+
+el.dailyActivityButton.hidden =
+  !dailyActivityReady;
+
+
+el.dailyActivityButton.disabled =
+  !dailyActivityReady;
       updateActionStates();
 
       return;
@@ -3148,7 +3170,189 @@ function renderSupervisorPanel() {
 
   }
 
+// ==========================================================
+// OPEN DAILY ACTIVITY REPORT
+//
+// This is the live working report for the current shift.
+// The same report becomes the End-of-Shift Report when
+// leadership publishes it at shift completion.
+// ==========================================================
 
+async function openDailyActivityReport() {
+
+  if (
+    !currentShift
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    !operationallyConfirmed()
+  ) {
+
+    showMessage(
+      "Activate the shift before opening the Daily Activity Report.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !isCurrentShiftLead()
+  ) {
+
+    showMessage(
+      "Only the current Team Lead or designated Acting Team Lead can work this shift's Daily Activity Report.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  el.dailyActivityButton.disabled =
+    true;
+
+
+  el.dailyActivityButton.textContent =
+    "Opening Daily Activity Report…";
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "open_end_of_shift_report",
+
+      {
+
+        p_shift_date:
+          currentShift.shift_date,
+
+        p_shift_name:
+          currentShift.shift_name
+
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    const reportId =
+
+      data
+        ?.report
+        ?.report_id;
+
+
+    if (
+      !reportId
+    ) {
+
+      throw new Error(
+        "The Daily Activity Report was opened, but SecureTrack did not return a report ID."
+      );
+
+    }
+
+
+    const target =
+      new URL(
+
+        END_OF_SHIFT_URL,
+
+        window.location.href
+
+      );
+
+
+    target.searchParams.set(
+      "reportId",
+      reportId
+    );
+
+
+    target.searchParams.set(
+      "shiftDate",
+      currentShift.shift_date
+    );
+
+
+    target.searchParams.set(
+      "shiftName",
+      currentShift.shift_name
+    );
+
+
+    target.searchParams.set(
+      "source",
+      "daily-activity"
+    );
+
+
+    target.searchParams.set(
+      "returnTo",
+      dutyReturnUrl()
+    );
+
+
+    window.location.assign(
+      target.href
+    );
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Open Daily Activity Report error:",
+      error
+    );
+
+
+    showMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to open the Daily Activity Report.",
+
+      "error"
+
+    );
+
+
+    el.dailyActivityButton.disabled =
+      false;
+
+
+    el.dailyActivityButton.textContent =
+      "Open Daily Activity Report";
+
+  }
+
+}
 
   // ==========================================================
   // CONFIRM OPERATIONAL HANDOFF
@@ -7248,7 +7452,17 @@ function renderSupervisorPanel() {
 
   );
 
+// ----------------------------------------------------------
+// Daily Activity Report
+// ----------------------------------------------------------
 
+el.dailyActivityButton.addEventListener(
+
+  "click",
+
+  openDailyActivityReport
+
+);
 
   // ----------------------------------------------------------
   // Add Special Post
