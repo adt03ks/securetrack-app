@@ -3,6 +3,8 @@
 
 <head>
 
+ <head>
+
   <meta charset="utf-8">
 
   <meta
@@ -19,6 +21,850 @@
     SecureTrack | Daily Activity Report
   </title>
 
+
+  <style>
+
+    :root {
+
+      --bg:
+        #0b0d10;
+
+      --panel:
+        #13171c;
+
+      --panel-2:
+        #181d23;
+
+      --border:
+        #2a3139;
+
+      --text:
+        #f1f3f5;
+
+      --muted:
+        #9ca6b1;
+
+      --orange:
+        #f28c28;
+
+      --orange-soft:
+        rgba(242,140,40,.12);
+
+      --green:
+        #34c759;
+
+      --green-soft:
+        rgba(52,199,89,.12);
+
+      --amber:
+        #f5b942;
+
+      --amber-soft:
+        rgba(245,185,66,.12);
+
+      --red:
+        #ff5f57;
+
+      --red-soft:
+        rgba(255,95,87,.12);
+
+      --blue:
+        #4da3ff;
+
+      --blue-soft:
+        rgba(77,163,255,.12);
+
+      --purple:
+        #a678ff;
+
+      --purple-soft:
+        rgba(166,120,255,.12);
+
+    }
+
+
+    * {
+
+      box-sizing:
+        border-box;
+
+    }
+
+
+    body {
+
+      margin:
+        0;
+
+      background:
+
+        radial-gradient(
+          circle at top right,
+          rgba(242,140,40,.08),
+          transparent 28%
+        ),
+
+        var(--bg);
+
+      color:
+        var(--text);
+
+      font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    }
+
+
+    .shell {
+
+      width:
+        min(1500px, calc(100% - 40px));
+
+      margin:
+        0 auto;
+
+      padding:
+        28px 0 60px;
+
+    }
+
+
+    .topbar {
+
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        flex-start;
+
+      gap:
+        24px;
+
+      margin-bottom:
+        20px;
+
+    }
+
+
+    .brand {
+
+      font-size:
+        15px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        .12em;
+
+      color:
+        #ffffff;
+
+    }
+
+
+    .brand span {
+
+      color:
+        var(--orange);
+
+    }
+
+
+    .eyebrow {
+
+      margin-top:
+        10px;
+
+      color:
+        var(--orange);
+
+      font-size:
+        11px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        .14em;
+
+      text-transform:
+        uppercase;
+
+    }
+
+
+    h1 {
+
+      margin:
+        8px 0 6px;
+
+      font-size:
+        clamp(28px, 4vw, 44px);
+
+      line-height:
+        1.08;
+
+    }
+
+
+    .subtitle {
+
+      margin:
+        0;
+
+      color:
+        var(--muted);
+
+      max-width:
+        800px;
+
+      line-height:
+        1.6;
+
+    }
+
+
+    .live-badge {
+
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      gap:
+        8px;
+
+      padding:
+        8px 12px;
+
+      border:
+        1px solid rgba(52,199,89,.35);
+
+      background:
+        var(--green-soft);
+
+      color:
+        #8ce7a2;
+
+      border-radius:
+        999px;
+
+      font-size:
+        11px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        .08em;
+
+      white-space:
+        nowrap;
+
+    }
+
+
+    .live-dot {
+
+      width:
+        8px;
+
+      height:
+        8px;
+
+      border-radius:
+        50%;
+
+      background:
+        var(--green);
+
+      box-shadow:
+        0 0 12px rgba(52,199,89,.8);
+
+    }
+
+
+    .command-card {
+
+      border:
+        1px solid var(--border);
+
+      border-radius:
+        16px;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,.025),
+          rgba(255,255,255,.01)
+        );
+
+      overflow:
+        hidden;
+
+      margin-bottom:
+        22px;
+
+    }
+
+
+    .section-head {
+
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      gap:
+        18px;
+
+      align-items:
+        center;
+
+      padding:
+        18px 22px;
+
+      background:
+        #11151a;
+
+      border-bottom:
+        1px solid var(--border);
+
+    }
+
+
+    .section-head h2 {
+
+      margin:
+        3px 0 0;
+
+      font-size:
+        18px;
+
+    }
+
+
+    .section-body {
+
+      padding:
+        22px;
+
+    }
+
+
+    .info-grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+      gap:
+        14px;
+
+    }
+
+
+    .info-block {
+
+      min-height:
+        110px;
+
+      padding:
+        16px;
+
+      background:
+        var(--panel-2);
+
+      border:
+        1px solid var(--border);
+
+      border-radius:
+        12px;
+
+    }
+
+
+    .info-block span {
+
+      display:
+        block;
+
+      margin-bottom:
+        10px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        11px;
+
+      font-weight:
+        800;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .07em;
+
+    }
+
+
+    .info-block strong {
+
+      display:
+        block;
+
+      font-size:
+        18px;
+
+      line-height:
+        1.35;
+
+    }
+
+
+    .info-block small {
+
+      display:
+        block;
+
+      margin-top:
+        7px;
+
+      color:
+        var(--muted);
+
+      line-height:
+        1.4;
+
+    }
+
+
+    .summary-grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+      gap:
+        14px;
+
+      margin:
+        22px 0;
+
+    }
+
+
+    .summary-card {
+
+      padding:
+        18px;
+
+      background:
+        var(--panel);
+
+      border:
+        1px solid var(--border);
+
+      border-radius:
+        14px;
+
+    }
+
+
+    .summary-card span {
+
+      display:
+        block;
+
+      margin-bottom:
+        6px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        11px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .07em;
+
+    }
+
+
+    .summary-card strong {
+
+      font-size:
+        32px;
+
+      line-height:
+        1;
+
+    }
+
+
+    .summary-card.total {
+
+      border-color:
+        rgba(77,163,255,.35);
+
+      background:
+        var(--blue-soft);
+
+    }
+
+
+    .summary-card.resolved {
+
+      border-color:
+        rgba(52,199,89,.35);
+
+      background:
+        var(--green-soft);
+
+    }
+
+
+    .summary-card.pending {
+
+      border-color:
+        rgba(245,185,66,.35);
+
+      background:
+        var(--amber-soft);
+
+    }
+
+
+    .summary-card.unreviewed {
+
+      border-color:
+        rgba(255,95,87,.4);
+
+      background:
+        var(--red-soft);
+
+    }
+
+
+    .status-chip {
+
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      padding:
+        5px 9px;
+
+      border-radius:
+        999px;
+
+      font-size:
+        10px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        .06em;
+
+      text-transform:
+        uppercase;
+
+    }
+
+
+    .status-chip.good {
+
+      background:
+        var(--green-soft);
+
+      color:
+        #8ce7a2;
+
+    }
+
+
+    .status-chip.warn {
+
+      background:
+        var(--amber-soft);
+
+      color:
+        #ffd477;
+
+    }
+
+
+    .status-chip.bad {
+
+      background:
+        var(--red-soft);
+
+      color:
+        #ffaaa5;
+
+    }
+
+
+    .status-chip.info {
+
+      background:
+        var(--blue-soft);
+
+      color:
+        #9dccff;
+
+    }
+
+
+    .restricted-section {
+
+      border:
+        1px solid rgba(166,120,255,.45);
+
+      background:
+        var(--purple-soft);
+
+    }
+
+
+    .restricted-section .section-head {
+
+      background:
+        rgba(166,120,255,.08);
+
+    }
+
+
+    .button {
+
+      appearance:
+        none;
+
+      border:
+        0;
+
+      border-radius:
+        9px;
+
+      padding:
+        11px 15px;
+
+      font:
+        inherit;
+
+      font-size:
+        13px;
+
+      font-weight:
+        800;
+
+      cursor:
+        pointer;
+
+      text-decoration:
+        none;
+
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      gap:
+        7px;
+
+    }
+
+
+    .button.primary {
+
+      background:
+        var(--orange);
+
+      color:
+        #111;
+
+    }
+
+
+    .button.secondary {
+
+      background:
+        #1b2128;
+
+      color:
+        #fff;
+
+      border:
+        1px solid var(--border);
+
+    }
+
+
+    .button:hover {
+
+      filter:
+        brightness(1.08);
+
+    }
+
+
+    .toolbar {
+
+      display:
+        flex;
+
+      flex-wrap:
+        wrap;
+
+      gap:
+        10px;
+
+    }
+
+
+    .divider {
+
+      height:
+        1px;
+
+      background:
+        var(--border);
+
+      margin:
+        20px 0;
+
+    }
+
+
+    .muted {
+
+      color:
+        var(--muted);
+
+    }
+
+
+    @media (
+      max-width: 950px
+    ) {
+
+      .info-grid,
+      .summary-grid {
+
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+
+      }
+
+    }
+
+
+    @media (
+      max-width: 620px
+    ) {
+
+      .shell {
+
+        width:
+          min(100% - 22px, 1500px);
+
+      }
+
+
+      .topbar {
+
+        flex-direction:
+          column;
+
+      }
+
+
+      .info-grid,
+      .summary-grid {
+
+        grid-template-columns:
+          1fr;
+
+      }
+
+    }
+
+
+    @media print {
+
+      body {
+
+        background:
+          white;
+
+        color:
+          black;
+
+      }
+
+
+      .no-print {
+
+        display:
+          none !important;
+
+      }
+
+
+      .command-card,
+      .summary-card,
+      .info-block {
+
+        background:
+          white !important;
+
+        color:
+          black !important;
+
+        border-color:
+          #ccc !important;
+
+        box-shadow:
+          none !important;
+
+      }
+
+    }
+
+  </style>
+
+  <title>
+    SecureTrack | Daily Activity Report
+  </title>
+
 </head>
 
 
@@ -26,90 +872,168 @@
   data-securetrack-roles="team_lead,senior_officer,manager,director,admin"
 >
 
-  <main>
+  <main class="shell">
 
-    <header>
+
+    <header class="topbar">
 
       <div>
-        SECURETRACK SECURITY OPERATIONS
+
+        <div class="brand">
+          SECURE<span>TRACK</span>
+        </div>
+
+        <div class="eyebrow">
+          Security Operations
+        </div>
+
+        <h1>
+          Daily Activity & Shift Accountability Report
+        </h1>
+
+        <p class="subtitle">
+          Live operational record for incident review,
+          staffing accountability, equipment exceptions,
+          special assignments, and end-of-shift preparation.
+        </p>
+
       </div>
 
-      <h1>
-        Daily Activity & Shift Accountability Report
-      </h1>
 
-      <p>
-        Live operational record for the active security shift.
-      </p>
+      <div class="toolbar no-print">
+
+        <span class="live-badge">
+          <span class="live-dot"></span>
+          LIVE SHIFT RECORD
+        </span>
+
+        <a
+          id="returnToAssignments"
+          class="button secondary"
+          href="#"
+        >
+          ← Duty Assignments
+        </a>
+
+      </div>
 
     </header>
 
 
-    <section>
+    <section class="command-card">
 
-      <h2>
-        Shift Command Summary
-      </h2>
+      <div class="section-head">
+
+        <div>
+
+          <div class="eyebrow">
+            Shift Command
+          </div>
+
+          <h2>
+            Shift Command Summary
+          </h2>
+
+        </div>
 
 
-      <div>
-
-        <strong>
-          Shift
-        </strong>
-
-        <span id="shiftName">
-          Loading…
+        <span class="status-chip good">
+          Active
         </span>
 
       </div>
 
 
-      <div>
+      <div class="section-body">
 
-        <strong>
-          Shift Date
-        </strong>
-
-        <span id="shiftDate">
-          Loading…
-        </span>
-
-      </div>
+        <div class="info-grid">
 
 
-      <div>
+          <div class="info-block">
 
-        <strong>
-          Shift Instance
-        </strong>
+            <span>
+              Shift
+            </span>
 
-        <span id="shiftInstanceId">
-          Loading…
-        </span>
+            <strong id="shiftName">
+              Loading…
+            </strong>
+
+          </div>
+
+
+          <div class="info-block">
+
+            <span>
+              Shift Date
+            </span>
+
+            <strong id="shiftDate">
+              Loading…
+            </strong>
+
+          </div>
+
+
+          <div class="info-block">
+
+            <span>
+              Assigned Team Lead
+            </span>
+
+            <strong id="assignedTeamLead">
+              Loading…
+            </strong>
+
+            <small id="teamLeadSource">
+              —
+            </small>
+
+          </div>
+
+
+          <div class="info-block">
+
+            <span>
+              Staffing
+            </span>
+
+            <strong id="staffingSummary">
+              — of — Available
+            </strong>
+
+            <small>
+              Current attendance
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="divider"></div>
+
+
+        <div class="toolbar no-print">
+
+          <button
+            id="refreshShiftStatusButton"
+            class="button secondary"
+            type="button"
+          >
+            Refresh Shift Status
+          </button>
+
+        </div>
 
       </div>
 
     </section>
 
-
-    <div>
-
-      <a
-        id="returnToAssignments"
-        href="#"
-      >
-        ← Return to Duty Assignments
-      </a>
-
-    </div>
-
   </main>
 
 
-  <script
-    src="daily-activity-report.js"
-  ></script>
+  <script src="daily-activity-report.js"></script>
 
 </body>
 
