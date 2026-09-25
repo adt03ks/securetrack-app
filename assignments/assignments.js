@@ -472,11 +472,6 @@ function operationallyConfirmed() {
 
     ||
 
-    handoffStatus
-      ?.operational_ready
-
-    ||
-
     [
       "acknowledged",
       "not_required"
@@ -488,8 +483,6 @@ function operationallyConfirmed() {
   );
 
 }
-
-
   function canGenerateOrPublishDraft() {
 
     if (
@@ -2890,43 +2883,73 @@ el.dailyActivityButton.disabled =
     // 2. NO PRIOR HANDOFF EXISTS
     // ========================================================
 
-    else if (
-      !status.handoff_required
-    ) {
+  else if (
+  !status.handoff_required
+) {
 
-      const alreadyActive =
+  const alreadyActive =
 
-        status.handoff_status ===
-          "not_required"
+    Boolean(
+      currentShift
+        ?.operationally_confirmed_at
+    )
 
-        ||
+    ||
 
-        status.operational_ready;
-
-
-      el.handoffStatusBadge.textContent =
-
-        alreadyActive
-
-          ? "SHIFT ACTIVE"
-
-          : "NO PRIOR HANDOFF";
+    status.handoff_status ===
+      "not_required";
 
 
-      el.handoffStatusBadge.className =
-        "status-chip good";
+  if (
+    alreadyActive
+  ) {
+
+    el.handoffStatusBadge.textContent =
+      "SHIFT ACTIVE";
 
 
-      el.handoffReceiptStatus.textContent =
+    el.handoffStatusBadge.className =
+      "status-chip good";
 
-        alreadyActive
 
-          ? "Shift activated without a prior handoff"
+    el.handoffReceiptStatus.textContent =
+      "Shift activated without a prior handoff";
 
-          : "No prior handoff is available. Start this shift without a prior handoff.";
+  }
 
-    }
+  else if (
+    status.operational_ready
+  ) {
 
+    el.handoffStatusBadge.textContent =
+      "READY TO START";
+
+
+    el.handoffStatusBadge.className =
+      "status-chip warn";
+
+
+    el.handoffReceiptStatus.textContent =
+      "Leadership confirmed. Start the shift to begin operations.";
+
+  }
+
+  else {
+
+    el.handoffStatusBadge.textContent =
+      "NO PRIOR HANDOFF";
+
+
+    el.handoffStatusBadge.className =
+      "status-chip warn";
+
+
+    el.handoffReceiptStatus.textContent =
+      "No prior handoff is available.";
+
+  }
+
+}
 
     // ========================================================
     // 3. PRIOR HANDOFF EXISTS BUT HAS NOT BEEN RECEIVED
@@ -3021,7 +3044,7 @@ el.dailyActivityButton.disabled =
       !canConfirm;
 
 
-   // ========================================================
+ // ========================================================
 // SHIFT ACTIVATION / DAILY ACTIVITY REPORT
 // ========================================================
 
@@ -3029,27 +3052,35 @@ const shiftActive =
   operationallyConfirmed();
 
 
+const leadershipReady =
+  Boolean(
+    status.leadership_resolved
+  );
+
+
+const currentUserIsLeader =
+  isCurrentShiftLead();
+
+
+
+// --------------------------------------------------------
+// SHIFT IS ACTIVE
+// --------------------------------------------------------
+
 if (
   shiftActive
 ) {
-
-  /*
-    Shift is already active.
-
-    Do not continue showing the activation button.
-    The Team Lead now works from the Daily Activity Report.
-  */
 
   el.confirmHandoffButton.hidden =
     true;
 
 
   el.dailyActivityButton.hidden =
-    !isCurrentShiftLead();
+    !currentUserIsLeader;
 
 
   el.dailyActivityButton.disabled =
-    !isCurrentShiftLead();
+    !currentUserIsLeader;
 
 
   el.dailyActivityButton.textContent =
@@ -3057,23 +3088,44 @@ if (
 
 }
 
-else {
+
+
+// --------------------------------------------------------
+// LEADERSHIP HAS NOT BEEN RESOLVED YET
+// --------------------------------------------------------
+
+else if (
+  !leadershipReady
+) {
 
   el.confirmHandoffButton.hidden =
-    false;
+    true;
 
 
   el.dailyActivityButton.hidden =
     true;
 
+}
 
-  const canConfirm =
 
-    status.leadership_resolved
 
-    &&
+// --------------------------------------------------------
+// LEADERSHIP READY — SHIFT STILL NEEDS TO BE STARTED
+// --------------------------------------------------------
 
-    isCurrentShiftLead()
+else {
+
+  el.dailyActivityButton.hidden =
+    true;
+
+
+  el.confirmHandoffButton.hidden =
+    false;
+
+
+  const canStartShift =
+
+    currentUserIsLeader
 
     &&
 
@@ -3087,7 +3139,7 @@ else {
 
 
   el.confirmHandoffButton.disabled =
-    !canConfirm;
+    !canStartShift;
 
 
   if (
@@ -3104,7 +3156,7 @@ else {
   ) {
 
     el.confirmHandoffButton.textContent =
-      "Confirm Operational Handoff";
+      "Start Shift";
 
   }
 
@@ -3116,11 +3168,6 @@ else {
   }
 
 }
-    updateActionStates();
-
-  }
-
-
   // ==========================================================
   // BUILD RETURN URL BACK TO THIS EXACT DUTY SHIFT
   // ==========================================================
