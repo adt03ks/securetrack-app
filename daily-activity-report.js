@@ -110,6 +110,26 @@ needsCoverageSpecialCount:
 specialAssignmentList:
   $("specialAssignmentList"), 
     
+    propertyMessage:
+  $("propertyMessage"),
+
+refreshPropertyButton:
+  $("refreshPropertyButton"),
+
+propertyCollectedCount:
+  $("propertyCollectedCount"),
+
+propertyReleasedCount:
+  $("propertyReleasedCount"),
+
+propertyDisposalRequestedCount:
+  $("propertyDisposalRequestedCount"),
+
+propertyDisposedCount:
+  $("propertyDisposedCount"),
+
+propertyActivityList:
+  $("propertyActivityList"),
 alertMessage:
   $("alertMessage"),
 
