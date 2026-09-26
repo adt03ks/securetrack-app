@@ -3097,7 +3097,126 @@
   </div>
 
 </section>
-   
+  <!-- ==========================================================
+     DEVICE EXCEPTIONS
+     ========================================================== -->
+
+<section class="activity-section">
+
+  <div class="section-heading-row">
+
+    <div>
+
+      <div class="eyebrow">
+        Equipment Accountability
+      </div>
+
+      <h2>
+        Device Exceptions
+      </h2>
+
+      <p class="section-description">
+        Failed inspections and equipment issues reported during this shift.
+      </p>
+
+    </div>
+
+
+    <button
+      id="refreshDeviceExceptionsButton"
+      class="button secondary"
+      type="button"
+    >
+      Refresh Devices
+    </button>
+
+  </div>
+
+
+  <div
+    id="deviceExceptionsMessage"
+    class="message"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- ========================================================
+       SUMMARY COUNTERS
+       ======================================================== -->
+
+  <div class="device-exception-summary-grid">
+
+    <article class="device-exception-summary failed">
+
+      <span>
+        Failed Inspections
+      </span>
+
+      <strong id="failedInspectionCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="device-exception-summary reported">
+
+      <span>
+        Issues Reported
+      </span>
+
+      <strong id="reportedDeviceIssueCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="device-exception-summary open">
+
+      <span>
+        Open Issues
+      </span>
+
+      <strong id="openDeviceIssueCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="device-exception-summary critical">
+
+      <span>
+        High / Critical
+      </span>
+
+      <strong id="highCriticalDeviceCount">
+        0
+      </strong>
+
+    </article>
+
+  </div>
+
+
+  <!-- ========================================================
+       EXCEPTION ACTIVITY
+       ======================================================== -->
+
+  <div
+    id="deviceExceptionList"
+    class="device-exception-list"
+  >
+
+    <div class="empty-state">
+      Loading Device Exceptions…
+    </div>
+
+  </div>
+
+</section> 
   </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
