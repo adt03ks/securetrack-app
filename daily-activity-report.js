@@ -9711,6 +9711,74 @@ el.refreshSupplyRequestsButton
       )
 
   );
+
+// ==========================================================
+// MANAGER CONFIDENTIAL CONTROLS
+// ==========================================================
+
+if (
+  hasManagerConfidentialAccess
+) {
+
+  el.confidentialForm
+    ?.addEventListener(
+
+      "submit",
+
+      async event => {
+
+        event.preventDefault();
+
+        await saveConfidentialEntry();
+
+      }
+
+    );
+
+
+  el.cancelConfidentialEditButton
+    ?.addEventListener(
+
+      "click",
+
+      () => {
+
+        resetConfidentialForm();
+
+        showConfidentialMessage();
+
+      }
+
+    );
+
+
+  el.refreshConfidentialButton
+    ?.addEventListener(
+
+      "click",
+
+      () =>
+        loadConfidentialEntries(
+          true
+        )
+
+    );
+
+
+  el.confidentialFollowUpRequired
+    ?.addEventListener(
+
+      "change",
+
+      () => {
+
+        syncConfidentialFollowUpField();
+
+      }
+
+    );
+
+}
   
   // ==========================================================
   // INITIAL LOAD
@@ -9730,7 +9798,11 @@ await Promise.all([
 
   loadTsiRequests(),
 
-  loadSupplyRequests()
+  loadSupplyRequests(),
+
+  hasManagerConfidentialAccess
+    ? loadConfidentialEntries()
+    : Promise.resolve()
 
 ]);
 })();
