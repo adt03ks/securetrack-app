@@ -6135,6 +6135,1616 @@ async function saveTsiRequest() {
   }
 
 }
+
+// ==========================================================
+// SUPPLY REQUEST STATE
+// ==========================================================
+
+let supplyRequests =
+  [];
+
+
+
+// ==========================================================
+// SUPPLY MESSAGE
+// ==========================================================
+
+function showSupplyMessage(
+  message = "",
+  type = "info"
+) {
+
+  if (
+    !el.supplyMessage
+  ) {
+
+    return;
+
+  }
+
+
+  el.supplyMessage.textContent =
+    message;
+
+
+  el.supplyMessage.className =
+
+    message
+
+      ? `message show ${type}`
+
+      : "message";
+
+}
+
+
+
+// ==========================================================
+// SUPPLY HELPERS
+// ==========================================================
+
+function supplyStatusClass(
+  status
+) {
+
+  return String(
+    status
+    ||
+    "requested"
+  )
+    .replaceAll(
+      "_",
+      "-"
+    );
+
+}
+
+
+
+function supplyLabel(
+  value
+) {
+
+  return String(
+    value
+    ??
+    ""
+  )
+    .replaceAll(
+      "_",
+      " "
+    )
+    .replace(
+      /\b\w/g,
+      character =>
+        character.toUpperCase()
+    );
+
+}
+
+
+
+function supplyNumber(
+  value,
+  fallback = 0
+) {
+
+  const number =
+    Number(
+      value
+    );
+
+
+  return Number.isFinite(
+    number
+  )
+    ? number
+    : fallback;
+
+}
+
+
+
+function formatSupplyQuantity(
+  value
+) {
+
+  const number =
+    supplyNumber(
+      value
+    );
+
+
+  return number.toLocaleString(
+    undefined,
+    {
+      maximumFractionDigits:
+        2
+    }
+  );
+
+}
+
+
+
+function addSupplyDetail(
+  container,
+  label,
+  value
+) {
+
+  if (
+    value === null
+    ||
+    value === undefined
+    ||
+    value === ""
+  ) {
+
+    return;
+
+  }
+
+
+  const box =
+    document.createElement(
+      "div"
+    );
+
+
+  box.className =
+    "supply-detail-box";
+
+
+  const name =
+    document.createElement(
+      "span"
+    );
+
+
+  name.textContent =
+    label;
+
+
+  const content =
+    document.createElement(
+      "strong"
+    );
+
+
+  content.textContent =
+    String(
+      value
+    );
+
+
+  box.append(
+    name,
+    content
+  );
+
+
+  container.appendChild(
+    box
+  );
+
+}
+
+
+
+// ==========================================================
+// RESET SUPPLY FORM
+// ==========================================================
+
+function resetSupplyForm() {
+
+  if (
+    el.supplyRequestId
+  ) {
+
+    el.supplyRequestId.value =
+      "";
+
+  }
+
+
+  if (
+    el.supplyItemName
+  ) {
+
+    el.supplyItemName.value =
+      "";
+
+  }
+
+
+  if (
+    el.supplyCategory
+  ) {
+
+    el.supplyCategory.value =
+      "";
+
+  }
+
+
+  if (
+    el.supplyQuantityRequested
+  ) {
+
+    el.supplyQuantityRequested.value =
+      "1";
+
+  }
+
+
+  if (
+    el.supplyUnit
+  ) {
+
+    el.supplyUnit.value =
+      "each";
+
+  }
+
+
+  if (
+    el.supplyRequestingArea
+  ) {
+
+    el.supplyRequestingArea.value =
+      "";
+
+  }
+
+
+  if (
+    el.supplyRequestedFor
+  ) {
+
+    el.supplyRequestedFor.value =
+      "";
+
+  }
+
+
+  if (
+    el.supplyPriority
+  ) {
+
+    el.supplyPriority.value =
+      "normal";
+
+  }
+
+
+  if (
+    el.supplyStatus
+  ) {
+
+    el.supplyStatus.value =
+      "requested";
+
+  }
+
+
+  if (
+    el.supplyQuantityFulfilled
+  ) {
+
+    el.supplyQuantityFulfilled.value =
+      "0";
+
+  }
+
+
+  if (
+    el.supplyFulfillmentNotes
+  ) {
+
+    el.supplyFulfillmentNotes.value =
+      "";
+
+  }
+
+
+  if (
+    el.supplyOperationalNotes
+  ) {
+
+    el.supplyOperationalNotes.value =
+      "";
+
+  }
+
+
+  if (
+    el.supplyFormTitle
+  ) {
+
+    el.supplyFormTitle.textContent =
+      "Add Supply Request";
+
+  }
+
+
+  if (
+    el.saveSupplyRequestButton
+  ) {
+
+    el.saveSupplyRequestButton.textContent =
+      "Add Supply Request";
+
+  }
+
+
+  if (
+    el.cancelSupplyEditButton
+  ) {
+
+    el.cancelSupplyEditButton.hidden =
+      true;
+
+  }
+
+}
+
+
+
+// ==========================================================
+// BEGIN SUPPLY EDIT
+// ==========================================================
+
+function beginSupplyEdit(
+  requestId
+) {
+
+  const request =
+    supplyRequests.find(
+
+      item =>
+        item.supply_request_id ===
+        requestId
+
+    );
+
+
+  if (
+    !request
+  ) {
+
+    showSupplyMessage(
+      "Unable to locate the selected Supply Request.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  el.supplyRequestId.value =
+    request.supply_request_id
+    ||
+    "";
+
+
+  el.supplyItemName.value =
+    request.item_name
+    ||
+    "";
+
+
+  el.supplyCategory.value =
+    request.category
+    ||
+    "";
+
+
+  el.supplyQuantityRequested.value =
+    request.quantity_requested
+    ??
+    1;
+
+
+  el.supplyUnit.value =
+    request.unit
+    ||
+    "each";
+
+
+  el.supplyRequestingArea.value =
+    request.requesting_area
+    ||
+    "";
+
+
+  el.supplyRequestedFor.value =
+    request.requested_for
+    ||
+    "";
+
+
+  el.supplyPriority.value =
+    request.priority
+    ||
+    "normal";
+
+
+  el.supplyStatus.value =
+    request.status
+    ||
+    "requested";
+
+
+  el.supplyQuantityFulfilled.value =
+    request.quantity_fulfilled
+    ??
+    0;
+
+
+  el.supplyFulfillmentNotes.value =
+    request.fulfillment_notes
+    ||
+    "";
+
+
+  el.supplyOperationalNotes.value =
+    request.operational_notes
+    ||
+    "";
+
+
+  el.supplyFormTitle.textContent =
+    "Edit Supply Request";
+
+
+  el.saveSupplyRequestButton.textContent =
+    "Save Supply Update";
+
+
+  el.cancelSupplyEditButton.hidden =
+    false;
+
+
+  el.supplyRequestForm
+    ?.scrollIntoView({
+
+      behavior:
+        "smooth",
+
+      block:
+        "start"
+
+    });
+
+
+  el.supplyItemName
+    ?.focus();
+
+}
+
+
+
+// ==========================================================
+// RENDER SUPPLY REQUESTS
+// ==========================================================
+
+function renderSupplyRequests(
+  data
+) {
+
+  const summary =
+    data?.summary
+    ||
+    {};
+
+
+  supplyRequests =
+    data?.items
+    ||
+    [];
+
+
+  el.supplyTotalCount.textContent =
+    summary.total
+    ??
+    0;
+
+
+  el.supplyRequestedCount.textContent =
+    summary.requested
+    ??
+    0;
+
+
+  el.supplyOrderedCount.textContent =
+    summary.ordered
+    ??
+    0;
+
+
+  el.supplyPartialCount.textContent =
+    summary.partially_fulfilled
+    ??
+    0;
+
+
+  el.supplyFulfilledCount.textContent =
+    summary.fulfilled
+    ??
+    0;
+
+
+  el.supplyUrgentCount.textContent =
+    summary.urgent
+    ??
+    0;
+
+
+  el.supplyRequestList.innerHTML =
+    "";
+
+
+  if (
+    !supplyRequests.length
+  ) {
+
+    el.supplyRequestList.innerHTML =
+      `
+        <div class="empty-state">
+          No Supply Requests are associated
+          with this shift at this time.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  supplyRequests.forEach(
+    request => {
+
+      const statusClass =
+        supplyStatusClass(
+          request.status
+        );
+
+
+      const priorityClass =
+        String(
+          request.priority
+          ||
+          "normal"
+        )
+          .toLowerCase();
+
+
+      const requestedQuantity =
+        supplyNumber(
+          request.quantity_requested
+        );
+
+
+      const fulfilledQuantity =
+        supplyNumber(
+          request.quantity_fulfilled
+        );
+
+
+      const fulfillmentPercent =
+
+        requestedQuantity > 0
+
+          ? Math.min(
+              100,
+              Math.max(
+                0,
+                (
+                  fulfilledQuantity
+                  /
+                  requestedQuantity
+                )
+                *
+                100
+              )
+            )
+
+          : 0;
+
+
+      const card =
+        document.createElement(
+          "article"
+        );
+
+
+      card.className =
+        `supply-request-card ${statusClass}${
+          priorityClass === "urgent"
+            ? " urgent"
+            : ""
+        }`;
+
+
+
+      // ------------------------------------------------------
+      // HEADER
+      // ------------------------------------------------------
+
+      const head =
+        document.createElement(
+          "div"
+        );
+
+
+      head.className =
+        "supply-request-head";
+
+
+      const left =
+        document.createElement(
+          "div"
+        );
+
+
+      const title =
+        document.createElement(
+          "h3"
+        );
+
+
+      title.className =
+        "supply-request-title";
+
+
+      title.textContent =
+        request.item_name
+        ||
+        "Supply Request";
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+
+      meta.className =
+        "supply-request-meta";
+
+
+      const metaParts =
+        [];
+
+
+      if (
+        request.category
+      ) {
+
+        metaParts.push(
+          request.category
+        );
+
+      }
+
+
+      if (
+        request.requested_at
+      ) {
+
+        metaParts.push(
+          formatDateTime(
+            request.requested_at
+          )
+        );
+
+      }
+
+
+      meta.textContent =
+        metaParts.join(
+          " • "
+        );
+
+
+      left.append(
+        title,
+        meta
+      );
+
+
+
+      // ------------------------------------------------------
+      // CHIPS
+      // ------------------------------------------------------
+
+      const chips =
+        document.createElement(
+          "div"
+        );
+
+
+      chips.className =
+        "supply-request-chips";
+
+
+      const statusChip =
+        document.createElement(
+          "span"
+        );
+
+
+      statusChip.className =
+        `supply-chip ${statusClass}`;
+
+
+      statusChip.textContent =
+        supplyLabel(
+          request.status
+        );
+
+
+      const priorityChip =
+        document.createElement(
+          "span"
+        );
+
+
+      priorityChip.className =
+        `supply-chip ${priorityClass}`;
+
+
+      priorityChip.textContent =
+        `${supplyLabel(
+          request.priority
+        )} Priority`;
+
+
+      chips.append(
+        statusChip,
+        priorityChip
+      );
+
+
+      head.append(
+        left,
+        chips
+      );
+
+
+
+      // ------------------------------------------------------
+      // BODY
+      // ------------------------------------------------------
+
+      const body =
+        document.createElement(
+          "div"
+        );
+
+
+      body.className =
+        "supply-request-body";
+
+
+      const details =
+        document.createElement(
+          "div"
+        );
+
+
+      details.className =
+        "supply-detail-grid";
+
+
+      addSupplyDetail(
+        details,
+        "Supply Item",
+        request.item_name
+      );
+
+
+      addSupplyDetail(
+        details,
+        "Category",
+        request.category
+      );
+
+
+      addSupplyDetail(
+        details,
+        "Quantity Requested",
+        `${formatSupplyQuantity(
+          requestedQuantity
+        )} ${request.unit || "each"}`
+      );
+
+
+      addSupplyDetail(
+        details,
+        "Quantity Fulfilled",
+        `${formatSupplyQuantity(
+          fulfilledQuantity
+        )} ${request.unit || "each"}`
+      );
+
+
+      addSupplyDetail(
+        details,
+        "Requesting Area",
+        request.requesting_area
+      );
+
+
+      addSupplyDetail(
+        details,
+        "Requested For",
+        request.requested_for
+      );
+
+
+      addSupplyDetail(
+        details,
+        "Status",
+        supplyLabel(
+          request.status
+        )
+      );
+
+
+      addSupplyDetail(
+        details,
+        "Priority",
+        supplyLabel(
+          request.priority
+        )
+      );
+
+
+      addSupplyDetail(
+        details,
+        "Entered By",
+        request.created_by_name
+      );
+
+
+      if (
+        request.requested_at
+      ) {
+
+        addSupplyDetail(
+          details,
+          "Requested",
+          formatDateTime(
+            request.requested_at
+          )
+        );
+
+      }
+
+
+      if (
+        request.updated_by_name
+      ) {
+
+        addSupplyDetail(
+          details,
+          "Last Updated By",
+          request.updated_by_name
+        );
+
+      }
+
+
+      if (
+        request.updated_at
+      ) {
+
+        addSupplyDetail(
+          details,
+          "Last Updated",
+          formatDateTime(
+            request.updated_at
+          )
+        );
+
+      }
+
+
+      if (
+        request.fulfilled_at
+      ) {
+
+        addSupplyDetail(
+          details,
+          "Fulfilled",
+          formatDateTime(
+            request.fulfilled_at
+          )
+        );
+
+      }
+
+
+      body.appendChild(
+        details
+      );
+
+
+
+      // ------------------------------------------------------
+      // FULFILLMENT PROGRESS
+      // ------------------------------------------------------
+
+      const progressWrap =
+        document.createElement(
+          "div"
+        );
+
+
+      progressWrap.className =
+        "supply-progress-wrap";
+
+
+      const progressLabel =
+        document.createElement(
+          "div"
+        );
+
+
+      progressLabel.className =
+        "supply-progress-label";
+
+
+      const progressText =
+        document.createElement(
+          "span"
+        );
+
+
+      progressText.textContent =
+        "Fulfillment Progress";
+
+
+      const progressValue =
+        document.createElement(
+          "span"
+        );
+
+
+      progressValue.textContent =
+        `${formatSupplyQuantity(
+          fulfilledQuantity
+        )} of ${formatSupplyQuantity(
+          requestedQuantity
+        )} ${request.unit || "each"}`;
+
+
+      progressLabel.append(
+        progressText,
+        progressValue
+      );
+
+
+      const progressTrack =
+        document.createElement(
+          "div"
+        );
+
+
+      progressTrack.className =
+        "supply-progress-track";
+
+
+      const progressFill =
+        document.createElement(
+          "div"
+        );
+
+
+      progressFill.className =
+        "supply-progress-fill";
+
+
+      progressFill.style.width =
+        `${fulfillmentPercent}%`;
+
+
+      progressTrack.appendChild(
+        progressFill
+      );
+
+
+      progressWrap.append(
+        progressLabel,
+        progressTrack
+      );
+
+
+      body.appendChild(
+        progressWrap
+      );
+
+
+
+      // ------------------------------------------------------
+      // FULFILLMENT NOTES
+      // ------------------------------------------------------
+
+      if (
+        request.fulfillment_notes
+      ) {
+
+        const box =
+          document.createElement(
+            "div"
+          );
+
+
+        box.className =
+          "supply-fulfillment-box";
+
+
+        const label =
+          document.createElement(
+            "strong"
+          );
+
+
+        label.textContent =
+          "Fulfillment Notes";
+
+
+        const text =
+          document.createElement(
+            "div"
+          );
+
+
+        text.textContent =
+          request.fulfillment_notes;
+
+
+        box.append(
+          label,
+          text
+        );
+
+
+        body.appendChild(
+          box
+        );
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // OPERATIONAL NOTES
+      // ------------------------------------------------------
+
+      if (
+        request.operational_notes
+      ) {
+
+        const box =
+          document.createElement(
+            "div"
+          );
+
+
+        box.className =
+          "supply-notes-box";
+
+
+        const label =
+          document.createElement(
+            "strong"
+          );
+
+
+        label.textContent =
+          "Operational Notes";
+
+
+        const text =
+          document.createElement(
+            "div"
+          );
+
+
+        text.textContent =
+          request.operational_notes;
+
+
+        box.append(
+          label,
+          text
+        );
+
+
+        body.appendChild(
+          box
+        );
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // EDIT
+      // ------------------------------------------------------
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+
+      actions.className =
+        "supply-card-actions";
+
+
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+
+      editButton.className =
+        "button secondary";
+
+
+      editButton.type =
+        "button";
+
+
+      editButton.textContent =
+        "Edit Request";
+
+
+      editButton.addEventListener(
+
+        "click",
+
+        () =>
+          beginSupplyEdit(
+            request.supply_request_id
+          )
+
+      );
+
+
+      actions.appendChild(
+        editButton
+      );
+
+
+      body.appendChild(
+        actions
+      );
+
+
+      card.append(
+        head,
+        body
+      );
+
+
+      el.supplyRequestList
+        .appendChild(
+          card
+        );
+
+    }
+  );
+
+}
+
+
+
+// ==========================================================
+// LOAD SUPPLY REQUESTS
+// ==========================================================
+
+async function loadSupplyRequests(
+  showSuccess = false
+) {
+
+  if (
+    !shiftInstanceId
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    el.refreshSupplyRequestsButton
+  ) {
+
+    el.refreshSupplyRequestsButton.disabled =
+      true;
+
+
+    el.refreshSupplyRequestsButton.textContent =
+      "Refreshing…";
+
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "get_daily_activity_supply_requests",
+
+      {
+        p_shift_id:
+          shiftInstanceId
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    renderSupplyRequests(
+      data
+    );
+
+
+    if (
+      showSuccess
+    ) {
+
+      showSupplyMessage(
+        "Supply Requests refreshed successfully.",
+        "success"
+      );
+
+    }
+
+    else {
+
+      showSupplyMessage();
+
+    }
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Daily Activity Supply Request error:",
+      error
+    );
+
+
+    showSupplyMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to load Supply Requests.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    if (
+      el.refreshSupplyRequestsButton
+    ) {
+
+      el.refreshSupplyRequestsButton.disabled =
+        false;
+
+
+      el.refreshSupplyRequestsButton.textContent =
+        "Refresh Supplies";
+
+    }
+
+  }
+
+}
+
+
+
+// ==========================================================
+// SAVE SUPPLY REQUEST
+// ==========================================================
+
+async function saveSupplyRequest() {
+
+  const itemName =
+    el.supplyItemName
+      ?.value
+      ?.trim()
+    ||
+    "";
+
+
+  const quantityRequested =
+    supplyNumber(
+      el.supplyQuantityRequested
+        ?.value
+    );
+
+
+  const quantityFulfilled =
+    supplyNumber(
+      el.supplyQuantityFulfilled
+        ?.value
+    );
+
+
+  if (
+    itemName.length < 2
+  ) {
+
+    showSupplyMessage(
+      "Enter the supply item before saving.",
+      "error"
+    );
+
+
+    el.supplyItemName
+      ?.focus();
+
+
+    return;
+
+  }
+
+
+  if (
+    quantityRequested <= 0
+  ) {
+
+    showSupplyMessage(
+      "Requested quantity must be greater than zero.",
+      "error"
+    );
+
+
+    el.supplyQuantityRequested
+      ?.focus();
+
+
+    return;
+
+  }
+
+
+  if (
+    quantityFulfilled < 0
+  ) {
+
+    showSupplyMessage(
+      "Fulfilled quantity cannot be negative.",
+      "error"
+    );
+
+
+    el.supplyQuantityFulfilled
+      ?.focus();
+
+
+    return;
+
+  }
+
+
+  const requestId =
+    el.supplyRequestId
+      ?.value
+      ?.trim()
+    ||
+    null;
+
+
+  if (
+    el.saveSupplyRequestButton
+  ) {
+
+    el.saveSupplyRequestButton.disabled =
+      true;
+
+
+    el.saveSupplyRequestButton.textContent =
+      requestId
+        ? "Saving Update…"
+        : "Adding Request…";
+
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "save_daily_activity_supply_request",
+
+      {
+
+        p_shift_id:
+          shiftInstanceId,
+
+        p_supply_request_id:
+          requestId,
+
+        p_item_name:
+          itemName,
+
+        p_category:
+          el.supplyCategory
+            ?.value
+            ?.trim()
+          ||
+          null,
+
+        p_quantity_requested:
+          quantityRequested,
+
+        p_unit:
+          el.supplyUnit
+            ?.value
+            ?.trim()
+          ||
+          "each",
+
+        p_requesting_area:
+          el.supplyRequestingArea
+            ?.value
+            ?.trim()
+          ||
+          null,
+
+        p_requested_for:
+          el.supplyRequestedFor
+            ?.value
+            ?.trim()
+          ||
+          null,
+
+        p_priority:
+          el.supplyPriority
+            ?.value
+          ||
+          "normal",
+
+        p_status:
+          el.supplyStatus
+            ?.value
+          ||
+          "requested",
+
+        p_quantity_fulfilled:
+          quantityFulfilled,
+
+        p_fulfillment_notes:
+          el.supplyFulfillmentNotes
+            ?.value
+            ?.trim()
+          ||
+          null,
+
+        p_operational_notes:
+          el.supplyOperationalNotes
+            ?.value
+            ?.trim()
+          ||
+          null
+
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    resetSupplyForm();
+
+
+    await loadSupplyRequests();
+
+
+    showSupplyMessage(
+
+      requestId
+
+        ? "Supply Request updated successfully."
+
+        : "Supply Request added successfully.",
+
+      "success"
+
+    );
+
+
+    return data;
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Save Supply Request error:",
+      error
+    );
+
+
+    showSupplyMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to save the Supply Request.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    if (
+      el.saveSupplyRequestButton
+    ) {
+
+      el.saveSupplyRequestButton.disabled =
+        false;
+
+
+      el.saveSupplyRequestButton.textContent =
+
+        el.supplyRequestId
+          ?.value
+
+          ? "Save Supply Update"
+
+          : "Add Supply Request";
+
+    }
+
+  }
+
+}
   
   // ==========================================================
   // RETURN LINK
