@@ -67,7 +67,13 @@
   let currentProfile =
     null;
 
+const pageParams =
+  new URLSearchParams(
+    window.location.search
+  );
 
+const shiftInstanceId =
+  pageParams.get("shift_id");
   // ========================================================
   // DOM
   // ========================================================
