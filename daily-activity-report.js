@@ -7855,6 +7855,1674 @@ async function saveSupplyRequest() {
   }
 
 }
+
+// ==========================================================
+// MANAGER CONFIDENTIAL STATE
+// ==========================================================
+
+let confidentialEntries =
+  [];
+
+
+
+// ==========================================================
+// CONFIDENTIAL MESSAGE
+// ==========================================================
+
+function showConfidentialMessage(
+  message = "",
+  type = "info"
+) {
+
+  if (
+    !el.confidentialMessage
+  ) {
+
+    return;
+
+  }
+
+
+  el.confidentialMessage.textContent =
+    message;
+
+
+  el.confidentialMessage.className =
+
+    message
+
+      ? `message show ${type}`
+
+      : "message";
+
+}
+
+
+
+// ==========================================================
+// CONFIDENTIAL HELPERS
+// ==========================================================
+
+function confidentialLabel(
+  value
+) {
+
+  return String(
+    value
+    ??
+    ""
+  )
+    .replaceAll(
+      "_",
+      " "
+    )
+    .replace(
+      /\b\w/g,
+      character =>
+        character.toUpperCase()
+    );
+
+}
+
+
+
+function toLocalDateTimeInput(
+  value
+) {
+
+  if (
+    !value
+  ) {
+
+    return "";
+
+  }
+
+
+  const date =
+    new Date(
+      value
+    );
+
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+
+    return "";
+
+  }
+
+
+  const pad =
+    number =>
+      String(
+        number
+      ).padStart(
+        2,
+        "0"
+      );
+
+
+  return (
+    `${date.getFullYear()}-`
+    +
+    `${pad(
+      date.getMonth() + 1
+    )}-`
+    +
+    `${pad(
+      date.getDate()
+    )}T`
+    +
+    `${pad(
+      date.getHours()
+    )}:`
+    +
+    `${pad(
+      date.getMinutes()
+    )}`
+  );
+
+}
+
+
+
+function confidentialDateTimeToIso(
+  value
+) {
+
+  if (
+    !value
+  ) {
+
+    return null;
+
+  }
+
+
+  const date =
+    new Date(
+      value
+    );
+
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+
+    return null;
+
+  }
+
+
+  return date.toISOString();
+
+}
+
+
+
+function addConfidentialDetail(
+  container,
+  label,
+  value
+) {
+
+  if (
+    value === null
+    ||
+    value === undefined
+    ||
+    value === ""
+  ) {
+
+    return;
+
+  }
+
+
+  const box =
+    document.createElement(
+      "div"
+    );
+
+
+  box.className =
+    "confidential-detail-box";
+
+
+  const name =
+    document.createElement(
+      "span"
+    );
+
+
+  name.textContent =
+    label;
+
+
+  const content =
+    document.createElement(
+      "strong"
+    );
+
+
+  content.textContent =
+    String(
+      value
+    );
+
+
+  box.append(
+    name,
+    content
+  );
+
+
+  container.appendChild(
+    box
+  );
+
+}
+
+
+
+// ==========================================================
+// FOLLOW-UP FIELD DISPLAY
+// ==========================================================
+
+function syncConfidentialFollowUpField() {
+
+  if (
+    !el.confidentialFollowUpDateField
+  ) {
+
+    return;
+
+  }
+
+
+  const required =
+    Boolean(
+      el.confidentialFollowUpRequired
+        ?.checked
+    );
+
+
+  el.confidentialFollowUpDateField.hidden =
+    !required;
+
+
+  if (
+    !required
+    &&
+    el.confidentialFollowUpDate
+  ) {
+
+    el.confidentialFollowUpDate.value =
+      "";
+
+  }
+
+}
+
+
+
+// ==========================================================
+// RESET CONFIDENTIAL FORM
+// ==========================================================
+
+function resetConfidentialForm() {
+
+  if (
+    !hasManagerConfidentialAccess
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    el.confidentialLogId
+  ) {
+
+    el.confidentialLogId.value =
+      "";
+
+  }
+
+
+  if (
+    el.confidentialSubjectUserId
+  ) {
+
+    el.confidentialSubjectUserId.value =
+      "";
+
+  }
+
+
+  if (
+    el.confidentialEntryType
+  ) {
+
+    el.confidentialEntryType.value =
+      "";
+
+  }
+
+
+  if (
+    el.confidentialSubjectName
+  ) {
+
+    el.confidentialSubjectName.value =
+      "";
+
+  }
+
+
+  if (
+    el.confidentialEmployeeNumber
+  ) {
+
+    el.confidentialEmployeeNumber.value =
+      "";
+
+  }
+
+
+  if (
+    el.confidentialStatus
+  ) {
+
+    el.confidentialStatus.value =
+      "open";
+
+  }
+
+
+  if (
+    el.confidentialOccurredAt
+  ) {
+
+    el.confidentialOccurredAt.value =
+      "";
+
+  }
+
+
+  if (
+    el.confidentialTitle
+  ) {
+
+    el.confidentialTitle.value =
+      "";
+
+  }
+
+
+  if (
+    el.confidentialDetails
+  ) {
+
+    el.confidentialDetails.value =
+      "";
+
+  }
+
+
+  if (
+    el.confidentialActionTaken
+  ) {
+
+    el.confidentialActionTaken.value =
+      "";
+
+  }
+
+
+  if (
+    el.confidentialFollowUpRequired
+  ) {
+
+    el.confidentialFollowUpRequired.checked =
+      false;
+
+  }
+
+
+  if (
+    el.confidentialFollowUpDate
+  ) {
+
+    el.confidentialFollowUpDate.value =
+      "";
+
+  }
+
+
+  syncConfidentialFollowUpField();
+
+
+  if (
+    el.confidentialFormTitle
+  ) {
+
+    el.confidentialFormTitle.textContent =
+      "Add Confidential Entry";
+
+  }
+
+
+  if (
+    el.saveConfidentialButton
+  ) {
+
+    el.saveConfidentialButton.textContent =
+      "Add Confidential Entry";
+
+  }
+
+
+  if (
+    el.cancelConfidentialEditButton
+  ) {
+
+    el.cancelConfidentialEditButton.hidden =
+      true;
+
+  }
+
+}
+
+
+
+// ==========================================================
+// BEGIN CONFIDENTIAL EDIT
+// ==========================================================
+
+function beginConfidentialEdit(
+  entryId
+) {
+
+  if (
+    !hasManagerConfidentialAccess
+  ) {
+
+    return;
+
+  }
+
+
+  const entry =
+    confidentialEntries.find(
+
+      item =>
+        item.confidential_log_id ===
+        entryId
+
+    );
+
+
+  if (
+    !entry
+  ) {
+
+    showConfidentialMessage(
+      "Unable to locate the selected confidential entry.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  el.confidentialLogId.value =
+    entry.confidential_log_id
+    ||
+    "";
+
+
+  el.confidentialSubjectUserId.value =
+    entry.subject_user_id
+    ||
+    "";
+
+
+  el.confidentialEntryType.value =
+    entry.entry_type
+    ||
+    "";
+
+
+  el.confidentialSubjectName.value =
+    entry.subject_name
+    ||
+    "";
+
+
+  el.confidentialEmployeeNumber.value =
+    entry.subject_employee_number
+    ||
+    "";
+
+
+  el.confidentialStatus.value =
+    entry.status
+    ||
+    "open";
+
+
+  el.confidentialOccurredAt.value =
+    toLocalDateTimeInput(
+      entry.occurred_at
+    );
+
+
+  el.confidentialTitle.value =
+    entry.title
+    ||
+    "";
+
+
+  el.confidentialDetails.value =
+    entry.details
+    ||
+    "";
+
+
+  el.confidentialActionTaken.value =
+    entry.action_taken
+    ||
+    "";
+
+
+  el.confidentialFollowUpRequired.checked =
+    Boolean(
+      entry.follow_up_required
+    );
+
+
+  el.confidentialFollowUpDate.value =
+    entry.follow_up_date
+    ||
+    "";
+
+
+  syncConfidentialFollowUpField();
+
+
+  el.confidentialFormTitle.textContent =
+    "Edit Confidential Entry";
+
+
+  el.saveConfidentialButton.textContent =
+    "Save Confidential Update";
+
+
+  el.cancelConfidentialEditButton.hidden =
+    false;
+
+
+  el.confidentialForm
+    ?.scrollIntoView({
+
+      behavior:
+        "smooth",
+
+      block:
+        "start"
+
+    });
+
+
+  el.confidentialEntryType
+    ?.focus();
+
+}
+
+
+
+// ==========================================================
+// RENDER CONFIDENTIAL ENTRIES
+// ==========================================================
+
+function renderConfidentialEntries(
+  data
+) {
+
+  if (
+    !hasManagerConfidentialAccess
+  ) {
+
+    return;
+
+  }
+
+
+  const summary =
+    data?.summary
+    ||
+    {};
+
+
+  confidentialEntries =
+    data?.items
+    ||
+    [];
+
+
+  el.confidentialTotalCount.textContent =
+    summary.total
+    ??
+    0;
+
+
+  el.confidentialOpenCount.textContent =
+    summary.open
+    ??
+    0;
+
+
+  el.confidentialMonitoringCount.textContent =
+    summary.monitoring
+    ??
+    0;
+
+
+  el.confidentialFollowUpCount.textContent =
+    summary.follow_up
+    ??
+    0;
+
+
+  el.confidentialCompletedCount.textContent =
+    summary.completed
+    ??
+    0;
+
+
+  el.confidentialEntryList.innerHTML =
+    "";
+
+
+  if (
+    !confidentialEntries.length
+  ) {
+
+    el.confidentialEntryList.innerHTML =
+      `
+        <div class="empty-state">
+          No confidential management entries
+          are associated with this shift.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  confidentialEntries.forEach(
+    entry => {
+
+      const status =
+        entry.status
+        ||
+        "open";
+
+
+      const card =
+        document.createElement(
+          "article"
+        );
+
+
+      card.className =
+        `confidential-entry-card ${status}`;
+
+
+
+      // ------------------------------------------------------
+      // HEADER
+      // ------------------------------------------------------
+
+      const head =
+        document.createElement(
+          "div"
+        );
+
+
+      head.className =
+        "confidential-entry-head";
+
+
+      const left =
+        document.createElement(
+          "div"
+        );
+
+
+      const title =
+        document.createElement(
+          "h3"
+        );
+
+
+      title.className =
+        "confidential-entry-title";
+
+
+      title.textContent =
+        entry.title
+        ||
+        "Confidential Entry";
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+
+      meta.className =
+        "confidential-entry-meta";
+
+
+      const metaParts =
+        [];
+
+
+      if (
+        entry.subject_name
+      ) {
+
+        metaParts.push(
+          entry.subject_name
+        );
+
+      }
+
+
+      if (
+        entry.entry_type
+      ) {
+
+        metaParts.push(
+          confidentialLabel(
+            entry.entry_type
+          )
+        );
+
+      }
+
+
+      if (
+        entry.occurred_at
+      ) {
+
+        metaParts.push(
+          formatDateTime(
+            entry.occurred_at
+          )
+        );
+
+      }
+
+
+      meta.textContent =
+        metaParts.join(
+          " • "
+        );
+
+
+      left.append(
+        title,
+        meta
+      );
+
+
+
+      // ------------------------------------------------------
+      // CHIPS
+      // ------------------------------------------------------
+
+      const chips =
+        document.createElement(
+          "div"
+        );
+
+
+      chips.className =
+        "confidential-entry-chips";
+
+
+      const restrictedChip =
+        document.createElement(
+          "span"
+        );
+
+
+      restrictedChip.className =
+        "confidential-chip restricted";
+
+
+      restrictedChip.textContent =
+        "Restricted";
+
+
+      const statusChip =
+        document.createElement(
+          "span"
+        );
+
+
+      statusChip.className =
+        `confidential-chip ${status}`;
+
+
+      statusChip.textContent =
+        confidentialLabel(
+          status
+        );
+
+
+      chips.append(
+        restrictedChip,
+        statusChip
+      );
+
+
+      if (
+        entry.follow_up_required
+        &&
+        status !== "completed"
+      ) {
+
+        const followUpChip =
+          document.createElement(
+            "span"
+          );
+
+
+        followUpChip.className =
+          "confidential-chip follow-up";
+
+
+        followUpChip.textContent =
+          "Follow-Up Required";
+
+
+        chips.appendChild(
+          followUpChip
+        );
+
+      }
+
+
+      head.append(
+        left,
+        chips
+      );
+
+
+
+      // ------------------------------------------------------
+      // BODY
+      // ------------------------------------------------------
+
+      const body =
+        document.createElement(
+          "div"
+        );
+
+
+      body.className =
+        "confidential-entry-body";
+
+
+      const details =
+        document.createElement(
+          "div"
+        );
+
+
+      details.className =
+        "confidential-detail-grid";
+
+
+      addConfidentialDetail(
+        details,
+        "Employee / Subject",
+        entry.subject_name
+      );
+
+
+      addConfidentialDetail(
+        details,
+        "Employee Number",
+        entry.subject_employee_number
+      );
+
+
+      addConfidentialDetail(
+        details,
+        "Entry Type",
+        confidentialLabel(
+          entry.entry_type
+        )
+      );
+
+
+      addConfidentialDetail(
+        details,
+        "Status",
+        confidentialLabel(
+          entry.status
+        )
+      );
+
+
+      if (
+        entry.occurred_at
+      ) {
+
+        addConfidentialDetail(
+          details,
+          "Occurred",
+          formatDateTime(
+            entry.occurred_at
+          )
+        );
+
+      }
+
+
+      addConfidentialDetail(
+        details,
+        "Entered By",
+        entry.created_by_name
+      );
+
+
+      if (
+        entry.updated_by_name
+      ) {
+
+        addConfidentialDetail(
+          details,
+          "Last Updated By",
+          entry.updated_by_name
+        );
+
+      }
+
+
+      if (
+        entry.updated_at
+      ) {
+
+        addConfidentialDetail(
+          details,
+          "Last Updated",
+          formatDateTime(
+            entry.updated_at
+          )
+        );
+
+      }
+
+
+      body.appendChild(
+        details
+      );
+
+
+
+      // ------------------------------------------------------
+      // DETAILS
+      // ------------------------------------------------------
+
+      if (
+        entry.details
+      ) {
+
+        const detailsBox =
+          document.createElement(
+            "div"
+          );
+
+
+        detailsBox.className =
+          "confidential-details-box";
+
+
+        const detailsLabel =
+          document.createElement(
+            "strong"
+          );
+
+
+        detailsLabel.textContent =
+          "Confidential Details";
+
+
+        const detailsText =
+          document.createElement(
+            "div"
+          );
+
+
+        detailsText.textContent =
+          entry.details;
+
+
+        detailsBox.append(
+          detailsLabel,
+          detailsText
+        );
+
+
+        body.appendChild(
+          detailsBox
+        );
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // ACTION TAKEN
+      // ------------------------------------------------------
+
+      if (
+        entry.action_taken
+      ) {
+
+        const actionBox =
+          document.createElement(
+            "div"
+          );
+
+
+        actionBox.className =
+          "confidential-action-box";
+
+
+        const actionLabel =
+          document.createElement(
+            "strong"
+          );
+
+
+        actionLabel.textContent =
+          "Action Taken";
+
+
+        const actionText =
+          document.createElement(
+            "div"
+          );
+
+
+        actionText.textContent =
+          entry.action_taken;
+
+
+        actionBox.append(
+          actionLabel,
+          actionText
+        );
+
+
+        body.appendChild(
+          actionBox
+        );
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // FOLLOW-UP
+      // ------------------------------------------------------
+
+      if (
+        entry.follow_up_required
+      ) {
+
+        const followUpBox =
+          document.createElement(
+            "div"
+          );
+
+
+        followUpBox.className =
+          "confidential-follow-up-box";
+
+
+        const followUpLabel =
+          document.createElement(
+            "strong"
+          );
+
+
+        followUpLabel.textContent =
+          "Management Follow-Up";
+
+
+        const followUpText =
+          document.createElement(
+            "div"
+          );
+
+
+        followUpText.textContent =
+          entry.follow_up_date
+
+            ? `Follow-up requested for ${entry.follow_up_date}.`
+
+            : "Follow-up is required; no date has been assigned.";
+
+
+        followUpBox.append(
+          followUpLabel,
+          followUpText
+        );
+
+
+        body.appendChild(
+          followUpBox
+        );
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // EDIT ACTION
+      // ------------------------------------------------------
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+
+      actions.className =
+        "confidential-card-actions";
+
+
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+
+      editButton.className =
+        "button secondary";
+
+
+      editButton.type =
+        "button";
+
+
+      editButton.textContent =
+        "Edit Confidential Entry";
+
+
+      editButton.addEventListener(
+
+        "click",
+
+        () =>
+          beginConfidentialEdit(
+            entry.confidential_log_id
+          )
+
+      );
+
+
+      actions.appendChild(
+        editButton
+      );
+
+
+      body.appendChild(
+        actions
+      );
+
+
+      card.append(
+        head,
+        body
+      );
+
+
+      el.confidentialEntryList
+        .appendChild(
+          card
+        );
+
+    }
+  );
+
+}
+
+
+
+// ==========================================================
+// LOAD CONFIDENTIAL ENTRIES
+// ==========================================================
+
+async function loadConfidentialEntries(
+  showSuccess = false
+) {
+
+  if (
+    !hasManagerConfidentialAccess
+    ||
+    !shiftInstanceId
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    el.refreshConfidentialButton
+  ) {
+
+    el.refreshConfidentialButton.disabled =
+      true;
+
+
+    el.refreshConfidentialButton.textContent =
+      "Refreshing…";
+
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "get_daily_activity_manager_confidential_logs",
+
+      {
+        p_shift_id:
+          shiftInstanceId
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    renderConfidentialEntries(
+      data
+    );
+
+
+    if (
+      showSuccess
+    ) {
+
+      showConfidentialMessage(
+        "Confidential management log refreshed successfully.",
+        "success"
+      );
+
+    }
+
+    else {
+
+      showConfidentialMessage();
+
+    }
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Manager Confidential Log error:",
+      error
+    );
+
+
+    showConfidentialMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to load the confidential management log.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    if (
+      el.refreshConfidentialButton
+    ) {
+
+      el.refreshConfidentialButton.disabled =
+        false;
+
+
+      el.refreshConfidentialButton.textContent =
+        "Refresh Confidential Log";
+
+    }
+
+  }
+
+}
+
+
+
+// ==========================================================
+// SAVE CONFIDENTIAL ENTRY
+// ==========================================================
+
+async function saveConfidentialEntry() {
+
+  if (
+    !hasManagerConfidentialAccess
+  ) {
+
+    return;
+
+  }
+
+
+  const entryType =
+    el.confidentialEntryType
+      ?.value
+    ||
+    "";
+
+
+  const subjectName =
+    el.confidentialSubjectName
+      ?.value
+      ?.trim()
+    ||
+    "";
+
+
+  const title =
+    el.confidentialTitle
+      ?.value
+      ?.trim()
+    ||
+    "";
+
+
+  const details =
+    el.confidentialDetails
+      ?.value
+      ?.trim()
+    ||
+    "";
+
+
+  if (
+    !entryType
+  ) {
+
+    showConfidentialMessage(
+      "Select a confidential entry type.",
+      "error"
+    );
+
+
+    el.confidentialEntryType
+      ?.focus();
+
+
+    return;
+
+  }
+
+
+  if (
+    subjectName.length < 2
+  ) {
+
+    showConfidentialMessage(
+      "Enter the employee or subject name.",
+      "error"
+    );
+
+
+    el.confidentialSubjectName
+      ?.focus();
+
+
+    return;
+
+  }
+
+
+  if (
+    title.length < 2
+  ) {
+
+    showConfidentialMessage(
+      "Enter a title for the confidential entry.",
+      "error"
+    );
+
+
+    el.confidentialTitle
+      ?.focus();
+
+
+    return;
+
+  }
+
+
+  if (
+    details.length < 3
+  ) {
+
+    showConfidentialMessage(
+      "Enter the confidential details before saving.",
+      "error"
+    );
+
+
+    el.confidentialDetails
+      ?.focus();
+
+
+    return;
+
+  }
+
+
+  const entryId =
+    el.confidentialLogId
+      ?.value
+      ?.trim()
+    ||
+    null;
+
+
+  const followUpRequired =
+    Boolean(
+      el.confidentialFollowUpRequired
+        ?.checked
+    );
+
+
+  if (
+    el.saveConfidentialButton
+  ) {
+
+    el.saveConfidentialButton.disabled =
+      true;
+
+
+    el.saveConfidentialButton.textContent =
+      entryId
+
+        ? "Saving Update…"
+
+        : "Adding Entry…";
+
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "save_daily_activity_manager_confidential_log",
+
+      {
+
+        p_shift_id:
+          shiftInstanceId,
+
+        p_confidential_log_id:
+          entryId,
+
+        p_entry_type:
+          entryType,
+
+        p_subject_user_id:
+          el.confidentialSubjectUserId
+            ?.value
+            ?.trim()
+          ||
+          null,
+
+        p_subject_name:
+          subjectName,
+
+        p_subject_employee_number:
+          el.confidentialEmployeeNumber
+            ?.value
+            ?.trim()
+          ||
+          null,
+
+        p_title:
+          title,
+
+        p_details:
+          details,
+
+        p_action_taken:
+          el.confidentialActionTaken
+            ?.value
+            ?.trim()
+          ||
+          null,
+
+        p_follow_up_required:
+          followUpRequired,
+
+        p_follow_up_date:
+          followUpRequired
+
+            ? (
+                el.confidentialFollowUpDate
+                  ?.value
+                ||
+                null
+              )
+
+            : null,
+
+        p_status:
+          el.confidentialStatus
+            ?.value
+          ||
+          "open",
+
+        p_occurred_at:
+          confidentialDateTimeToIso(
+            el.confidentialOccurredAt
+              ?.value
+          )
+
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    resetConfidentialForm();
+
+
+    await loadConfidentialEntries();
+
+
+    showConfidentialMessage(
+
+      entryId
+
+        ? "Confidential entry updated successfully."
+
+        : "Confidential entry added successfully.",
+
+      "success"
+
+    );
+
+
+    return data;
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Save Manager Confidential Entry error:",
+      error
+    );
+
+
+    showConfidentialMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to save the confidential management entry.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    if (
+      el.saveConfidentialButton
+    ) {
+
+      el.saveConfidentialButton.disabled =
+        false;
+
+
+      el.saveConfidentialButton.textContent =
+
+        el.confidentialLogId
+          ?.value
+
+          ? "Save Confidential Update"
+
+          : "Add Confidential Entry";
+
+    }
+
+  }
+
+}
   
   // ==========================================================
   // RETURN LINK
