@@ -2723,6 +2723,412 @@
   }
 
 }
+
+/* ==========================================================
+   TSI REQUESTS
+   ========================================================== */
+
+.tsi-summary-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 18px;
+}
+
+
+.tsi-summary {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--panel);
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+
+.tsi-summary span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+
+.tsi-summary strong {
+  font-size: 28px;
+  line-height: 1;
+  margin-top: 10px;
+}
+
+
+.tsi-summary.total {
+  border-left: 4px solid #2563eb;
+}
+
+
+.tsi-summary.open {
+  border-left: 4px solid #d97706;
+}
+
+
+.tsi-summary.progress {
+  border-left: 4px solid #7c3aed;
+}
+
+
+.tsi-summary.resolved {
+  border-left: 4px solid #16a34a;
+}
+
+
+.tsi-summary.urgent {
+  border-left: 4px solid #dc2626;
+}
+
+
+
+/* ==========================================================
+   ENTRY PANEL
+   ========================================================== */
+
+.tsi-entry-panel {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+
+.tsi-entry-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+
+.tsi-entry-heading h3 {
+  margin: 3px 0 0;
+  font-size: 18px;
+}
+
+
+.tsi-form-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+
+.tsi-description-field {
+  grid-column: span 3;
+}
+
+
+.tsi-form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+
+
+/* ==========================================================
+   REQUEST LIST
+   ========================================================== */
+
+.tsi-request-list {
+  display: grid;
+  gap: 14px;
+}
+
+
+.tsi-request-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+
+.tsi-request-card.open {
+  border-left: 4px solid #d97706;
+}
+
+
+.tsi-request-card.in-progress {
+  border-left: 4px solid #7c3aed;
+}
+
+
+.tsi-request-card.resolved {
+  border-left: 4px solid #16a34a;
+}
+
+
+.tsi-request-card.cancelled {
+  border-left: 4px solid #64748b;
+}
+
+
+.tsi-request-card.urgent {
+  box-shadow:
+    inset 0 0 0 1px rgba(220, 38, 38, 0.35);
+}
+
+
+.tsi-request-head {
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+
+.tsi-request-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+
+.tsi-request-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+
+.tsi-request-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: flex-end;
+}
+
+
+.tsi-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+
+.tsi-chip.open {
+  background: rgba(217, 119, 6, 0.14);
+  color: #d97706;
+}
+
+
+.tsi-chip.in-progress {
+  background: rgba(124, 58, 237, 0.13);
+  color: #7c3aed;
+}
+
+
+.tsi-chip.resolved {
+  background: rgba(22, 163, 74, 0.12);
+  color: #16a34a;
+}
+
+
+.tsi-chip.cancelled {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+}
+
+
+.tsi-chip.low {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+}
+
+
+.tsi-chip.normal {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+}
+
+
+.tsi-chip.high {
+  background: rgba(217, 119, 6, 0.14);
+  color: #d97706;
+}
+
+
+.tsi-chip.urgent {
+  background: rgba(220, 38, 38, 0.14);
+  color: #dc2626;
+}
+
+
+.tsi-request-body {
+  padding: 18px;
+}
+
+
+.tsi-detail-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+
+.tsi-detail-box {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: var(--surface);
+}
+
+
+.tsi-detail-box span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+
+.tsi-detail-box strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+
+.tsi-description-box,
+.tsi-notes-box {
+  margin-top: 14px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+
+.tsi-description-box strong,
+.tsi-notes-box strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+
+.tsi-card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 1100px) {
+
+  .tsi-summary-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 900px) {
+
+  .tsi-form-grid,
+  .tsi-detail-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
+  .tsi-description-field {
+    grid-column: span 2;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .tsi-summary-grid,
+  .tsi-form-grid,
+  .tsi-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .tsi-description-field {
+    grid-column: span 1;
+  }
+
+
+  .tsi-request-head {
+    flex-direction: column;
+  }
+
+
+  .tsi-request-chips {
+    justify-content: flex-start;
+  }
+
+}
+
+
+
+/* ==========================================================
+   PRINT
+   ========================================================== */
+
+@media print {
+
+  .tsi-summary-grid {
+    grid-template-columns:
+      repeat(5, minmax(0, 1fr));
+  }
+
+
+  .tsi-entry-panel,
+  #refreshTsiRequestsButton,
+  .tsi-card-actions {
+    display: none !important;
+  }
+
+
+  .tsi-detail-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
    
   </style>
 
