@@ -2930,6 +2930,347 @@
 
     </section>
 
+   <!-- ==========================================================
+     TSI REQUESTS
+     ========================================================== -->
+
+<section class="activity-section">
+
+  <div class="section-heading-row">
+
+    <div>
+
+      <div class="eyebrow">
+        Operational Support
+      </div>
+
+      <h2>
+        TSI Requests
+      </h2>
+
+      <p class="section-description">
+        Track technology support requests, ticket numbers,
+        status updates, and operational follow-up during this shift.
+      </p>
+
+    </div>
+
+
+    <button
+      id="refreshTsiRequestsButton"
+      class="button secondary"
+      type="button"
+    >
+      Refresh TSI
+    </button>
+
+  </div>
+
+
+  <div
+    id="tsiMessage"
+    class="message"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- ========================================================
+       SUMMARY COUNTERS
+       ======================================================== -->
+
+  <div class="tsi-summary-grid">
+
+    <article class="tsi-summary total">
+
+      <span>
+        Total Requests
+      </span>
+
+      <strong id="tsiTotalCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="tsi-summary open">
+
+      <span>
+        Open
+      </span>
+
+      <strong id="tsiOpenCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="tsi-summary progress">
+
+      <span>
+        In Progress
+      </span>
+
+      <strong id="tsiInProgressCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="tsi-summary resolved">
+
+      <span>
+        Resolved
+      </span>
+
+      <strong id="tsiResolvedCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="tsi-summary urgent">
+
+      <span>
+        Urgent Open
+      </span>
+
+      <strong id="tsiUrgentCount">
+        0
+      </strong>
+
+    </article>
+
+  </div>
+
+
+  <!-- ========================================================
+       TSI ENTRY FORM
+       ======================================================== -->
+
+  <div class="tsi-entry-panel">
+
+    <div class="tsi-entry-heading">
+
+      <div>
+
+        <div class="eyebrow">
+          Shift Entry
+        </div>
+
+        <h3 id="tsiFormTitle">
+          Add TSI Request
+        </h3>
+
+      </div>
+
+    </div>
+
+
+    <form
+      id="tsiRequestForm"
+      autocomplete="off"
+    >
+
+      <input
+        id="tsiRequestId"
+        type="hidden"
+      >
+
+
+      <div class="tsi-form-grid">
+
+
+        <label class="form-field">
+
+          <span>
+            Ticket Number
+          </span>
+
+          <input
+            id="tsiTicketNumber"
+            type="text"
+            placeholder="Example: INC0012345"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Request Type
+          </span>
+
+          <input
+            id="tsiRequestType"
+            type="text"
+            placeholder="Example: Workstation, Phone, Access"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Location
+          </span>
+
+          <input
+            id="tsiLocation"
+            type="text"
+            placeholder="Department, unit, room, or area"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Priority
+          </span>
+
+          <select id="tsiPriority">
+
+            <option value="low">
+              Low
+            </option>
+
+            <option
+              value="normal"
+              selected
+            >
+              Normal
+            </option>
+
+            <option value="high">
+              High
+            </option>
+
+            <option value="urgent">
+              Urgent
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Status
+          </span>
+
+          <select id="tsiStatus">
+
+            <option
+              value="open"
+              selected
+            >
+              Open
+            </option>
+
+            <option value="in_progress">
+              In Progress
+            </option>
+
+            <option value="resolved">
+              Resolved
+            </option>
+
+            <option value="cancelled">
+              Cancelled
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="form-field tsi-description-field">
+
+          <span>
+            Request Details
+          </span>
+
+          <textarea
+            id="tsiDescription"
+            rows="3"
+            required
+            placeholder="Describe the issue or support request..."
+          ></textarea>
+
+        </label>
+
+
+        <label class="form-field tsi-description-field">
+
+          <span>
+            Operational Notes
+          </span>
+
+          <textarea
+            id="tsiOperationalNotes"
+            rows="3"
+            placeholder="Add follow-up, contact, troubleshooting, or shift notes..."
+          ></textarea>
+
+        </label>
+
+      </div>
+
+
+      <div class="tsi-form-actions">
+
+        <button
+          id="saveTsiRequestButton"
+          class="button primary"
+          type="submit"
+        >
+          Add TSI Request
+        </button>
+
+
+        <button
+          id="cancelTsiEditButton"
+          class="button secondary"
+          type="button"
+          hidden
+        >
+          Cancel Edit
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+
+  <!-- ========================================================
+       TSI REQUEST LIST
+       ======================================================== -->
+
+  <div
+    id="tsiRequestList"
+    class="tsi-request-list"
+  >
+
+    <div class="empty-state">
+      Loading TSI Requests…
+    </div>
+
+  </div>
+
+</section>
+
 <!-- =====================================================
      SECURITY ALERTS
      ===================================================== -->
