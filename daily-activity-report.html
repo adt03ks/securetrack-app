@@ -2397,6 +2397,333 @@
   }
 
 }
+
+/* ==========================================================
+   DEVICE EXCEPTIONS
+   ========================================================== */
+
+.device-exception-summary-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 18px;
+}
+
+
+.device-exception-summary {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--panel);
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+
+.device-exception-summary span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+
+.device-exception-summary strong {
+  font-size: 28px;
+  line-height: 1;
+  margin-top: 10px;
+}
+
+
+.device-exception-summary.failed {
+  border-left: 4px solid #dc2626;
+}
+
+
+.device-exception-summary.reported {
+  border-left: 4px solid #2563eb;
+}
+
+
+.device-exception-summary.open {
+  border-left: 4px solid #d97706;
+}
+
+
+.device-exception-summary.critical {
+  border-left: 4px solid #991b1b;
+}
+
+
+.device-exception-list {
+  display: grid;
+  gap: 14px;
+}
+
+
+.device-exception-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+
+.device-exception-card.failed-inspection {
+  border-left: 4px solid #dc2626;
+}
+
+
+.device-exception-card.reported-issue {
+  border-left: 4px solid #2563eb;
+}
+
+
+.device-exception-head {
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border);
+}
+
+
+.device-exception-title {
+  font-size: 17px;
+  font-weight: 800;
+  margin: 0;
+}
+
+
+.device-exception-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+
+.device-exception-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+
+.device-exception-chip.failed-inspection {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+
+.device-exception-chip.reported-issue {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+}
+
+
+.device-exception-chip.low {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+}
+
+
+.device-exception-chip.medium {
+  background: rgba(217, 119, 6, 0.12);
+  color: #d97706;
+}
+
+
+.device-exception-chip.high {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+
+.device-exception-chip.critical {
+  background: rgba(127, 29, 29, 0.18);
+  color: #991b1b;
+}
+
+
+.device-exception-body {
+  padding: 18px;
+}
+
+
+.device-exception-detail-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+
+.device-exception-detail {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: var(--surface);
+}
+
+
+.device-exception-detail span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+
+.device-exception-detail strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+
+.device-checklist {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 14px;
+  background: var(--surface);
+}
+
+
+.device-checklist strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+
+.device-checklist-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+
+.device-check-item {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(100, 116, 139, 0.12);
+}
+
+
+.device-check-item.pass {
+  background: rgba(22, 163, 74, 0.12);
+  color: #16a34a;
+}
+
+
+.device-check-item.fail {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+
+.device-exception-notes {
+  margin-top: 14px;
+  padding: 13px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+
+.device-exception-notes strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+
+.device-history-link {
+  display: inline-flex;
+  margin-top: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+
+.device-history-link:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 900px) {
+
+  .device-exception-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
+  .device-exception-detail-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .device-exception-summary-grid,
+  .device-exception-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .device-exception-head {
+    flex-direction: column;
+  }
+
+}
+
+
+@media print {
+
+  .device-exception-summary-grid {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+  }
+
+
+  .device-exception-detail-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+
+  #refreshDeviceExceptionsButton {
+    display: none !important;
+  }
+
+}
+   
   </style>
 
   <title>
