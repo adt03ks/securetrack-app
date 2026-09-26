@@ -3848,7 +3848,18 @@ el.refreshSpecialAssignmentsButton
       )
 
   );
+  
+el.refreshPropertyButton
+  ?.addEventListener(
 
+    "click",
+
+    () =>
+      loadPropertyAccountability(
+        true
+      )
+
+  );
   
 el.refreshSpecialAssignmentsButton
   ?.addEventListener(
@@ -3872,7 +3883,9 @@ el.refreshSpecialAssignmentsButton
 
   loadSecurityAlerts(),
 
-  loadSpecialAssignments()
+  loadSpecialAssignments(),
+
+    loadPropertyAccountability()
 
 ]);
 
