@@ -3214,6 +3214,449 @@
 
 </section>
 
+<!-- ==========================================================
+     MANAGER CONFIDENTIAL LOG
+     ========================================================== -->
+
+<section
+  id="managerConfidentialSection"
+  class="activity-section manager-confidential-section"
+  hidden
+>
+
+  <div class="section-heading-row">
+
+    <div>
+
+      <div class="eyebrow">
+        Manager / Director / Admin Only
+      </div>
+
+      <h2>
+        Manager Confidential Log
+      </h2>
+
+      <p class="section-description">
+        Restricted management documentation for coaching,
+        counseling, performance, conduct, attendance,
+        policy follow-up, and other confidential personnel matters.
+      </p>
+
+    </div>
+
+
+    <button
+      id="refreshConfidentialButton"
+      class="button secondary"
+      type="button"
+    >
+      Refresh Confidential Log
+    </button>
+
+  </div>
+
+
+  <!-- ========================================================
+       CONFIDENTIALITY NOTICE
+       ======================================================== -->
+
+  <div class="confidential-warning">
+
+    <strong>
+      🔒 CONFIDENTIAL MANAGEMENT RECORD
+    </strong>
+
+    <span>
+      This section is restricted to Managers, Directors, and Administrators.
+      Entries are excluded from Team Lead access and will not be published
+      into the End-of-Shift Handoff.
+    </span>
+
+  </div>
+
+
+  <div
+    id="confidentialMessage"
+    class="message"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- ========================================================
+       SUMMARY COUNTERS
+       ======================================================== -->
+
+  <div class="confidential-summary-grid">
+
+    <article class="confidential-summary total">
+
+      <span>
+        Total Entries
+      </span>
+
+      <strong id="confidentialTotalCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="confidential-summary open">
+
+      <span>
+        Open
+      </span>
+
+      <strong id="confidentialOpenCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="confidential-summary monitoring">
+
+      <span>
+        Monitoring
+      </span>
+
+      <strong id="confidentialMonitoringCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="confidential-summary follow-up">
+
+      <span>
+        Follow-Up Required
+      </span>
+
+      <strong id="confidentialFollowUpCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="confidential-summary completed">
+
+      <span>
+        Completed
+      </span>
+
+      <strong id="confidentialCompletedCount">
+        0
+      </strong>
+
+    </article>
+
+  </div>
+
+
+  <!-- ========================================================
+       CONFIDENTIAL ENTRY FORM
+       ======================================================== -->
+
+  <div class="confidential-entry-panel">
+
+    <div class="confidential-entry-heading">
+
+      <div>
+
+        <div class="eyebrow">
+          Restricted Entry
+        </div>
+
+        <h3 id="confidentialFormTitle">
+          Add Confidential Entry
+        </h3>
+
+      </div>
+
+    </div>
+
+
+    <form
+      id="confidentialForm"
+      autocomplete="off"
+    >
+
+      <input
+        id="confidentialLogId"
+        type="hidden"
+      >
+
+
+      <input
+        id="confidentialSubjectUserId"
+        type="hidden"
+      >
+
+
+      <div class="confidential-form-grid">
+
+
+        <label class="form-field">
+
+          <span>
+            Entry Type
+          </span>
+
+          <select
+            id="confidentialEntryType"
+            required
+          >
+
+            <option value="">
+              Select Entry Type
+            </option>
+
+            <option value="coaching">
+              Coaching
+            </option>
+
+            <option value="verbal_counseling">
+              Verbal Counseling
+            </option>
+
+            <option value="written_counseling">
+              Written Counseling
+            </option>
+
+            <option value="performance">
+              Performance
+            </option>
+
+            <option value="policy_follow_up">
+              Policy Follow-Up
+            </option>
+
+            <option value="attendance">
+              Attendance
+            </option>
+
+            <option value="conduct">
+              Conduct
+            </option>
+
+            <option value="recognition">
+              Recognition
+            </option>
+
+            <option value="other">
+              Other
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Employee / Subject Name
+          </span>
+
+          <input
+            id="confidentialSubjectName"
+            type="text"
+            required
+            placeholder="Employee or subject name"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Employee Number
+          </span>
+
+          <input
+            id="confidentialEmployeeNumber"
+            type="text"
+            placeholder="Optional employee number"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Status
+          </span>
+
+          <select id="confidentialStatus">
+
+            <option
+              value="open"
+              selected
+            >
+              Open
+            </option>
+
+            <option value="monitoring">
+              Monitoring
+            </option>
+
+            <option value="completed">
+              Completed
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Occurred At
+          </span>
+
+          <input
+            id="confidentialOccurredAt"
+            type="datetime-local"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Entry Title
+          </span>
+
+          <input
+            id="confidentialTitle"
+            type="text"
+            required
+            placeholder="Brief description of the matter"
+          >
+
+        </label>
+
+
+        <label class="form-field confidential-wide-field">
+
+          <span>
+            Confidential Details
+          </span>
+
+          <textarea
+            id="confidentialDetails"
+            rows="5"
+            required
+            placeholder="Document the relevant confidential management information..."
+          ></textarea>
+
+        </label>
+
+
+        <label class="form-field confidential-wide-field">
+
+          <span>
+            Action Taken
+          </span>
+
+          <textarea
+            id="confidentialActionTaken"
+            rows="3"
+            placeholder="Document coaching, direction, corrective action, referral, or other management response..."
+          ></textarea>
+
+        </label>
+
+
+        <div class="confidential-follow-up-row">
+
+          <label class="confidential-check">
+
+            <input
+              id="confidentialFollowUpRequired"
+              type="checkbox"
+            >
+
+            <span>
+              Follow-Up Required
+            </span>
+
+          </label>
+
+
+          <label
+            id="confidentialFollowUpDateField"
+            class="form-field"
+            hidden
+          >
+
+            <span>
+              Follow-Up Date
+            </span>
+
+            <input
+              id="confidentialFollowUpDate"
+              type="date"
+            >
+
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <div class="confidential-form-actions">
+
+        <button
+          id="saveConfidentialButton"
+          class="button primary"
+          type="submit"
+        >
+          Add Confidential Entry
+        </button>
+
+
+        <button
+          id="cancelConfidentialEditButton"
+          class="button secondary"
+          type="button"
+          hidden
+        >
+          Cancel Edit
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+
+  <!-- ========================================================
+       CONFIDENTIAL ENTRY LIST
+       ======================================================== -->
+
+  <div
+    id="confidentialEntryList"
+    class="confidential-entry-list"
+  >
+
+    <div class="empty-state">
+      Loading confidential management records…
+    </div>
+
+  </div>
+
+</section>
+   
 /* ==========================================================
    ENTRY PANEL
    ========================================================== */
