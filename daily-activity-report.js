@@ -7885,6 +7885,54 @@ el.refreshTsiRequestsButton
       )
 
   );
+
+// ==========================================================
+// SUPPLY FORM + CONTROLS
+// ==========================================================
+
+el.supplyRequestForm
+  ?.addEventListener(
+
+    "submit",
+
+    async event => {
+
+      event.preventDefault();
+
+      await saveSupplyRequest();
+
+    }
+
+  );
+
+
+el.cancelSupplyEditButton
+  ?.addEventListener(
+
+    "click",
+
+    () => {
+
+      resetSupplyForm();
+
+      showSupplyMessage();
+
+    }
+
+  );
+
+
+el.refreshSupplyRequestsButton
+  ?.addEventListener(
+
+    "click",
+
+    () =>
+      loadSupplyRequests(
+        true
+      )
+
+  );
   
   // ==========================================================
   // INITIAL LOAD
@@ -7902,7 +7950,9 @@ await Promise.all([
 
   loadDeviceExceptions(),
 
-  loadTsiRequests()
+  loadTsiRequests(),
+
+  loadSupplyRequests()
 
 ]);
 })();
