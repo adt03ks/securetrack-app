@@ -2790,872 +2790,7 @@
   border-left: 4px solid #dc2626;
 }
 
-<!-- ==========================================================
-     SUPPLY REQUESTS
-     ========================================================== -->
 
-<section class="activity-section">
-
-  <div class="section-heading-row">
-
-    <div>
-
-      <div class="eyebrow">
-        Operational Support
-      </div>
-
-      <h2>
-        Supply Requests
-      </h2>
-
-      <p class="section-description">
-        Track supplies requested during the shift, order status,
-        partial fulfillment, completed fulfillment, and follow-up.
-      </p>
-
-    </div>
-
-
-    <button
-      id="refreshSupplyRequestsButton"
-      class="button secondary"
-      type="button"
-    >
-      Refresh Supplies
-    </button>
-
-  </div>
-
-
-  <div
-    id="supplyMessage"
-    class="message"
-    role="status"
-    aria-live="polite"
-  ></div>
-
-
-  <!-- ========================================================
-       SUMMARY COUNTERS
-       ======================================================== -->
-
-  <div class="supply-summary-grid">
-
-    <article class="supply-summary total">
-
-      <span>
-        Total Requests
-      </span>
-
-      <strong id="supplyTotalCount">
-        0
-      </strong>
-
-    </article>
-
-
-    <article class="supply-summary requested">
-
-      <span>
-        Requested
-      </span>
-
-      <strong id="supplyRequestedCount">
-        0
-      </strong>
-
-    </article>
-
-
-    <article class="supply-summary ordered">
-
-      <span>
-        Ordered
-      </span>
-
-      <strong id="supplyOrderedCount">
-        0
-      </strong>
-
-    </article>
-
-
-    <article class="supply-summary partial">
-
-      <span>
-        Partially Fulfilled
-      </span>
-
-      <strong id="supplyPartialCount">
-        0
-      </strong>
-
-    </article>
-
-
-    <article class="supply-summary fulfilled">
-
-      <span>
-        Fulfilled
-      </span>
-
-      <strong id="supplyFulfilledCount">
-        0
-      </strong>
-
-    </article>
-
-
-    <article class="supply-summary urgent">
-
-      <span>
-        Urgent Open
-      </span>
-
-      <strong id="supplyUrgentCount">
-        0
-      </strong>
-
-    </article>
-
-  </div>
-
-
-  <!-- ========================================================
-       SUPPLY REQUEST ENTRY FORM
-       ======================================================== -->
-
-  <div class="supply-entry-panel">
-
-    <div class="supply-entry-heading">
-
-      <div>
-
-        <div class="eyebrow">
-          Shift Entry
-        </div>
-
-        <h3 id="supplyFormTitle">
-          Add Supply Request
-        </h3>
-
-      </div>
-
-    </div>
-
-
-    <form
-      id="supplyRequestForm"
-      autocomplete="off"
-    >
-
-      <input
-        id="supplyRequestId"
-        type="hidden"
-      >
-
-
-      <div class="supply-form-grid">
-
-
-        <label class="form-field">
-
-          <span>
-            Supply Item
-          </span>
-
-          <input
-            id="supplyItemName"
-            type="text"
-            required
-            placeholder="Example: Radio battery"
-          >
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Category
-          </span>
-
-          <input
-            id="supplyCategory"
-            type="text"
-            placeholder="Example: Equipment, Office, PPE"
-          >
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Quantity Requested
-          </span>
-
-          <input
-            id="supplyQuantityRequested"
-            type="number"
-            min="0.01"
-            step="0.01"
-            value="1"
-            required
-          >
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Unit
-          </span>
-
-          <input
-            id="supplyUnit"
-            type="text"
-            value="each"
-            placeholder="each, box, pack, case"
-          >
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Requesting Area
-          </span>
-
-          <input
-            id="supplyRequestingArea"
-            type="text"
-            placeholder="Department, post, office, or unit"
-          >
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Requested For
-          </span>
-
-          <input
-            id="supplyRequestedFor"
-            type="text"
-            placeholder="Officer, team, department, or purpose"
-          >
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Priority
-          </span>
-
-          <select id="supplyPriority">
-
-            <option value="low">
-              Low
-            </option>
-
-            <option
-              value="normal"
-              selected
-            >
-              Normal
-            </option>
-
-            <option value="high">
-              High
-            </option>
-
-            <option value="urgent">
-              Urgent
-            </option>
-
-          </select>
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Status
-          </span>
-
-          <select id="supplyStatus">
-
-            <option
-              value="requested"
-              selected
-            >
-              Requested
-            </option>
-
-            <option value="ordered">
-              Ordered
-            </option>
-
-            <option value="partially_fulfilled">
-              Partially Fulfilled
-            </option>
-
-            <option value="fulfilled">
-              Fulfilled
-            </option>
-
-            <option value="cancelled">
-              Cancelled
-            </option>
-
-          </select>
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Quantity Fulfilled
-          </span>
-
-          <input
-            id="supplyQuantityFulfilled"
-            type="number"
-            min="0"
-            step="0.01"
-            value="0"
-          >
-
-        </label>
-
-
-        <label class="form-field supply-wide-field">
-
-          <span>
-            Fulfillment Notes
-          </span>
-
-          <textarea
-            id="supplyFulfillmentNotes"
-            rows="3"
-            placeholder="Document order information, partial delivery, pickup, or fulfillment details..."
-          ></textarea>
-
-        </label>
-
-
-        <label class="form-field supply-wide-field">
-
-          <span>
-            Operational Notes
-          </span>
-
-          <textarea
-            id="supplyOperationalNotes"
-            rows="3"
-            placeholder="Add shift follow-up, contacts, delays, or other operational notes..."
-          ></textarea>
-
-        </label>
-
-      </div>
-
-
-      <div class="supply-form-actions">
-
-        <button
-          id="saveSupplyRequestButton"
-          class="button primary"
-          type="submit"
-        >
-          Add Supply Request
-        </button>
-
-
-        <button
-          id="cancelSupplyEditButton"
-          class="button secondary"
-          type="button"
-          hidden
-        >
-          Cancel Edit
-        </button>
-
-      </div>
-
-    </form>
-
-  </div>
-
-
-  <!-- ========================================================
-       SUPPLY REQUEST LIST
-       ======================================================== -->
-
-  <div
-    id="supplyRequestList"
-    class="supply-request-list"
-  >
-
-    <div class="empty-state">
-      Loading Supply Requests…
-    </div>
-
-  </div>
-
-</section>
-
-<!-- ==========================================================
-     MANAGER CONFIDENTIAL LOG
-     ========================================================== -->
-
-<section
-  id="managerConfidentialSection"
-  class="activity-section manager-confidential-section"
-  hidden
->
-
-  <div class="section-heading-row">
-
-    <div>
-
-      <div class="eyebrow">
-        Manager / Director / Admin Only
-      </div>
-
-      <h2>
-        Manager Confidential Log
-      </h2>
-
-      <p class="section-description">
-        Restricted management documentation for coaching,
-        counseling, performance, conduct, attendance,
-        policy follow-up, and other confidential personnel matters.
-      </p>
-
-    </div>
-
-
-    <button
-      id="refreshConfidentialButton"
-      class="button secondary"
-      type="button"
-    >
-      Refresh Confidential Log
-    </button>
-
-  </div>
-
-
-  <!-- ========================================================
-       CONFIDENTIALITY NOTICE
-       ======================================================== -->
-
-  <div class="confidential-warning">
-
-    <strong>
-      🔒 CONFIDENTIAL MANAGEMENT RECORD
-    </strong>
-
-    <span>
-      This section is restricted to Managers, Directors, and Administrators.
-      Entries are excluded from Team Lead access and will not be published
-      into the End-of-Shift Handoff.
-    </span>
-
-  </div>
-
-
-  <div
-    id="confidentialMessage"
-    class="message"
-    role="status"
-    aria-live="polite"
-  ></div>
-
-
-  <!-- ========================================================
-       SUMMARY COUNTERS
-       ======================================================== -->
-
-  <div class="confidential-summary-grid">
-
-    <article class="confidential-summary total">
-
-      <span>
-        Total Entries
-      </span>
-
-      <strong id="confidentialTotalCount">
-        0
-      </strong>
-
-    </article>
-
-
-    <article class="confidential-summary open">
-
-      <span>
-        Open
-      </span>
-
-      <strong id="confidentialOpenCount">
-        0
-      </strong>
-
-    </article>
-
-
-    <article class="confidential-summary monitoring">
-
-      <span>
-        Monitoring
-      </span>
-
-      <strong id="confidentialMonitoringCount">
-        0
-      </strong>
-
-    </article>
-
-
-    <article class="confidential-summary follow-up">
-
-      <span>
-        Follow-Up Required
-      </span>
-
-      <strong id="confidentialFollowUpCount">
-        0
-      </strong>
-
-    </article>
-
-
-    <article class="confidential-summary completed">
-
-      <span>
-        Completed
-      </span>
-
-      <strong id="confidentialCompletedCount">
-        0
-      </strong>
-
-    </article>
-
-  </div>
-
-
-  <!-- ========================================================
-       CONFIDENTIAL ENTRY FORM
-       ======================================================== -->
-
-  <div class="confidential-entry-panel">
-
-    <div class="confidential-entry-heading">
-
-      <div>
-
-        <div class="eyebrow">
-          Restricted Entry
-        </div>
-
-        <h3 id="confidentialFormTitle">
-          Add Confidential Entry
-        </h3>
-
-      </div>
-
-    </div>
-
-
-    <form
-      id="confidentialForm"
-      autocomplete="off"
-    >
-
-      <input
-        id="confidentialLogId"
-        type="hidden"
-      >
-
-
-      <input
-        id="confidentialSubjectUserId"
-        type="hidden"
-      >
-
-
-      <div class="confidential-form-grid">
-
-
-        <label class="form-field">
-
-          <span>
-            Entry Type
-          </span>
-
-          <select
-            id="confidentialEntryType"
-            required
-          >
-
-            <option value="">
-              Select Entry Type
-            </option>
-
-            <option value="coaching">
-              Coaching
-            </option>
-
-            <option value="verbal_counseling">
-              Verbal Counseling
-            </option>
-
-            <option value="written_counseling">
-              Written Counseling
-            </option>
-
-            <option value="performance">
-              Performance
-            </option>
-
-            <option value="policy_follow_up">
-              Policy Follow-Up
-            </option>
-
-            <option value="attendance">
-              Attendance
-            </option>
-
-            <option value="conduct">
-              Conduct
-            </option>
-
-            <option value="recognition">
-              Recognition
-            </option>
-
-            <option value="other">
-              Other
-            </option>
-
-          </select>
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Employee / Subject Name
-          </span>
-
-          <input
-            id="confidentialSubjectName"
-            type="text"
-            required
-            placeholder="Employee or subject name"
-          >
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Employee Number
-          </span>
-
-          <input
-            id="confidentialEmployeeNumber"
-            type="text"
-            placeholder="Optional employee number"
-          >
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Status
-          </span>
-
-          <select id="confidentialStatus">
-
-            <option
-              value="open"
-              selected
-            >
-              Open
-            </option>
-
-            <option value="monitoring">
-              Monitoring
-            </option>
-
-            <option value="completed">
-              Completed
-            </option>
-
-          </select>
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Occurred At
-          </span>
-
-          <input
-            id="confidentialOccurredAt"
-            type="datetime-local"
-          >
-
-        </label>
-
-
-        <label class="form-field">
-
-          <span>
-            Entry Title
-          </span>
-
-          <input
-            id="confidentialTitle"
-            type="text"
-            required
-            placeholder="Brief description of the matter"
-          >
-
-        </label>
-
-
-        <label class="form-field confidential-wide-field">
-
-          <span>
-            Confidential Details
-          </span>
-
-          <textarea
-            id="confidentialDetails"
-            rows="5"
-            required
-            placeholder="Document the relevant confidential management information..."
-          ></textarea>
-
-        </label>
-
-
-        <label class="form-field confidential-wide-field">
-
-          <span>
-            Action Taken
-          </span>
-
-          <textarea
-            id="confidentialActionTaken"
-            rows="3"
-            placeholder="Document coaching, direction, corrective action, referral, or other management response..."
-          ></textarea>
-
-        </label>
-
-
-        <div class="confidential-follow-up-row">
-
-          <label class="confidential-check">
-
-            <input
-              id="confidentialFollowUpRequired"
-              type="checkbox"
-            >
-
-            <span>
-              Follow-Up Required
-            </span>
-
-          </label>
-
-
-          <label
-            id="confidentialFollowUpDateField"
-            class="form-field"
-            hidden
-          >
-
-            <span>
-              Follow-Up Date
-            </span>
-
-            <input
-              id="confidentialFollowUpDate"
-              type="date"
-            >
-
-          </label>
-
-        </div>
-
-      </div>
-
-
-      <div class="confidential-form-actions">
-
-        <button
-          id="saveConfidentialButton"
-          class="button primary"
-          type="submit"
-        >
-          Add Confidential Entry
-        </button>
-
-
-        <button
-          id="cancelConfidentialEditButton"
-          class="button secondary"
-          type="button"
-          hidden
-        >
-          Cancel Edit
-        </button>
-
-      </div>
-
-    </form>
-
-  </div>
-
-
-  <!-- ========================================================
-       CONFIDENTIAL ENTRY LIST
-       ======================================================== -->
-
-  <div
-    id="confidentialEntryList"
-    class="confidential-entry-list"
-  >
-
-    <div class="empty-state">
-      Loading confidential management records…
-    </div>
-
-  </div>
-
-</section>
    
 /* ==========================================================
    ENTRY PANEL
@@ -5463,6 +4598,873 @@
 
 </section>
 
+<!-- ==========================================================
+     SUPPLY REQUESTS
+     ========================================================== -->
+
+<section class="activity-section">
+
+  <div class="section-heading-row">
+
+    <div>
+
+      <div class="eyebrow">
+        Operational Support
+      </div>
+
+      <h2>
+        Supply Requests
+      </h2>
+
+      <p class="section-description">
+        Track supplies requested during the shift, order status,
+        partial fulfillment, completed fulfillment, and follow-up.
+      </p>
+
+    </div>
+
+
+    <button
+      id="refreshSupplyRequestsButton"
+      class="button secondary"
+      type="button"
+    >
+      Refresh Supplies
+    </button>
+
+  </div>
+
+
+  <div
+    id="supplyMessage"
+    class="message"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- ========================================================
+       SUMMARY COUNTERS
+       ======================================================== -->
+
+  <div class="supply-summary-grid">
+
+    <article class="supply-summary total">
+
+      <span>
+        Total Requests
+      </span>
+
+      <strong id="supplyTotalCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="supply-summary requested">
+
+      <span>
+        Requested
+      </span>
+
+      <strong id="supplyRequestedCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="supply-summary ordered">
+
+      <span>
+        Ordered
+      </span>
+
+      <strong id="supplyOrderedCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="supply-summary partial">
+
+      <span>
+        Partially Fulfilled
+      </span>
+
+      <strong id="supplyPartialCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="supply-summary fulfilled">
+
+      <span>
+        Fulfilled
+      </span>
+
+      <strong id="supplyFulfilledCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="supply-summary urgent">
+
+      <span>
+        Urgent Open
+      </span>
+
+      <strong id="supplyUrgentCount">
+        0
+      </strong>
+
+    </article>
+
+  </div>
+
+
+  <!-- ========================================================
+       SUPPLY REQUEST ENTRY FORM
+       ======================================================== -->
+
+  <div class="supply-entry-panel">
+
+    <div class="supply-entry-heading">
+
+      <div>
+
+        <div class="eyebrow">
+          Shift Entry
+        </div>
+
+        <h3 id="supplyFormTitle">
+          Add Supply Request
+        </h3>
+
+      </div>
+
+    </div>
+
+
+    <form
+      id="supplyRequestForm"
+      autocomplete="off"
+    >
+
+      <input
+        id="supplyRequestId"
+        type="hidden"
+      >
+
+
+      <div class="supply-form-grid">
+
+
+        <label class="form-field">
+
+          <span>
+            Supply Item
+          </span>
+
+          <input
+            id="supplyItemName"
+            type="text"
+            required
+            placeholder="Example: Radio battery"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Category
+          </span>
+
+          <input
+            id="supplyCategory"
+            type="text"
+            placeholder="Example: Equipment, Office, PPE"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Quantity Requested
+          </span>
+
+          <input
+            id="supplyQuantityRequested"
+            type="number"
+            min="0.01"
+            step="0.01"
+            value="1"
+            required
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Unit
+          </span>
+
+          <input
+            id="supplyUnit"
+            type="text"
+            value="each"
+            placeholder="each, box, pack, case"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Requesting Area
+          </span>
+
+          <input
+            id="supplyRequestingArea"
+            type="text"
+            placeholder="Department, post, office, or unit"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Requested For
+          </span>
+
+          <input
+            id="supplyRequestedFor"
+            type="text"
+            placeholder="Officer, team, department, or purpose"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Priority
+          </span>
+
+          <select id="supplyPriority">
+
+            <option value="low">
+              Low
+            </option>
+
+            <option
+              value="normal"
+              selected
+            >
+              Normal
+            </option>
+
+            <option value="high">
+              High
+            </option>
+
+            <option value="urgent">
+              Urgent
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Status
+          </span>
+
+          <select id="supplyStatus">
+
+            <option
+              value="requested"
+              selected
+            >
+              Requested
+            </option>
+
+            <option value="ordered">
+              Ordered
+            </option>
+
+            <option value="partially_fulfilled">
+              Partially Fulfilled
+            </option>
+
+            <option value="fulfilled">
+              Fulfilled
+            </option>
+
+            <option value="cancelled">
+              Cancelled
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Quantity Fulfilled
+          </span>
+
+          <input
+            id="supplyQuantityFulfilled"
+            type="number"
+            min="0"
+            step="0.01"
+            value="0"
+          >
+
+        </label>
+
+
+        <label class="form-field supply-wide-field">
+
+          <span>
+            Fulfillment Notes
+          </span>
+
+          <textarea
+            id="supplyFulfillmentNotes"
+            rows="3"
+            placeholder="Document order information, partial delivery, pickup, or fulfillment details..."
+          ></textarea>
+
+        </label>
+
+
+        <label class="form-field supply-wide-field">
+
+          <span>
+            Operational Notes
+          </span>
+
+          <textarea
+            id="supplyOperationalNotes"
+            rows="3"
+            placeholder="Add shift follow-up, contacts, delays, or other operational notes..."
+          ></textarea>
+
+        </label>
+
+      </div>
+
+
+      <div class="supply-form-actions">
+
+        <button
+          id="saveSupplyRequestButton"
+          class="button primary"
+          type="submit"
+        >
+          Add Supply Request
+        </button>
+
+
+        <button
+          id="cancelSupplyEditButton"
+          class="button secondary"
+          type="button"
+          hidden
+        >
+          Cancel Edit
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+
+  <!-- ========================================================
+       SUPPLY REQUEST LIST
+       ======================================================== -->
+
+  <div
+    id="supplyRequestList"
+    class="supply-request-list"
+  >
+
+    <div class="empty-state">
+      Loading Supply Requests…
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ==========================================================
+     MANAGER CONFIDENTIAL LOG
+     ========================================================== -->
+
+<section
+  id="managerConfidentialSection"
+  class="activity-section manager-confidential-section"
+  hidden
+>
+
+  <div class="section-heading-row">
+
+    <div>
+
+      <div class="eyebrow">
+        Manager / Director / Admin Only
+      </div>
+
+      <h2>
+        Manager Confidential Log
+      </h2>
+
+      <p class="section-description">
+        Restricted management documentation for coaching,
+        counseling, performance, conduct, attendance,
+        policy follow-up, and other confidential personnel matters.
+      </p>
+
+    </div>
+
+
+    <button
+      id="refreshConfidentialButton"
+      class="button secondary"
+      type="button"
+    >
+      Refresh Confidential Log
+    </button>
+
+  </div>
+
+
+  <!-- ========================================================
+       CONFIDENTIALITY NOTICE
+       ======================================================== -->
+
+  <div class="confidential-warning">
+
+    <strong>
+      🔒 CONFIDENTIAL MANAGEMENT RECORD
+    </strong>
+
+    <span>
+      This section is restricted to Managers, Directors, and Administrators.
+      Entries are excluded from Team Lead access and will not be published
+      into the End-of-Shift Handoff.
+    </span>
+
+  </div>
+
+
+  <div
+    id="confidentialMessage"
+    class="message"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- ========================================================
+       SUMMARY COUNTERS
+       ======================================================== -->
+
+  <div class="confidential-summary-grid">
+
+    <article class="confidential-summary total">
+
+      <span>
+        Total Entries
+      </span>
+
+      <strong id="confidentialTotalCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="confidential-summary open">
+
+      <span>
+        Open
+      </span>
+
+      <strong id="confidentialOpenCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="confidential-summary monitoring">
+
+      <span>
+        Monitoring
+      </span>
+
+      <strong id="confidentialMonitoringCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="confidential-summary follow-up">
+
+      <span>
+        Follow-Up Required
+      </span>
+
+      <strong id="confidentialFollowUpCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="confidential-summary completed">
+
+      <span>
+        Completed
+      </span>
+
+      <strong id="confidentialCompletedCount">
+        0
+      </strong>
+
+    </article>
+
+  </div>
+
+
+  <!-- ========================================================
+       CONFIDENTIAL ENTRY FORM
+       ======================================================== -->
+
+  <div class="confidential-entry-panel">
+
+    <div class="confidential-entry-heading">
+
+      <div>
+
+        <div class="eyebrow">
+          Restricted Entry
+        </div>
+
+        <h3 id="confidentialFormTitle">
+          Add Confidential Entry
+        </h3>
+
+      </div>
+
+    </div>
+
+
+    <form
+      id="confidentialForm"
+      autocomplete="off"
+    >
+
+      <input
+        id="confidentialLogId"
+        type="hidden"
+      >
+
+
+      <input
+        id="confidentialSubjectUserId"
+        type="hidden"
+      >
+
+
+      <div class="confidential-form-grid">
+
+
+        <label class="form-field">
+
+          <span>
+            Entry Type
+          </span>
+
+          <select
+            id="confidentialEntryType"
+            required
+          >
+
+            <option value="">
+              Select Entry Type
+            </option>
+
+            <option value="coaching">
+              Coaching
+            </option>
+
+            <option value="verbal_counseling">
+              Verbal Counseling
+            </option>
+
+            <option value="written_counseling">
+              Written Counseling
+            </option>
+
+            <option value="performance">
+              Performance
+            </option>
+
+            <option value="policy_follow_up">
+              Policy Follow-Up
+            </option>
+
+            <option value="attendance">
+              Attendance
+            </option>
+
+            <option value="conduct">
+              Conduct
+            </option>
+
+            <option value="recognition">
+              Recognition
+            </option>
+
+            <option value="other">
+              Other
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Employee / Subject Name
+          </span>
+
+          <input
+            id="confidentialSubjectName"
+            type="text"
+            required
+            placeholder="Employee or subject name"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Employee Number
+          </span>
+
+          <input
+            id="confidentialEmployeeNumber"
+            type="text"
+            placeholder="Optional employee number"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Status
+          </span>
+
+          <select id="confidentialStatus">
+
+            <option
+              value="open"
+              selected
+            >
+              Open
+            </option>
+
+            <option value="monitoring">
+              Monitoring
+            </option>
+
+            <option value="completed">
+              Completed
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Occurred At
+          </span>
+
+          <input
+            id="confidentialOccurredAt"
+            type="datetime-local"
+          >
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Entry Title
+          </span>
+
+          <input
+            id="confidentialTitle"
+            type="text"
+            required
+            placeholder="Brief description of the matter"
+          >
+
+        </label>
+
+
+        <label class="form-field confidential-wide-field">
+
+          <span>
+            Confidential Details
+          </span>
+
+          <textarea
+            id="confidentialDetails"
+            rows="5"
+            required
+            placeholder="Document the relevant confidential management information..."
+          ></textarea>
+
+        </label>
+
+
+        <label class="form-field confidential-wide-field">
+
+          <span>
+            Action Taken
+          </span>
+
+          <textarea
+            id="confidentialActionTaken"
+            rows="3"
+            placeholder="Document coaching, direction, corrective action, referral, or other management response..."
+          ></textarea>
+
+        </label>
+
+
+        <div class="confidential-follow-up-row">
+
+          <label class="confidential-check">
+
+            <input
+              id="confidentialFollowUpRequired"
+              type="checkbox"
+            >
+
+            <span>
+              Follow-Up Required
+            </span>
+
+          </label>
+
+
+          <label
+            id="confidentialFollowUpDateField"
+            class="form-field"
+            hidden
+          >
+
+            <span>
+              Follow-Up Date
+            </span>
+
+            <input
+              id="confidentialFollowUpDate"
+              type="date"
+            >
+
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <div class="confidential-form-actions">
+
+        <button
+          id="saveConfidentialButton"
+          class="button primary"
+          type="submit"
+        >
+          Add Confidential Entry
+        </button>
+
+
+        <button
+          id="cancelConfidentialEditButton"
+          class="button secondary"
+          type="button"
+          hidden
+        >
+          Cancel Edit
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+
+  <!-- ========================================================
+       CONFIDENTIAL ENTRY LIST
+       ======================================================== -->
+
+  <div
+    id="confidentialEntryList"
+    class="confidential-entry-list"
+  >
+
+    <div class="empty-state">
+      Loading confidential management records…
+    </div>
+
+  </div>
+
+</section>
+   
 <!-- =====================================================
      SECURITY ALERTS
      ===================================================== -->
