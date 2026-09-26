@@ -151,6 +151,66 @@ highCriticalDeviceCount:
 
 deviceExceptionList:
   $("deviceExceptionList"),
+
+   tsiMessage:
+  $("tsiMessage"),
+
+refreshTsiRequestsButton:
+  $("refreshTsiRequestsButton"),
+
+tsiTotalCount:
+  $("tsiTotalCount"),
+
+tsiOpenCount:
+  $("tsiOpenCount"),
+
+tsiInProgressCount:
+  $("tsiInProgressCount"),
+
+tsiResolvedCount:
+  $("tsiResolvedCount"),
+
+tsiUrgentCount:
+  $("tsiUrgentCount"),
+
+tsiRequestForm:
+  $("tsiRequestForm"),
+
+tsiRequestId:
+  $("tsiRequestId"),
+
+tsiFormTitle:
+  $("tsiFormTitle"),
+
+tsiTicketNumber:
+  $("tsiTicketNumber"),
+
+tsiRequestType:
+  $("tsiRequestType"),
+
+tsiLocation:
+  $("tsiLocation"),
+
+tsiPriority:
+  $("tsiPriority"),
+
+tsiStatus:
+  $("tsiStatus"),
+
+tsiDescription:
+  $("tsiDescription"),
+
+tsiOperationalNotes:
+  $("tsiOperationalNotes"),
+
+saveTsiRequestButton:
+  $("saveTsiRequestButton"),
+
+cancelTsiEditButton:
+  $("cancelTsiEditButton"),
+
+tsiRequestList:
+  $("tsiRequestList"), 
     
 alertMessage:
   $("alertMessage"),
