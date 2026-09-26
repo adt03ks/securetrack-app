@@ -10140,6 +10140,236 @@ function refreshPublishReadiness() {
 
 }
 
+// ==========================================================
+// PUBLISH END-OF-SHIFT HANDOFF
+// ==========================================================
+
+async function publishDailyActivityEndOfShift() {
+
+  if (
+    !shiftInstanceId
+    ||
+    !el.publishEndOfShiftButton
+  ) {
+
+    return;
+
+  }
+
+
+  refreshPublishReadiness();
+
+
+  if (
+    el.publishEndOfShiftButton.disabled
+  ) {
+
+    return;
+
+  }
+
+
+  const handoffSummary =
+    el.dailyHandoffSummary
+      ?.value
+      ?.trim()
+    ||
+    "";
+
+
+  const confirmed =
+    window.confirm(
+      "Publish and permanently lock this End-of-Shift Handoff? Once published, the official record cannot be edited."
+    );
+
+
+  if (
+    !confirmed
+  ) {
+
+    return;
+
+  }
+
+
+  el.publishEndOfShiftButton.disabled =
+    true;
+
+
+  el.publishEndOfShiftButton.textContent =
+    "Publishing…";
+
+
+  if (
+    el.publishReadinessMessage
+  ) {
+
+    el.publishReadinessMessage.textContent =
+      "Creating the official End-of-Shift Handoff…";
+
+    el.publishReadinessMessage.className =
+      "message show info";
+
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "publish_daily_activity_end_of_shift",
+
+      {
+        p_shift_id:
+          shiftInstanceId,
+
+        p_handoff_summary:
+          handoffSummary
+          ||
+          null
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    const report =
+      data?.report
+      ||
+      {};
+
+
+    // ========================================================
+    // LOCK THE PAGE'S PUBLISH CONTROLS
+    // ========================================================
+
+    if (
+      el.dailyHandoffSummary
+    ) {
+
+      el.dailyHandoffSummary.disabled =
+        true;
+
+    }
+
+
+    el.publishEndOfShiftButton.disabled =
+      true;
+
+
+    el.publishEndOfShiftButton.textContent =
+      "Handoff Published";
+
+
+    el.endOfShiftPublishSection
+      ?.classList
+      .add(
+        "published"
+      );
+
+
+    // ========================================================
+    // STATUS
+    // ========================================================
+
+    if (
+      el.publishStatusBadge
+    ) {
+
+      el.publishStatusBadge.textContent =
+        "PUBLISHED";
+
+
+      el.publishStatusBadge.className =
+        "status-chip good";
+
+    }
+
+
+    // ========================================================
+    // SUCCESS MESSAGE
+    // ========================================================
+
+    if (
+      el.publishReadinessMessage
+    ) {
+
+      const publisher =
+        report.published_by
+        ||
+        "Shift Leadership";
+
+
+      const publishedAt =
+        report.published_at
+          ? formatDateTime(
+              report.published_at
+            )
+          : "just now";
+
+
+      el.publishReadinessMessage.textContent =
+        `Official End-of-Shift Handoff published by ${publisher} • ${publishedAt}. The record is permanently locked and available to the incoming shift.`;
+
+      el.publishReadinessMessage.className =
+        "message show success";
+
+    }
+
+
+    console.log(
+      "Daily Activity End-of-Shift published:",
+      data
+    );
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Publish Daily Activity End-of-Shift error:",
+      error
+    );
+
+
+    if (
+      el.publishReadinessMessage
+    ) {
+
+      el.publishReadinessMessage.textContent =
+        error?.message
+        ||
+        "Unable to publish the End-of-Shift Handoff.";
+
+      el.publishReadinessMessage.className =
+        "message show error";
+
+    }
+
+
+    el.publishEndOfShiftButton.textContent =
+      "Publish End-of-Shift Handoff";
+
+
+    refreshPublishReadiness();
+
+  }
+
+}
+  
   el.refreshConfidentialButton
     ?.addEventListener(
 
