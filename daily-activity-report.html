@@ -4050,7 +4050,436 @@
   }
 
 }
-   
+   /* ==========================================================
+   END-OF-SHIFT HANDOFF / PUBLISH
+   ========================================================== */
+
+.end-of-shift-publish-section {
+  border:
+    1px solid
+    rgba(242, 140, 40, 0.42);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(242, 140, 40, 0.035),
+      rgba(255, 255, 255, 0.01)
+    );
+}
+
+
+/* ==========================================================
+   READINESS GRID
+   ========================================================== */
+
+.publish-readiness-grid {
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+
+  gap:
+    12px;
+
+  margin-top:
+    16px;
+
+  margin-bottom:
+    20px;
+}
+
+
+.publish-readiness-card {
+  min-height:
+    112px;
+
+  padding:
+    16px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    14px;
+
+  background:
+    var(--panel);
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+}
+
+
+.publish-readiness-card span {
+  color:
+    var(--muted);
+
+  font-size:
+    11px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.06em;
+
+  text-transform:
+    uppercase;
+}
+
+
+.publish-readiness-card strong {
+  display:
+    block;
+
+  margin-top:
+    10px;
+
+  font-size:
+    18px;
+
+  line-height:
+    1.25;
+}
+
+
+.publish-readiness-card small {
+  display:
+    block;
+
+  margin-top:
+    auto;
+
+  padding-top:
+    10px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    11px;
+
+  line-height:
+    1.45;
+}
+
+
+/* ==========================================================
+   READINESS STATES
+   ========================================================== */
+
+.publish-readiness-card.ready {
+  border-left:
+    4px solid
+    var(--green);
+
+  background:
+    var(--green-soft);
+}
+
+
+.publish-readiness-card.warning {
+  border-left:
+    4px solid
+    var(--amber);
+
+  background:
+    var(--amber-soft);
+}
+
+
+.publish-readiness-card.blocked {
+  border-left:
+    4px solid
+    var(--red);
+
+  background:
+    var(--red-soft);
+}
+
+
+.publish-readiness-card.info {
+  border-left:
+    4px solid
+    var(--blue);
+
+  background:
+    var(--blue-soft);
+}
+
+
+.confidential-excluded {
+  color:
+    var(--purple);
+}
+
+
+/* ==========================================================
+   FINAL HANDOFF SUMMARY
+   ========================================================== */
+
+.publish-summary-panel {
+  margin-top:
+    18px;
+
+  padding:
+    18px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    14px;
+
+  background:
+    var(--panel);
+}
+
+
+.publish-summary-panel label > span {
+  display:
+    block;
+
+  margin-bottom:
+    8px;
+
+  font-size:
+    12px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.05em;
+
+  text-transform:
+    uppercase;
+}
+
+
+.publish-summary-panel textarea {
+  width:
+    100%;
+
+  min-height:
+    145px;
+
+  padding:
+    13px 14px;
+
+  resize:
+    vertical;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    10px;
+
+  background:
+    #0f1317;
+
+  color:
+    var(--text);
+
+  font:
+    inherit;
+
+  line-height:
+    1.5;
+}
+
+
+.publish-summary-panel textarea:focus {
+  outline:
+    none;
+
+  border-color:
+    var(--orange);
+
+  box-shadow:
+    0 0 0 2px
+    rgba(242, 140, 40, 0.12);
+}
+
+
+/* ==========================================================
+   PUBLISH ACTION PANEL
+   ========================================================== */
+
+.publish-action-panel {
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    center;
+
+  gap:
+    22px;
+
+  margin-top:
+    18px;
+
+  padding:
+    20px;
+
+  border:
+    1px solid
+    rgba(242, 140, 40, 0.35);
+
+  border-radius:
+    14px;
+
+  background:
+    rgba(242, 140, 40, 0.07);
+}
+
+
+.publish-action-panel strong {
+  display:
+    block;
+
+  font-size:
+    16px;
+}
+
+
+.publish-action-panel p {
+  margin:
+    6px 0 0;
+
+  max-width:
+    760px;
+}
+
+
+#publishEndOfShiftButton {
+  min-width:
+    245px;
+
+  white-space:
+    nowrap;
+}
+
+
+#publishEndOfShiftButton:disabled {
+  opacity:
+    0.45;
+
+  cursor:
+    not-allowed;
+
+  filter:
+    none;
+}
+
+
+/* ==========================================================
+   PUBLISHED STATE
+   ========================================================== */
+
+.end-of-shift-publish-section.published {
+  border-color:
+    rgba(52, 199, 89, 0.45);
+
+  background:
+    rgba(52, 199, 89, 0.04);
+}
+
+
+.end-of-shift-publish-section.published
+#publishEndOfShiftButton {
+  background:
+    var(--green);
+
+  color:
+    #07140b;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (
+  max-width: 1100px
+) {
+
+  .publish-readiness-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+}
+
+
+@media (
+  max-width: 700px
+) {
+
+  .publish-readiness-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .publish-action-panel {
+    flex-direction:
+      column;
+
+    align-items:
+      stretch;
+  }
+
+
+  #publishEndOfShiftButton {
+    width:
+      100%;
+
+    min-width:
+      0;
+  }
+
+}
+
+
+/* ==========================================================
+   PRINT
+   ========================================================== */
+
+@media print {
+
+  #publishEndOfShiftButton {
+    display:
+      none !important;
+  }
+
+
+  .publish-action-panel {
+    border-color:
+      #ccc !important;
+
+    background:
+      white !important;
+  }
+
+}
   </style>
 
   <title>
