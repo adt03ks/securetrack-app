@@ -3045,6 +3045,754 @@ async function loadSpecialAssignments(
 
 }  
 
+// ==========================================================
+// PROPERTY ACCOUNTABILITY HELPERS
+// ==========================================================
+
+function showPropertyMessage(
+  message = "",
+  type = "info"
+) {
+
+  if (
+    !el.propertyMessage
+  ) {
+
+    return;
+
+  }
+
+
+  el.propertyMessage.textContent =
+    message;
+
+
+  el.propertyMessage.className =
+
+    message
+
+      ? `message show ${type}`
+
+      : "message";
+
+}
+
+
+
+function propertyActivityLabel(
+  type
+) {
+
+  const labels = {
+
+    collected:
+      "Collected",
+
+    released:
+      "Released",
+
+    disposal_requested:
+      "Marked for Disposal",
+
+    disposed:
+      "Disposed"
+
+  };
+
+
+  return (
+    labels[type]
+    ||
+    "Property Activity"
+  );
+
+}
+
+
+
+function propertyActivityClass(
+  type
+) {
+
+  if (
+    type ===
+    "disposal_requested"
+  ) {
+
+    return "disposal-requested";
+
+  }
+
+
+  return (
+    type
+    ||
+    "collected"
+  );
+
+}
+
+
+
+function addPropertyDetail(
+  container,
+  label,
+  value
+) {
+
+  if (
+    value === null
+    ||
+    value === undefined
+    ||
+    value === ""
+  ) {
+
+    return;
+
+  }
+
+
+  const box =
+    document.createElement(
+      "div"
+    );
+
+
+  box.className =
+    "property-detail-box";
+
+
+  const name =
+    document.createElement(
+      "span"
+    );
+
+
+  name.textContent =
+    label;
+
+
+  const content =
+    document.createElement(
+      "strong"
+    );
+
+
+  content.textContent =
+    String(
+      value
+    );
+
+
+  box.append(
+    name,
+    content
+  );
+
+
+  container.appendChild(
+    box
+  );
+
+}
+
+
+
+// ==========================================================
+// RENDER PROPERTY ACCOUNTABILITY
+// ==========================================================
+
+function renderPropertyAccountability(
+  data
+) {
+
+  const summary =
+    data?.summary
+    ||
+    {};
+
+
+  const items =
+    data?.items
+    ||
+    [];
+
+
+  el.propertyCollectedCount.textContent =
+    summary.collected
+    ??
+    0;
+
+
+  el.propertyReleasedCount.textContent =
+    summary.released
+    ??
+    0;
+
+
+  el.propertyDisposalRequestedCount.textContent =
+    summary.marked_for_disposal
+    ??
+    0;
+
+
+  el.propertyDisposedCount.textContent =
+    summary.disposed
+    ??
+    0;
+
+
+  el.propertyActivityList.innerHTML =
+    "";
+
+
+  if (
+    !items.length
+  ) {
+
+    el.propertyActivityList.innerHTML =
+      `
+        <div class="empty-state">
+          No Property Accountability activity is associated
+          with this shift at this time.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  items.forEach(
+    item => {
+
+      const activityType =
+        item.activity_type
+        ||
+        "collected";
+
+
+      const activityClass =
+        propertyActivityClass(
+          activityType
+        );
+
+
+      const card =
+        document.createElement(
+          "article"
+        );
+
+
+      card.className =
+        `property-activity-card ${activityClass}`;
+
+
+
+      // ------------------------------------------------------
+      // HEADER
+      // ------------------------------------------------------
+
+      const head =
+        document.createElement(
+          "div"
+        );
+
+
+      head.className =
+        "property-activity-head";
+
+
+      const left =
+        document.createElement(
+          "div"
+        );
+
+
+      const title =
+        document.createElement(
+          "h3"
+        );
+
+
+      title.className =
+        "property-activity-title";
+
+
+      title.textContent =
+
+        item.property_number
+
+        ||
+
+        "Property Record";
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+
+      meta.className =
+        "property-activity-meta";
+
+
+      meta.textContent =
+
+        `${propertyActivityLabel(
+          activityType
+        )}`
+
+        +
+
+        (
+          item.occurred_at
+
+            ? ` • ${formatDateTime(
+                item.occurred_at
+              )}`
+
+            : ""
+        );
+
+
+      left.append(
+        title,
+        meta
+      );
+
+
+      const chip =
+        document.createElement(
+          "span"
+        );
+
+
+      chip.className =
+        `property-status-chip ${activityClass}`;
+
+
+      chip.textContent =
+        propertyActivityLabel(
+          activityType
+        );
+
+
+      head.append(
+        left,
+        chip
+      );
+
+
+
+      // ------------------------------------------------------
+      // DETAILS
+      // ------------------------------------------------------
+
+      const body =
+        document.createElement(
+          "div"
+        );
+
+
+      body.className =
+        "property-activity-body";
+
+
+      const details =
+        document.createElement(
+          "div"
+        );
+
+
+      details.className =
+        "property-detail-grid";
+
+
+      addPropertyDetail(
+        details,
+        "Property ID",
+        item.property_number
+      );
+
+
+      addPropertyDetail(
+        details,
+        "DG Number",
+        item.dg_number
+      );
+
+
+      addPropertyDetail(
+        details,
+        "MRN Number",
+        item.mrn_number
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Description",
+        item.description
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Category",
+        item.category
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Current Status",
+        item.status
+          ? String(
+              item.status
+            ).toUpperCase()
+          : null
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Location Received",
+        item.location_received
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Storage Location",
+        item.current_storage_location
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Receiving Officer",
+        item.received_by_name
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Action By",
+        item.actor_name
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Released To",
+        item.released_to
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Witness",
+        item.witness
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Requested By",
+        item.requested_by_name
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Disposal Request Status",
+        item.disposal_request_status
+          ? String(
+              item.disposal_request_status
+            ).replaceAll(
+              "_",
+              " "
+            ).toUpperCase()
+          : null
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Reviewed By",
+        item.reviewed_by_name
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Disposed By",
+        item.disposed_by_name
+      );
+
+
+      addPropertyDetail(
+        details,
+        "Disposal Method",
+        item.disposal_method
+      );
+
+
+      body.appendChild(
+        details
+      );
+
+
+
+      // ------------------------------------------------------
+      // NOTES
+      // ------------------------------------------------------
+
+      const notes = [
+
+        item.request_notes,
+
+        item.review_notes,
+
+        item.event_notes,
+
+        item.initial_notes
+
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+
+      if (
+        notes
+      ) {
+
+        const noteBox =
+          document.createElement(
+            "div"
+          );
+
+
+        noteBox.className =
+          "property-notes";
+
+
+        const noteLabel =
+          document.createElement(
+            "strong"
+          );
+
+
+        noteLabel.textContent =
+          "Property Notes";
+
+
+        const noteText =
+          document.createElement(
+            "div"
+          );
+
+
+        noteText.textContent =
+          notes;
+
+
+        noteBox.append(
+          noteLabel,
+          noteText
+        );
+
+
+        body.appendChild(
+          noteBox
+        );
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // FULL PROPERTY RECORD
+      // ------------------------------------------------------
+
+      if (
+        item.property_item_id
+      ) {
+
+        const link =
+          document.createElement(
+            "a"
+          );
+
+
+        link.className =
+          "property-record-link";
+
+
+        link.href =
+          `property/record.html?id=${
+            encodeURIComponent(
+              item.property_item_id
+            )
+          }`;
+
+
+        link.textContent =
+          "Open Full Property Record →";
+
+
+        body.appendChild(
+          link
+        );
+
+      }
+
+
+      card.append(
+        head,
+        body
+      );
+
+
+      el.propertyActivityList
+        .appendChild(
+          card
+        );
+
+    }
+  );
+
+}
+
+
+
+// ==========================================================
+// LOAD PROPERTY ACCOUNTABILITY
+// ==========================================================
+
+async function loadPropertyAccountability(
+  showSuccess = false
+) {
+
+  if (
+    !shiftInstanceId
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    el.refreshPropertyButton
+  ) {
+
+    el.refreshPropertyButton.disabled =
+      true;
+
+
+    el.refreshPropertyButton.textContent =
+      "Refreshing…";
+
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "get_daily_activity_property_accountability",
+
+      {
+        p_shift_id:
+          shiftInstanceId
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    renderPropertyAccountability(
+      data
+    );
+
+
+    if (
+      showSuccess
+    ) {
+
+      showPropertyMessage(
+        "Property Accountability refreshed successfully.",
+        "success"
+      );
+
+    }
+
+    else {
+
+      showPropertyMessage();
+
+    }
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Daily Activity Property Accountability error:",
+      error
+    );
+
+
+    showPropertyMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to load Property Accountability.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    if (
+      el.refreshPropertyButton
+    ) {
+
+      el.refreshPropertyButton.disabled =
+        false;
+
+
+      el.refreshPropertyButton.textContent =
+        "Refresh Property";
+
+    }
+
+  }
+
+}
+  
   // ==========================================================
   // RETURN LINK
   // ==========================================================
