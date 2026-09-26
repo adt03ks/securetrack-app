@@ -10187,12 +10187,92 @@ document
     }
 
   );
+
+// ==========================================================
+// END-OF-SHIFT READINESS WATCHERS
+// ==========================================================
+
+const publishReadinessWatchIds = [
+
+  "unreviewedAlerts",
+  "pendingAlerts",
+
+  "tsiOpenCount",
+  "tsiInProgressCount",
+
+  "supplyRequestedCount",
+  "supplyOrderedCount",
+  "supplyPartialCount",
+
+  "openDeviceIssueCount",
+
+  "propertyDisposalRequestedCount",
+
+  "carryForwardSpecialCount"
+
+];
+
+
+const publishReadinessObserver =
+  new MutationObserver(
+    () => {
+
+      refreshPublishReadiness();
+
+    }
+  );
+
+
+publishReadinessWatchIds
+  .forEach(
+    id => {
+
+      const target =
+        document.getElementById(id);
+
+
+      if (
+        target
+      ) {
+
+        publishReadinessObserver.observe(
+          target,
+          {
+            childList:
+              true,
+
+            characterData:
+              true,
+
+            subtree:
+              true
+          }
+        );
+
+      }
+
+    }
+  );
+
+
+el.dailyHandoffSummary
+  ?.addEventListener(
+    "input",
+    () => {
+
+      refreshPublishReadiness();
+
+    }
+  );
+  
   // ==========================================================
   // INITIAL LOAD
   // ==========================================================
 
 await Promise.all([
 
+  refreshPublishReadiness();
+  
   loadShiftSummary(),
 
   loadSecurityAlerts(),
@@ -10205,7 +10285,7 @@ await Promise.all([
 
   loadTsiRequests(),
 
-  loadSupplyRequests(),
+  loadSupplyRequests(),  
 
   hasManagerConfidentialAccess
     ? loadConfidentialEntries()
