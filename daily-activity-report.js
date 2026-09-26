@@ -364,6 +364,34 @@ cancelConfidentialEditButton:
 
 confidentialEntryList:
   $("confidentialEntryList"),
+
+    // ==========================================================
+// END-OF-SHIFT PUBLISH
+// ==========================================================
+
+endOfShiftPublishSection:
+  $("endOfShiftPublishSection"),
+
+publishStatusBadge:
+  $("publishStatusBadge"),
+
+publishReadinessMessage:
+  $("publishReadinessMessage"),
+
+publishAlertsStatus:
+  $("publishAlertsStatus"),
+
+publishPendingStatus:
+  $("publishPendingStatus"),
+
+publishCarryForwardStatus:
+  $("publishCarryForwardStatus"),
+
+dailyHandoffSummary:
+  $("dailyHandoffSummary"),
+
+publishEndOfShiftButton:
+  $("publishEndOfShiftButton"),
     
 alertMessage:
   $("alertMessage"),
