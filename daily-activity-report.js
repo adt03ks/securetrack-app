@@ -10505,14 +10505,12 @@ el.publishEndOfShiftButton
     publishDailyActivityEndOfShift
   );
   
-  // ==========================================================
-  // INITIAL LOAD
-  // ==========================================================
+// ==========================================================
+// INITIAL LOAD
+// ==========================================================
 
 await Promise.all([
 
-  refreshPublishReadiness();
-  
   loadShiftSummary(),
 
   loadSecurityAlerts(),
@@ -10525,11 +10523,14 @@ await Promise.all([
 
   loadTsiRequests(),
 
-  loadSupplyRequests(),  
+  loadSupplyRequests(),
 
   hasManagerConfidentialAccess
     ? loadConfidentialEntries()
     : Promise.resolve()
 
 ]);
+
+refreshPublishReadiness();
+
 })();
