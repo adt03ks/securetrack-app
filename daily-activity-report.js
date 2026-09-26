@@ -130,6 +130,28 @@ propertyDisposedCount:
 
 propertyActivityList:
   $("propertyActivityList"),
+
+deviceExceptionsMessage:
+  $("deviceExceptionsMessage"),
+
+refreshDeviceExceptionsButton:
+  $("refreshDeviceExceptionsButton"),
+
+failedInspectionCount:
+  $("failedInspectionCount"),
+
+reportedDeviceIssueCount:
+  $("reportedDeviceIssueCount"),
+
+openDeviceIssueCount:
+  $("openDeviceIssueCount"),
+
+highCriticalDeviceCount:
+  $("highCriticalDeviceCount"),
+
+deviceExceptionList:
+  $("deviceExceptionList"),
+    
 alertMessage:
   $("alertMessage"),
 
