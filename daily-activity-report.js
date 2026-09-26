@@ -10397,8 +10397,6 @@ async function publishDailyActivityEndOfShift() {
 
     );
 
-}
-
   // ==========================================================
 // PRINT DAILY ACTIVITY REPORT
 // ==========================================================
