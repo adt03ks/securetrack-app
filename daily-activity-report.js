@@ -10494,6 +10494,16 @@ el.dailyHandoffSummary
 
     }
   );
+
+// ==========================================================
+// PUBLISH END-OF-SHIFT HANDOFF
+// ==========================================================
+
+el.publishEndOfShiftButton
+  ?.addEventListener(
+    "click",
+    publishDailyActivityEndOfShift
+  );
   
   // ==========================================================
   // INITIAL LOAD
