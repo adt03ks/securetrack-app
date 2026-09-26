@@ -4785,6 +4785,1281 @@ async function loadDeviceExceptions(
   }
 
 }
+
+  // ==========================================================
+// TSI REQUEST STATE
+// ==========================================================
+
+let tsiRequests =
+  [];
+
+
+
+// ==========================================================
+// TSI MESSAGE
+// ==========================================================
+
+function showTsiMessage(
+  message = "",
+  type = "info"
+) {
+
+  if (
+    !el.tsiMessage
+  ) {
+
+    return;
+
+  }
+
+
+  el.tsiMessage.textContent =
+    message;
+
+
+  el.tsiMessage.className =
+
+    message
+
+      ? `message show ${type}`
+
+      : "message";
+
+}
+
+
+
+// ==========================================================
+// TSI HELPERS
+// ==========================================================
+
+function tsiStatusClass(
+  status
+) {
+
+  return String(
+    status
+    ||
+    "open"
+  )
+    .replaceAll(
+      "_",
+      "-"
+    );
+
+}
+
+
+
+function tsiLabel(
+  value
+) {
+
+  return String(
+    value
+    ??
+    ""
+  )
+    .replaceAll(
+      "_",
+      " "
+    )
+    .replace(
+      /\b\w/g,
+      character =>
+        character.toUpperCase()
+    );
+
+}
+
+
+
+function addTsiDetail(
+  container,
+  label,
+  value
+) {
+
+  if (
+    value === null
+    ||
+    value === undefined
+    ||
+    value === ""
+  ) {
+
+    return;
+
+  }
+
+
+  const box =
+    document.createElement(
+      "div"
+    );
+
+
+  box.className =
+    "tsi-detail-box";
+
+
+  const name =
+    document.createElement(
+      "span"
+    );
+
+
+  name.textContent =
+    label;
+
+
+  const content =
+    document.createElement(
+      "strong"
+    );
+
+
+  content.textContent =
+    String(
+      value
+    );
+
+
+  box.append(
+    name,
+    content
+  );
+
+
+  container.appendChild(
+    box
+  );
+
+}
+
+
+
+// ==========================================================
+// RESET TSI FORM
+// ==========================================================
+
+function resetTsiForm() {
+
+  if (
+    el.tsiRequestId
+  ) {
+
+    el.tsiRequestId.value =
+      "";
+
+  }
+
+
+  if (
+    el.tsiTicketNumber
+  ) {
+
+    el.tsiTicketNumber.value =
+      "";
+
+  }
+
+
+  if (
+    el.tsiRequestType
+  ) {
+
+    el.tsiRequestType.value =
+      "";
+
+  }
+
+
+  if (
+    el.tsiLocation
+  ) {
+
+    el.tsiLocation.value =
+      "";
+
+  }
+
+
+  if (
+    el.tsiPriority
+  ) {
+
+    el.tsiPriority.value =
+      "normal";
+
+  }
+
+
+  if (
+    el.tsiStatus
+  ) {
+
+    el.tsiStatus.value =
+      "open";
+
+  }
+
+
+  if (
+    el.tsiDescription
+  ) {
+
+    el.tsiDescription.value =
+      "";
+
+  }
+
+
+  if (
+    el.tsiOperationalNotes
+  ) {
+
+    el.tsiOperationalNotes.value =
+      "";
+
+  }
+
+
+  if (
+    el.tsiFormTitle
+  ) {
+
+    el.tsiFormTitle.textContent =
+      "Add TSI Request";
+
+  }
+
+
+  if (
+    el.saveTsiRequestButton
+  ) {
+
+    el.saveTsiRequestButton.textContent =
+      "Add TSI Request";
+
+  }
+
+
+  if (
+    el.cancelTsiEditButton
+  ) {
+
+    el.cancelTsiEditButton.hidden =
+      true;
+
+  }
+
+}
+
+
+
+// ==========================================================
+// BEGIN TSI EDIT
+// ==========================================================
+
+function beginTsiEdit(
+  requestId
+) {
+
+  const request =
+    tsiRequests.find(
+
+      item =>
+        item.tsi_request_id ===
+        requestId
+
+    );
+
+
+  if (
+    !request
+  ) {
+
+    showTsiMessage(
+      "Unable to locate the selected TSI request.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  el.tsiRequestId.value =
+    request.tsi_request_id
+    ||
+    "";
+
+
+  el.tsiTicketNumber.value =
+    request.ticket_number
+    ||
+    "";
+
+
+  el.tsiRequestType.value =
+    request.request_type
+    ||
+    "";
+
+
+  el.tsiLocation.value =
+    request.location
+    ||
+    "";
+
+
+  el.tsiPriority.value =
+    request.priority
+    ||
+    "normal";
+
+
+  el.tsiStatus.value =
+    request.status
+    ||
+    "open";
+
+
+  el.tsiDescription.value =
+    request.description
+    ||
+    "";
+
+
+  el.tsiOperationalNotes.value =
+    request.operational_notes
+    ||
+    "";
+
+
+  el.tsiFormTitle.textContent =
+    "Edit TSI Request";
+
+
+  el.saveTsiRequestButton.textContent =
+    "Save TSI Update";
+
+
+  el.cancelTsiEditButton.hidden =
+    false;
+
+
+  el.tsiRequestForm
+    ?.scrollIntoView({
+
+      behavior:
+        "smooth",
+
+      block:
+        "start"
+
+    });
+
+
+  el.tsiTicketNumber
+    ?.focus();
+
+}
+
+
+
+// ==========================================================
+// RENDER TSI REQUESTS
+// ==========================================================
+
+function renderTsiRequests(
+  data
+) {
+
+  const summary =
+    data?.summary
+    ||
+    {};
+
+
+  tsiRequests =
+    data?.items
+    ||
+    [];
+
+
+  el.tsiTotalCount.textContent =
+    summary.total
+    ??
+    0;
+
+
+  el.tsiOpenCount.textContent =
+    summary.open
+    ??
+    0;
+
+
+  el.tsiInProgressCount.textContent =
+    summary.in_progress
+    ??
+    0;
+
+
+  el.tsiResolvedCount.textContent =
+    summary.resolved
+    ??
+    0;
+
+
+  el.tsiUrgentCount.textContent =
+    summary.urgent
+    ??
+    0;
+
+
+  el.tsiRequestList.innerHTML =
+    "";
+
+
+  if (
+    !tsiRequests.length
+  ) {
+
+    el.tsiRequestList.innerHTML =
+      `
+        <div class="empty-state">
+          No TSI Requests are associated
+          with this shift at this time.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  tsiRequests.forEach(
+    request => {
+
+      const statusClass =
+        tsiStatusClass(
+          request.status
+        );
+
+
+      const priorityClass =
+        String(
+          request.priority
+          ||
+          "normal"
+        )
+          .toLowerCase();
+
+
+      const card =
+        document.createElement(
+          "article"
+        );
+
+
+      card.className =
+        `tsi-request-card ${statusClass}${
+          priorityClass === "urgent"
+            ? " urgent"
+            : ""
+        }`;
+
+
+
+      // ------------------------------------------------------
+      // HEADER
+      // ------------------------------------------------------
+
+      const head =
+        document.createElement(
+          "div"
+        );
+
+
+      head.className =
+        "tsi-request-head";
+
+
+      const left =
+        document.createElement(
+          "div"
+        );
+
+
+      const title =
+        document.createElement(
+          "h3"
+        );
+
+
+      title.className =
+        "tsi-request-title";
+
+
+      title.textContent =
+
+        request.ticket_number
+
+        ||
+
+        "TSI Request";
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+
+      meta.className =
+        "tsi-request-meta";
+
+
+      const metaParts =
+        [];
+
+
+      if (
+        request.request_type
+      ) {
+
+        metaParts.push(
+          request.request_type
+        );
+
+      }
+
+
+      if (
+        request.reported_at
+      ) {
+
+        metaParts.push(
+          formatDateTime(
+            request.reported_at
+          )
+        );
+
+      }
+
+
+      meta.textContent =
+        metaParts.join(
+          " • "
+        );
+
+
+      left.append(
+        title,
+        meta
+      );
+
+
+
+      // ------------------------------------------------------
+      // CHIPS
+      // ------------------------------------------------------
+
+      const chips =
+        document.createElement(
+          "div"
+        );
+
+
+      chips.className =
+        "tsi-request-chips";
+
+
+      const statusChip =
+        document.createElement(
+          "span"
+        );
+
+
+      statusChip.className =
+        `tsi-chip ${statusClass}`;
+
+
+      statusChip.textContent =
+        tsiLabel(
+          request.status
+        );
+
+
+      const priorityChip =
+        document.createElement(
+          "span"
+        );
+
+
+      priorityChip.className =
+        `tsi-chip ${priorityClass}`;
+
+
+      priorityChip.textContent =
+        `${tsiLabel(
+          request.priority
+        )} Priority`;
+
+
+      chips.append(
+        statusChip,
+        priorityChip
+      );
+
+
+      head.append(
+        left,
+        chips
+      );
+
+
+
+      // ------------------------------------------------------
+      // BODY
+      // ------------------------------------------------------
+
+      const body =
+        document.createElement(
+          "div"
+        );
+
+
+      body.className =
+        "tsi-request-body";
+
+
+      const details =
+        document.createElement(
+          "div"
+        );
+
+
+      details.className =
+        "tsi-detail-grid";
+
+
+      addTsiDetail(
+        details,
+        "Ticket Number",
+        request.ticket_number
+      );
+
+
+      addTsiDetail(
+        details,
+        "Request Type",
+        request.request_type
+      );
+
+
+      addTsiDetail(
+        details,
+        "Location",
+        request.location
+      );
+
+
+      addTsiDetail(
+        details,
+        "Status",
+        tsiLabel(
+          request.status
+        )
+      );
+
+
+      addTsiDetail(
+        details,
+        "Priority",
+        tsiLabel(
+          request.priority
+        )
+      );
+
+
+      addTsiDetail(
+        details,
+        "Entered By",
+        request.created_by_name
+      );
+
+
+      if (
+        request.reported_at
+      ) {
+
+        addTsiDetail(
+          details,
+          "Reported",
+          formatDateTime(
+            request.reported_at
+          )
+        );
+
+      }
+
+
+      if (
+        request.updated_by_name
+      ) {
+
+        addTsiDetail(
+          details,
+          "Last Updated By",
+          request.updated_by_name
+        );
+
+      }
+
+
+      if (
+        request.updated_at
+      ) {
+
+        addTsiDetail(
+          details,
+          "Last Updated",
+          formatDateTime(
+            request.updated_at
+          )
+        );
+
+      }
+
+
+      if (
+        request.resolved_at
+      ) {
+
+        addTsiDetail(
+          details,
+          "Resolved",
+          formatDateTime(
+            request.resolved_at
+          )
+        );
+
+      }
+
+
+      body.appendChild(
+        details
+      );
+
+
+
+      // ------------------------------------------------------
+      // DESCRIPTION
+      // ------------------------------------------------------
+
+      if (
+        request.description
+      ) {
+
+        const descriptionBox =
+          document.createElement(
+            "div"
+          );
+
+
+        descriptionBox.className =
+          "tsi-description-box";
+
+
+        const descriptionLabel =
+          document.createElement(
+            "strong"
+          );
+
+
+        descriptionLabel.textContent =
+          "Request Details";
+
+
+        const descriptionText =
+          document.createElement(
+            "div"
+          );
+
+
+        descriptionText.textContent =
+          request.description;
+
+
+        descriptionBox.append(
+          descriptionLabel,
+          descriptionText
+        );
+
+
+        body.appendChild(
+          descriptionBox
+        );
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // OPERATIONAL NOTES
+      // ------------------------------------------------------
+
+      if (
+        request.operational_notes
+      ) {
+
+        const notesBox =
+          document.createElement(
+            "div"
+          );
+
+
+        notesBox.className =
+          "tsi-notes-box";
+
+
+        const notesLabel =
+          document.createElement(
+            "strong"
+          );
+
+
+        notesLabel.textContent =
+          "Operational Notes";
+
+
+        const notesText =
+          document.createElement(
+            "div"
+          );
+
+
+        notesText.textContent =
+          request.operational_notes;
+
+
+        notesBox.append(
+          notesLabel,
+          notesText
+        );
+
+
+        body.appendChild(
+          notesBox
+        );
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // EDIT BUTTON
+      // ------------------------------------------------------
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+
+      actions.className =
+        "tsi-card-actions";
+
+
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+
+      editButton.className =
+        "button secondary";
+
+
+      editButton.type =
+        "button";
+
+
+      editButton.textContent =
+        "Edit Request";
+
+
+      editButton.addEventListener(
+
+        "click",
+
+        () =>
+          beginTsiEdit(
+            request.tsi_request_id
+          )
+
+      );
+
+
+      actions.appendChild(
+        editButton
+      );
+
+
+      body.appendChild(
+        actions
+      );
+
+
+      card.append(
+        head,
+        body
+      );
+
+
+      el.tsiRequestList
+        .appendChild(
+          card
+        );
+
+    }
+  );
+
+}
+
+
+
+// ==========================================================
+// LOAD TSI REQUESTS
+// ==========================================================
+
+async function loadTsiRequests(
+  showSuccess = false
+) {
+
+  if (
+    !shiftInstanceId
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    el.refreshTsiRequestsButton
+  ) {
+
+    el.refreshTsiRequestsButton.disabled =
+      true;
+
+
+    el.refreshTsiRequestsButton.textContent =
+      "Refreshing…";
+
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "get_daily_activity_tsi_requests",
+
+      {
+        p_shift_id:
+          shiftInstanceId
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    renderTsiRequests(
+      data
+    );
+
+
+    if (
+      showSuccess
+    ) {
+
+      showTsiMessage(
+        "TSI Requests refreshed successfully.",
+        "success"
+      );
+
+    }
+
+    else {
+
+      showTsiMessage();
+
+    }
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Daily Activity TSI Request error:",
+      error
+    );
+
+
+    showTsiMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to load TSI Requests.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    if (
+      el.refreshTsiRequestsButton
+    ) {
+
+      el.refreshTsiRequestsButton.disabled =
+        false;
+
+
+      el.refreshTsiRequestsButton.textContent =
+        "Refresh TSI";
+
+    }
+
+  }
+
+}
+
+
+
+// ==========================================================
+// SAVE TSI REQUEST
+// ==========================================================
+
+async function saveTsiRequest() {
+
+  const description =
+    el.tsiDescription
+      ?.value
+      ?.trim()
+    ||
+    "";
+
+
+  if (
+    description.length < 3
+  ) {
+
+    showTsiMessage(
+      "Enter the TSI request details before saving.",
+      "error"
+    );
+
+
+    el.tsiDescription
+      ?.focus();
+
+
+    return;
+
+  }
+
+
+  const requestId =
+    el.tsiRequestId
+      ?.value
+      ?.trim()
+    ||
+    null;
+
+
+  if (
+    el.saveTsiRequestButton
+  ) {
+
+    el.saveTsiRequestButton.disabled =
+      true;
+
+
+    el.saveTsiRequestButton.textContent =
+      requestId
+        ? "Saving Update…"
+        : "Adding Request…";
+
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "save_daily_activity_tsi_request",
+
+      {
+
+        p_shift_id:
+          shiftInstanceId,
+
+        p_tsi_request_id:
+          requestId,
+
+        p_ticket_number:
+          el.tsiTicketNumber
+            ?.value
+            ?.trim()
+          ||
+          null,
+
+        p_request_type:
+          el.tsiRequestType
+            ?.value
+            ?.trim()
+          ||
+          null,
+
+        p_location:
+          el.tsiLocation
+            ?.value
+            ?.trim()
+          ||
+          null,
+
+        p_description:
+          description,
+
+        p_status:
+          el.tsiStatus
+            ?.value
+          ||
+          "open",
+
+        p_priority:
+          el.tsiPriority
+            ?.value
+          ||
+          "normal",
+
+        p_operational_notes:
+          el.tsiOperationalNotes
+            ?.value
+            ?.trim()
+          ||
+          null
+
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    resetTsiForm();
+
+
+    await loadTsiRequests();
+
+
+    showTsiMessage(
+
+      requestId
+
+        ? "TSI Request updated successfully."
+
+        : "TSI Request added successfully.",
+
+      "success"
+
+    );
+
+
+    return data;
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Save TSI Request error:",
+      error
+    );
+
+
+    showTsiMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to save the TSI Request.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    if (
+      el.saveTsiRequestButton
+    ) {
+
+      el.saveTsiRequestButton.disabled =
+        false;
+
+
+      el.saveTsiRequestButton.textContent =
+
+        el.tsiRequestId
+          ?.value
+
+          ? "Save TSI Update"
+
+          : "Add TSI Request";
+
+    }
+
+  }
+
+}
   
   // ==========================================================
   // RETURN LINK
