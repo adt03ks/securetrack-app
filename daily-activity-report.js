@@ -3814,6 +3814,917 @@ async function loadPropertyAccountability(
   }
 
 }
+
+// ==========================================================
+// DEVICE EXCEPTION HELPERS
+// ==========================================================
+
+function showDeviceExceptionsMessage(
+  message = "",
+  type = "info"
+) {
+
+  if (
+    !el.deviceExceptionsMessage
+  ) {
+
+    return;
+
+  }
+
+
+  el.deviceExceptionsMessage.textContent =
+    message;
+
+
+  el.deviceExceptionsMessage.className =
+
+    message
+
+      ? `message show ${type}`
+
+      : "message";
+
+}
+
+
+
+function humanizeDeviceValue(
+  value
+) {
+
+  return String(
+    value
+    ??
+    ""
+  )
+    .replaceAll(
+      "_",
+      " "
+    )
+    .replace(
+      /\b\w/g,
+      character =>
+        character.toUpperCase()
+    );
+
+}
+
+
+
+function addDeviceExceptionDetail(
+  container,
+  label,
+  value
+) {
+
+  if (
+    value === null
+    ||
+    value === undefined
+    ||
+    value === ""
+  ) {
+
+    return;
+
+  }
+
+
+  const box =
+    document.createElement(
+      "div"
+    );
+
+
+  box.className =
+    "device-exception-detail";
+
+
+  const name =
+    document.createElement(
+      "span"
+    );
+
+
+  name.textContent =
+    label;
+
+
+  const content =
+    document.createElement(
+      "strong"
+    );
+
+
+  content.textContent =
+    String(
+      value
+    );
+
+
+  box.append(
+    name,
+    content
+  );
+
+
+  container.appendChild(
+    box
+  );
+
+}
+
+
+
+function deviceChecklistClass(
+  value
+) {
+
+  const normalized =
+    String(
+      value
+      ??
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+
+  if (
+    [
+      "pass",
+      "passed",
+      "true",
+      "ok"
+    ].includes(
+      normalized
+    )
+  ) {
+
+    return "pass";
+
+  }
+
+
+  if (
+    [
+      "fail",
+      "failed",
+      "false"
+    ].includes(
+      normalized
+    )
+  ) {
+
+    return "fail";
+
+  }
+
+
+  return "";
+
+}
+
+
+
+// ==========================================================
+// RENDER DEVICE EXCEPTIONS
+// ==========================================================
+
+function renderDeviceExceptions(
+  data
+) {
+
+  const summary =
+    data?.summary
+    ||
+    {};
+
+
+  const items =
+    data?.items
+    ||
+    [];
+
+
+  el.failedInspectionCount.textContent =
+    summary.failed_inspections
+    ??
+    0;
+
+
+  el.reportedDeviceIssueCount.textContent =
+    summary.issues_reported
+    ??
+    0;
+
+
+  el.openDeviceIssueCount.textContent =
+    summary.open_issues
+    ??
+    0;
+
+
+  el.highCriticalDeviceCount.textContent =
+    summary.high_critical
+    ??
+    0;
+
+
+  el.deviceExceptionList.innerHTML =
+    "";
+
+
+  if (
+    !items.length
+  ) {
+
+    el.deviceExceptionList.innerHTML =
+      `
+        <div class="empty-state">
+          No Device Exceptions are associated
+          with this shift at this time.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  items.forEach(
+    item => {
+
+      const isInspection =
+        item.activity_type ===
+        "failed_inspection";
+
+
+      const cardClass =
+        isInspection
+
+          ? "failed-inspection"
+
+          : "reported-issue";
+
+
+      const card =
+        document.createElement(
+          "article"
+        );
+
+
+      card.className =
+        `device-exception-card ${cardClass}`;
+
+
+
+      // ------------------------------------------------------
+      // HEADER
+      // ------------------------------------------------------
+
+      const head =
+        document.createElement(
+          "div"
+        );
+
+
+      head.className =
+        "device-exception-head";
+
+
+      const left =
+        document.createElement(
+          "div"
+        );
+
+
+      const title =
+        document.createElement(
+          "h3"
+        );
+
+
+      title.className =
+        "device-exception-title";
+
+
+      title.textContent =
+
+        item.asset_code
+
+        ||
+
+        "Device";
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+
+      meta.className =
+        "device-exception-meta";
+
+
+      meta.textContent =
+
+        (
+          isInspection
+
+            ? "Failed Inspection"
+
+            : "Reported Equipment Issue"
+        )
+
+        +
+
+        (
+          item.occurred_at
+
+            ? ` • ${formatDateTime(
+                item.occurred_at
+              )}`
+
+            : ""
+        );
+
+
+      left.append(
+        title,
+        meta
+      );
+
+
+      const chip =
+        document.createElement(
+          "span"
+        );
+
+
+      if (
+        isInspection
+      ) {
+
+        chip.className =
+          "device-exception-chip failed-inspection";
+
+
+        chip.textContent =
+          "FAILED";
+
+      }
+
+      else {
+
+        const severity =
+          String(
+            item.severity
+            ||
+            "reported"
+          )
+            .toLowerCase();
+
+
+        chip.className =
+          `device-exception-chip ${severity}`;
+
+
+        chip.textContent =
+          item.severity
+
+            ? `${String(
+                item.severity
+              ).toUpperCase()} ISSUE`
+
+            : "ISSUE";
+
+      }
+
+
+      head.append(
+        left,
+        chip
+      );
+
+
+
+      // ------------------------------------------------------
+      // DETAILS
+      // ------------------------------------------------------
+
+      const body =
+        document.createElement(
+          "div"
+        );
+
+
+      body.className =
+        "device-exception-body";
+
+
+      const details =
+        document.createElement(
+          "div"
+        );
+
+
+      details.className =
+        "device-exception-detail-grid";
+
+
+      addDeviceExceptionDetail(
+        details,
+        "Asset Number",
+        item.asset_code
+      );
+
+
+      addDeviceExceptionDetail(
+        details,
+        "Device Type",
+        humanizeDeviceValue(
+          item.device_type
+        )
+      );
+
+
+      addDeviceExceptionDetail(
+        details,
+        "Manufacturer",
+        item.manufacturer
+      );
+
+
+      addDeviceExceptionDetail(
+        details,
+        "Model",
+        item.model
+      );
+
+
+      addDeviceExceptionDetail(
+        details,
+        "Serial",
+        item.serial_last4
+          ? `••••${item.serial_last4}`
+          : null
+      );
+
+
+      addDeviceExceptionDetail(
+        details,
+        "Device Status",
+        item.device_status
+          ? humanizeDeviceValue(
+              item.device_status
+            )
+          : null
+      );
+
+
+      addDeviceExceptionDetail(
+        details,
+        "Reported / Inspected By",
+        item.employee_name
+      );
+
+
+      addDeviceExceptionDetail(
+        details,
+        "Employee Number",
+        item.employee_number
+          ? `#${item.employee_number}`
+          : null
+      );
+
+
+      if (
+        isInspection
+      ) {
+
+        addDeviceExceptionDetail(
+          details,
+          "Inspection Result",
+          "FAIL"
+        );
+
+      }
+
+      else {
+
+        addDeviceExceptionDetail(
+          details,
+          "Category",
+          humanizeDeviceValue(
+            item.category
+          )
+        );
+
+
+        addDeviceExceptionDetail(
+          details,
+          "Severity",
+          humanizeDeviceValue(
+            item.severity
+          )
+        );
+
+
+        addDeviceExceptionDetail(
+          details,
+          "Issue Status",
+          humanizeDeviceValue(
+            item.issue_status
+          )
+        );
+
+      }
+
+
+      addDeviceExceptionDetail(
+        details,
+        "Attention Required",
+        item.attention_required
+          ? "YES"
+          : "NO"
+      );
+
+
+      if (
+        item.resolved_at
+      ) {
+
+        addDeviceExceptionDetail(
+          details,
+          "Resolved",
+          formatDateTime(
+            item.resolved_at
+          )
+        );
+
+      }
+
+
+      body.appendChild(
+        details
+      );
+
+
+
+      // ------------------------------------------------------
+      // INSPECTION CHECKLIST
+      // ------------------------------------------------------
+
+      if (
+        isInspection
+        &&
+        item.checklist
+        &&
+        typeof item.checklist ===
+          "object"
+      ) {
+
+        const checklistEntries =
+          Object.entries(
+            item.checklist
+          );
+
+
+        if (
+          checklistEntries.length
+        ) {
+
+          const checklistBox =
+            document.createElement(
+              "div"
+            );
+
+
+          checklistBox.className =
+            "device-checklist";
+
+
+          const checklistTitle =
+            document.createElement(
+              "strong"
+            );
+
+
+          checklistTitle.textContent =
+            "Inspection Checklist";
+
+
+          const checklistItems =
+            document.createElement(
+              "div"
+            );
+
+
+          checklistItems.className =
+            "device-checklist-items";
+
+
+          checklistEntries.forEach(
+            ([
+              key,
+              value
+            ]) => {
+
+              const check =
+                document.createElement(
+                  "span"
+                );
+
+
+              const statusClass =
+                deviceChecklistClass(
+                  value
+                );
+
+
+              check.className =
+                `device-check-item ${statusClass}`;
+
+
+              check.textContent =
+                `${humanizeDeviceValue(
+                  key
+                )}: ${String(
+                  value
+                ).toUpperCase()}`;
+
+
+              checklistItems.appendChild(
+                check
+              );
+
+            }
+          );
+
+
+          checklistBox.append(
+            checklistTitle,
+            checklistItems
+          );
+
+
+          body.appendChild(
+            checklistBox
+          );
+
+        }
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // ISSUE / INSPECTION NOTES
+      // ------------------------------------------------------
+
+      const noteValue =
+
+        isInspection
+
+          ? item.notes
+
+          : item.description;
+
+
+      if (
+        noteValue
+      ) {
+
+        const noteBox =
+          document.createElement(
+            "div"
+          );
+
+
+        noteBox.className =
+          "device-exception-notes";
+
+
+        const noteLabel =
+          document.createElement(
+            "strong"
+          );
+
+
+        noteLabel.textContent =
+
+          isInspection
+
+            ? "Inspection Notes"
+
+            : "Issue Description";
+
+
+        const noteText =
+          document.createElement(
+            "div"
+          );
+
+
+        noteText.textContent =
+          noteValue;
+
+
+        noteBox.append(
+          noteLabel,
+          noteText
+        );
+
+
+        body.appendChild(
+          noteBox
+        );
+
+      }
+
+
+
+      // ------------------------------------------------------
+      // ASSET HISTORY LINK
+      // ------------------------------------------------------
+
+      if (
+        item.device_id
+      ) {
+
+        const link =
+          document.createElement(
+            "a"
+          );
+
+
+        link.className =
+          "device-history-link";
+
+
+        link.href =
+          `asset-history.html?device=${
+            encodeURIComponent(
+              item.device_id
+            )
+          }`;
+
+
+        link.textContent =
+          "Open Full Asset History →";
+
+
+        body.appendChild(
+          link
+        );
+
+      }
+
+
+      card.append(
+        head,
+        body
+      );
+
+
+      el.deviceExceptionList
+        .appendChild(
+          card
+        );
+
+    }
+  );
+
+}
+
+
+
+// ==========================================================
+// LOAD DEVICE EXCEPTIONS
+// ==========================================================
+
+async function loadDeviceExceptions(
+  showSuccess = false
+) {
+
+  if (
+    !shiftInstanceId
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    el.refreshDeviceExceptionsButton
+  ) {
+
+    el.refreshDeviceExceptionsButton.disabled =
+      true;
+
+
+    el.refreshDeviceExceptionsButton.textContent =
+      "Refreshing…";
+
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+
+      "get_daily_activity_device_exceptions",
+
+      {
+        p_shift_id:
+          shiftInstanceId
+      }
+
+    );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    renderDeviceExceptions(
+      data
+    );
+
+
+    if (
+      showSuccess
+    ) {
+
+      showDeviceExceptionsMessage(
+        "Device Exceptions refreshed successfully.",
+        "success"
+      );
+
+    }
+
+    else {
+
+      showDeviceExceptionsMessage();
+
+    }
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Daily Activity Device Exceptions error:",
+      error
+    );
+
+
+    showDeviceExceptionsMessage(
+
+      error?.message
+
+      ||
+
+      "Unable to load Device Exceptions.",
+
+      "error"
+
+    );
+
+  }
+
+  finally {
+
+    if (
+      el.refreshDeviceExceptionsButton
+    ) {
+
+      el.refreshDeviceExceptionsButton.disabled =
+        false;
+
+
+      el.refreshDeviceExceptionsButton.textContent =
+        "Refresh Devices";
+
+    }
+
+  }
+
+}
   
   // ==========================================================
   // RETURN LINK
