@@ -2696,6 +2696,129 @@
   </div>
 
 </section>
+
+<!-- ==========================================================
+     PROPERTY ACCOUNTABILITY
+     ========================================================== -->
+
+<section class="activity-section">
+
+  <div class="section-heading-row">
+
+    <div>
+
+      <div class="eyebrow">
+        Chain of Custody
+      </div>
+
+      <h2>
+        Property Accountability
+      </h2>
+
+      <p class="section-description">
+        Property and belongings collected, released, marked for disposal,
+        or disposed during this shift.
+      </p>
+
+    </div>
+
+
+    <button
+      id="refreshPropertyButton"
+      class="button secondary"
+      type="button"
+    >
+      Refresh Property
+    </button>
+
+  </div>
+
+
+  <div
+    id="propertyMessage"
+    class="message"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- ========================================================
+       SUMMARY COUNTERS
+       ======================================================== -->
+
+  <div class="property-summary-grid">
+
+    <article class="property-summary collected">
+
+      <span>
+        Collected
+      </span>
+
+      <strong id="propertyCollectedCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="property-summary released">
+
+      <span>
+        Released
+      </span>
+
+      <strong id="propertyReleasedCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="property-summary disposal-pending">
+
+      <span>
+        Marked for Disposal
+      </span>
+
+      <strong id="propertyDisposalRequestedCount">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="property-summary disposed">
+
+      <span>
+        Disposed
+      </span>
+
+      <strong id="propertyDisposedCount">
+        0
+      </strong>
+
+    </article>
+
+  </div>
+
+
+  <!-- ========================================================
+       ACTIVITY FEED
+       ======================================================== -->
+
+  <div
+    id="propertyActivityList"
+    class="property-activity-list"
+  >
+
+    <div class="empty-state">
+      Loading Property Accountability…
+    </div>
+
+  </div>
+
+</section>
+   
   </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
