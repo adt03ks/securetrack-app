@@ -4339,7 +4339,473 @@
 
 }
 
+/* ==========================================================
+   MANAGER CONFIDENTIAL LOG
+   ========================================================== */
 
+.manager-confidential-section {
+  border:
+    1px solid
+    rgba(124, 58, 237, 0.42);
+}
+
+
+.confidential-warning {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border:
+    1px solid
+    rgba(124, 58, 237, 0.42);
+  background:
+    rgba(124, 58, 237, 0.08);
+}
+
+
+.confidential-warning strong {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: #7c3aed;
+}
+
+
+.confidential-warning span {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+
+
+/* ==========================================================
+   SUMMARY
+   ========================================================== */
+
+.confidential-summary-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 18px;
+}
+
+
+.confidential-summary {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--panel);
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+
+.confidential-summary span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+
+.confidential-summary strong {
+  font-size: 28px;
+  line-height: 1;
+  margin-top: 10px;
+}
+
+
+.confidential-summary.total {
+  border-left: 4px solid #7c3aed;
+}
+
+
+.confidential-summary.open {
+  border-left: 4px solid #dc2626;
+}
+
+
+.confidential-summary.monitoring {
+  border-left: 4px solid #d97706;
+}
+
+
+.confidential-summary.follow-up {
+  border-left: 4px solid #2563eb;
+}
+
+
+.confidential-summary.completed {
+  border-left: 4px solid #16a34a;
+}
+
+
+
+/* ==========================================================
+   ENTRY PANEL
+   ========================================================== */
+
+.confidential-entry-panel {
+  border:
+    1px solid
+    rgba(124, 58, 237, 0.32);
+  border-radius: 14px;
+  background: var(--panel);
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+
+.confidential-entry-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+
+.confidential-entry-heading h3 {
+  margin: 3px 0 0;
+  font-size: 18px;
+}
+
+
+.confidential-form-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+
+.confidential-wide-field {
+  grid-column: span 3;
+}
+
+
+.confidential-follow-up-row {
+  grid-column: span 3;
+  display: flex;
+  align-items: end;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+
+.confidential-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+.confidential-check input {
+  width: 17px;
+  height: 17px;
+  accent-color: #7c3aed;
+}
+
+
+.confidential-form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+
+
+/* ==========================================================
+   CONFIDENTIAL ENTRY LIST
+   ========================================================== */
+
+.confidential-entry-list {
+  display: grid;
+  gap: 14px;
+}
+
+
+.confidential-entry-card {
+  border: 1px solid var(--border);
+  border-left: 4px solid #7c3aed;
+  border-radius: 14px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+
+.confidential-entry-card.open {
+  border-left-color: #dc2626;
+}
+
+
+.confidential-entry-card.monitoring {
+  border-left-color: #d97706;
+}
+
+
+.confidential-entry-card.completed {
+  border-left-color: #16a34a;
+}
+
+
+.confidential-entry-head {
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+
+.confidential-entry-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+
+.confidential-entry-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+
+.confidential-entry-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: flex-end;
+}
+
+
+.confidential-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+
+.confidential-chip.restricted {
+  background:
+    rgba(124, 58, 237, 0.13);
+  color: #7c3aed;
+}
+
+
+.confidential-chip.open {
+  background:
+    rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+
+.confidential-chip.monitoring {
+  background:
+    rgba(217, 119, 6, 0.13);
+  color: #d97706;
+}
+
+
+.confidential-chip.completed {
+  background:
+    rgba(22, 163, 74, 0.12);
+  color: #16a34a;
+}
+
+
+.confidential-chip.follow-up {
+  background:
+    rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+}
+
+
+
+/* ==========================================================
+   ENTRY BODY
+   ========================================================== */
+
+.confidential-entry-body {
+  padding: 18px;
+}
+
+
+.confidential-detail-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+
+.confidential-detail-box {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: var(--surface);
+}
+
+
+.confidential-detail-box span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+
+.confidential-detail-box strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+
+.confidential-details-box,
+.confidential-action-box {
+  margin-top: 14px;
+  padding: 13px 14px;
+  border-radius: 10px;
+  border:
+    1px solid
+    rgba(124, 58, 237, 0.22);
+  background: var(--surface);
+}
+
+
+.confidential-details-box strong,
+.confidential-action-box strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+
+.confidential-follow-up-box {
+  margin-top: 14px;
+  padding: 13px 14px;
+  border-radius: 10px;
+  border:
+    1px solid
+    rgba(37, 99, 235, 0.28);
+  background:
+    rgba(37, 99, 235, 0.06);
+}
+
+
+.confidential-follow-up-box strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+
+.confidential-card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 1100px) {
+
+  .confidential-summary-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 900px) {
+
+  .confidential-form-grid,
+  .confidential-detail-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
+  .confidential-wide-field,
+  .confidential-follow-up-row {
+    grid-column: span 2;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .confidential-summary-grid,
+  .confidential-form-grid,
+  .confidential-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .confidential-wide-field,
+  .confidential-follow-up-row {
+    grid-column: span 1;
+  }
+
+
+  .confidential-entry-head {
+    flex-direction: column;
+  }
+
+
+  .confidential-entry-chips {
+    justify-content: flex-start;
+  }
+
+}
+
+
+
+/* ==========================================================
+   PRINT
+   CONFIDENTIAL SECTION MUST NEVER PRINT WITH SHIFT REPORT
+   ========================================================== */
+
+@media print {
+
+  #managerConfidentialSection {
+    display: none !important;
+  }
+
+}
 
 /* ==========================================================
    PRINT
