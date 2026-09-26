@@ -4793,6 +4793,18 @@ el.refreshPropertyButton
       )
 
   );
+
+el.refreshDeviceExceptionsButton
+  ?.addEventListener(
+
+    "click",
+
+    () =>
+      loadDeviceExceptions(
+        true
+      )
+
+  );
   
 el.refreshSpecialAssignmentsButton
   ?.addEventListener(
@@ -4810,7 +4822,7 @@ el.refreshSpecialAssignmentsButton
   // INITIAL LOAD
   // ==========================================================
 
- await Promise.all([
+await Promise.all([
 
   loadShiftSummary(),
 
@@ -4818,8 +4830,9 @@ el.refreshSpecialAssignmentsButton
 
   loadSpecialAssignments(),
 
-    loadPropertyAccountability()
+  loadPropertyAccountability(),
+
+  loadDeviceExceptions()
 
 ]);
-
 })();
