@@ -6153,6 +6153,54 @@ el.refreshSpecialAssignmentsButton
 
   );
 
+// ==========================================================
+// TSI FORM + CONTROLS
+// ==========================================================
+
+el.tsiRequestForm
+  ?.addEventListener(
+
+    "submit",
+
+    async event => {
+
+      event.preventDefault();
+
+      await saveTsiRequest();
+
+    }
+
+  );
+
+
+el.cancelTsiEditButton
+  ?.addEventListener(
+
+    "click",
+
+    () => {
+
+      resetTsiForm();
+
+      showTsiMessage();
+
+    }
+
+  );
+
+
+el.refreshTsiRequestsButton
+  ?.addEventListener(
+
+    "click",
+
+    () =>
+      loadTsiRequests(
+        true
+      )
+
+  );
+  
   // ==========================================================
   // INITIAL LOAD
   // ==========================================================
@@ -6167,7 +6215,9 @@ await Promise.all([
 
   loadPropertyAccountability(),
 
-  loadDeviceExceptions()
+  loadDeviceExceptions(),
+
+  loadTsiRequests()
 
 ]);
 })();
