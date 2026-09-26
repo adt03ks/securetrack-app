@@ -9778,7 +9778,367 @@ if (
       }
 
     );
+// ==========================================================
+// END-OF-SHIFT PUBLISH READINESS
+// ==========================================================
 
+function refreshPublishReadiness() {
+
+  if (
+    !el.endOfShiftPublishSection
+    ||
+    !el.publishEndOfShiftButton
+  ) {
+
+    return;
+
+  }
+
+
+  const counter =
+    id => {
+
+      const value =
+        Number(
+          document
+            .getElementById(id)
+            ?.textContent
+            ?.trim()
+        );
+
+      return Number.isFinite(value)
+        ? value
+        : 0;
+
+    };
+
+
+  // ========================================================
+  // SECURITY ALERTS
+  // ========================================================
+
+  const unreviewedAlerts =
+    counter(
+      "unreviewedAlerts"
+    );
+
+
+  const pendingAlerts =
+    counter(
+      "pendingAlerts"
+    );
+
+
+  const alertsReady =
+    unreviewedAlerts === 0;
+
+
+  if (
+    el.publishAlertsStatus
+  ) {
+
+    el.publishAlertsStatus.textContent =
+      alertsReady
+
+        ? "READY"
+
+        : `${unreviewedAlerts} UNREVIEWED`;
+
+  }
+
+
+  const alertsCard =
+    el.publishAlertsStatus
+      ?.closest(
+        ".publish-readiness-card"
+      );
+
+
+  alertsCard
+    ?.classList
+    .remove(
+      "ready",
+      "warning",
+      "blocked",
+      "info"
+    );
+
+
+  alertsCard
+    ?.classList
+    .add(
+      alertsReady
+        ? "ready"
+        : "blocked"
+    );
+
+
+
+  // ========================================================
+  // OPERATIONAL FOLLOW-UP
+  // ========================================================
+
+  const tsiOpen =
+    counter(
+      "tsiOpenCount"
+    );
+
+
+  const tsiInProgress =
+    counter(
+      "tsiInProgressCount"
+    );
+
+
+  const supplyRequested =
+    counter(
+      "supplyRequestedCount"
+    );
+
+
+  const supplyOrdered =
+    counter(
+      "supplyOrderedCount"
+    );
+
+
+  const supplyPartial =
+    counter(
+      "supplyPartialCount"
+    );
+
+
+  const openDeviceIssues =
+    counter(
+      "openDeviceIssueCount"
+    );
+
+
+  const disposalPending =
+    counter(
+      "propertyDisposalRequestedCount"
+    );
+
+
+  const pendingFollowUp =
+    pendingAlerts
+    +
+    tsiOpen
+    +
+    tsiInProgress
+    +
+    supplyRequested
+    +
+    supplyOrdered
+    +
+    supplyPartial
+    +
+    openDeviceIssues
+    +
+    disposalPending;
+
+
+  if (
+    el.publishPendingStatus
+  ) {
+
+    el.publishPendingStatus.textContent =
+      pendingFollowUp > 0
+
+        ? `${pendingFollowUp} ITEM${
+            pendingFollowUp === 1
+              ? ""
+              : "S"
+          }`
+
+        : "NONE";
+
+  }
+
+
+  const pendingCard =
+    el.publishPendingStatus
+      ?.closest(
+        ".publish-readiness-card"
+      );
+
+
+  pendingCard
+    ?.classList
+    .remove(
+      "ready",
+      "warning",
+      "blocked",
+      "info"
+    );
+
+
+  pendingCard
+    ?.classList
+    .add(
+      pendingFollowUp > 0
+        ? "warning"
+        : "ready"
+    );
+
+
+
+  // ========================================================
+  // CARRY-FORWARD SPECIAL ASSIGNMENTS
+  // ========================================================
+
+  const carryForward =
+    counter(
+      "carryForwardSpecialCount"
+    );
+
+
+  if (
+    el.publishCarryForwardStatus
+  ) {
+
+    el.publishCarryForwardStatus.textContent =
+      carryForward > 0
+
+        ? `${carryForward} TO HAND FORWARD`
+
+        : "NONE";
+
+  }
+
+
+  const carryCard =
+    el.publishCarryForwardStatus
+      ?.closest(
+        ".publish-readiness-card"
+      );
+
+
+  carryCard
+    ?.classList
+    .remove(
+      "ready",
+      "warning",
+      "blocked",
+      "info"
+    );
+
+
+  carryCard
+    ?.classList
+    .add(
+      carryForward > 0
+        ? "warning"
+        : "ready"
+    );
+
+
+
+  // ========================================================
+  // FINAL SUMMARY REQUIREMENT
+  //
+  // A summary is required whenever there is something that
+  // must be handed to the incoming shift.
+  // ========================================================
+
+  const summaryText =
+    el.dailyHandoffSummary
+      ?.value
+      ?.trim()
+    ||
+    "";
+
+
+  const summaryRequired =
+    pendingFollowUp > 0
+    ||
+    carryForward > 0;
+
+
+  const summaryReady =
+    !summaryRequired
+    ||
+    summaryText.length >= 10;
+
+
+
+  // ========================================================
+  // FINAL READINESS
+  // ========================================================
+
+  const readyToPublish =
+    alertsReady
+    &&
+    summaryReady;
+
+
+  el.publishEndOfShiftButton.disabled =
+    !readyToPublish;
+
+
+  if (
+    el.publishStatusBadge
+  ) {
+
+    el.publishStatusBadge.textContent =
+      readyToPublish
+
+        ? "READY TO PUBLISH"
+
+        : "NOT READY";
+
+
+    el.publishStatusBadge.className =
+      readyToPublish
+
+        ? "status-chip good"
+
+        : "status-chip warn";
+
+  }
+
+
+  if (
+    readyToPublish
+  ) {
+
+    el.publishReadinessMessage.textContent =
+      "All required publication checks are satisfied. Review the final handoff summary before publishing.";
+
+    el.publishReadinessMessage.className =
+      "message show success";
+
+  }
+
+  else if (
+    !alertsReady
+  ) {
+
+    el.publishReadinessMessage.textContent =
+      `${unreviewedAlerts} Security Alert${
+        unreviewedAlerts === 1
+          ? " remains"
+          : "s remain"
+      } unreviewed. Review all Security Alerts before publishing.`;
+
+    el.publishReadinessMessage.className =
+      "message show error";
+
+  }
+
+  else if (
+    !summaryReady
+  ) {
+
+    el.publishReadinessMessage.textContent =
+      "Outstanding or carry-forward activity exists. Enter a final handoff summary for the incoming shift before publishing.";
+
+    el.publishReadinessMessage.className =
+      "message show info";
+
+  }
+
+}
 
   el.refreshConfidentialButton
     ?.addEventListener(
