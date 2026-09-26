@@ -286,6 +286,84 @@ cancelSupplyEditButton:
 
 supplyRequestList:
   $("supplyRequestList"),
+
+managerConfidentialSection:
+  $("managerConfidentialSection"),
+
+refreshConfidentialButton:
+  $("refreshConfidentialButton"),
+
+confidentialMessage:
+  $("confidentialMessage"),
+
+confidentialTotalCount:
+  $("confidentialTotalCount"),
+
+confidentialOpenCount:
+  $("confidentialOpenCount"),
+
+confidentialMonitoringCount:
+  $("confidentialMonitoringCount"),
+
+confidentialFollowUpCount:
+  $("confidentialFollowUpCount"),
+
+confidentialCompletedCount:
+  $("confidentialCompletedCount"),
+
+confidentialForm:
+  $("confidentialForm"),
+
+confidentialLogId:
+  $("confidentialLogId"),
+
+confidentialSubjectUserId:
+  $("confidentialSubjectUserId"),
+
+confidentialFormTitle:
+  $("confidentialFormTitle"),
+
+confidentialEntryType:
+  $("confidentialEntryType"),
+
+confidentialSubjectName:
+  $("confidentialSubjectName"),
+
+confidentialEmployeeNumber:
+  $("confidentialEmployeeNumber"),
+
+confidentialStatus:
+  $("confidentialStatus"),
+
+confidentialOccurredAt:
+  $("confidentialOccurredAt"),
+
+confidentialTitle:
+  $("confidentialTitle"),
+
+confidentialDetails:
+  $("confidentialDetails"),
+
+confidentialActionTaken:
+  $("confidentialActionTaken"),
+
+confidentialFollowUpRequired:
+  $("confidentialFollowUpRequired"),
+
+confidentialFollowUpDateField:
+  $("confidentialFollowUpDateField"),
+
+confidentialFollowUpDate:
+  $("confidentialFollowUpDate"),
+
+saveConfidentialButton:
+  $("saveConfidentialButton"),
+
+cancelConfidentialEditButton:
+  $("cancelConfidentialEditButton"),
+
+confidentialEntryList:
+  $("confidentialEntryList"),
     
 alertMessage:
   $("alertMessage"),
@@ -373,7 +451,39 @@ securityAlertList:
 
   };
 
+// ==========================================================
+// MANAGER CONFIDENTIAL ACCESS
+// ==========================================================
 
+const managerConfidentialRoles =
+  [
+    "manager",
+    "director",
+    "admin"
+  ];
+
+
+const hasManagerConfidentialAccess =
+  (
+    auth.roles
+    ||
+    []
+  ).some(
+    role =>
+      managerConfidentialRoles.includes(
+        role
+      )
+  );
+
+
+if (
+  el.managerConfidentialSection
+) {
+
+  el.managerConfidentialSection.hidden =
+    !hasManagerConfidentialAccess;
+
+}
 
   // ==========================================================
   // URL PARAMETERS
