@@ -211,6 +211,81 @@ cancelTsiEditButton:
 
 tsiRequestList:
   $("tsiRequestList"), 
+
+supplyMessage:
+  $("supplyMessage"),
+
+refreshSupplyRequestsButton:
+  $("refreshSupplyRequestsButton"),
+
+supplyTotalCount:
+  $("supplyTotalCount"),
+
+supplyRequestedCount:
+  $("supplyRequestedCount"),
+
+supplyOrderedCount:
+  $("supplyOrderedCount"),
+
+supplyPartialCount:
+  $("supplyPartialCount"),
+
+supplyFulfilledCount:
+  $("supplyFulfilledCount"),
+
+supplyUrgentCount:
+  $("supplyUrgentCount"),
+
+supplyRequestForm:
+  $("supplyRequestForm"),
+
+supplyRequestId:
+  $("supplyRequestId"),
+
+supplyFormTitle:
+  $("supplyFormTitle"),
+
+supplyItemName:
+  $("supplyItemName"),
+
+supplyCategory:
+  $("supplyCategory"),
+
+supplyQuantityRequested:
+  $("supplyQuantityRequested"),
+
+supplyUnit:
+  $("supplyUnit"),
+
+supplyRequestingArea:
+  $("supplyRequestingArea"),
+
+supplyRequestedFor:
+  $("supplyRequestedFor"),
+
+supplyPriority:
+  $("supplyPriority"),
+
+supplyStatus:
+  $("supplyStatus"),
+
+supplyQuantityFulfilled:
+  $("supplyQuantityFulfilled"),
+
+supplyFulfillmentNotes:
+  $("supplyFulfillmentNotes"),
+
+supplyOperationalNotes:
+  $("supplyOperationalNotes"),
+
+saveSupplyRequestButton:
+  $("saveSupplyRequestButton"),
+
+cancelSupplyEditButton:
+  $("cancelSupplyEditButton"),
+
+supplyRequestList:
+  $("supplyRequestList"),
     
 alertMessage:
   $("alertMessage"),
