@@ -6087,6 +6087,193 @@
   </div>
 
 </section> 
+   <!-- ==========================================================
+     END-OF-SHIFT HANDOFF / PUBLISH
+     ========================================================== -->
+
+<section
+  id="endOfShiftPublishSection"
+  class="activity-section end-of-shift-publish-section"
+>
+
+  <div class="section-heading-row">
+
+    <div>
+
+      <div class="eyebrow">
+        Shift Completion
+      </div>
+
+      <h2>
+        End-of-Shift Handoff
+      </h2>
+
+      <p class="section-description">
+        Complete the final shift summary, review outstanding
+        operational items, and publish the official handoff
+        for the incoming shift.
+      </p>
+
+    </div>
+
+
+    <span
+      id="publishStatusBadge"
+      class="status-chip warn"
+    >
+      NOT READY
+    </span>
+
+  </div>
+
+
+  <div
+    id="publishReadinessMessage"
+    class="message"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- ========================================================
+       READINESS CHECKS
+       ======================================================== -->
+
+  <div class="publish-readiness-grid">
+
+    <article class="publish-readiness-card">
+
+      <span>
+        Security Alerts
+      </span>
+
+      <strong id="publishAlertsStatus">
+        Checking…
+      </strong>
+
+      <small>
+        All alerts must be reviewed before publication.
+      </small>
+
+    </article>
+
+
+    <article class="publish-readiness-card">
+
+      <span>
+        Pending Follow-Up
+      </span>
+
+      <strong id="publishPendingStatus">
+        Checking…
+      </strong>
+
+      <small>
+        Pending operational items must be clearly handed forward.
+      </small>
+
+    </article>
+
+
+    <article class="publish-readiness-card">
+
+      <span>
+        Carry Forward
+      </span>
+
+      <strong id="publishCarryForwardStatus">
+        Checking…
+      </strong>
+
+      <small>
+        Ongoing Special Assignments and unresolved items will be
+        included in the handoff.
+      </small>
+
+    </article>
+
+
+    <article class="publish-readiness-card">
+
+      <span>
+        Confidential Records
+      </span>
+
+      <strong class="confidential-excluded">
+        EXCLUDED
+      </strong>
+
+      <small>
+        Manager Confidential Log entries are never included
+        in the published handoff.
+      </small>
+
+    </article>
+
+  </div>
+
+
+  <!-- ========================================================
+       FINAL HANDOFF SUMMARY
+       ======================================================== -->
+
+  <div class="publish-summary-panel">
+
+    <label for="dailyHandoffSummary">
+
+      <span>
+        Final Shift / Handoff Summary
+      </span>
+
+      <textarea
+        id="dailyHandoffSummary"
+        rows="6"
+        placeholder="Summarize major activity, unresolved issues, staffing concerns, significant incidents, items requiring follow-up, and information the incoming shift should know..."
+      ></textarea>
+
+    </label>
+
+    <p class="muted">
+      This summary becomes part of the official locked
+      End-of-Shift Handoff record.
+    </p>
+
+  </div>
+
+
+  <!-- ========================================================
+       PUBLICATION ACTION
+       ======================================================== -->
+
+  <div class="publish-action-panel">
+
+    <div>
+
+      <strong>
+        Publish Official Handoff
+      </strong>
+
+      <p class="muted">
+        Publication permanently locks the End-of-Shift record
+        and makes it available to the incoming shift for review
+        and acknowledgment.
+      </p>
+
+    </div>
+
+
+    <button
+      id="publishEndOfShiftButton"
+      class="button primary"
+      type="button"
+      disabled
+    >
+      Publish End-of-Shift Handoff
+    </button>
+
+  </div>
+
+</section>
   </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
