@@ -88,7 +88,33 @@ const shiftInstanceId =
     document.getElementById(
       "incidentType"
     );
+// ========================================================
+// ENSURE TSI REQUEST OPTION EXISTS
+// ========================================================
 
+if (
+  incidentType &&
+  !incidentType.querySelector(
+    'option[value="tsi"]'
+  )
+) {
+
+  const tsiOption =
+    document.createElement(
+      "option"
+    );
+
+  tsiOption.value =
+    "tsi";
+
+  tsiOption.textContent =
+    "TSI Request";
+
+  incidentType.appendChild(
+    tsiOption
+  );
+
+}
 
   const detailsSection =
     document.getElementById(
