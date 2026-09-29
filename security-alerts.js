@@ -675,8 +675,164 @@ const shiftInstanceId =
 
       `
 
-    }
+    },
 
+tsi: {
+
+  help:
+    "Record a TSI request for operational tracking. No management notification will be sent.",
+
+  html: () => `
+
+    <div class="field">
+
+      <label for="tsiTicketNumber">
+        Ticket Number
+      </label>
+
+      <input
+        id="tsiTicketNumber"
+        type="text"
+        maxlength="100"
+        placeholder="Example: INC0012345"
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label for="tsiRequestType">
+        Request Type
+      </label>
+
+      <input
+        id="tsiRequestType"
+        type="text"
+        maxlength="180"
+        placeholder="Example: Workstation, Phone, Access"
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label for="tsiLocation">
+        Location
+      </label>
+
+      <input
+        id="tsiLocation"
+        type="text"
+        maxlength="300"
+        placeholder="Department, unit, room, or area"
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label for="tsiPriority">
+        Priority
+      </label>
+
+      <select id="tsiPriority">
+
+        <option value="low">
+          Low
+        </option>
+
+        <option
+          value="normal"
+          selected
+        >
+          Normal
+        </option>
+
+        <option value="high">
+          High
+        </option>
+
+        <option value="urgent">
+          Urgent
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div class="field">
+
+      <label for="tsiStatus">
+        Status
+      </label>
+
+      <select id="tsiStatus">
+
+        <option
+          value="open"
+          selected
+        >
+          Open
+        </option>
+
+        <option value="in_progress">
+          In Progress
+        </option>
+
+        <option value="resolved">
+          Resolved
+        </option>
+
+        <option value="cancelled">
+          Cancelled
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div class="field full-width">
+
+      <label for="tsiDescription">
+        Request Details *
+      </label>
+
+      <textarea
+        id="tsiDescription"
+        rows="4"
+        maxlength="1500"
+        required
+        placeholder="Describe the issue or support request..."
+      ></textarea>
+
+    </div>
+
+
+    <div class="field full-width">
+
+      <label for="tsiOperationalNotes">
+        Operational Notes
+      </label>
+
+      <textarea
+        id="tsiOperationalNotes"
+        rows="4"
+        maxlength="1500"
+        placeholder="Add relevant operational notes..."
+      ></textarea>
+
+    </div>
+
+  `
+
+}
+
+    
   };
 
 
