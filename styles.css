@@ -2782,3 +2782,87 @@ h2.form-title { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.08; margin-b
   }
 
 }
+/* =========================================================
+   REPORT CENTER — PRINT / PDF
+   LETTER LANDSCAPE
+   ========================================================= */
+
+@media print {
+
+  @page {
+    size: letter landscape;
+    margin: 0.35in;
+  }
+
+  html,
+  body {
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 9pt;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .shell,
+  .panel,
+  .manager-section {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .brandbar,
+  .manager-user-area,
+  .report-quick-buttons,
+  #reportForm,
+  #reportError,
+  .report-actions,
+  .footer-trust,
+  button {
+    display: none !important;
+  }
+
+  table,
+  .manager-table,
+  .report-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+  }
+
+  th,
+  td {
+    padding: 5px 6px !important;
+    font-size: 8.5pt !important;
+    color: #000000 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .summary-card,
+  .report-card {
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+  }
+
+  .manager-section-header,
+  h1,
+  h2,
+  h3 {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+}
