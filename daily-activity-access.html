@@ -1,0 +1,466 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#0b0d10"
+  >
+
+  <title>
+    SecureTrack | Daily Activity Access
+  </title>
+<link
+  rel="icon"
+  type="image/png"
+  href="/assets/Favicon.png"
+>
+  <link
+    rel="icon"
+    type="image/png"
+    href="/assets/Favicon.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+  <style>
+
+    /* =========================================================
+       DAILY ACTIVITY ACCESS
+       ========================================================= */
+
+    .daily-access-shell {
+      width:
+        min(
+          calc(100% - 32px),
+          1100px
+        );
+      margin:
+        32px auto;
+    }
+
+
+    .daily-access-header {
+      margin-bottom:
+        22px;
+    }
+
+
+    .daily-access-header h1 {
+      margin-bottom:
+        8px;
+    }
+
+
+    .daily-access-card {
+      border:
+        1px solid
+        #30363d;
+
+      border-radius:
+        18px;
+
+      background:
+        #0b0e11;
+
+      padding:
+        22px;
+
+      margin-bottom:
+        16px;
+    }
+
+
+    .daily-access-status {
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      gap:
+        16px;
+
+      flex-wrap:
+        wrap;
+
+      margin-bottom:
+        18px;
+    }
+
+
+    .daily-access-status strong {
+      font-size:
+        18px;
+    }
+
+
+    .daily-access-list {
+      display:
+        grid;
+
+      gap:
+        14px;
+    }
+
+
+    .active-shift-card {
+      border:
+        1px solid
+        #343a41;
+
+      border-radius:
+        15px;
+
+      padding:
+        18px;
+
+      background:
+        #101419;
+    }
+
+
+    .active-shift-head {
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      gap:
+        16px;
+
+      align-items:
+        flex-start;
+
+      flex-wrap:
+        wrap;
+    }
+
+
+    .active-shift-name {
+      font-size:
+        22px;
+
+      font-weight:
+        900;
+
+      color:
+        #ffffff;
+    }
+
+
+    .active-shift-meta {
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          3,
+          minmax(0, 1fr)
+        );
+
+      gap:
+        12px;
+
+      margin-top:
+        16px;
+    }
+
+
+    .active-shift-meta div {
+      border:
+        1px solid
+        #2c333a;
+
+      border-radius:
+        11px;
+
+      padding:
+        11px 12px;
+
+      background:
+        #0b0e11;
+    }
+
+
+    .active-shift-meta span {
+      display:
+        block;
+
+      color:
+        #8e98a3;
+
+      font-size:
+        11px;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .06em;
+
+      margin-bottom:
+        4px;
+    }
+
+
+    .active-shift-meta strong {
+      color:
+        #ffffff;
+    }
+
+
+    .daily-access-empty {
+      border:
+        1px dashed
+        #3a4148;
+
+      border-radius:
+        14px;
+
+      padding:
+        28px;
+
+      text-align:
+        center;
+
+      color:
+        #9da5ae;
+    }
+
+
+    .daily-access-loading {
+      text-align:
+        center;
+
+      padding:
+        40px 20px;
+
+      color:
+        #aab2bb;
+    }
+
+
+    .daily-access-spinner {
+      width:
+        36px;
+
+      height:
+        36px;
+
+      margin:
+        0 auto 14px;
+
+      border:
+        4px solid
+        #30363d;
+
+      border-top-color:
+        #ff7800;
+
+      border-radius:
+        50%;
+
+      animation:
+        dailyAccessSpin
+        .8s linear infinite;
+    }
+
+
+    @keyframes dailyAccessSpin {
+
+      to {
+        transform:
+          rotate(360deg);
+      }
+
+    }
+
+
+    @media (
+      max-width: 700px
+    ) {
+
+      .active-shift-meta {
+        grid-template-columns:
+          1fr;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body
+  data-securetrack-roles="
+    senior_officer,
+    team_lead,
+    manager,
+    director,
+    admin
+  "
+>
+
+  <main class="daily-access-shell">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header class="daily-access-header">
+
+      <div class="brand">
+        SECURE<span>TRACK</span>
+      </div>
+
+      <div class="eyebrow">
+        SHIFT OPERATIONS
+      </div>
+
+      <h1>
+        Daily Activity & Shift Accountability
+      </h1>
+
+      <p class="subtle">
+        Quickly access the live Daily Activity Report
+        for a shift currently in progress.
+      </p>
+
+    </header>
+
+
+    <!-- =====================================================
+         PAGE MESSAGE
+         ===================================================== -->
+
+    <div
+      id="pageMessage"
+      class="message"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+
+    <!-- =====================================================
+         ACCESS CARD
+         ===================================================== -->
+
+    <section class="daily-access-card">
+
+      <div class="daily-access-status">
+
+        <div>
+
+          <div class="eyebrow">
+            CURRENT SHIFT ACCESS
+          </div>
+
+          <strong id="accessHeading">
+            Finding your active shift…
+          </strong>
+
+        </div>
+
+
+        <a
+          id="backButton"
+          class="button secondary"
+          href="hub.html"
+        >
+          ← Operations Hub
+        </a>
+
+      </div>
+
+
+      <!-- ===================================================
+           LOADING
+           =================================================== -->
+
+      <div
+        id="loadingState"
+        class="daily-access-loading"
+      >
+
+        <div
+          class="daily-access-spinner"
+          aria-hidden="true"
+        ></div>
+
+        Checking active SecureTrack shifts…
+
+      </div>
+
+
+      <!-- ===================================================
+           NO ACTIVE SHIFT
+           =================================================== -->
+
+      <div
+        id="emptyState"
+        class="daily-access-empty"
+        hidden
+      >
+
+        <strong>
+          No active shift was found.
+        </strong>
+
+        <p>
+          A shift must be operationally started before
+          its Daily Activity Report is available here.
+        </p>
+
+      </div>
+
+
+      <!-- ===================================================
+           MANAGEMENT / MULTIPLE ACTIVE SHIFTS
+           =================================================== -->
+
+      <div
+        id="activeShiftList"
+        class="daily-access-list"
+        hidden
+      ></div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =======================================================
+       SECURETRACK
+       ======================================================= -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="config.js"></script>
+
+  <script src="secure-page.js"></script>
+
+  <script src="daily-activity-access.js"></script>
+
+</body>
+
+</html>
