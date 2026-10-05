@@ -157,6 +157,88 @@
   let loadedPhone =
     "";
 
+  // =========================================================
+// ONESIGNAL
+// =========================================================
+
+async function waitForOneSignal() {
+
+  for (
+    let attempt = 0;
+    attempt < 40;
+    attempt++
+  ) {
+
+    if (
+      window.SecureTrackOneSignal
+    ) {
+
+      return window.SecureTrackOneSignal;
+
+    }
+
+
+    await new Promise(
+      resolve =>
+        setTimeout(
+          resolve,
+          250
+        )
+    );
+
+  }
+
+
+  throw new Error(
+    "OneSignal did not initialize."
+  );
+
+}
+
+
+
+async function connectOneSignalUser(
+  session
+) {
+
+  if (
+    !session?.user?.id
+  ) {
+
+    throw new Error(
+      "SecureTrack user identity is unavailable."
+    );
+
+  }
+
+
+  const OneSignal =
+    await waitForOneSignal();
+
+
+  /*
+    Use the authenticated Supabase UUID
+    as OneSignal's External ID.
+
+    This connects the OneSignal user to
+    the same SecureTrack identity used
+    throughout the application.
+  */
+
+  await OneSignal.login(
+    session.user.id
+  );
+
+
+  console.log(
+    "SecureTrack OneSignal user connected:",
+    session.user.id
+  );
+
+
+  return OneSignal;
+
+}
 
   function showResult(
     text,
@@ -681,6 +763,9 @@
 
       }
 
+      await connectOneSignalUser(
+  session
+);
 
       const {
         data,
