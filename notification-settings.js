@@ -49,12 +49,6 @@
     );
 
 
-  const ntfyEnabled =
-    document.getElementById(
-      "ntfyEnabled"
-    );
-
-
   const phoneInput =
     document.getElementById(
       "notificationPhone"
@@ -309,12 +303,6 @@
         false;
 
     }
-
-
-    ntfyEnabled.checked =
-      Boolean(
-        settings.ntfy_enabled
-      );
 
 
     phoneInput.value =
@@ -873,9 +861,6 @@
 
               p_email_enabled:
                 emailEnabled.checked,
-
-              p_ntfy_enabled:
-                ntfyEnabled.checked,
 
               p_sms_enabled:
                 smsEnabled.checked,
