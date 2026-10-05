@@ -695,14 +695,17 @@ async function connectOneSignalUser(
           ? "Browser permission is already granted. SecureTrack is ready for the push provider connection."
           : "This browser will ask for notification permission when SecureTrack push is activated.";
 
-      /*
-        Keep this hidden until the push provider
-        is connected in the next step.
-      */
+     // OneSignal is now connected.
+// Allow this browser/device to be enrolled.
 
-      enablePushButton.hidden =
-        true;
+enablePushButton.hidden =
+  false;
 
+enablePushButton.disabled =
+  false;
+
+enablePushButton.textContent =
+  "Enable Push Notifications";
 
     } catch (error) {
 
@@ -733,6 +736,443 @@ async function connectOneSignalUser(
     }
 
   }
+
+// =========================================================
+// DETECT BROWSER / OPERATING SYSTEM
+// =========================================================
+
+function getPushDeviceInfo() {
+
+  const ua =
+    navigator.userAgent || "";
+
+
+  let browser =
+    "Browser";
+
+
+  if (
+    /Edg\//i.test(ua)
+  ) {
+
+    browser =
+      "Microsoft Edge";
+
+  }
+  else if (
+    /Chrome\//i.test(ua)
+  ) {
+
+    browser =
+      "Google Chrome";
+
+  }
+  else if (
+    /Firefox\//i.test(ua)
+  ) {
+
+    browser =
+      "Mozilla Firefox";
+
+  }
+  else if (
+    /Safari\//i.test(ua) &&
+    !/Chrome\//i.test(ua)
+  ) {
+
+    browser =
+      "Safari";
+
+  }
+
+
+  let operatingSystem =
+    "Operating System";
+
+
+  if (
+    /Windows NT/i.test(ua)
+  ) {
+
+    operatingSystem =
+      "Windows";
+
+  }
+  else if (
+    /Android/i.test(ua)
+  ) {
+
+    operatingSystem =
+      "Android";
+
+  }
+  else if (
+    /iPhone|iPad|iPod/i.test(ua)
+  ) {
+
+    operatingSystem =
+      "iOS";
+
+  }
+  else if (
+    /Macintosh|Mac OS X/i.test(ua)
+  ) {
+
+    operatingSystem =
+      "macOS";
+
+  }
+  else if (
+    /Linux/i.test(ua)
+  ) {
+
+    operatingSystem =
+      "Linux";
+
+  }
+
+
+  return {
+
+    browser,
+
+    operatingSystem,
+
+    deviceLabel:
+      `${browser} on ${operatingSystem}`
+
+  };
+
+}
+
+
+
+// =========================================================
+// WAIT FOR ONESIGNAL SUBSCRIPTION ID
+// =========================================================
+
+async function waitForOneSignalSubscriptionId(
+  OneSignal
+) {
+
+  for (
+    let attempt = 0;
+    attempt < 40;
+    attempt++
+  ) {
+
+    const subscriptionId =
+      OneSignal?.User
+        ?.PushSubscription
+        ?.id;
+
+
+    if (
+      subscriptionId
+    ) {
+
+      return subscriptionId;
+
+    }
+
+
+    await new Promise(
+      resolve =>
+        setTimeout(
+          resolve,
+          250
+        )
+    );
+
+  }
+
+
+  throw new Error(
+    "OneSignal did not return a push subscription ID."
+  );
+
+}
+
+
+
+// =========================================================
+// ENABLE PUSH NOTIFICATIONS
+// =========================================================
+
+async function enableSecureTrackPush() {
+
+  clearResult();
+
+
+  enablePushButton.disabled =
+    true;
+
+  enablePushButton.textContent =
+    "Enabling Push…";
+
+
+  pushStatus.textContent =
+    "Requesting notification permission…";
+
+
+  try {
+
+    const session =
+      await STM.getSession();
+
+
+    if (
+      !session?.user?.id
+    ) {
+
+      throw new Error(
+        "An active SecureTrack login is required."
+      );
+
+    }
+
+
+    const OneSignal =
+      await waitForOneSignal();
+
+
+    // Make sure this OneSignal user belongs
+    // to the authenticated SecureTrack account.
+
+    await OneSignal.login(
+      session.user.id
+    );
+
+
+    // =========================================
+    // REQUEST BROWSER PERMISSION
+    // =========================================
+
+    if (
+      Notification.permission !==
+      "granted"
+    ) {
+
+      await OneSignal.Notifications
+        .requestPermission();
+
+    }
+
+
+    if (
+      Notification.permission !==
+      "granted"
+    ) {
+
+      throw new Error(
+        "Notification permission was not granted."
+      );
+
+    }
+
+
+    // =========================================
+    // OPT THIS DEVICE INTO ONESIGNAL PUSH
+    // =========================================
+
+    await OneSignal.User
+      .PushSubscription
+      .optIn();
+
+
+    // =========================================
+    // GET ONESIGNAL SUBSCRIPTION ID
+    // =========================================
+
+    const subscriptionId =
+      await waitForOneSignalSubscriptionId(
+        OneSignal
+      );
+
+
+    console.log(
+      "SecureTrack OneSignal subscription:",
+      subscriptionId
+    );
+
+
+    // =========================================
+    // DEVICE INFORMATION
+    // =========================================
+
+    const deviceInfo =
+      getPushDeviceInfo();
+
+
+    // =========================================
+    // REGISTER DEVICE IN SUPABASE
+    // =========================================
+
+    const {
+      data: registration,
+      error: registrationError
+    } =
+      await db.rpc(
+        "register_my_push_subscription",
+        {
+
+          p_provider:
+            "onesignal",
+
+          p_provider_subscription_id:
+            subscriptionId,
+
+          p_device_label:
+            deviceInfo.deviceLabel,
+
+          p_browser_name:
+            deviceInfo.browser,
+
+          p_operating_system:
+            deviceInfo.operatingSystem,
+
+          p_permission_status:
+            "granted"
+
+        }
+      );
+
+
+    if (
+      registrationError
+    ) {
+
+      throw registrationError;
+
+    }
+
+
+    console.log(
+      "SecureTrack push registration:",
+      registration
+    );
+
+
+    // =========================================
+    // ENABLE MASTER PUSH PREFERENCE
+    // =========================================
+
+    const {
+      error: preferenceError
+    } =
+      await db.rpc(
+        "save_my_push_preferences",
+        {
+
+          p_push_enabled:
+            true,
+
+          p_code_green:
+            codeGreenAlerts.checked,
+
+          p_taser_pull:
+            taserPullAlerts.checked,
+
+          p_ctw:
+            ctwAlerts.checked,
+
+          p_officer_injury:
+            officerInjuryAlerts.checked,
+
+          p_insufficient_staffing:
+            insufficientStaffingAlerts.checked,
+
+          p_setup_confirmed:
+            true
+
+        }
+      );
+
+
+    if (
+      preferenceError
+    ) {
+
+      throw preferenceError;
+
+    }
+
+
+    // =========================================
+    // SUCCESS
+    // =========================================
+
+    showResult(
+      "Push notifications are now enabled on this device."
+    );
+
+
+    await loadPushStatus();
+
+  }
+  catch (error) {
+
+    console.error(
+      "SecureTrack push activation error:",
+      error
+    );
+
+
+    pushStatus.textContent =
+      "Push notifications could not be enabled.";
+
+
+    pushPermissionNote.hidden =
+      false;
+
+
+    pushPermissionNote.textContent =
+      error?.message ||
+      "SecureTrack could not activate push notifications.";
+
+
+    showResult(
+      error?.message ||
+      "Unable to enable push notifications.",
+      "error"
+    );
+
+
+    enablePushButton.hidden =
+      false;
+
+    enablePushButton.disabled =
+      false;
+
+    enablePushButton.textContent =
+      "Try Again";
+
+  }
+
+}
+
+
+
+// =========================================================
+// PUSH BUTTON
+// =========================================================
+
+if (
+  enablePushButton
+) {
+
+  enablePushButton.addEventListener(
+    "click",
+    async event => {
+
+      event.preventDefault();
+
+      await enableSecureTrackPush();
+
+    }
+  );
+
+}
   
   async function loadSettings() {
 
