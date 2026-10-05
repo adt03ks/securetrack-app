@@ -359,46 +359,89 @@
           </article>
 
 
-          <!-- NTFY -->
+         <!-- =====================================================
+     SECURETRACK PUSH NOTIFICATIONS
+     ===================================================== -->
 
-          <article class="notification-card">
+<article class="notification-card">
 
-            <div class="eyebrow">
-              Push
-            </div>
-
-            <h3>
-              ntfy Push Notifications
-            </h3>
-
-            <p>
-              Receive immediate SecureTrack push
-              alerts through the ntfy mobile app.
-            </p>
-
-            <label class="channel-toggle">
-
-              <input
-                id="ntfyEnabled"
-                type="checkbox"
-              >
-
-              Enable ntfy Push Alerts
-
-            </label>
-
-            <div
-              id="ntfyStatus"
-              class="status-note"
-            >
-              Your preference can be saved now.
-              Device subscription setup will be
-              connected to this page in the next step.
-            </div>
-
-          </article>
+  <div class="eyebrow">
+    Push
+  </div>
 
 
+  <h3>
+    SecureTrack Push Notifications
+  </h3>
+
+
+  <p>
+    Receive immediate SecureTrack OP alerts directly
+    through this browser or approved device. No outside
+    notification account or subscription page is required.
+  </p>
+
+
+  <label class="channel-toggle">
+
+    <input
+      id="pushEnabled"
+      type="checkbox"
+    >
+
+    Enable Push Notifications
+
+  </label>
+
+
+  <div
+    id="pushStatus"
+    class="status-note"
+  >
+    Push notification status is being checked…
+  </div>
+
+
+  <div
+    id="pushPermissionNote"
+    class="status-note"
+    hidden
+  >
+    Your browser must allow notifications from
+    SecureTrack OP before push alerts can be activated.
+  </div>
+
+
+  <div
+    id="pushDeviceSection"
+    class="notification-field"
+    hidden
+  >
+
+    <label>
+      Registered Devices
+    </label>
+
+    <div
+      id="pushDeviceList"
+      class="readonly-value"
+    >
+      No registered push devices.
+    </div>
+
+  </div>
+
+
+  <button
+    id="enablePushButton"
+    class="save-notifications"
+    type="button"
+    hidden
+  >
+    Enable Push on This Device
+  </button>
+
+</article>
           <!-- SMS -->
 
           <article class="notification-card">
