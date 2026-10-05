@@ -250,7 +250,10 @@
   </style>
 
 </head>
-
+<script
+  src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+  defer
+></script>
 
 <body
   data-securetrack-roles=
@@ -674,7 +677,51 @@
   <script src="manager-common.js"></script>
 
  <script src="notification-settings.js?v=20261005-2"></script>
+<script>
+  window.OneSignalDeferred =
+    window.OneSignalDeferred || [];
 
+  OneSignalDeferred.push(
+    async function (OneSignal) {
+
+      try {
+
+        await OneSignal.init({
+          appId:
+            "6ceb93a4-c390-4961-ad5a-5bbbceb0e6c7",
+
+          serviceWorkerPath:
+            "/OneSignalSDKWorker.js",
+
+          serviceWorkerParam: {
+            scope: "/"
+          },
+
+          notifyButton: {
+            enable: false
+          }
+        });
+
+        window.SecureTrackOneSignal =
+          OneSignal;
+
+        console.log(
+          "SecureTrack OneSignal initialized."
+        );
+
+      }
+      catch (error) {
+
+        console.error(
+          "SecureTrack OneSignal initialization failed:",
+          error
+        );
+
+      }
+
+    }
+  );
+</script>
 </body>
 
 </html>
