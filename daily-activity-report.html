@@ -4480,6 +4480,164 @@
   }
 
 }
+
+   /* ==========================================================
+   FINAL PRINT LAYOUT — DAILY ACTIVITY REPORT
+   ========================================================== */
+
+@media print {
+
+  @page {
+    size: letter portrait;
+    margin: 0.4in;
+  }
+
+  html,
+  body {
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 10pt;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .shell {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .no-print,
+  .toolbar,
+  button,
+  .button,
+  [class*="refresh"] {
+    display: none !important;
+  }
+
+  /* Keep confidential material completely out of print */
+  #managerConfidentialSection {
+    display: none !important;
+  }
+
+  /* Prevent major cards from being cut in half */
+  .command-card,
+  .alert-card,
+  .special-activity-card,
+  .property-activity-card,
+  .device-exception-card,
+  .tsi-request-card,
+  .supply-request-card,
+  .publish-readiness-card,
+  .info-block,
+  .summary-card {
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Allow a large overall section to flow,
+     but keep each individual record together */
+  .activity-section,
+  .section-body {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  /* Do not leave section titles stranded
+     at the bottom of a page */
+  .section-head,
+  h1,
+  h2,
+  h3 {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+
+  /* Make summary grids fit Letter paper */
+  .info-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .alert-summary-grid,
+  .special-summary-grid,
+  .property-summary-grid,
+  .device-summary-grid,
+  .tsi-summary-grid,
+  .supply-summary-grid,
+  .publish-readiness-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  /* Detail grids should not be too wide */
+  .alert-detail-grid,
+  .special-detail-grid,
+  .property-detail-grid,
+  .device-detail-grid,
+  .tsi-detail-grid,
+  .supply-detail-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  /* Reduce excess screen spacing */
+  .command-card,
+  .activity-section,
+  .alert-card,
+  .special-activity-card,
+  .property-activity-card,
+  .device-exception-card,
+  .tsi-request-card,
+  .supply-request-card {
+    margin-bottom: 10px !important;
+  }
+
+  .section-body,
+  .activity-section {
+    padding: 10px !important;
+  }
+
+  p,
+  div,
+  span,
+  td,
+  th {
+    overflow-wrap: anywhere;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  tr {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+}
   </style>
 
   <title>
