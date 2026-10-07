@@ -1316,7 +1316,161 @@ function getPushDeviceInfo() {
 
 }
 
+// =========================================================
+// REFRESH CURRENT PUSH DEVICE INFORMATION
+// =========================================================
 
+async function refreshCurrentPushDeviceInformation() {
+
+  try {
+
+    const session =
+      await STM.getSession();
+
+
+    if (
+      !session?.user?.id
+    ) {
+      return;
+    }
+
+
+    const OneSignal =
+      await waitForOneSignal();
+
+
+    // Make sure OneSignal is attached
+    // to the current SecureTrack user.
+
+    await OneSignal.login(
+      session.user.id
+    );
+
+
+    let subscriptionId =
+      OneSignal?.User
+        ?.PushSubscription
+        ?.id ||
+      null;
+
+
+    // Give OneSignal a moment to expose
+    // the existing subscription ID.
+
+    for (
+      let attempt = 0;
+      attempt < 12 &&
+      !subscriptionId;
+      attempt += 1
+    ) {
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            250
+          )
+      );
+
+
+      subscriptionId =
+        OneSignal?.User
+          ?.PushSubscription
+          ?.id ||
+        null;
+
+    }
+
+
+    if (
+      !subscriptionId
+    ) {
+      return;
+    }
+
+
+    const registration =
+      await navigator.serviceWorker.ready;
+
+
+    const browserSubscription =
+      await registration.pushManager
+        .getSubscription();
+
+
+    if (
+      !browserSubscription ||
+      !browserSubscription.endpoint ||
+      Notification.permission !==
+        "granted" ||
+      OneSignal?.User
+        ?.PushSubscription
+        ?.optedIn !== true
+    ) {
+
+      return;
+
+    }
+
+
+    const deviceInfo =
+      getPushDeviceInfo();
+
+
+    const {
+      error
+    } =
+      await db.rpc(
+        "register_my_push_subscription",
+        {
+
+          p_provider:
+            "onesignal",
+
+          p_provider_subscription_id:
+            subscriptionId,
+
+          p_device_label:
+            deviceInfo.deviceLabel,
+
+          p_browser_name:
+            deviceInfo.browser,
+
+          p_operating_system:
+            deviceInfo.operatingSystem,
+
+          p_permission_status:
+            "granted"
+
+        }
+      );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    console.log(
+      "SecureTrack push device information refreshed:",
+      deviceInfo.deviceLabel
+    );
+
+  }
+  catch (error) {
+
+    console.warn(
+      "SecureTrack could not refresh push device information:",
+      error
+    );
+
+  }
+
+}
 
 // =========================================================
 // WAIT FOR ONESIGNAL SUBSCRIPTION ID
@@ -1968,32 +2122,41 @@ async function loadSettings() {
       Settings from loading.
     */
 
-    connectOneSignalUser(
-      session
-    )
-      .catch(
-        error => {
+   connectOneSignalUser(
+  session
+)
+  .then(
+    async () => {
 
-          console.warn(
-            "OneSignal user connection was not completed:",
-            error
-          );
+      await refreshCurrentPushDeviceInformation();
 
-        }
+      await loadPushStatus();
+
+    }
+  )
+  .catch(
+    error => {
+
+      console.warn(
+        "SecureTrack push initialization was not completed:",
+        error
       );
 
 
-    loadPushStatus()
-      .catch(
-        error => {
+      loadPushStatus()
+        .catch(
+          statusError => {
 
-          console.warn(
-            "Push status could not be loaded:",
-            error
-          );
+            console.warn(
+              "Push status could not be loaded:",
+              statusError
+            );
 
-        }
-      );
+          }
+        );
+
+    }
+  );
 
   }
   catch (error) {
