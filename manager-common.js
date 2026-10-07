@@ -375,6 +375,12 @@ async function signOut() {
   window.location.replace(
     "login.html"
   );
+  }
+window.SecureTrackManager = {
+  db: managerDB,
+  getSession,
+  requireManager,
+  signOut
+};
 
-}
 })();
