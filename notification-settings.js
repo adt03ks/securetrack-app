@@ -225,8 +225,7 @@ async function connectOneSignalUser(
     throughout the application.
   */
 
- // TEMP TEST:
-// await OneSignal.login(session.user.id);
+ await OneSignal.login(session.user.id);
 
 
   console.log(
