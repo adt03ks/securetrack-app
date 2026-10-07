@@ -915,6 +915,10 @@ async function enableSecureTrackPush() {
 
   try {
 
+    // =========================================
+    // SECURETRACK SESSION
+    // =========================================
+
     const session =
       await STM.getSession();
 
@@ -930,14 +934,12 @@ async function enableSecureTrackPush() {
     }
 
 
+    // =========================================
+    // ONESIGNAL
+    // =========================================
+
     const OneSignal =
       await waitForOneSignal();
-
-
-    // Make sure this OneSignal user belongs
-    // to the authenticated SecureTrack account.
-
- await OneSignal.login(session.user.id);
 
 
     // =========================================
@@ -967,8 +969,12 @@ async function enableSecureTrackPush() {
     }
 
 
+    pushStatus.textContent =
+      "Creating secure push subscription…";
+
+
     // =========================================
-    // OPT THIS DEVICE INTO ONESIGNAL PUSH
+    // OPT DEVICE INTO ONESIGNAL
     // =========================================
 
     await OneSignal.User
@@ -977,17 +983,220 @@ async function enableSecureTrackPush() {
 
 
     // =========================================
-    // GET ONESIGNAL SUBSCRIPTION ID
+    // VERIFY REAL BROWSER PUSH SUBSCRIPTION
     // =========================================
 
-    const subscriptionId =
-      await waitForOneSignalSubscriptionId(
-        OneSignal
+    const serviceWorkerRegistration =
+      await navigator.serviceWorker.ready;
+
+
+    let browserPushSubscription =
+      await serviceWorkerRegistration
+        .pushManager
+        .getSubscription();
+
+
+    /*
+      Give OneSignal a few seconds to create
+      the native browser subscription.
+    */
+
+    for (
+      let attempt = 0;
+      attempt < 10 &&
+      !browserPushSubscription;
+      attempt += 1
+    ) {
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            500
+          )
       );
 
 
+      browserPushSubscription =
+        await serviceWorkerRegistration
+          .pushManager
+          .getSubscription();
+
+    }
+
+
+    if (
+      !browserPushSubscription
+    ) {
+
+      throw new Error(
+        "The browser did not create a valid push subscription. SecureTrack will not mark this device as active."
+      );
+
+    }
+
+
+    if (
+      !browserPushSubscription.endpoint
+    ) {
+
+      throw new Error(
+        "The browser push subscription does not contain a valid endpoint."
+      );
+
+    }
+
+
     console.log(
-      "SecureTrack OneSignal subscription:",
+      "SecureTrack native push subscription verified."
+    );
+
+
+    // =========================================
+    // ATTACH ONESIGNAL TO SECURETRACK USER
+    // =========================================
+
+    pushStatus.textContent =
+      "Connecting push notifications to your SecureTrack account…";
+
+
+    await OneSignal.login(
+      session.user.id
+    );
+
+
+    /*
+      Give OneSignal time to attach the
+      authenticated SecureTrack External ID.
+    */
+
+    await new Promise(
+      resolve =>
+        setTimeout(
+          resolve,
+          1500
+        )
+    );
+
+
+    const externalId =
+      OneSignal?.User?.externalId;
+
+
+    if (
+      externalId !==
+      session.user.id
+    ) {
+
+      throw new Error(
+        "OneSignal could not verify the SecureTrack user identity."
+      );
+
+    }
+
+
+    // =========================================
+    // VERIFY ONESIGNAL OPT-IN STATE
+    // =========================================
+
+    if (
+      OneSignal?.User
+        ?.PushSubscription
+        ?.optedIn !== true
+    ) {
+
+      throw new Error(
+        "OneSignal did not confirm that this device is opted in for push notifications."
+      );
+
+    }
+
+
+    // =========================================
+    // GET ONESIGNAL SUBSCRIPTION ID
+    // =========================================
+
+    /*
+      The browser subscription can exist before
+      OneSignal exposes its subscription ID.
+
+      Give OneSignal time to finish creating
+      the subscription record.
+    */
+
+    let subscriptionId = null;
+
+
+    for (
+      let attempt = 0;
+      attempt < 20 &&
+      !subscriptionId;
+      attempt += 1
+    ) {
+
+      subscriptionId =
+        OneSignal?.User
+          ?.PushSubscription
+          ?.id ||
+        null;
+
+
+      if (
+        subscriptionId
+      ) {
+
+        break;
+
+      }
+
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            500
+          )
+      );
+
+    }
+
+
+    /*
+      Fallback:
+      use the OneSignal User ID only if the
+      push-specific subscription ID has not yet
+      been exposed by the SDK.
+
+      This keeps the SecureTrack device record
+      tied to a real OneSignal identity rather
+      than creating a false "active" entry.
+    */
+
+    if (
+      !subscriptionId
+    ) {
+
+      subscriptionId =
+        OneSignal?.User
+          ?.onesignalId ||
+        null;
+
+    }
+
+
+    if (
+      !subscriptionId
+    ) {
+
+      throw new Error(
+        "OneSignal created the browser subscription but did not return a usable subscription identifier."
+      );
+
+    }
+
+
+    console.log(
+      "SecureTrack OneSignal registration ID:",
       subscriptionId
     );
 
@@ -1001,7 +1210,7 @@ async function enableSecureTrackPush() {
 
 
     // =========================================
-    // REGISTER DEVICE IN SUPABASE
+    // REGISTER VERIFIED DEVICE IN SUPABASE
     // =========================================
 
     const {
@@ -1095,8 +1304,38 @@ async function enableSecureTrackPush() {
 
 
     // =========================================
+    // FINAL VERIFICATION
+    // =========================================
+
+    const finalSubscription =
+      await serviceWorkerRegistration
+        .pushManager
+        .getSubscription();
+
+
+    if (
+      !finalSubscription ||
+      Notification.permission !==
+        "granted" ||
+      OneSignal?.User
+        ?.PushSubscription
+        ?.optedIn !== true
+    ) {
+
+      throw new Error(
+        "Push setup could not be verified after registration."
+      );
+
+    }
+
+
+    // =========================================
     // SUCCESS
     // =========================================
+
+    pushPermissionNote.hidden =
+      true;
+
 
     showResult(
       "Push notifications are now enabled on this device."
@@ -1146,9 +1385,6 @@ async function enableSecureTrackPush() {
   }
 
 }
-
-
-
 // =========================================================
 // PUSH BUTTON
 // =========================================================
