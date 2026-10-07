@@ -1009,7 +1009,7 @@ if (
 
 }
 // =========================================================
-// DETECT BROWSER / OPERATING SYSTEM
+// DETECT BROWSER / OPERATING SYSTEM / DEVICE
 // =========================================================
 
 function getPushDeviceInfo() {
@@ -1017,12 +1017,169 @@ function getPushDeviceInfo() {
   const ua =
     navigator.userAgent || "";
 
+  const platform =
+    navigator.platform || "";
+
+  const maxTouchPoints =
+    navigator.maxTouchPoints || 0;
+
+
+  // =======================================================
+  // DEVICE / OPERATING SYSTEM
+  // =======================================================
+
+  let operatingSystem =
+    "Operating System";
+
+  let deviceType =
+    "Device";
+
+
+  /*
+    Modern iPads may report:
+    platform = "MacIntel"
+    userAgent contains "Macintosh"
+
+    maxTouchPoints > 1 is the important clue
+    that this is actually an iPad.
+  */
+
+  const isIPad =
+    /iPad/i.test(ua) ||
+    (
+      /MacIntel|Macintosh/i.test(
+        platform + " " + ua
+      ) &&
+      maxTouchPoints > 1
+    );
+
+
+  const isIPhone =
+    /iPhone|iPod/i.test(ua);
+
+
+  const isAndroid =
+    /Android/i.test(ua);
+
+
+  const isWindows =
+    /Windows NT/i.test(ua);
+
+
+  const isMac =
+    !isIPad &&
+    /Macintosh|Mac OS X|MacIntel/i.test(
+      ua + " " + platform
+    );
+
+
+  const isLinux =
+    !isAndroid &&
+    /Linux/i.test(ua);
+
+
+  if (
+    isIPad
+  ) {
+
+    operatingSystem =
+      "iPadOS";
+
+    deviceType =
+      "iPad";
+
+  }
+  else if (
+    isIPhone
+  ) {
+
+    operatingSystem =
+      "iOS";
+
+    deviceType =
+      "iPhone";
+
+  }
+  else if (
+    isAndroid
+  ) {
+
+    operatingSystem =
+      "Android";
+
+    deviceType =
+      /Mobile/i.test(ua)
+        ? "Android Phone"
+        : "Android Tablet";
+
+  }
+  else if (
+    isWindows
+  ) {
+
+    operatingSystem =
+      "Windows";
+
+    deviceType =
+      "Windows Device";
+
+  }
+  else if (
+    isMac
+  ) {
+
+    operatingSystem =
+      "macOS";
+
+    deviceType =
+      "Mac";
+
+  }
+  else if (
+    isLinux
+  ) {
+
+    operatingSystem =
+      "Linux";
+
+    deviceType =
+      "Linux Device";
+
+  }
+
+
+  // =======================================================
+  // BROWSER
+  // =======================================================
 
   let browser =
     "Browser";
 
 
+  /*
+    Check the specialized browser tokens first.
+
+    iOS/iPadOS browsers do not always use the
+    same UA tokens as their desktop versions.
+  */
+
   if (
+    /EdgiOS\//i.test(ua)
+  ) {
+
+    browser =
+      "Microsoft Edge";
+
+  }
+  else if (
+    /EdgA\//i.test(ua)
+  ) {
+
+    browser =
+      "Microsoft Edge";
+
+  }
+  else if (
     /Edg\//i.test(ua)
   ) {
 
@@ -1031,11 +1188,28 @@ function getPushDeviceInfo() {
 
   }
   else if (
-    /Chrome\//i.test(ua)
+    /CriOS\//i.test(ua)
   ) {
 
     browser =
       "Google Chrome";
+
+  }
+  else if (
+    /Chrome\//i.test(ua) &&
+    !/Edg|OPR|SamsungBrowser/i.test(ua)
+  ) {
+
+    browser =
+      "Google Chrome";
+
+  }
+  else if (
+    /FxiOS\//i.test(ua)
+  ) {
+
+    browser =
+      "Mozilla Firefox";
 
   }
   else if (
@@ -1047,8 +1221,23 @@ function getPushDeviceInfo() {
 
   }
   else if (
-    /Safari\//i.test(ua) &&
-    !/Chrome\//i.test(ua)
+    /SamsungBrowser\//i.test(ua)
+  ) {
+
+    browser =
+      "Samsung Internet";
+
+  }
+  else if (
+    /OPR\//i.test(ua)
+  ) {
+
+    browser =
+      "Opera";
+
+  }
+  else if (
+    /Safari\//i.test(ua)
   ) {
 
     browser =
@@ -1057,48 +1246,60 @@ function getPushDeviceInfo() {
   }
 
 
-  let operatingSystem =
-    "Operating System";
+  // =======================================================
+  // FRIENDLY DEVICE LABEL
+  // =======================================================
+
+  let deviceLabel =
+    `${browser} on ${operatingSystem}`;
 
 
   if (
-    /Windows NT/i.test(ua)
+    deviceType === "iPad"
   ) {
 
-    operatingSystem =
-      "Windows";
+    deviceLabel =
+      `${browser} on iPad`;
 
   }
   else if (
-    /Android/i.test(ua)
+    deviceType === "iPhone"
   ) {
 
-    operatingSystem =
-      "Android";
+    deviceLabel =
+      `${browser} on iPhone`;
 
   }
   else if (
-    /iPhone|iPad|iPod/i.test(ua)
+    deviceType === "Android Phone"
   ) {
 
-    operatingSystem =
-      "iOS";
+    deviceLabel =
+      `${browser} on Android Phone`;
 
   }
   else if (
-    /Macintosh|Mac OS X/i.test(ua)
+    deviceType === "Android Tablet"
   ) {
 
-    operatingSystem =
-      "macOS";
+    deviceLabel =
+      `${browser} on Android Tablet`;
 
   }
   else if (
-    /Linux/i.test(ua)
+    deviceType === "Mac"
   ) {
 
-    operatingSystem =
-      "Linux";
+    deviceLabel =
+      `${browser} on Mac`;
+
+  }
+  else if (
+    deviceType === "Windows Device"
+  ) {
+
+    deviceLabel =
+      `${browser} on Windows`;
 
   }
 
@@ -1109,8 +1310,7 @@ function getPushDeviceInfo() {
 
     operatingSystem,
 
-    deviceLabel:
-      `${browser} on ${operatingSystem}`
+    deviceLabel
 
   };
 
