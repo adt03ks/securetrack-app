@@ -2125,35 +2125,39 @@ async function loadSettings() {
    connectOneSignalUser(
   session
 )
-  .then(
-    async () => {
-
-      await refreshCurrentPushDeviceInformation();
-
-      await loadPushStatus();
-
-    }
-  )
   .catch(
     error => {
 
       console.warn(
-        "SecureTrack push initialization was not completed:",
+        "OneSignal user connection was not completed:",
         error
       );
 
+    }
+  );
 
-      loadPushStatus()
-        .catch(
-          statusError => {
 
-            console.warn(
-              "Push status could not be loaded:",
-              statusError
-            );
+refreshCurrentPushDeviceInformation()
+  .catch(
+    error => {
 
-          }
-        );
+      console.warn(
+        "SecureTrack device information refresh was not completed:",
+        error
+      );
+
+    }
+  );
+
+
+loadPushStatus()
+  .catch(
+    error => {
+
+      console.warn(
+        "Push status could not be loaded:",
+        error
+      );
 
     }
   );
