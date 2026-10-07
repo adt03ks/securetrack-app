@@ -451,290 +451,541 @@ async function connectOneSignalUser(
 
   }
 
-  // =========================================================
-  // LOAD PUSH NOTIFICATION STATUS
-  // =========================================================
+// =========================================================
+// LOAD PUSH NOTIFICATION STATUS
+// =========================================================
 
-  async function loadPushStatus() {
+async function loadPushStatus() {
+
+  if (
+    !pushEnabled ||
+    !pushStatus
+  ) {
+    return;
+  }
+
+
+  // Start from a neutral state.
+
+  pushEnabled.disabled =
+    true;
+
+  pushEnabled.checked =
+    false;
+
+  enablePushButton.hidden =
+    true;
+
+  pushPermissionNote.hidden =
+    true;
+
+  pushStatus.textContent =
+    "Checking SecureTrack push status…";
+
+
+  try {
+
+    // =========================================
+    // LOAD SAVED SECURETRACK PUSH STATUS
+    // =========================================
+
+    const {
+      data,
+      error
+    } =
+      await db.rpc(
+        "get_my_push_notification_status"
+      );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    const state =
+      data || {};
+
+
+    const devices =
+      Array.isArray(
+        state.devices
+      )
+        ? state.devices
+        : [];
+
+
+    const activeDevices =
+      devices.filter(
+        device =>
+          device.is_active === true &&
+          device.permission_status ===
+            "granted"
+      );
+
+
+    // =========================================
+    // VERIFY BROWSER SUPPORT
+    // =========================================
+
+    const browserSupportsPush =
+      (
+        "Notification" in window &&
+        "serviceWorker" in navigator &&
+        "PushManager" in window
+      );
+
 
     if (
-      !pushEnabled ||
-      !pushStatus
+      !browserSupportsPush
     ) {
+
+      pushEnabled.checked =
+        false;
+
+
+      pushStatus.textContent =
+        "This browser does not support SecureTrack push notifications.";
+
+
+      pushPermissionNote.hidden =
+        false;
+
+
+      pushPermissionNote.textContent =
+        "Use an approved browser that supports web push notifications.";
+
+
       return;
+
     }
+
+
+    // =========================================
+    // VERIFY BROWSER PERMISSION
+    // =========================================
+
+    if (
+      Notification.permission ===
+        "denied"
+    ) {
+
+      pushEnabled.checked =
+        false;
+
+
+      pushStatus.textContent =
+        "Push notifications are blocked in this browser.";
+
+
+      pushPermissionNote.hidden =
+        false;
+
+
+      pushPermissionNote.textContent =
+        "Notifications must be allowed for securetrackop.com in the browser before this device can receive SecureTrack alerts.";
+
+
+      enablePushButton.hidden =
+        true;
+
+
+      return;
+
+    }
+
+
+    // =========================================
+    // CHECK ACTUAL BROWSER PUSH SUBSCRIPTION
+    // =========================================
+
+    let browserPushSubscription =
+      null;
+
+
+    try {
+
+      const serviceWorkerRegistration =
+        await navigator.serviceWorker.ready;
+
+
+      browserPushSubscription =
+        await serviceWorkerRegistration
+          .pushManager
+          .getSubscription();
+
+    }
+    catch (error) {
+
+      console.warn(
+        "SecureTrack could not inspect the browser push subscription:",
+        error
+      );
+
+    }
+
+
+    const browserHasSubscription =
+      Boolean(
+        browserPushSubscription &&
+        browserPushSubscription.endpoint
+      );
+
+
+    // =========================================
+    // CHECK ONESIGNAL STATE
+    // =========================================
+
+    let OneSignal =
+      null;
+
+
+    let oneSignalOptedIn =
+      false;
+
+
+    try {
+
+      OneSignal =
+        await waitForOneSignal();
+
+
+      oneSignalOptedIn =
+        OneSignal?.User
+          ?.PushSubscription
+          ?.optedIn === true;
+
+    }
+    catch (error) {
+
+      console.warn(
+        "SecureTrack could not read OneSignal push status:",
+        error
+      );
+
+    }
+
+
+    // =========================================
+    // CURRENT DEVICE IS REALLY PUSH-CAPABLE
+    // =========================================
+
+    const currentBrowserReady =
+      (
+        Notification.permission ===
+          "granted" &&
+        browserHasSubscription &&
+        oneSignalOptedIn
+      );
+
+
+    // =========================================
+    // SECURETRACK MASTER PUSH STATUS
+    // =========================================
+
+    /*
+      Push is displayed as enabled only when:
+
+      1. SecureTrack master push preference is enabled
+      2. Supabase has at least one active registered device
+      3. THIS browser has a real PushSubscription
+      4. OneSignal confirms the browser is opted in
+      5. Browser notification permission is granted
+    */
+
+    const secureTrackPushActive =
+      Boolean(
+        state.push_enabled &&
+        activeDevices.length > 0 &&
+        currentBrowserReady
+      );
+
+
+    pushEnabled.checked =
+      secureTrackPushActive;
+
+
+    // =========================================
+    // DEVICE DISPLAY
+    // =========================================
+
+    if (
+      devices.length > 0
+    ) {
+
+      pushDeviceSection.hidden =
+        false;
+
+
+      pushDeviceList.innerHTML =
+        devices
+          .map(
+            device => {
+
+              const label =
+                device.device_label ||
+                "Registered Device";
+
+
+              const browser =
+                device.browser_name ||
+                "Browser";
+
+
+              const os =
+                device.operating_system ||
+                "Operating System";
+
+
+              const status =
+                device.is_active
+                  ? "Registered"
+                  : "Inactive";
+
+
+              const lastSeen =
+                device.last_seen_at
+                  ? new Date(
+                      device.last_seen_at
+                    ).toLocaleString()
+                  : "Unknown";
+
+
+              return `
+                <div
+                  style="
+                    padding:9px 0;
+                    border-bottom:
+                      1px solid #30363d;
+                  "
+                >
+                  <strong>
+                    ${label}
+                  </strong>
+
+                  <br>
+
+                  <span>
+                    ${browser} • ${os}
+                  </span>
+
+                  <br>
+
+                  <span>
+                    ${status}
+                    • Last seen ${lastSeen}
+                  </span>
+                </div>
+              `;
+
+            }
+          )
+          .join("");
+
+    }
+    else {
+
+      pushDeviceSection.hidden =
+        true;
+
+
+      pushDeviceList.textContent =
+        "No registered push devices.";
+
+    }
+
+
+    // =========================================
+    // FULLY ACTIVE
+    // =========================================
+
+    if (
+      secureTrackPushActive
+    ) {
+
+      pushStatus.textContent =
+        "SecureTrack push notifications are active on this browser.";
+
+
+      pushPermissionNote.hidden =
+        false;
+
+
+      pushPermissionNote.textContent =
+        activeDevices.length === 1
+          ? "1 push device is registered with SecureTrack."
+          : `${activeDevices.length} push devices are registered with SecureTrack.`;
+
+
+      enablePushButton.hidden =
+        true;
+
+
+      return;
+
+    }
+
+
+    // =========================================
+    // BROWSER SUBSCRIBED BUT SECURETRACK
+    // REGISTRATION / PREFERENCE NOT COMPLETE
+    // =========================================
+
+    if (
+      currentBrowserReady
+    ) {
+
+      pushEnabled.checked =
+        false;
+
+
+      pushStatus.textContent =
+        "This browser is connected to OneSignal, but SecureTrack push setup is not complete.";
+
+
+      pushPermissionNote.hidden =
+        false;
+
+
+      pushPermissionNote.textContent =
+        "Select Enable Push Notifications to finish registering this browser with SecureTrack.";
+
+
+      enablePushButton.hidden =
+        false;
+
+
+      enablePushButton.disabled =
+        false;
+
+
+      enablePushButton.textContent =
+        "Enable Push Notifications";
+
+
+      return;
+
+    }
+
+
+    // =========================================
+    // PERMISSION GRANTED BUT NO REAL
+    // PUSH SUBSCRIPTION EXISTS
+    // =========================================
+
+    if (
+      Notification.permission ===
+        "granted"
+    ) {
+
+      pushEnabled.checked =
+        false;
+
+
+      pushStatus.textContent =
+        "Push notifications are not active on this browser.";
+
+
+      pushPermissionNote.hidden =
+        false;
+
+
+      pushPermissionNote.textContent =
+        "Browser permission is granted, but this browser does not currently have a verified SecureTrack push subscription.";
+
+
+      enablePushButton.hidden =
+        false;
+
+
+      enablePushButton.disabled =
+        false;
+
+
+      enablePushButton.textContent =
+        "Enable Push Notifications";
+
+
+      return;
+
+    }
+
+
+    // =========================================
+    // PERMISSION HAS NOT BEEN REQUESTED
+    // =========================================
+
+    pushEnabled.checked =
+      false;
+
+
+    pushStatus.textContent =
+      "SecureTrack push is not yet active on this browser.";
+
+
+    pushPermissionNote.hidden =
+      false;
+
+
+    pushPermissionNote.textContent =
+      "This browser will ask for notification permission when SecureTrack push is activated.";
+
+
+    enablePushButton.hidden =
+      false;
+
+
+    enablePushButton.disabled =
+      false;
+
+
+    enablePushButton.textContent =
+      "Enable Push Notifications";
+
+  }
+  catch (error) {
+
+    console.error(
+      "SecureTrack push status error:",
+      error
+    );
+
+
+    pushEnabled.checked =
+      false;
 
 
     pushEnabled.disabled =
       true;
 
-    pushEnabled.checked =
-      false;
-
-    enablePushButton.hidden =
-      true;
-
-    pushPermissionNote.hidden =
-      true;
 
     pushStatus.textContent =
-      "Checking SecureTrack push status…";
+      "Push notification status could not be loaded.";
 
 
-    try {
+    pushPermissionNote.hidden =
+      false;
 
-      const {
-        data,
-        error
-      } =
-        await db.rpc(
-          "get_my_push_notification_status"
-        );
 
+    pushPermissionNote.textContent =
+      error?.message ||
+      "SecureTrack could not retrieve this device's push status.";
 
-      if (error) {
-        throw error;
-      }
 
+    enablePushButton.hidden =
+      false;
 
-      const state =
-        data || {};
 
+    enablePushButton.disabled =
+      false;
 
-      const devices =
-        Array.isArray(
-          state.devices
-        )
-          ? state.devices
-          : [];
 
-
-      const activeDevices =
-        devices.filter(
-          device =>
-            device.is_active === true &&
-            device.permission_status ===
-              "granted"
-        );
-
-
-      // =========================================
-      // MASTER PUSH STATUS
-      // =========================================
-
-      pushEnabled.checked =
-        Boolean(
-          state.push_enabled &&
-          activeDevices.length > 0
-        );
-
-
-      // =========================================
-      // DEVICE DISPLAY
-      // =========================================
-
-      if (
-        devices.length > 0
-      ) {
-
-        pushDeviceSection.hidden =
-          false;
-
-
-        pushDeviceList.innerHTML =
-          devices
-            .map(
-              device => {
-
-                const label =
-                  device.device_label ||
-                  "Registered Device";
-
-                const browser =
-                  device.browser_name ||
-                  "Browser";
-
-                const os =
-                  device.operating_system ||
-                  "Operating System";
-
-                const status =
-                  device.is_active
-                    ? "Active"
-                    : "Inactive";
-
-                const lastSeen =
-                  device.last_seen_at
-                    ? new Date(
-                        device.last_seen_at
-                      ).toLocaleString()
-                    : "Unknown";
-
-
-                return `
-                  <div
-                    style="
-                      padding:9px 0;
-                      border-bottom:
-                        1px solid #30363d;
-                    "
-                  >
-                    <strong>
-                      ${label}
-                    </strong>
-
-                    <br>
-
-                    <span>
-                      ${browser} • ${os}
-                    </span>
-
-                    <br>
-
-                    <span>
-                      ${status}
-                      • Last seen ${lastSeen}
-                    </span>
-                  </div>
-                `;
-
-              }
-            )
-            .join("");
-
-      } else {
-
-        pushDeviceSection.hidden =
-          true;
-
-        pushDeviceList.textContent =
-          "No registered push devices.";
-
-      }
-
-
-      // =========================================
-      // BROWSER SUPPORT / PERMISSION
-      // =========================================
-
-      if (
-        !(
-          "Notification" in window
-        )
-      ) {
-
-        pushStatus.textContent =
-          "This browser does not support SecureTrack push notifications.";
-
-        pushPermissionNote.hidden =
-          false;
-
-        pushPermissionNote.textContent =
-          "Use an approved browser that supports web notifications.";
-
-        return;
-
-      }
-
-
-      if (
-        Notification.permission ===
-        "denied"
-      ) {
-
-        pushStatus.textContent =
-          "Push notifications are blocked in this browser.";
-
-        pushPermissionNote.hidden =
-          false;
-
-        pushPermissionNote.textContent =
-          "Notifications must be allowed for securetrackop.com in the browser before this device can receive SecureTrack alerts.";
-
-        return;
-
-      }
-
-
-      // =========================================
-      // ACTIVE DEVICE
-      // =========================================
-
-      if (
-        activeDevices.length > 0
-      ) {
-
-        pushStatus.textContent =
-          activeDevices.length === 1
-            ? "SecureTrack push notifications are active on 1 registered device."
-            : `SecureTrack push notifications are active on ${activeDevices.length} registered devices.`;
-
-        pushPermissionNote.hidden =
-          true;
-
-        return;
-
-      }
-
-
-      // =========================================
-      // NO ACTIVE DEVICE YET
-      // =========================================
-
-      pushStatus.textContent =
-        "SecureTrack push is not yet active on this device.";
-
-      pushPermissionNote.hidden =
-        false;
-
-      pushPermissionNote.textContent =
-        Notification.permission ===
-        "granted"
-          ? "Browser permission is already granted. SecureTrack is ready for the push provider connection."
-          : "This browser will ask for notification permission when SecureTrack push is activated.";
-
-     // OneSignal is now connected.
-// Allow this browser/device to be enrolled.
-
-enablePushButton.hidden =
-  false;
-
-enablePushButton.disabled =
-  false;
-
-enablePushButton.textContent =
-  "Enable Push Notifications";
-
-    } catch (error) {
-
-      console.error(
-        "SecureTrack push status error:",
-        error
-      );
-
-
-      pushEnabled.checked =
-        false;
-
-      pushEnabled.disabled =
-        true;
-
-
-      pushStatus.textContent =
-        "Push notification status could not be loaded.";
-
-
-      pushPermissionNote.hidden =
-        false;
-
-      pushPermissionNote.textContent =
-        error.message ||
-        "SecureTrack could not retrieve this device's push status.";
-
-    }
+    enablePushButton.textContent =
+      "Try Again";
 
   }
 
+}
 // =========================================================
 // DETECT BROWSER / OPERATING SYSTEM
 // =========================================================
