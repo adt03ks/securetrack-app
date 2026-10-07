@@ -792,47 +792,72 @@ console.log(
   }
 );
     // =========================================
-    // BROWSER SUBSCRIBED BUT SECURETRACK
-    // REGISTRATION / PREFERENCE NOT COMPLETE
-    // =========================================
+// FULLY ACTIVE
+// =========================================
 
-    if (
-      currentBrowserReady
-    ) {
+if (
+  secureTrackPushActive
+) {
 
-      pushEnabled.checked =
-        false;
+  pushEnabled.checked =
+    true;
 
+  pushStatus.textContent =
+    "SecureTrack push notifications are active on this browser.";
 
-      pushStatus.textContent =
-        "This browser is connected to OneSignal, but SecureTrack push setup is not complete.";
+  pushPermissionNote.hidden =
+    false;
 
+  pushPermissionNote.textContent =
+    activeDevices.length === 1
+      ? "1 push device is registered with SecureTrack."
+      : `${activeDevices.length} push devices are registered with SecureTrack.`;
 
-      pushPermissionNote.hidden =
-        false;
+  enablePushButton.hidden =
+    true;
 
+  enablePushButton.disabled =
+    true;
 
-      pushPermissionNote.textContent =
-        "Select Enable Push Notifications to finish registering this browser with SecureTrack.";
+  return;
 
-
-      enablePushButton.hidden =
-        false;
-
-
-      enablePushButton.disabled =
-        false;
-
-
-      enablePushButton.textContent =
-        "Enable Push Notifications";
+}
 
 
-      return;
+// =========================================
+// BROWSER CONNECTED BUT SECURETRACK
+// REGISTRATION IS NOT COMPLETE
+// =========================================
 
-    }
+if (
+  currentBrowserReady &&
+  !secureTrackPushActive
+) {
 
+  pushEnabled.checked =
+    false;
 
+  pushStatus.textContent =
+    "This browser is connected to OneSignal, but SecureTrack push setup is not complete.";
+
+  pushPermissionNote.hidden =
+    false;
+
+  pushPermissionNote.textContent =
+    "Select Enable Push Notifications to finish registering this browser with SecureTrack.";
+
+  enablePushButton.hidden =
+    false;
+
+  enablePushButton.disabled =
+    false;
+
+  enablePushButton.textContent =
+    "Enable Push Notifications";
+
+  return;
+
+}
     // =========================================
     // PERMISSION GRANTED BUT NO REAL
     // PUSH SUBSCRIPTION EXISTS
