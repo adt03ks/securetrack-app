@@ -769,28 +769,7 @@ const secureTrackPushActive =
 
 pushEnabled.checked =
   secureTrackPushActive;
-console.log(
-  "FINAL PUSH UI DECISION:",
-  {
-    statePushEnabled:
-      state.push_enabled,
 
-    notificationPermission:
-      Notification.permission,
-
-    browserHasSubscription,
-
-    oneSignalOptedIn,
-
-    currentOneSignalSubscriptionId,
-
-    currentBrowserRegistered,
-
-    currentBrowserReady,
-
-    secureTrackPushActive
-  }
-);
     // =========================================
 // FULLY ACTIVE
 // =========================================
