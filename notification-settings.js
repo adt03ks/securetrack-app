@@ -1626,85 +1626,138 @@ if (
 
 }
   
-  async function loadSettings() {
+async function loadSettings() {
+
+  loading.hidden =
+    false;
+
+  form.hidden =
+    true;
+
+
+  try {
+
+    // =========================================
+    // SECURETRACK SESSION
+    // =========================================
+
+    const session =
+      await STM.getSession();
+
+
+    if (
+      !session
+    ) {
+
+      window.location.replace(
+        "login.html?next=notification-settings.html"
+      );
+
+      return;
+
+    }
+
+
+    // =========================================
+    // LOAD GENERAL NOTIFICATION PREFERENCES
+    // =========================================
+
+    const {
+      data,
+      error
+    } =
+      await db.rpc(
+        "get_my_notification_preferences"
+      );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    populate(
+      data || {}
+    );
+
+
+    // =========================================
+    // SHOW THE PAGE NOW
+    // =========================================
+
+    /*
+      Email and SMS settings must not wait
+      for OneSignal or Web Push initialization.
+    */
 
     loading.hidden =
-      false;
-
-
-    form.hidden =
       true;
 
 
-    try {
+    form.hidden =
+      false;
 
 
-      const session =
-        await STM.getSession();
+    // =========================================
+    // INITIALIZE PUSH SEPARATELY
+    // =========================================
 
+    /*
+      Do not await these here.
 
-      if (
-        !session
-      ) {
+      Apple browsers may require additional
+      Web Push conditions, but that should
+      never prevent the rest of Notification
+      Settings from loading.
+    */
 
-        window.location.replace(
-          "login.html?next=notification-settings.html"
-        );
+    connectOneSignalUser(
+      session
+    )
+      .catch(
+        error => {
 
-        return;
+          console.warn(
+            "OneSignal user connection was not completed:",
+            error
+          );
 
-      }
-
-      await connectOneSignalUser(
-  session
-);
-
-      const {
-        data,
-        error
-      } =
-        await db.rpc(
-          "get_my_notification_preferences"
-        );
-
-
-      if (error) {
-
-        throw error;
-
-      }
-
-
-      populate(
-        data || {}
-      );
-
-            await loadPushStatus();
-
-      loading.hidden =
-        true;
-
-
-      form.hidden =
-        false;
-
-
-    }
-    catch (error) {
-
-      console.error(
-        "Notification settings load error:",
-        error
+        }
       );
 
 
-      loading.textContent =
-        error?.message ||
-        "Unable to load notification preferences.";
+    loadPushStatus()
+      .catch(
+        error => {
 
-    }
+          console.warn(
+            "Push status could not be loaded:",
+            error
+          );
+
+        }
+      );
 
   }
+  catch (error) {
+
+    console.error(
+      "Notification settings load error:",
+      error
+    );
+
+
+    loading.textContent =
+      error?.message ||
+      "Unable to load notification preferences.";
+
+  }
+
+}
 
 
   smsConsent.addEventListener(
