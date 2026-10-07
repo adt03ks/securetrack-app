@@ -605,24 +605,77 @@ async function loadPushStatus() {
 
     try {
 
-      const serviceWorkerRegistration =
-        await navigator.serviceWorker.ready;
+     const serviceWorkerRegistration =
+  await Promise.race([
+    navigator.serviceWorker.ready,
+
+    new Promise(
+      (_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                "SERVICE_WORKER_TIMEOUT"
+              )
+            ),
+          5000
+        )
+    )
+  ]);
 
 
-      browserPushSubscription =
-        await serviceWorkerRegistration
-          .pushManager
-          .getSubscription();
+browserPushSubscription =
+  await serviceWorkerRegistration
+    .pushManager
+    .getSubscription();
 
     }
-    catch (error) {
+   catch (error) {
 
-      console.warn(
-        "SecureTrack could not inspect the browser push subscription:",
-        error
-      );
+  console.warn(
+    "SecureTrack could not inspect the browser push subscription:",
+    error
+  );
 
-    }
+
+  if (
+    error?.message ===
+    "SERVICE_WORKER_TIMEOUT"
+  ) {
+
+    pushEnabled.checked =
+      false;
+
+
+    pushStatus.textContent =
+      "SecureTrack push is still initializing on this device.";
+
+
+    pushPermissionNote.hidden =
+      false;
+
+
+    pushPermissionNote.textContent =
+      "On iPhone or iPad, open SecureTrack from the Home Screen icon and allow a few seconds for push services to initialize.";
+
+
+    enablePushButton.hidden =
+      false;
+
+
+    enablePushButton.disabled =
+      false;
+
+
+    enablePushButton.textContent =
+      "Enable Push Notifications";
+
+
+    return;
+
+  }
+
+}
 
 
     const browserHasSubscription =
