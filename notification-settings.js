@@ -225,9 +225,8 @@ async function connectOneSignalUser(
     throughout the application.
   */
 
-  await OneSignal.login(
-    session.user.id
-  );
+ // TEMP TEST:
+// await OneSignal.login(session.user.id);
 
 
   console.log(
@@ -939,9 +938,8 @@ async function enableSecureTrackPush() {
     // Make sure this OneSignal user belongs
     // to the authenticated SecureTrack account.
 
-    await OneSignal.login(
-      session.user.id
-    );
+   // TEMP TEST:
+// await OneSignal.login(session.user.id);
 
 
     // =========================================
