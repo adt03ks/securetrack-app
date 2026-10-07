@@ -775,7 +775,16 @@ const currentBrowserReady =
     )
   );
 
+if (
+  currentOneSignalSubscriptionId
+) {
 
+  localStorage.setItem(
+    "securetrack_push_subscription_id",
+    currentOneSignalSubscriptionId
+  );
+
+}
 // =========================================
 // MATCH THIS BROWSER TO SUPABASE
 // =========================================
@@ -1670,7 +1679,10 @@ async function enableSecureTrackPush() {
       "SecureTrack OneSignal registration ID:",
       subscriptionId
     );
-
+localStorage.setItem(
+  "securetrack_push_subscription_id",
+  subscriptionId
+);
 
     // =========================================
     // DEVICE INFORMATION
