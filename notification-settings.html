@@ -248,7 +248,39 @@
     }
 
   </style>
+<script
+  src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+  defer
+></script>
 
+<script>
+  window.OneSignalDeferred =
+    window.OneSignalDeferred || [];
+
+  OneSignalDeferred.push(
+    async function (OneSignal) {
+
+      await OneSignal.init({
+        appId:
+          "6ceb93a4-c390-4961-ad5a-5bbbceb0e6c7",
+
+        safari_web_id:
+          "web.onesignal.auto.129ff751-f997-4966-a642-dcf62166c788",
+
+        notifyButton: {
+          enable: true
+        }
+      });
+
+      window.SecureTrackOneSignal =
+        OneSignal;
+
+      console.log(
+        "SecureTrack OneSignal initialized."
+      );
+    }
+  );
+</script>
 </head>
 <script
   src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
@@ -685,22 +717,6 @@
     async function (OneSignal) {
 
       try {
-
-        await OneSignal.init({
-          appId:
-            "6ceb93a4-c390-4961-ad5a-5bbbceb0e6c7",
-
-          serviceWorkerPath:
-            "/OneSignalSDKWorker.js",
-
-          serviceWorkerParam: {
-            scope: "/"
-          },
-
-          notifyButton: {
-            enable: false
-          }
-        });
 
         window.SecureTrackOneSignal =
           OneSignal;
