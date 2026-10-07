@@ -632,199 +632,143 @@ async function loadPushStatus() {
       );
 
 
-    // =========================================
-    // CHECK ONESIGNAL STATE
-    // =========================================
+   // =========================================
+// CHECK ONESIGNAL STATE
+// =========================================
 
-    let OneSignal =
+let OneSignal =
+  null;
+
+let oneSignalOptedIn =
+  false;
+
+let currentOneSignalSubscriptionId =
+  null;
+
+
+try {
+
+  OneSignal =
+    await waitForOneSignal();
+
+
+  oneSignalOptedIn =
+    OneSignal?.User
+      ?.PushSubscription
+      ?.optedIn === true;
+
+
+  /*
+    The OneSignal subscription ID may appear
+    slightly after initialization/login.
+
+    Give the SDK a few seconds to expose it.
+  */
+
+  for (
+    let attempt = 0;
+    attempt < 12 &&
+    !currentOneSignalSubscriptionId;
+    attempt += 1
+  ) {
+
+    currentOneSignalSubscriptionId =
+      OneSignal?.User
+        ?.PushSubscription
+        ?.id ||
       null;
 
 
-    let oneSignalOptedIn =
-      false;
-
-
-    try {
-
-      OneSignal =
-        await waitForOneSignal();
-
-
-      oneSignalOptedIn =
-        OneSignal?.User
-          ?.PushSubscription
-          ?.optedIn === true;
-
-    }
-    catch (error) {
-
-      console.warn(
-        "SecureTrack could not read OneSignal push status:",
-        error
-      );
-
-    }
-
-
-    // =========================================
-    // CURRENT DEVICE IS REALLY PUSH-CAPABLE
-    // =========================================
-
-    const currentBrowserReady =
-      (
-        Notification.permission ===
-          "granted" &&
-        browserHasSubscription &&
-        oneSignalOptedIn
-      );
-
-
-    // =========================================
-    // SECURETRACK MASTER PUSH STATUS
-    // =========================================
-
-    /*
-      Push is displayed as enabled only when:
-
-      1. SecureTrack master push preference is enabled
-      2. Supabase has at least one active registered device
-      3. THIS browser has a real PushSubscription
-      4. OneSignal confirms the browser is opted in
-      5. Browser notification permission is granted
-    */
-
-    const secureTrackPushActive =
-      Boolean(
-        state.push_enabled &&
-        activeDevices.length > 0 &&
-        currentBrowserReady
-      );
-
-
-    pushEnabled.checked =
-      secureTrackPushActive;
-
-
-    // =========================================
-    // DEVICE DISPLAY
-    // =========================================
-
     if (
-      devices.length > 0
+      currentOneSignalSubscriptionId
     ) {
-
-      pushDeviceSection.hidden =
-        false;
-
-
-      pushDeviceList.innerHTML =
-        devices
-          .map(
-            device => {
-
-              const label =
-                device.device_label ||
-                "Registered Device";
-
-
-              const browser =
-                device.browser_name ||
-                "Browser";
-
-
-              const os =
-                device.operating_system ||
-                "Operating System";
-
-
-              const status =
-                device.is_active
-                  ? "Registered"
-                  : "Inactive";
-
-
-              const lastSeen =
-                device.last_seen_at
-                  ? new Date(
-                      device.last_seen_at
-                    ).toLocaleString()
-                  : "Unknown";
-
-
-              return `
-                <div
-                  style="
-                    padding:9px 0;
-                    border-bottom:
-                      1px solid #30363d;
-                  "
-                >
-                  <strong>
-                    ${label}
-                  </strong>
-
-                  <br>
-
-                  <span>
-                    ${browser} • ${os}
-                  </span>
-
-                  <br>
-
-                  <span>
-                    ${status}
-                    • Last seen ${lastSeen}
-                  </span>
-                </div>
-              `;
-
-            }
-          )
-          .join("");
-
-    }
-    else {
-
-      pushDeviceSection.hidden =
-        true;
-
-
-      pushDeviceList.textContent =
-        "No registered push devices.";
-
+      break;
     }
 
 
-    // =========================================
-    // FULLY ACTIVE
-    // =========================================
+    await new Promise(
+      resolve =>
+        setTimeout(
+          resolve,
+          250
+        )
+    );
 
-    if (
-      secureTrackPushActive
-    ) {
+  }
 
-      pushStatus.textContent =
-        "SecureTrack push notifications are active on this browser.";
+}
+catch (error) {
 
+  console.warn(
+    "SecureTrack could not read OneSignal push status:",
+    error
+  );
 
-      pushPermissionNote.hidden =
-        false;
-
-
-      pushPermissionNote.textContent =
-        activeDevices.length === 1
-          ? "1 push device is registered with SecureTrack."
-          : `${activeDevices.length} push devices are registered with SecureTrack.`;
-
-
-      enablePushButton.hidden =
-        true;
+}
 
 
-      return;
+// =========================================
+// CURRENT BROWSER PUSH STATE
+// =========================================
 
-    }
+const currentBrowserReady =
+  (
+    Notification.permission ===
+      "granted" &&
+    browserHasSubscription &&
+    oneSignalOptedIn &&
+    Boolean(
+      currentOneSignalSubscriptionId
+    )
+  );
 
+
+// =========================================
+// MATCH THIS BROWSER TO SUPABASE
+// =========================================
+
+const currentRegisteredDevice =
+  activeDevices.find(
+    device =>
+      device.provider ===
+        "onesignal" &&
+      device.provider_subscription_id ===
+        currentOneSignalSubscriptionId
+  ) ||
+  null;
+
+
+const currentBrowserRegistered =
+  Boolean(
+    currentRegisteredDevice
+  );
+
+
+console.log(
+  "SecureTrack push verification:",
+  {
+    currentOneSignalSubscriptionId,
+    browserHasSubscription,
+    oneSignalOptedIn,
+    currentBrowserRegistered
+  }
+);
+
+
+// =========================================
+// SECURETRACK MASTER PUSH STATUS
+// =========================================
+
+const secureTrackPushActive =
+  Boolean(
+    state.push_enabled &&
+    currentBrowserReady &&
+    currentBrowserRegistered
+  );
+
+
+pushEnabled.checked =
+  secureTrackPushActive;
 
     // =========================================
     // BROWSER SUBSCRIBED BUT SECURETRACK
