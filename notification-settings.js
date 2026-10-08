@@ -1440,15 +1440,36 @@ async function enableSecureTrackPush() {
     // REQUEST BROWSER PERMISSION
     // =========================================
 
-    if (
-      Notification.permission !==
-      "granted"
-    ) {
+   if (
+  Notification.permission !==
+  "granted"
+) {
 
-      await OneSignal.Notifications
-        .requestPermission();
+  pushStatus.textContent =
+    "Requesting notification permission…";
 
-    }
+
+  await Promise.race([
+
+    OneSignal.Notifications
+      .requestPermission(),
+
+    new Promise(
+      (_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                "Notification permission request timed out."
+              )
+            ),
+          10000
+        )
+    )
+
+  ]);
+
+}
 
 
     if (
