@@ -1448,45 +1448,40 @@ async function enableSecureTrackPush() {
   pushStatus.textContent =
     "Requesting notification permission…";
 
+ const permission =
+    await Notification.requestPermission();
 
-  await Promise.race([
 
-    OneSignal.Notifications
-      .requestPermission(),
+  console.log(
+    "SecureTrack browser notification permission:",
+    permission
+  );
 
-    new Promise(
-      (_, reject) =>
-        setTimeout(
-          () =>
-            reject(
-              new Error(
-                "Notification permission request timed out."
-              )
-            ),
-          10000
-        )
-    )
 
-  ]);
+  if (
+    permission !==
+    "granted"
+  ) {
+
+    throw new Error(
+      "Notification permission was not granted."
+    );
+
+  }
 
 }
 
 
-    if (
-      Notification.permission !==
-      "granted"
-    ) {
+if (
+  Notification.permission !==
+  "granted"
+) {
 
-      throw new Error(
-        "Notification permission was not granted."
-      );
+  throw new Error(
+    "Notification permission was not granted."
+  );
 
-    }
-
-
-    pushStatus.textContent =
-      "Creating secure push subscription…";
-
+}
 
     // =========================================
     // OPT DEVICE INTO ONESIGNAL
