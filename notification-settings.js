@@ -638,42 +638,55 @@ browserPushSubscription =
   );
 
 
-  if (
-    error?.message ===
-    "SERVICE_WORKER_TIMEOUT"
-  ) {
+ if (
+  error?.message ===
+  "SERVICE_WORKER_TIMEOUT"
+) {
 
-    pushEnabled.checked =
-      false;
-
-
-    pushStatus.textContent =
-      "SecureTrack push is still initializing on this device.";
+  const deviceInfo =
+    getPushDeviceInfo();
 
 
-    pushPermissionNote.hidden =
-      false;
+  const isAppleMobile =
+    deviceInfo.operatingSystem ===
+      "iOS" ||
+    deviceInfo.operatingSystem ===
+      "iPadOS";
 
 
-    pushPermissionNote.textContent =
-      "On iPhone or iPad, open SecureTrack from the Home Screen icon and allow a few seconds for push services to initialize.";
+  pushEnabled.checked =
+    false;
 
 
-    enablePushButton.hidden =
-      false;
+  pushStatus.textContent =
+    "SecureTrack push is still initializing on this device.";
 
 
-    enablePushButton.disabled =
-      false;
+  pushPermissionNote.hidden =
+    false;
 
 
-    enablePushButton.textContent =
-      "Enable Push Notifications";
+  pushPermissionNote.textContent =
+    isAppleMobile
+      ? "On iPhone or iPad, open SecureTrack from the Home Screen icon and allow a few seconds for push services to initialize."
+      : "Push services are taking longer than expected to initialize. You may try enabling push notifications again.";
 
 
-    return;
+  enablePushButton.hidden =
+    false;
 
-  }
+
+  enablePushButton.disabled =
+    false;
+
+
+  enablePushButton.textContent =
+    "Enable Push Notifications";
+
+
+  return;
+
+}
 
 }
 
