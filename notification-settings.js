@@ -163,9 +163,12 @@
 
 async function waitForOneSignal() {
 
+  // Give OneSignal more time on browsers with
+  // stricter tracking/security policies.
+
   for (
     let attempt = 0;
-    attempt < 40;
+    attempt < 160;
     attempt++
   ) {
 
@@ -190,11 +193,10 @@ async function waitForOneSignal() {
 
 
   throw new Error(
-    "OneSignal did not initialize."
+    "OneSignal did not initialize within 40 seconds."
   );
 
 }
-
 
 
 async function connectOneSignalUser(
