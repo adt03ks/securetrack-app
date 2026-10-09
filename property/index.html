@@ -186,6 +186,13 @@
     <nav class="tabs" aria-label="Property functions">
       <button class="tab active" type="button" data-panel="intakePanel">Log New Property</button>
       <button class="tab" type="button" data-panel="searchPanel">Search Property</button>
+      <button
+  class="tab"
+  type="button"
+  data-panel="lostFoundPanel"
+>
+  Lost &amp; Found
+</button>
     </nav>
 
     <section id="intakePanel" class="panel active">
@@ -391,23 +398,396 @@
               <th>Storage</th>
               <th>Status</th>
               <th>Received</th>
+              <th>Hold Age</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody id="propertyResultsBody">
             <tr>
-              <td colspan="9" class="empty-cell">Search for a property record above.</td>
+              <td colspan="10" class="empty-cell">Search for a property record above.</td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
+    <!-- =====================================================
+     LOST & FOUND
+     ===================================================== -->
+
+<section
+  id="lostFoundPanel"
+  class="panel"
+>
+
+  <div class="panel-heading">
+
+    <div>
+
+      <div class="eyebrow">
+        LOST &amp; FOUND
+      </div>
+
+      <h2>
+        Lost &amp; Found Inventory
+      </h2>
+
+      <p class="subtitle">
+        Log and track found property retained by Security.
+        Items are held for seven days before disposal becomes available.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       LOST & FOUND SUMMARY
+       =================================================== -->
+
+  <section
+    class="summary-grid"
+    aria-label="Lost and Found summary"
+  >
+
+    <div class="summary-card">
+
+      <span>
+        Active Items
+      </span>
+
+      <strong id="lostFoundActiveCount">
+        0
+      </strong>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <span>
+        Due for Disposal
+      </span>
+
+      <strong id="lostFoundDueCount">
+        0
+      </strong>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <span>
+        Closed Records
+      </span>
+
+      <strong id="lostFoundClosedCount">
+        0
+      </strong>
+
+      <small>
+        Returned / Disposed
+      </small>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================
+       NEW LOST & FOUND ITEM
+       =================================================== -->
+
+  <div
+    class="panel-heading"
+    style="margin-top:28px;"
+  >
+
+    <div>
+
+      <div class="eyebrow">
+        NEW LOST &amp; FOUND RECORD
+      </div>
+
+      <h3>
+        Log Found Item
+      </h3>
+
+    </div>
+
+  </div>
+
+
+  <form
+    id="lostFoundForm"
+    autocomplete="off"
+  >
+
+    <div class="form-grid two-col">
+
+      <label>
+
+        <span>
+          Item Description <b>*</b>
+        </span>
+
+        <input
+          id="lostFoundDescription"
+          type="text"
+          required
+          placeholder="Example: Black wallet with keys"
+        >
+
+      </label>
+
+
+      <label>
+
+        <span>
+          Turned In By <b>*</b>
+        </span>
+
+        <input
+          id="lostFoundTurnedInBy"
+          type="text"
+          required
+          placeholder="Name, department, visitor, or other identifier"
+        >
+
+      </label>
+
+    </div>
+
+
+    <div class="form-grid two-col">
+
+      <label>
+
+        <span>
+          Date / Time Turned In <b>*</b>
+        </span>
+
+        <input
+          id="lostFoundTurnedInAt"
+          type="datetime-local"
+          required
+        >
+
+      </label>
+
+
+      <label>
+
+        <span>
+          Locker / Storage Location <b>*</b>
+        </span>
+
+        <input
+          id="lostFoundStorage"
+          type="text"
+          required
+          placeholder="Example: Lost & Found Locker LF-04"
+        >
+
+      </label>
+
+    </div>
+
+
+    <label>
+
+      <span>
+        Received By
+      </span>
+
+      <input
+        id="lostFoundReceivedBy"
+        type="text"
+        readonly
+      >
+
+    </label>
+
+
+    <label>
+
+      <span>
+        Notes
+      </span>
+
+      <textarea
+        id="lostFoundNotes"
+        rows="3"
+        placeholder="Optional notes about the item or circumstances"
+      ></textarea>
+
+    </label>
+
+
+    <div
+      id="lostFoundMessage"
+      class="message"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+
+    <div class="form-actions">
+
+      <button
+        id="saveLostFoundButton"
+        class="button primary"
+        type="submit"
+      >
+        Add Lost &amp; Found Item
+      </button>
+
+
+      <button
+        id="clearLostFoundButton"
+        class="button secondary"
+        type="button"
+      >
+        Clear
+      </button>
+
+    </div>
+
+  </form>
+
+
+  <!-- ===================================================
+       LOST & FOUND INVENTORY
+       =================================================== -->
+
+  <div
+    class="panel-heading"
+    style="margin-top:34px;"
+  >
+
+    <div>
+
+      <div class="eyebrow">
+        INVENTORY
+      </div>
+
+      <h3>
+        Lost &amp; Found Records
+      </h3>
+
+      <p class="subtitle">
+        Active items remain in inventory until returned or disposed.
+      </p>
+
+    </div>
+
+
+    <button
+      id="refreshLostFoundButton"
+      class="button secondary"
+      type="button"
+    >
+      Refresh
+    </button>
+
+  </div>
+
+
+  <form
+    id="lostFoundSearchForm"
+    class="search-bar"
+  >
+
+    <input
+      id="lostFoundSearchInput"
+      type="search"
+      autocomplete="off"
+      placeholder="Item ID, description, turned in by, or storage location"
+    >
+
+    <button
+      class="button primary"
+      type="submit"
+    >
+      Search
+    </button>
+
+  </form>
+
+
+  <div class="table-wrap">
+
+    <table class="property-table">
+
+      <thead>
+
+        <tr>
+
+          <th>
+            Item ID
+          </th>
+
+          <th>
+            Description
+          </th>
+
+          <th>
+            Turned In By
+          </th>
+
+          <th>
+            Storage
+          </th>
+
+          <th>
+            Age
+          </th>
+
+          <th>
+            Disposal Eligible
+          </th>
+
+          <th>
+            Status
+          </th>
+
+          <th>
+            Action
+          </th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody id="lostFoundResultsBody">
+
+        <tr>
+
+          <td
+            colspan="8"
+            class="empty-cell"
+          >
+            No Lost &amp; Found records loaded.
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config.js"></script>
   <script src="../secure-page.js"></script>
   <script src="property.js?v=20260920-summary-links-fix"></script>
+  <script src="lost-found.js?v=20261009-1"></script>
 
   <script>
     (function () {
