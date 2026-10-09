@@ -1565,6 +1565,50 @@ function propertyAgeBand(
         tr.appendChild(
           dateTd
         );
+        // =========================================
+// PROPERTY HOLD AGE
+// =========================================
+
+const ageTd =
+  document.createElement(
+    "td"
+  );
+
+
+const ageInfo =
+  propertyAgeBand(
+    item.hold_age_days
+  );
+
+
+const ageBadge =
+  document.createElement(
+    "span"
+  );
+
+
+ageBadge.className =
+  ageInfo.className;
+
+
+ageBadge.textContent =
+  ageInfo.label;
+
+
+ageBadge.title =
+  `Standard disposal eligible ${formatDate(
+    item.disposal_eligible_at
+  )}`;
+
+
+ageTd.appendChild(
+  ageBadge
+);
+
+
+tr.appendChild(
+  ageTd
+);
 // =========================================
 // PROPERTY HOLD AGE
 // =========================================
