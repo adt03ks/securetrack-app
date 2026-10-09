@@ -694,7 +694,40 @@ function propertyAgeBand(
             <span>
               Request Notes
             </span>
+<label
+  id="earlyDisposalReasonField"
+  hidden
+>
 
+  <span>
+    Early Disposal Reason <b>*</b>
+  </span>
+
+  <select
+    id="earlyDisposalReason"
+  >
+
+    <option value="">
+      Select reason
+    </option>
+
+    <option value="hazardous">
+      Hazardous
+    </option>
+
+    <option value="soiled">
+      Soiled / Contaminated
+    </option>
+
+  </select>
+
+  <small class="category-help">
+    Property under 90 days may only be requested
+    for early disposal when it is hazardous or
+    soiled / contaminated.
+  </small>
+
+</label>
             <textarea
               id="requestDisposalNotes"
               rows="4"
