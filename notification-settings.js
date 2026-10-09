@@ -2325,22 +2325,88 @@ loadPushStatus()
           );
 
 
-        if (error) {
+     if (
+  error
+) {
 
-          throw error;
+  throw error;
 
-        }
-
-
-        populate(
-          data || {}
-        );
+}
 
 
-        showResult(
-          "Notification preferences saved successfully."
-        );
+// =========================================
+// SYNC SMS WITH ONESIGNAL
+// =========================================
 
+const previousPhone =
+  loadedPhone;
+
+
+try {
+
+  await syncOneSignalSms({
+
+    previousPhone,
+
+    currentPhone:
+      normalizedPhone,
+
+    consentGranted:
+      smsConsent.checked,
+
+    smsEnabledValue:
+      smsEnabled.checked
+
+  });
+
+}
+catch (smsError) {
+
+  console.error(
+    "SecureTrack OneSignal SMS sync error:",
+    smsError
+  );
+
+
+  /*
+    The SecureTrack preference has already
+    been saved in Supabase.
+
+    Supabase remains the source of truth
+    for SMS consent. Do not falsely report
+    that the entire save failed.
+  */
+
+  populate(
+    data || {}
+  );
+
+
+  showResult(
+    "Your SecureTrack preferences were saved, but SMS could not be connected to the messaging service. Please try again.",
+    "error"
+  );
+
+
+  return;
+
+}
+
+
+// =========================================
+// SAVE COMPLETED
+// =========================================
+
+populate(
+  data || {}
+);
+
+
+showResult(
+  smsEnabled.checked
+    ? "Notification preferences saved and SMS alerts are connected."
+    : "Notification preferences saved successfully."
+);
 
         saveButton.textContent =
           "✓ Preferences Saved";
