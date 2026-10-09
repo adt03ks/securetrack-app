@@ -326,7 +326,113 @@ async function connectOneSignalUser(
 
   }
 
+// =========================================================
+// SYNC ONESIGNAL SMS SUBSCRIPTION
+// =========================================================
 
+async function syncOneSignalSms({
+  previousPhone,
+  currentPhone,
+  consentGranted,
+  smsEnabledValue
+}) {
+
+  const OneSignal =
+    await waitForOneSignal();
+
+
+  const session =
+    await STM.getSession();
+
+
+  if (
+    !session?.user?.id
+  ) {
+
+    throw new Error(
+      "An active SecureTrack login is required for SMS setup."
+    );
+
+  }
+
+
+  // Make sure the OneSignal identity belongs
+  // to the currently authenticated SecureTrack user.
+
+  await OneSignal.login(
+    session.user.id
+  );
+
+
+  const shouldReceiveSms =
+    Boolean(
+      consentGranted &&
+      smsEnabledValue &&
+      currentPhone
+    );
+
+
+  // =======================================================
+  // REMOVE OLD NUMBER WHEN NEEDED
+  // =======================================================
+
+  if (
+    previousPhone &&
+    (
+      !shouldReceiveSms ||
+      previousPhone !== currentPhone
+    )
+  ) {
+
+    try {
+
+      await OneSignal.User.removeSms(
+        previousPhone
+      );
+
+      console.log(
+        "SecureTrack removed previous OneSignal SMS subscription."
+      );
+
+    }
+    catch (error) {
+
+      /*
+        An old number may already have been removed.
+        Do not stop the entire preference save for that.
+      */
+
+      console.warn(
+        "Previous OneSignal SMS subscription could not be removed:",
+        error
+      );
+
+    }
+
+  }
+
+
+  // =======================================================
+  // ADD / CONFIRM CURRENT NUMBER
+  // =======================================================
+
+  if (
+    shouldReceiveSms
+  ) {
+
+    await OneSignal.User.addSms(
+      currentPhone
+    );
+
+
+    console.log(
+      "SecureTrack OneSignal SMS subscription connected."
+    );
+
+  }
+
+}
+  
   function updateSmsControls() {
 
     if (
