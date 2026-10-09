@@ -622,3 +622,52 @@ textarea { resize: vertical; }
 .summary-link:hover small {
   color: #ffb667;
 }
+/* PROPERTY HOLD AGE / LOST & FOUND AGE BANDS */
+.age-band {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.age-0-30,
+.age-fresh {
+  border: 1px solid rgba(67, 191, 119, .45);
+  background: rgba(67, 191, 119, .10);
+  color: #9ee0b9;
+}
+
+.age-31-60 {
+  border: 1px solid rgba(77, 157, 224, .45);
+  background: rgba(77, 157, 224, .10);
+  color: #a9d2f5;
+}
+
+.age-61-89,
+.age-warning {
+  border: 1px solid rgba(255, 166, 70, .45);
+  background: rgba(255, 139, 35, .10);
+  color: #ffbf79;
+}
+
+.age-90-plus,
+.age-due {
+  border: 1px solid rgba(255, 83, 83, .50);
+  background: rgba(255, 70, 70, .10);
+  color: #ffabab;
+}
+
+.early-disposal-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid rgba(255, 83, 83, .50);
+  background: rgba(255, 70, 70, .10);
+  color: #ffabab;
+}
