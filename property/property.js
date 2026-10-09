@@ -282,7 +282,82 @@ const notes =
           .toLowerCase()
     );
   }
+// =========================================================
+// PROPERTY HOLD AGE
+// =========================================================
 
+function propertyAgeBand(
+  days
+) {
+
+  const value =
+    Number(
+      days || 0
+    );
+
+
+  if (
+    value >= 90
+  ) {
+
+    return {
+
+      className:
+        "age-band age-90-plus",
+
+      label:
+        `${value} days • Disposal Eligible`
+
+    };
+
+  }
+
+
+  if (
+    value >= 61
+  ) {
+
+    return {
+
+      className:
+        "age-band age-61-89",
+
+      label:
+        `${value} days • 61–89`
+
+    };
+
+  }
+
+
+  if (
+    value >= 31
+  ) {
+
+    return {
+
+      className:
+        "age-band age-31-60",
+
+      label:
+        `${value} days • 31–60`
+
+    };
+
+  }
+
+
+  return {
+
+    className:
+      "age-band age-0-30",
+
+    label:
+      `${value} days • 0–30`
+
+  };
+
+}
   function escapeHtml(value) {
     return String(
       value ?? ""
@@ -1292,7 +1367,7 @@ const notes =
           "td"
         );
 
-      td.colSpan = 9;
+      td.colSpan = 10;
       td.className = "empty-cell";
       td.textContent =
         "No matching property records found.";
@@ -1490,7 +1565,50 @@ const notes =
         tr.appendChild(
           dateTd
         );
+// =========================================
+// PROPERTY HOLD AGE
+// =========================================
 
+const ageTd =
+  document.createElement(
+    "td"
+  );
+
+
+const ageInfo =
+  propertyAgeBand(
+    item.hold_age_days
+  );
+
+
+const ageBadge =
+  document.createElement(
+    "span"
+  );
+
+
+ageBadge.className =
+  ageInfo.className;
+
+
+ageBadge.textContent =
+  ageInfo.label;
+
+
+ageBadge.title =
+  `Standard disposal eligible ${formatDate(
+    item.disposal_eligible_at
+  )}`;
+
+
+ageTd.appendChild(
+  ageBadge
+);
+
+
+tr.appendChild(
+  ageTd
+);
         const actionTd =
           document.createElement(
             "td"
@@ -1625,7 +1743,7 @@ const notes =
       ] =
         await Promise.all([
           db.rpc(
-            "search_property_items",
+            "search_property_items_v2",
             {
               p_search:
                 searchTerm.trim()
