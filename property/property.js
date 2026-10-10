@@ -2160,7 +2160,24 @@ tr.appendChild(
   basisTd
 );
 
+// =========================================
+// REQUEST NOTES
+// =========================================
 
+const notesTd =
+  document.createElement(
+    "td"
+  );
+
+
+notesTd.textContent =
+  request.request_notes ||
+  "—";
+
+
+tr.appendChild(
+  notesTd
+);
 // =========================================
 // ASSIGNED REVIEWERS
 // =========================================
