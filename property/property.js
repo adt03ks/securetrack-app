@@ -1102,28 +1102,48 @@ function propertyAgeBand(
         "requestDisposalMessage"
       );
 
-    summary.innerHTML = `
-      <strong>
-        ${escapeHtml(
-          item.property_number ||
-          "Property"
-        )}
-      </strong>
-      <br>
-
+   summary.innerHTML =
+  `
+    <strong>
       ${escapeHtml(
-        item.description ||
-        "No description"
+        item.property_number ||
+        "Property"
       )}
+    </strong>
+
+    <br>
+
+    ${escapeHtml(
+      item.description ||
+      "No description"
+    )}
+
+    <br>
+
+    ${escapeHtml(
+      item.current_storage_location ||
+      "—"
+    )}
+
+    <br><br>
+
+    <span class="subtle">
+
+      <strong>Hold Age:</strong>
+      ${ageDays}
+      day${ageDays === 1 ? "" : "s"}
+
       <br>
 
-      <span class="subtle">
-        ${escapeHtml(
-          item.current_storage_location ||
-          ""
-        )}
-      </span>
-    `;
+      <strong>Standard Disposal Eligible:</strong>
+      ${escapeHtml(
+        formatDate(
+          item.disposal_eligible_at
+        )
+      )}
+
+    </span>
+  `;
 
     notesInput.value =
       "";
