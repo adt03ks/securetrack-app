@@ -1676,32 +1676,7 @@ tr.appendChild(
           openLink
         );
 
-        if (
-          item.status ===
-          "stored"
-        ) {
-          const disposalButton =
-            document.createElement(
-              "button"
-            );
-
-          disposalButton.type =
-            "button";
-
-          disposalButton.className =
-            "button secondary compact";
-
-          if (
-            pendingRequest
-          ) {
-            disposalButton.textContent =
-              "Disposal Requested";
-
-            disposalButton.disabled =
-              true;
-          } else {
-            disposalButton.textContent =
-              if (
+if (
   item.status ===
     "stored"
 ) {
