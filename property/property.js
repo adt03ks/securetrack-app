@@ -2006,44 +2006,176 @@ if (
             "tr"
           );
 
-        [
-          request.property_number ||
-            "—",
+       [
+  request.property_number || "—",
+  request.description || "—",
+  request.category || "—",
+  request.storage_location || "—",
+  request.requested_by_name || "—",
+  formatDate(request.requested_at)
+].forEach(value => {
 
-          request.description ||
-            "—",
+  const td =
+    document.createElement(
+      "td"
+    );
 
-          request.category ||
-            "—",
+  td.textContent =
+    value;
 
-          request.storage_location ||
-            "—",
+  tr.appendChild(
+    td
+  );
 
-          request.requested_by_name ||
-            "—",
+});
 
-          formatDate(
-            request.requested_at
-          ),
 
-          request.assigned_reviewers ||
-            "—"
-        ].forEach(
-          value => {
-            const td =
-              document.createElement(
-                "td"
-              );
+// =========================================
+// DISPOSAL BASIS
+// =========================================
 
-            td.textContent =
-              value;
+const basisTd =
+  document.createElement(
+    "td"
+  );
 
-            tr.appendChild(
-              td
-            );
-          }
-        );
 
+const basis =
+  String(
+    request.eligibility_basis ||
+    ""
+  ).toLowerCase();
+
+
+const earlyReason =
+  String(
+    request.early_disposal_reason ||
+    ""
+  ).toLowerCase();
+
+
+const holdDays =
+  Number(
+    request.hold_days_at_request ||
+    0
+  );
+
+
+if (
+  basis === "hazardous" ||
+  basis === "soiled"
+) {
+
+  const badge =
+    document.createElement(
+      "span"
+    );
+
+  badge.className =
+    "early-disposal-badge";
+
+  badge.textContent =
+    "Early Disposal";
+
+  basisTd.appendChild(
+    badge
+  );
+
+
+  const detail =
+    document.createElement(
+      "div"
+    );
+
+  detail.className =
+    "subtle";
+
+  detail.style.marginTop =
+    "6px";
+
+
+  const reasonLabel =
+    earlyReason === "soiled"
+      ? "Soiled / Contaminated"
+      : "Hazardous";
+
+
+  detail.textContent =
+    `${reasonLabel} • ${holdDays} days held`;
+
+  basisTd.appendChild(
+    detail
+  );
+
+}
+else if (
+  basis === "90_day_hold"
+) {
+
+  const badge =
+    document.createElement(
+      "span"
+    );
+
+  badge.className =
+    "age-band age-90-plus";
+
+  badge.textContent =
+    "90-Day Hold Complete";
+
+  basisTd.appendChild(
+    badge
+  );
+
+
+  const detail =
+    document.createElement(
+      "div"
+    );
+
+  detail.className =
+    "subtle";
+
+  detail.style.marginTop =
+    "6px";
+
+  detail.textContent =
+    `${holdDays} days held`;
+
+  basisTd.appendChild(
+    detail
+  );
+
+}
+else {
+
+  basisTd.textContent =
+    "Standard Disposal Request";
+
+}
+
+
+tr.appendChild(
+  basisTd
+);
+
+
+// =========================================
+// ASSIGNED REVIEWERS
+// =========================================
+
+const reviewersTd =
+  document.createElement(
+    "td"
+  );
+
+reviewersTd.textContent =
+  request.assigned_reviewers ||
+  "—";
+
+tr.appendChild(
+  reviewersTd
+);
         const actionTd =
           document.createElement(
             "td"
