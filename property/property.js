@@ -1001,6 +1001,7 @@ function propertyAgeBand(
                 <th>Storage</th>
                 <th>Requested By</th>
                 <th>Requested</th>
+                <th>Disposal Basis</th>
                 <th>Assigned Reviewers</th>
                 <th>Action</th>
               </tr>
@@ -1009,7 +1010,7 @@ function propertyAgeBand(
             <tbody id="disposalQueueBody">
               <tr>
                 <td
-                  colspan="8"
+                  colspan="9"
                   class="empty-cell"
                 >
                   Loading disposal requests…
@@ -1981,7 +1982,7 @@ if (
           "td"
         );
 
-      td.colSpan = 8;
+      td.colSpan = 9;
       td.className = "empty-cell";
 
       td.textContent =
