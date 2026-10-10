@@ -1216,32 +1216,47 @@ function propertyAgeBand(
     dialog.showModal();
   }
 
-  async function requestDisposal(
-    item,
-    requestNotes
+async function requestDisposal(
+  item,
+  requestNotes,
+  earlyReason = null
+) {
+
+  const {
+    data,
+    error
+  } =
+    await db.rpc(
+      "request_property_disposal_v2",
+      {
+
+        p_property_number:
+          item.property_number,
+
+        p_notes:
+          requestNotes.trim() ||
+          null,
+
+        p_early_reason:
+          earlyReason ||
+          null
+
+      }
+    );
+
+
+  if (
+    error
   ) {
-    const {
-      data,
-      error
-    } =
-      await db.rpc(
-        "request_property_disposal",
-        {
-          p_property_number:
-            item.property_number,
 
-          p_notes:
-            requestNotes.trim() ||
-            null
-        }
-      );
+    throw error;
 
-    if (error) {
-      throw error;
-    }
-
-    return data || {};
   }
+
+
+  return data || {};
+
+}
 
   async function denyDisposal(
     request
