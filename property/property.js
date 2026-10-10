@@ -1207,29 +1207,100 @@ function propertyAgeBand(
         "completeDisposalMessage"
       );
 
-    summary.innerHTML = `
-      <strong>
-        ${escapeHtml(
-          request.property_number ||
-          "Property"
-        )}
-      </strong>
-      <br>
+   const basis =
+  String(
+    request.eligibility_basis ||
+    ""
+  ).toLowerCase();
 
+
+const reason =
+  String(
+    request.early_disposal_reason ||
+    ""
+  ).toLowerCase();
+
+
+const holdDays =
+  Number(
+    request.hold_days_at_request ||
+    0
+  );
+
+
+let disposalBasisText =
+  "Standard Disposal Request";
+
+
+if (
+  basis === "hazardous"
+) {
+
+  disposalBasisText =
+    `Early Disposal — Hazardous • ${holdDays} days held`;
+
+}
+else if (
+  basis === "soiled"
+) {
+
+  disposalBasisText =
+    `Early Disposal — Soiled / Contaminated • ${holdDays} days held`;
+
+}
+else if (
+  basis === "90_day_hold"
+) {
+
+  disposalBasisText =
+    `90-Day Hold Complete • ${holdDays} days held`;
+
+}
+
+
+summary.innerHTML =
+  `
+    <strong>
       ${escapeHtml(
-        request.description ||
-        "No description"
+        request.property_number ||
+        "Property"
       )}
+    </strong>
+
+    <br>
+
+    ${escapeHtml(
+      request.description ||
+      "No description"
+    )}
+
+    <br>
+
+    <span class="subtle">
+
+      Storage:
+      ${escapeHtml(
+        request.storage_location ||
+        "—"
+      )}
+
       <br>
 
-      <span class="subtle">
-        Storage:
-        ${escapeHtml(
-          request.storage_location ||
-          "—"
-        )}
-      </span>
-    `;
+      <strong>Disposal Basis:</strong>
+      ${escapeHtml(
+        disposalBasisText
+      )}
+
+      <br>
+
+      <strong>Request Notes:</strong>
+      ${escapeHtml(
+        request.request_notes ||
+        "—"
+      )}
+
+    </span>
+  `;
 
     method.value = "";
     witness.value = "";
