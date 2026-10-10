@@ -1701,22 +1701,87 @@ tr.appendChild(
               true;
           } else {
             disposalButton.textContent =
-              "Request Disposal";
+              if (
+  item.status ===
+    "stored"
+) {
 
-            disposalButton.addEventListener(
-              "click",
-              () => {
-                openRequestDisposalDialog(
-                  item
-                );
-              }
-            );
-          }
+  const disposalButton =
+    document.createElement(
+      "button"
+    );
 
-          actionStack.appendChild(
-            disposalButton
-          );
-        }
+
+  disposalButton.type =
+    "button";
+
+
+  disposalButton.className =
+    "button secondary compact";
+
+
+  if (
+    pendingRequest
+  ) {
+
+    disposalButton.textContent =
+      "Disposal Requested";
+
+
+    disposalButton.disabled =
+      true;
+
+  }
+  else {
+
+    // =========================================
+    // 90-DAY PROPERTY HOLD RULE
+    // =========================================
+
+    if (
+      item.disposal_eligible ===
+        true
+    ) {
+
+      disposalButton.textContent =
+        "Request Disposal";
+
+
+      disposalButton.title =
+        "This property has completed the 90-day retention period.";
+
+    }
+    else {
+
+      disposalButton.textContent =
+        "Request Early Disposal";
+
+
+      disposalButton.title =
+        "Property under 90 days may only be disposed early if it is hazardous or soiled / contaminated.";
+
+    }
+
+
+    disposalButton.addEventListener(
+      "click",
+      () => {
+
+        openRequestDisposalDialog(
+          item
+        );
+
+      }
+    );
+
+  }
+
+
+  actionStack.appendChild(
+    disposalButton
+  );
+
+}
 
         actionTd.appendChild(
           actionStack
