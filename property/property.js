@@ -1101,6 +1101,11 @@ function propertyAgeBand(
       document.getElementById(
         "requestDisposalMessage"
       );
+    const ageDays =
+  Number(
+    item.hold_age_days ||
+    0
+  );
 
    summary.innerHTML =
   `
