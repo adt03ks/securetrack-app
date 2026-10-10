@@ -2591,12 +2591,47 @@ if (
         clearMessage(
           requestDisposalMessage
         );
+const ageDays =
+  Number(
+    currentDisposalItem.hold_age_days ||
+    0
+  );
 
+
+const earlyReason =
+  ageDays < 90
+    ? (
+        document.getElementById(
+          "earlyDisposalReason"
+        )?.value ||
+        ""
+      )
+    : null;
+
+
+if (
+  ageDays < 90 &&
+  !earlyReason
+) {
+
+  showMessage(
+    requestDisposalMessage,
+    "Select Hazardous or Soiled / Contaminated for an early disposal request.",
+    "error"
+  );
+
+  requestDisposalButton.disabled =
+    false;
+
+  return;
+
+}
         try {
           const result =
             await requestDisposal(
               currentDisposalItem,
-              requestDisposalNotes.value
+              requestDisposalNotes.value,
+              earlyReason
             );
 
           requestDisposalDialog.close();
