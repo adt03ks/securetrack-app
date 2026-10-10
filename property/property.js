@@ -2369,7 +2369,7 @@ if (
       error
     } =
       await db.rpc(
-        "get_property_disposal_queue"
+        "get_property_disposal_queue_v2"
       );
 
     if (error) {
