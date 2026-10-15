@@ -3,6 +3,6 @@ window.SECURETRACK_SUPPORT = {
   functionUrl: 'https://gqmwfvezhhyukpvfbjsr.supabase.co/functions/v1/submit-support-ticket'
   turnstileSiteKey: '0x4AAAAAAFX4SQ3QOkxp46JT'
  
-  supabaseUrl: 'https://gqmwfvezhhyukpvfbjsr.supabase.co'
+  supabaseUrl: 'https://gqmwfvezhhyukpvfbjsr.supabase.com'
   supabaseAnonKey: 'sb_publishable_g6xeeoIhbuhgpp70ugL2gg_Zafr1Lg1'
 };
