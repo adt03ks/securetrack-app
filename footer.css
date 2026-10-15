@@ -22,3 +22,17 @@
 .st-footer--compact .st-footer__divider{margin:10px 0}
 .st-footer--compact .st-footer__links{font-size:12px}
 @media(max-width:640px){.st-footer__inner{padding:18px 16px}.st-footer__top{align-items:flex-start}.st-footer__links{gap:9px 14px}.st-footer__bottom{font-size:11px}}
+/* Allow login page to scroll when footer is present */
+body:has(#securetrack-footer[data-variant="login"]) {
+  min-height: 100vh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#securetrack-footer[data-variant="login"] {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  clear: both;
+}
