@@ -6,8 +6,9 @@
 <h2 id="ticket-heading">Submit a technical support request</h2>
 <p>Available to everyone. No SecureTrack login is required. Please do not include passwords, patient information, confidential incident narratives, device secrets, or other sensitive operational details.</p>
 <form id="st-support-form">
+<p id="st-profile-status" class="small muted" role="status">Checking for a signed-in SecureTrack account…</p>
 <div class="form-grid">
-<label>Full name <input name="name" autocomplete="name" minlength="2" maxlength="120" required></label>
+<label>Full name <input name="name" autocomplete="name" minlength="2" maxlength="120" required> <small id="st-name-note" class="muted">Signed-in names are filled automatically and cannot be edited.</small></label>
 <label>Email address <input type="email" name="email" autocomplete="email" maxlength="254" required></label>
 <label>Phone (optional) <input type="tel" name="phone" autocomplete="tel" maxlength="30"></label>
 <label>Organization (optional) <input name="organization" maxlength="120"></label>
