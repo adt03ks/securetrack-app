@@ -40,31 +40,33 @@
 
   // Navigation for each area of SecureTrack.
 
-  const links = {
-    login: [
-      ['Technical Support', pages.support],
-      ['Report a Security Concern', pages.security],
-      ['Contact Us', pages.contact],
-      ['Privacy', pages.privacy],
-      ['Terms', pages.terms]
-    ],
+ 
+const links = {
+  login: [
+    ['Technical Support', pages.support],
+    ['Security & Compliance', pages.security],
+    ['Contact Us', pages.contact],
+    ['Privacy Policy', pages.privacy],
+    ['Terms of Use', pages.terms]
+  ],
 
-    hub: [
-      ['Technical Support', pages.support],
-      ['Report a Security Concern', pages.security],
-      ['Contact Us', pages.contact],
-      ['Privacy', pages.privacy],
-      ['Terms', pages.terms]
-    ],
+  hub: [
+    ['Technical Support', pages.support],
+    ['Security & Compliance', pages.security],
+    ['Contact Us', pages.contact],
+    ['Privacy Policy', pages.privacy],
+    ['Terms of Use', pages.terms]
+  ],
 
-    manager: [
-      ['Help & Support', pages.support],
-      ['Security', pages.security],
-      ['Contact Us', pages.contact],
-      ['Privacy', pages.privacy],
-      ['Terms', pages.terms]
-    ]
-  };
+  manager: [
+    ['Help & Support', pages.support],
+    ['Security & Compliance', pages.security],
+    ['Contact Us', pages.contact],
+    ['Privacy Policy', pages.privacy],
+    ['Terms of Use', pages.terms]
+  ]
+};
+
 
   const linkHtml = links[variant]
     .map(([label, slug]) =>
