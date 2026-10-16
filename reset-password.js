@@ -208,9 +208,11 @@
       confirmInput.value = '';
 
       show(
-        'Password updated successfully. ' +
-        'Redirecting to SecureTrack login.',
-        true
+       show(
+  'Your password has been updated successfully. ' +
+  'You will now return to SecureTrack Login.',
+  true
+);
       );
 
       button.textContent = 'Password Updated';
@@ -218,7 +220,7 @@
       await db.auth.signOut();
 
       setTimeout(() => {
-        window.location.replace('/manager-login.html');
+       window.location.replace('/login.html?password_reset=success');
       }, 1800);
 
     } catch (error) {
