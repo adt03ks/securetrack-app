@@ -50,7 +50,7 @@
       }
     }
   );
-
+window.SECURETRACK_DB = db;
   const RESET_URL =
     "https://securetrackop.com/reset-password.html";
 
