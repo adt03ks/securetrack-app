@@ -207,7 +207,6 @@
       passwordInput.value = '';
       confirmInput.value = '';
 
-      show(
        show(
   'Your password has been updated successfully. ' +
   'You will now return to SecureTrack Login.',
