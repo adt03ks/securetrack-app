@@ -1,47 +1,221 @@
+
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
   <meta name="theme-color" content="#080a0c">
+
   <title>SecureTrack | Operations Hub Login</title>
+
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="stylesheet" href="hub.css">
   <link rel="stylesheet" href="/footer.css">
 </head>
+
 <body data-page="login">
+
   <main class="hub-shell hub-shell-narrow">
+
     <header class="hub-brand">
-      <div class="hub-logo" aria-hidden="true"><span class="hub-lock"></span></div>
+      <div class="hub-logo" aria-hidden="true">
+        <span class="hub-lock"></span>
+      </div>
+
       <div>
-        <div class="hub-wordmark"><span>Secure</span><strong>Track</strong></div>
+        <div class="hub-wordmark">
+          <span>Secure</span><strong>Track</strong>
+        </div>
         <div class="hub-tagline">OPERATIONS HUB</div>
       </div>
     </header>
 
-    <section class="hub-panel login-panel" aria-labelledby="loginTitle">
+    <section
+      class="hub-panel login-panel"
+      aria-labelledby="loginTitle"
+    >
+
       <div class="eyebrow">Authorized Personnel</div>
+
       <h1 id="loginTitle">Secure access.</h1>
-      <p class="muted">Sign in with the SecureTrack account issued to you by Security leadership.</p>
+
+      <p class="muted">
+        Sign in with the SecureTrack account issued
+        to you by Security leadership.
+      </p>
+
+      <!-- LOGIN FORM -->
 
       <form id="loginForm" class="login-form">
-        <label><span>Email</span><input id="email" name="email" type="email" autocomplete="username" required></label>
-        <label><span>Password</span><input id="password" name="password" type="password" autocomplete="current-password" required></label>
-        <button id="loginButton" class="hub-primary" type="submit">SIGN IN</button>
-        <div id="loginMessage" class="hub-message" role="status" aria-live="polite"></div>
+
+        <label>
+          <span>Email</span>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="username"
+            required
+          >
+        </label>
+
+        <label>
+          <span>Password</span>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+        </label>
+
+        <button
+          id="loginButton"
+          class="hub-primary"
+          type="submit"
+        >
+          SIGN IN
+        </button>
+
+        <div
+          id="loginMessage"
+          class="hub-message"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+        <!-- RESET PASSWORD AFTER FAILED ATTEMPTS -->
+
+        <button
+          id="retryResetPasswordButton"
+          type="button"
+          class="hub-primary"
+          hidden
+          style="margin-top:12px;"
+        >
+          RESET PASSWORD
+        </button>
+
       </form>
 
-      <div class="login-security-note"><strong>Restricted system.</strong> Access and activity may be logged. Do not share your credentials.</div>
+      <!-- ALWAYS AVAILABLE RECOVERY LINK -->
+
+      <div style="text-align:center; margin-top:18px;">
+
+        <button
+          type="button"
+          id="forgotPasswordButton"
+          style="
+            background:none;
+            border:none;
+            color:#f1a65b;
+            text-decoration:underline;
+            cursor:pointer;
+            font:inherit;
+          "
+        >
+          Forgot Password?
+        </button>
+
+      </div>
+
+      <!-- PASSWORD RECOVERY PANEL -->
+
+      <section
+        id="forgotPasswordPanel"
+        hidden
+        style="margin-top:24px;"
+      >
+
+        <div class="eyebrow">
+          Account Recovery
+        </div>
+
+        <h2>Reset Your Password</h2>
+
+        <p class="muted">
+          Enter the email address associated with your
+          SecureTrack account. We'll send you a secure
+          password-reset link.
+        </p>
+
+        <form id="forgotPasswordForm" class="login-form">
+
+          <label>
+            <span>Account Email</span>
+            <input
+              id="resetEmail"
+              type="email"
+              autocomplete="email"
+              required
+            >
+          </label>
+
+          <button
+            id="sendResetButton"
+            type="submit"
+            class="hub-primary"
+          >
+            SEND PASSWORD RESET EMAIL
+          </button>
+
+          <button
+            id="cancelResetButton"
+            type="button"
+            style="
+              background:none;
+              border:none;
+              color:#f1a65b;
+              cursor:pointer;
+              padding:12px;
+              font:inherit;
+            "
+          >
+            Back to Sign In
+          </button>
+
+          <div
+            id="resetRequestResult"
+            class="hub-message"
+            role="status"
+            aria-live="polite"
+          ></div>
+
+        </form>
+
+      </section>
+
+      <div class="login-security-note">
+        <strong>Restricted system.</strong>
+        Access and activity may be logged.
+        Do not share your credentials.
+      </div>
+
     </section>
+
   </main>
+
+  <!-- EXISTING SECURETRACK AUTHENTICATION -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="hub-auth.js"></script>
-  <!-- SECURETRACK MANAGER PORTAL FOOTER -->
-<div id="securetrack-footer"
-     data-variant="manager"></div>
 
-<script src="/footer.js" defer></script>
+  <!-- PASSWORD RECOVERY ENHANCEMENT -->
+  <script src="login-recovery.js" defer></script>
+
+  <!-- SECURETRACK PUBLIC LOGIN FOOTER -->
+  <div
+    id="securetrack-footer"
+    data-variant="login"
+  ></div>
+
+  <script src="/footer.js" defer></script>
+
 </body>
 </html>
