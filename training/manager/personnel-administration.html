@@ -18,7 +18,11 @@
   <title>
     SecureTrack Training | Personnel Administration
   </title>
-
+<link
+  rel="icon"
+  type="image/png"
+  href="/assets/favicon.png"
+>
   <link
     rel="stylesheet"
     href="/styles.css"
@@ -110,7 +114,20 @@
       margin-bottom:
         30px;
     }
+.training-brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: inherit;
+  text-decoration: none;
+}
 
+.training-brand-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
     .training-brand {
       font-size:
         34px;
@@ -1086,15 +1103,31 @@
 
         <div>
 
-          <div class="training-brand">
-            Secure<span>Track</span>
-          </div>
+        <a
+  class="training-brand-wrap"
+  href="/training/manager/"
+  aria-label="SecureTrack Learning Center"
+>
 
-          <div class="training-subbrand">
-            Learning Center
-          </div>
+  <img
+    class="training-brand-logo"
+    src="/assets/favicon.png"
+    alt="SecureTrack OP logo"
+  >
 
-        </div>
+  <div>
+
+    <div class="training-brand">
+      Secure<span>Track</span>
+    </div>
+
+    <div class="training-subbrand">
+      Learning Center
+    </div>
+
+  </div>
+
+</a>
 
 
         <div class="training-actions">
