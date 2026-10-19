@@ -1,6 +1,30 @@
 (() => {
   "use strict";
+// =========================================================
+// LOAD GLOBAL SECURE SESSION TIMEOUT
+// =========================================================
 
+if (
+  !document.querySelector(
+    'script[data-securetrack-session-timeout]'
+  )
+) {
+
+  const timeoutScript =
+    document.createElement("script");
+
+  timeoutScript.src =
+    "/session-timeout.js?v=20261019";
+
+  timeoutScript.dataset
+    .securetrackSessionTimeout =
+    "true";
+
+  document.head.appendChild(
+    timeoutScript
+  );
+
+}
   document.documentElement.classList.add("securetrack-auth-pending");
 
   const style = document.createElement("style");
