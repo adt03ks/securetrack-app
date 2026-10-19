@@ -256,15 +256,35 @@
           </div>
 
           <div class="separation-field">
-            <label for="separationDate">Effective Separation Date</label>
-            <input id="separationDate" type="date"
-              value="${localDate}" required>
+            <label for="separationDate">Effective Separation Date</label>         
+<input
+  id="separationDate"
+  type="date"
+  value="${localDate}"
+  max="${localDate}"
+  required
+>
+
           </div>
 
           <div class="separation-field">
             <label for="separationServiceDays">Days Employed</label>
             <input id="separationServiceDays" disabled>
           </div>
+
+
+<div class="separation-field">
+  <label for="separationHRDate">
+    HR Approval Date
+  </label>
+  <input
+    id="separationHRDate"
+    type="date"
+    required
+    max="${localDate}"
+  >
+</div>
+
 
           <div class="separation-field">
             <label for="separationReason">Separation Reason</label>
@@ -287,6 +307,19 @@
               <option value="review">Pending Verification</option>
             </select>
           </div>
+
+
+<div class="separation-field full">
+  <label for="separationPropertyNotes">
+    Outstanding Property / Return Notes
+  </label>
+  <textarea
+    id="separationPropertyNotes"
+    rows="3"
+    placeholder="Identify outstanding equipment, uniforms, keys, badges, or document verified returns."
+  ></textarea>
+</div>
+
 
           <div class="separation-field full">
             <label for="separationNotes">Administrative Notes</label>
