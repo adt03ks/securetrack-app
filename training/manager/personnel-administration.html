@@ -78,7 +78,39 @@
         0 24px 70px
         rgba(0,0,0,.4);
     }
+.training-screen {
+  margin: 24px 0;
+  padding: 14px;
+  border: 1px solid #303840;
+  border-radius: 16px;
+  background: #090d11;
+}
 
+.training-screen img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.training-screen figcaption {
+  margin-top: 11px;
+  color: #8f99a3;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.training-screen.compact {
+  max-width: 900px;
+}
+
+.training-screen.tall {
+  max-width: 820px;
+}
+
+.training-screen.tall img {
+  width: 100%;
+}
 
     /* ======================================================
        HEADER
@@ -1330,21 +1362,20 @@
           </ul>
 
 
-          <div class="screen-placeholder">
+        <figure class="training-screen">
 
-            <strong>
-              Personnel Administration Overview Screenshot
-            </strong>
+  <img
+    src="/training/assets/personnel/personnel-overview.webp"
+    alt="SecureTrack Personnel Administration overview showing Active Personnel, Outside Officers, Open Property Cases, Transfer Pending, and management tabs."
+  >
 
-            <span>
-              Training image will be added here.
-            </span>
+  <figcaption>
+    Personnel Administration provides a management overview
+    of active personnel, outside officers, open property
+    cases, and pending transfers.
+  </figcaption>
 
-            <code>
-              personnel-overview.webp
-            </code>
-
-          </div>
+</figure>
 
 
           <div class="callout">
