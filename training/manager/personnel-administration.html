@@ -1,0 +1,3023 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#080a0c"
+  >
+
+  <title>
+    SecureTrack Training | Personnel Administration
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="/styles.css"
+  >
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(255,120,0,.06),
+          transparent 28%
+        ),
+        #080a0c;
+      color: #eef1f4;
+    }
+
+    .training-shell {
+      width:
+        min(
+          1500px,
+          calc(100% - 30px)
+        );
+
+      margin:
+        24px auto 60px;
+    }
+
+    .training-panel {
+      overflow: hidden;
+
+      border:
+        1px solid #30363d;
+
+      border-radius:
+        22px;
+
+      background:
+        #101419;
+
+      box-shadow:
+        0 24px 70px
+        rgba(0,0,0,.4);
+    }
+
+
+    /* ======================================================
+       HEADER
+       ====================================================== */
+
+    .training-header {
+      padding:
+        28px 32px 30px;
+
+      border-bottom:
+        1px solid #2c333a;
+
+      background:
+        radial-gradient(
+          circle at top left,
+          rgba(255,120,0,.09),
+          transparent 36%
+        ),
+        #11161b;
+    }
+
+    .training-header-top {
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      gap: 20px;
+
+      align-items:
+        flex-start;
+
+      margin-bottom:
+        30px;
+    }
+
+    .training-brand {
+      font-size:
+        34px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        -.04em;
+    }
+
+    .training-brand span {
+      color:
+        #ff7800;
+    }
+
+    .training-subbrand {
+      margin-top:
+        5px;
+
+      color:
+        #aeb6be;
+
+      font-size:
+        11px;
+
+      font-weight:
+        850;
+
+      letter-spacing:
+        .14em;
+
+      text-transform:
+        uppercase;
+    }
+
+    .training-actions {
+      display: flex;
+
+      gap: 10px;
+
+      flex-wrap: wrap;
+    }
+
+    .training-action {
+      min-height:
+        42px;
+
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      padding:
+        10px 14px;
+
+      border:
+        1px solid #394149;
+
+      border-radius:
+        10px;
+
+      background:
+        #101419;
+
+      color:
+        #f3f5f7;
+
+      text-decoration:
+        none;
+
+      font: inherit;
+
+      font-weight:
+        800;
+
+      cursor:
+        pointer;
+    }
+
+    .training-action:hover {
+      border-color:
+        #ff7800;
+    }
+
+    .eyebrow {
+      color:
+        #ff7800;
+
+      font-size:
+        11px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        .14em;
+
+      text-transform:
+        uppercase;
+    }
+
+    .training-header h1 {
+      margin:
+        8px 0 12px;
+
+      font-size:
+        clamp(
+          34px,
+          5vw,
+          58px
+        );
+
+      line-height:
+        1;
+
+      letter-spacing:
+        -.04em;
+    }
+
+    .training-header p {
+      max-width:
+        900px;
+
+      margin:
+        0;
+
+      color:
+        #aeb6be;
+
+      font-size:
+        16px;
+
+      line-height:
+        1.6;
+    }
+
+    .module-meta {
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 8px;
+
+      margin-top:
+        20px;
+    }
+
+    .module-meta span {
+      padding:
+        6px 9px;
+
+      border:
+        1px solid #323941;
+
+      border-radius:
+        8px;
+
+      background:
+        #0b0f13;
+
+      color:
+        #aeb6be;
+
+      font-size:
+        11px;
+
+      font-weight:
+        800;
+    }
+
+
+    /* ======================================================
+       LAYOUT
+       ====================================================== */
+
+    .training-layout {
+      display: grid;
+
+      grid-template-columns:
+        270px minmax(0, 1fr);
+
+      min-height:
+        900px;
+    }
+
+    .lesson-nav {
+      padding:
+        25px 18px;
+
+      border-right:
+        1px solid #2d343b;
+
+      background:
+        #0b0f13;
+
+      position:
+        sticky;
+
+      top: 0;
+
+      align-self:
+        start;
+
+      max-height:
+        100vh;
+
+      overflow-y:
+        auto;
+    }
+
+    .lesson-nav-title {
+      margin-bottom:
+        13px;
+
+      color:
+        #8d97a0;
+
+      font-size:
+        10px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        .1em;
+
+      text-transform:
+        uppercase;
+    }
+
+    .lesson-nav a {
+      display: flex;
+
+      gap: 10px;
+
+      align-items:
+        flex-start;
+
+      padding:
+        11px 10px;
+
+      margin-bottom:
+        5px;
+
+      border:
+        1px solid transparent;
+
+      border-radius:
+        9px;
+
+      color:
+        #aab3bc;
+
+      text-decoration:
+        none;
+
+      font-size:
+        12px;
+
+      line-height:
+        1.4;
+
+      font-weight:
+        750;
+    }
+
+    .lesson-nav a:hover {
+      border-color:
+        #343c44;
+
+      background:
+        #11161b;
+
+      color:
+        #fff;
+    }
+
+    .lesson-number {
+      color:
+        #ff7800;
+
+      font-weight:
+        900;
+    }
+
+    .lesson-content {
+      padding:
+        30px 34px 42px;
+    }
+
+
+    /* ======================================================
+       LESSON SECTIONS
+       ====================================================== */
+
+    .lesson {
+      scroll-margin-top:
+        20px;
+
+      padding:
+        4px 0 40px;
+
+      margin-bottom:
+        35px;
+
+      border-bottom:
+        1px solid #293038;
+    }
+
+    .lesson:last-of-type {
+      border-bottom:
+        0;
+    }
+
+    .lesson h2 {
+      margin:
+        7px 0 10px;
+
+      font-size:
+        30px;
+
+      line-height:
+        1.15;
+    }
+
+    .lesson h3 {
+      margin:
+        26px 0 9px;
+
+      font-size:
+        20px;
+    }
+
+    .lesson p {
+      max-width:
+        900px;
+
+      color:
+        #aab3bc;
+
+      line-height:
+        1.65;
+    }
+
+    .training-list {
+      max-width:
+        900px;
+
+      color:
+        #aab3bc;
+
+      line-height:
+        1.7;
+    }
+
+    .training-list li {
+      margin-bottom:
+        5px;
+    }
+
+
+    /* ======================================================
+       SCREENSHOT PLACEHOLDER
+       ====================================================== */
+
+    .screen-placeholder {
+      min-height:
+        260px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      flex-direction:
+        column;
+
+      gap: 8px;
+
+      margin:
+        22px 0;
+
+      padding:
+        25px;
+
+      border:
+        1px dashed #46505a;
+
+      border-radius:
+        15px;
+
+      background:
+        #090d11;
+
+      text-align:
+        center;
+
+      color:
+        #7f8a94;
+    }
+
+    .screen-placeholder strong {
+      color:
+        #d7dce1;
+    }
+
+    .screen-placeholder code {
+      color:
+        #ff9a3c;
+    }
+
+
+    /* ======================================================
+       CALLOUTS
+       ====================================================== */
+
+    .callout {
+      max-width:
+        920px;
+
+      margin:
+        20px 0;
+
+      padding:
+        16px 18px;
+
+      border:
+        1px solid #3a424a;
+
+      border-left:
+        4px solid #ff7800;
+
+      border-radius:
+        12px;
+
+      background:
+        #0c1115;
+
+      color:
+        #c4cbd1;
+
+      line-height:
+        1.6;
+    }
+
+    .callout strong {
+      color:
+        #fff;
+    }
+
+    .callout.warning {
+      border-color:
+        rgba(255,166,0,.43);
+
+      border-left-color:
+        #ffae00;
+
+      background:
+        rgba(255,166,0,.055);
+    }
+
+    .callout.danger {
+      border-color:
+        rgba(221,75,75,.48);
+
+      border-left-color:
+        #e34e4e;
+
+      background:
+        rgba(221,75,75,.055);
+    }
+
+    .callout.success {
+      border-color:
+        rgba(83,190,105,.4);
+
+      border-left-color:
+        #53be69;
+
+      background:
+        rgba(83,190,105,.05);
+    }
+
+
+    /* ======================================================
+       DECISION TABLE
+       ====================================================== */
+
+    .decision-table {
+      width:
+        100%;
+
+      max-width:
+        1000px;
+
+      margin:
+        22px 0;
+
+      border-collapse:
+        collapse;
+
+      overflow:
+        hidden;
+
+      border-radius:
+        12px;
+    }
+
+    .decision-table th,
+    .decision-table td {
+      padding:
+        13px 14px;
+
+      border:
+        1px solid #303840;
+
+      text-align:
+        left;
+
+      vertical-align:
+        top;
+    }
+
+    .decision-table th {
+      background:
+        #12171c;
+
+      color:
+        #fff;
+
+      font-size:
+        12px;
+    }
+
+    .decision-table td {
+      background:
+        #0a0e12;
+
+      color:
+        #aab3bc;
+
+      font-size:
+        12px;
+    }
+
+    .decision-table td:last-child {
+      color:
+        #ff9a3c;
+
+      font-weight:
+        800;
+    }
+
+
+    /* ======================================================
+       FLOW
+       ====================================================== */
+
+    .flow {
+      max-width:
+        850px;
+
+      margin:
+        22px 0;
+
+      display:
+        grid;
+
+      gap:
+        8px;
+    }
+
+    .flow-step {
+      padding:
+        12px 15px;
+
+      border:
+        1px solid #343c44;
+
+      border-radius:
+        10px;
+
+      background:
+        #0a0e12;
+
+      color:
+        #d4d9de;
+
+      font-weight:
+        800;
+
+      text-align:
+        center;
+    }
+
+    .flow-arrow {
+      text-align:
+        center;
+
+      color:
+        #ff7800;
+
+      font-size:
+        18px;
+
+      font-weight:
+        900;
+    }
+
+
+    /* ======================================================
+       RETENTION EXAMPLE
+       ====================================================== */
+
+    .retention-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          4,
+          minmax(0, 1fr)
+        );
+
+      gap:
+        10px;
+
+      max-width:
+        900px;
+
+      margin:
+        20px 0;
+    }
+
+    .retention-card {
+      padding:
+        15px;
+
+      border:
+        1px solid #343b42;
+
+      border-radius:
+        12px;
+
+      background:
+        #0a0e12;
+    }
+
+    .retention-card span {
+      display:
+        block;
+
+      margin-bottom:
+        5px;
+
+      color:
+        #7f8993;
+
+      font-size:
+        10px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        .06em;
+
+      text-transform:
+        uppercase;
+    }
+
+    .retention-card strong {
+      color:
+        #fff;
+
+      font-size:
+        16px;
+    }
+
+    .retention-card.impact {
+      border-color:
+        rgba(255,120,0,.55);
+    }
+
+    .retention-card.impact strong {
+      color:
+        #ff9534;
+    }
+
+
+    /* ======================================================
+       KNOWLEDGE CHECK
+       ====================================================== */
+
+    .quiz-card {
+      max-width:
+        900px;
+
+      margin:
+        18px 0;
+
+      padding:
+        20px;
+
+      border:
+        1px solid #333b43;
+
+      border-radius:
+        14px;
+
+      background:
+        #0a0e12;
+    }
+
+    .quiz-card h3 {
+      margin:
+        0 0 14px;
+
+      font-size:
+        17px;
+    }
+
+    .quiz-option {
+      display: flex;
+
+      gap:
+        9px;
+
+      align-items:
+        flex-start;
+
+      margin:
+        8px 0;
+
+      padding:
+        10px 11px;
+
+      border:
+        1px solid #2e353c;
+
+      border-radius:
+        9px;
+
+      background:
+        #0c1115;
+
+      color:
+        #b3bbc3;
+
+      cursor:
+        pointer;
+    }
+
+    .quiz-option:hover {
+      border-color:
+        #ff7800;
+    }
+
+    .quiz-submit {
+      margin-top:
+        20px;
+
+      min-height:
+        44px;
+
+      padding:
+        10px 17px;
+
+      border:
+        1px solid #ff7800;
+
+      border-radius:
+        10px;
+
+      background:
+        #ff7800;
+
+      color:
+        #101214;
+
+      font-weight:
+        900;
+
+      cursor:
+        pointer;
+    }
+
+    .quiz-result {
+      display:
+        none;
+
+      max-width:
+        900px;
+
+      margin-top:
+        18px;
+
+      padding:
+        16px;
+
+      border:
+        1px solid #3a424a;
+
+      border-radius:
+        12px;
+
+      background:
+        #0b1014;
+    }
+
+    .quiz-result.show {
+      display:
+        block;
+    }
+
+    .quiz-result.pass {
+      border-color:
+        rgba(83,190,105,.5);
+
+      color:
+        #9adea8;
+    }
+
+    .quiz-result.fail {
+      border-color:
+        rgba(221,75,75,.5);
+
+      color:
+        #ffabab;
+    }
+
+
+    /* ======================================================
+       FOOTER
+       ====================================================== */
+
+    .module-footer {
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        center;
+
+      gap:
+        20px;
+
+      padding-top:
+        25px;
+    }
+
+    .module-footer a {
+      color:
+        #ff9a3c;
+
+      font-weight:
+        850;
+
+      text-decoration:
+        none;
+    }
+
+
+    /* ======================================================
+       RESPONSIVE
+       ====================================================== */
+
+    @media (
+      max-width: 1000px
+    ) {
+
+      .training-layout {
+        grid-template-columns:
+          1fr;
+      }
+
+      .lesson-nav {
+        position:
+          static;
+
+        max-height:
+          none;
+
+        border-right:
+          0;
+
+        border-bottom:
+          1px solid #2d343b;
+      }
+
+      .retention-grid {
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0, 1fr)
+          );
+      }
+
+    }
+
+    @media (
+      max-width: 650px
+    ) {
+
+      .training-shell {
+        width:
+          calc(100% - 16px);
+
+        margin-top:
+          8px;
+      }
+
+      .training-header,
+      .lesson-content {
+        padding:
+          22px 17px;
+      }
+
+      .training-header-top,
+      .module-footer {
+        flex-direction:
+          column;
+
+        align-items:
+          flex-start;
+      }
+
+      .retention-grid {
+        grid-template-columns:
+          1fr;
+      }
+
+      .decision-table {
+        display:
+          block;
+
+        overflow-x:
+          auto;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body
+  data-securetrack-roles="manager,director,admin"
+>
+
+<main class="training-shell">
+
+  <section class="training-panel">
+
+
+    <!-- ====================================================
+         HEADER
+         ==================================================== -->
+
+    <header class="training-header">
+
+      <div class="training-header-top">
+
+        <div>
+
+          <div class="training-brand">
+            Secure<span>Track</span>
+          </div>
+
+          <div class="training-subbrand">
+            Learning Center
+          </div>
+
+        </div>
+
+
+        <div class="training-actions">
+
+          <a
+            class="training-action"
+            href="/training/manager/"
+          >
+            ← Manager Training
+          </a>
+
+          <a
+            class="training-action"
+            href="/manager-portal.html"
+          >
+            Manager Portal
+          </a>
+
+          <button
+            id="trainingSignOut"
+            class="training-action"
+            type="button"
+          >
+            Sign Out
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="eyebrow">
+        Module 01
+      </div>
+
+      <h1>
+        Personnel Administration
+      </h1>
+
+      <p>
+        Learn how to maintain personnel records, onboard new
+        officers, manage account access, process campus
+        transfers and employee separations, understand
+        retention reporting, and maintain property
+        accountability.
+      </p>
+
+
+      <div class="module-meta">
+
+        <span>
+          Manager / Director / Administrator
+        </span>
+
+        <span>
+          Approx. 20–25 Minutes
+        </span>
+
+        <span>
+          Required Training
+        </span>
+
+        <span>
+          Knowledge Check Included
+        </span>
+
+      </div>
+
+    </header>
+
+
+    <!-- ====================================================
+         MODULE
+         ==================================================== -->
+
+    <div class="training-layout">
+
+
+      <!-- ==================================================
+           LESSON NAVIGATION
+           ================================================== -->
+
+      <aside class="lesson-nav">
+
+        <div class="lesson-nav-title">
+          Module Lessons
+        </div>
+
+        <a href="#overview">
+          <span class="lesson-number">01</span>
+          <span>Personnel Administration Overview</span>
+        </a>
+
+        <a href="#active-personnel">
+          <span class="lesson-number">02</span>
+          <span>Active Personnel</span>
+        </a>
+
+        <a href="#add-officer">
+          <span class="lesson-number">03</span>
+          <span>Add New Officer</span>
+        </a>
+
+        <a href="#account-access">
+          <span class="lesson-number">04</span>
+          <span>Account Access</span>
+        </a>
+
+        <a href="#edit-personnel">
+          <span class="lesson-number">05</span>
+          <span>Edit Personnel</span>
+        </a>
+
+        <a href="#qualifications">
+          <span class="lesson-number">06</span>
+          <span>Qualifications</span>
+        </a>
+
+        <a href="#campus-transfer">
+          <span class="lesson-number">07</span>
+          <span>Campus Transfer</span>
+        </a>
+
+        <a href="#separation">
+          <span class="lesson-number">08</span>
+          <span>Employee Separation</span>
+        </a>
+
+        <a href="#retention">
+          <span class="lesson-number">09</span>
+          <span>Retention Reporting</span>
+        </a>
+
+        <a href="#property">
+          <span class="lesson-number">10</span>
+          <span>Outstanding Property</span>
+        </a>
+
+        <a href="#knowledge-check">
+          <span class="lesson-number">11</span>
+          <span>Knowledge Check</span>
+        </a>
+
+      </aside>
+
+
+      <!-- ==================================================
+           CONTENT
+           ================================================== -->
+
+      <div class="lesson-content">
+
+
+        <!-- ================================================
+             LESSON 01
+             ================================================ -->
+
+        <section
+          id="overview"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 01
+          </div>
+
+          <h2>
+            Personnel Administration Overview
+          </h2>
+
+          <p>
+            Personnel Administration is the management
+            workspace used to maintain local personnel,
+            outside officers, employment status, transfers,
+            and post-separation accountability.
+          </p>
+
+          <p>
+            The dashboard provides an at-a-glance view of:
+          </p>
+
+          <ul class="training-list">
+
+            <li>
+              Active Personnel
+            </li>
+
+            <li>
+              Outside Officers
+            </li>
+
+            <li>
+              Open Property Cases
+            </li>
+
+            <li>
+              Pending Transfers
+            </li>
+
+          </ul>
+
+
+          <div class="screen-placeholder">
+
+            <strong>
+              Personnel Administration Overview Screenshot
+            </strong>
+
+            <span>
+              Training image will be added here.
+            </span>
+
+            <code>
+              personnel-overview.webp
+            </code>
+
+          </div>
+
+
+          <div class="callout">
+
+            <strong>
+              Manager Standard:
+            </strong>
+
+            Personnel Administration should reflect the
+            employee's current operational status. Update
+            personnel information promptly when authorized
+            employment information changes.
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             LESSON 02
+             ================================================ -->
+
+        <section
+          id="active-personnel"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 02
+          </div>
+
+          <h2>
+            Active Personnel
+          </h2>
+
+          <p>
+            Active Personnel contains employees regularly
+            assigned to the local campus.
+          </p>
+
+          <p>
+            Personnel cards provide quick access to
+            identifying and operational information such as
+            the employee's name, rank, employee number,
+            current shift, email, telephone number, status,
+            and account-access status.
+          </p>
+
+
+          <div class="screen-placeholder">
+
+            <strong>
+              Active Personnel Card Screenshot
+            </strong>
+
+            <code>
+              active-personnel-card.webp
+            </code>
+
+          </div>
+
+
+          <h3>
+            Available Personnel Actions
+          </h3>
+
+          <ul class="training-list">
+
+            <li>
+              Send Invite
+            </li>
+
+            <li>
+              Edit Personnel
+            </li>
+
+            <li>
+              Qualifications
+            </li>
+
+            <li>
+              Transfer to Outside Officer
+            </li>
+
+            <li>
+              Employee Separation
+            </li>
+
+          </ul>
+
+        </section>
+
+
+        <!-- ================================================
+             LESSON 03
+             ================================================ -->
+
+        <section
+          id="add-officer"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 03
+          </div>
+
+          <h2>
+            Add New Officer
+          </h2>
+
+          <p>
+            Select
+            <strong>+ Add New Officer</strong>
+            to create a new employee's personnel record.
+          </p>
+
+
+          <div class="screen-placeholder">
+
+            <strong>
+              Add New Officer Screenshot
+            </strong>
+
+            <code>
+              add-new-officer.webp
+            </code>
+
+          </div>
+
+
+          <h3>
+            Required Information
+          </h3>
+
+          <ul class="training-list">
+
+            <li>
+              First and last name
+            </li>
+
+            <li>
+              Telephone number
+            </li>
+
+            <li>
+              Email address
+            </li>
+
+            <li>
+              Employee number
+            </li>
+
+            <li>
+              Hire date
+            </li>
+
+            <li>
+              Rank
+            </li>
+
+            <li>
+              Normal shift
+            </li>
+
+          </ul>
+
+
+          <p>
+            Date of birth, middle initial, nickname, armed
+            qualification, and profile photo may also be
+            recorded when applicable.
+          </p>
+
+
+          <div class="callout warning">
+
+            <strong>
+              Important:
+            </strong>
+
+            Saving a new personnel profile does not
+            automatically activate the employee's SecureTrack
+            login. Account access is handled separately.
+
+          </div>
+
+
+          <div class="callout">
+
+            Managers may only onboard personnel into shifts
+            they are authorized to supervise.
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             LESSON 04
+             ================================================ -->
+
+        <section
+          id="account-access"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 04
+          </div>
+
+          <h2>
+            Account Access
+          </h2>
+
+          <p>
+            A personnel profile and SecureTrack login access
+            are intentionally treated as separate steps.
+          </p>
+
+
+          <div class="callout success">
+
+            <strong>
+              Personnel Record:
+            </strong>
+            identifies who the employee is.
+
+            <br><br>
+
+            <strong>
+              Account Access:
+            </strong>
+            determines whether the employee can sign in to
+            SecureTrack.
+
+          </div>
+
+
+          <p>
+            When a personnel card shows
+            <strong>Not Set Up</strong>,
+            select
+            <strong>Send Invite</strong>
+            only when the employee is authorized and ready to
+            establish SecureTrack access.
+          </p>
+
+        </section>
+
+
+        <!-- ================================================
+             LESSON 05
+             ================================================ -->
+
+        <section
+          id="edit-personnel"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 05
+          </div>
+
+          <h2>
+            Edit Personnel
+          </h2>
+
+          <p>
+            Select
+            <strong>Edit Personnel</strong>
+            from the employee card to maintain the current
+            personnel record.
+          </p>
+
+
+          <div class="screen-placeholder">
+
+            <strong>
+              Edit Personnel Screenshot
+            </strong>
+
+            <code>
+              edit-personnel.webp
+            </code>
+
+          </div>
+
+
+          <p>
+            Managers may review or update authorized
+            information including:
+          </p>
+
+          <ul class="training-list">
+
+            <li>
+              Officer photo
+            </li>
+
+            <li>
+              Name information
+            </li>
+
+            <li>
+              Employee number
+            </li>
+
+            <li>
+              Telephone number
+            </li>
+
+            <li>
+              Date of birth
+            </li>
+
+            <li>
+              Hire date
+            </li>
+
+            <li>
+              Rank
+            </li>
+
+            <li>
+              Normal shift
+            </li>
+
+            <li>
+              Armed qualification
+            </li>
+
+          </ul>
+
+
+          <div class="callout warning">
+
+            <strong>
+              Hire Date Matters:
+            </strong>
+
+            SecureTrack later uses the recorded hire date to
+            calculate Days Employed and Retention
+            Classification during Employee Separation.
+
+          </div>
+
+
+          <div class="callout">
+
+            The Email Address / Login field is protected from
+            ordinary editing so the personnel record and
+            authentication account do not become inconsistent.
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             LESSON 06
+             ================================================ -->
+
+        <section
+          id="qualifications"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 06
+          </div>
+
+          <h2>
+            Qualifications
+          </h2>
+
+          <p>
+            The Qualifications control is visible within
+            Personnel Administration; however, full manager
+            qualification management is not currently active.
+          </p>
+
+
+          <div class="callout warning">
+
+            <strong>
+              Current Feature Status:
+            </strong>
+
+            Do not rely on the Qualifications button to add,
+            modify, revoke, or verify personnel qualifications
+            until this feature is formally activated.
+
+          </div>
+
+
+          <p>
+            Armed Qualification is currently maintained
+            through the Add New Officer and Edit Personnel
+            workflows.
+          </p>
+
+        </section>
+
+
+        <!-- ================================================
+             LESSON 07
+             ================================================ -->
+
+        <section
+          id="campus-transfer"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 07
+          </div>
+
+          <h2>
+            Transfer to Outside Officer
+          </h2>
+
+          <p>
+            Use
+            <strong>Transfer to Outside Officer</strong>
+            when the employee remains employed but their
+            permanent home campus changes.
+          </p>
+
+
+          <div class="screen-placeholder">
+
+            <strong>
+              Transfer to Outside Officer Screenshot
+            </strong>
+
+            <code>
+              campus-transfer.webp
+            </code>
+
+          </div>
+
+
+          <p>
+            The manager confirms:
+          </p>
+
+          <ul class="training-list">
+
+            <li>
+              Employee identity
+            </li>
+
+            <li>
+              Current shift
+            </li>
+
+            <li>
+              Employee number
+            </li>
+
+            <li>
+              Current rank
+            </li>
+
+            <li>
+              New home campus
+            </li>
+
+            <li>
+              Effective date
+            </li>
+
+            <li>
+              Optional transfer notes
+            </li>
+
+          </ul>
+
+
+          <div class="callout danger">
+
+            <strong>
+              This changes SecureTrack access.
+            </strong>
+
+            The officer is removed from active local
+            personnel, their local shift assignment is
+            closed, and current local application roles are
+            revoked. Historical records remain preserved.
+
+          </div>
+
+
+          <table class="decision-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Situation
+                </th>
+
+                <th>
+                  Correct Action
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+
+                <td>
+                  Employee remains employed but permanently
+                  changes campus
+                </td>
+
+                <td>
+                  Transfer to Outside Officer
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td>
+                  Employee's employment ends
+                </td>
+
+                <td>
+                  Employee Separation
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </section>
+
+
+        <!-- ================================================
+             LESSON 08
+             ================================================ -->
+
+        <section
+          id="separation"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 08
+          </div>
+
+          <h2>
+            Employee Separation
+          </h2>
+
+          <p>
+            Employee Separation is used to permanently
+            deactivate an employee's operational access after
+            an approved separation.
+          </p>
+
+
+          <div class="screen-placeholder">
+
+            <strong>
+              Employee Separation Form Screenshot
+            </strong>
+
+            <code>
+              employee-separation.webp
+            </code>
+
+          </div>
+
+
+          <p>
+            Before proceeding, verify:
+          </p>
+
+          <ul class="training-list">
+
+            <li>
+              Employee Name
+            </li>
+
+            <li>
+              Employee Number
+            </li>
+
+            <li>
+              Current Shift
+            </li>
+
+            <li>
+              Hire Date
+            </li>
+
+            <li>
+              Effective Separation Date
+            </li>
+
+            <li>
+              HR Approval Date
+            </li>
+
+            <li>
+              Separation Reason
+            </li>
+
+            <li>
+              Property Return Status
+            </li>
+
+          </ul>
+
+
+          <div class="callout warning">
+
+            <strong>
+              HR Approval Required:
+            </strong>
+
+            Employee Separation should only be finalized
+            after appropriate HR approval has been received.
+
+          </div>
+
+
+          <h3>
+            Final Separation Authorization
+          </h3>
+
+
+          <div class="screen-placeholder">
+
+            <strong>
+              Final Separation Authorization Screenshot
+            </strong>
+
+            <code>
+              final-separation-authorization.webp
+            </code>
+
+          </div>
+
+
+          <p>
+            SecureTrack presents a second review screen before
+            the employee is deactivated.
+          </p>
+
+
+          <div class="flow">
+
+            <div class="flow-step">
+              Begin Separation
+            </div>
+
+            <div class="flow-arrow">
+              ↓
+            </div>
+
+            <div class="flow-step">
+              Complete Separation Information
+            </div>
+
+            <div class="flow-arrow">
+              ↓
+            </div>
+
+            <div class="flow-step">
+              Review Separation
+            </div>
+
+            <div class="flow-arrow">
+              ↓
+            </div>
+
+            <div class="flow-step">
+              Final Separation Authorization
+            </div>
+
+            <div class="flow-arrow">
+              ↓
+            </div>
+
+            <div class="flow-step">
+              Type SEPARATE
+            </div>
+
+            <div class="flow-arrow">
+              ↓
+            </div>
+
+            <div class="flow-step">
+              Finalize Employee Separation
+            </div>
+
+          </div>
+
+
+          <div class="callout danger">
+
+            <strong>
+              Finalize Employee Separation is a permanent
+              operational-status action.
+            </strong>
+
+            It is not a delete action. SecureTrack preserves
+            the employee's historical operational records for
+            accountability and reporting.
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             LESSON 09
+             ================================================ -->
+
+        <section
+          id="retention"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 09
+          </div>
+
+          <h2>
+            Retention Reporting
+          </h2>
+
+          <p>
+            SecureTrack automatically calculates the
+            employee's tenure during Employee Separation.
+          </p>
+
+
+          <div class="flow">
+
+            <div class="flow-step">
+              Hire Date
+            </div>
+
+            <div class="flow-arrow">
+              ↓
+            </div>
+
+            <div class="flow-step">
+              Effective Separation Date
+            </div>
+
+            <div class="flow-arrow">
+              ↓
+            </div>
+
+            <div class="flow-step">
+              SecureTrack Calculates Days Employed
+            </div>
+
+            <div class="flow-arrow">
+              ↓
+            </div>
+
+            <div class="flow-step">
+              SecureTrack Assigns Retention Classification
+            </div>
+
+          </div>
+
+
+          <div class="retention-grid">
+
+            <article class="retention-card">
+
+              <span>
+                Hire Date
+              </span>
+
+              <strong>
+                09/07/2026
+              </strong>
+
+            </article>
+
+
+            <article class="retention-card">
+
+              <span>
+                Separation Date
+              </span>
+
+              <strong>
+                10/19/2026
+              </strong>
+
+            </article>
+
+
+            <article class="retention-card">
+
+              <span>
+                Days Employed
+              </span>
+
+              <strong>
+                42
+              </strong>
+
+            </article>
+
+
+            <article class="retention-card impact">
+
+              <span>
+                Classification
+              </span>
+
+              <strong>
+                Under 12 Months
+              </strong>
+
+            </article>
+
+          </div>
+
+
+          <div class="callout">
+
+            Managers do not manually calculate employee
+            retention. SecureTrack calculates the service
+            period from the recorded Hire Date and Effective
+            Separation Date.
+
+          </div>
+
+
+          <div class="callout warning">
+
+            <strong>
+              Accurate Dates Are Critical:
+            </strong>
+
+            Incorrect hire or separation dates will produce
+            incorrect retention reporting.
+
+          </div>
+
+
+          <h3>
+            Retention Impact
+          </h3>
+
+          <p>
+            If an employee separates before completing twelve
+            months of service, SecureTrack records the
+            separation as a retention impact.
+          </p>
+
+          <p>
+            Later reporting can use this information to
+            analyze early turnover, average days employed,
+            retention trends by shift, and separation
+            patterns.
+          </p>
+
+
+          <div class="callout">
+
+            <strong>
+              Retention Classification</strong>
+            means employee tenure.
+
+            It is different from
+            <strong>record retention</strong>,
+            which refers to how long operational records are
+            preserved.
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             LESSON 10
+             ================================================ -->
+
+        <section
+          id="property"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 10
+          </div>
+
+          <h2>
+            Outstanding Property
+          </h2>
+
+          <p>
+            Outstanding Property is used to maintain
+            accountability when an employee separates but
+            still has unresolved organizational property.
+          </p>
+
+
+          <div class="screen-placeholder">
+
+            <strong>
+              Outstanding Property Screenshot
+            </strong>
+
+            <code>
+              outstanding-property.webp
+            </code>
+
+          </div>
+
+
+          <p>
+            Items may include:
+          </p>
+
+          <ul class="training-list">
+
+            <li>
+              SecureTrack-tracked equipment
+            </li>
+
+            <li>
+              Keys
+            </li>
+
+            <li>
+              Access badges
+            </li>
+
+            <li>
+              Uniforms
+            </li>
+
+            <li>
+              Other organizational property
+            </li>
+
+          </ul>
+
+
+          <div class="callout">
+
+            Employee separation does not remove unresolved
+            property from management visibility. Outstanding
+            property remains available for follow-up until the
+            accountability process is completed.
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             DECISION GUIDE
+             ================================================ -->
+
+        <section class="lesson">
+
+          <div class="eyebrow">
+            Manager Quick Reference
+          </div>
+
+          <h2>
+            Personnel Administration Decision Guide
+          </h2>
+
+
+          <table class="decision-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Situation
+                </th>
+
+                <th>
+                  Correct Action
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+
+                <td>
+                  New employee joins the department
+                </td>
+
+                <td>
+                  + Add New Officer
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td>
+                  Personnel record exists but employee has
+                  not established SecureTrack access
+                </td>
+
+                <td>
+                  Send Invite
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td>
+                  Name, phone, rank, shift, hire date, or
+                  armed status changes
+                </td>
+
+                <td>
+                  Edit Personnel
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td>
+                  Qualifications button is visible
+                </td>
+
+                <td>
+                  Feature not active for manager use
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td>
+                  Employee changes permanent campus but
+                  remains employed
+                </td>
+
+                <td>
+                  Transfer to Outside Officer
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td>
+                  Employment ends
+                </td>
+
+                <td>
+                  Employee Separation
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td>
+                  Former employee still has unresolved
+                  property
+                </td>
+
+                <td>
+                  Outstanding Property
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </section>
+
+
+        <!-- ================================================
+             KNOWLEDGE CHECK
+             ================================================ -->
+
+        <section
+          id="knowledge-check"
+          class="lesson"
+        >
+
+          <div class="eyebrow">
+            Lesson 11
+          </div>
+
+          <h2>
+            Knowledge Check
+          </h2>
+
+          <p>
+            Select the best answer for each question.
+            A score of 80% or higher is considered passing
+            for this training module.
+          </p>
+
+
+          <div class="quiz-card">
+
+            <h3>
+              1. An employee permanently transfers to another
+              campus but remains employed. Which action should
+              you use?
+            </h3>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q1"
+                value="a"
+              >
+              Employee Separation
+            </label>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q1"
+                value="b"
+              >
+              Transfer to Outside Officer
+            </label>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q1"
+                value="c"
+              >
+              Delete Personnel
+            </label>
+
+          </div>
+
+
+          <div class="quiz-card">
+
+            <h3>
+              2. Does saving a new employee profile
+              automatically activate their SecureTrack login?
+            </h3>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q2"
+                value="a"
+              >
+              Yes
+            </label>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q2"
+                value="b"
+              >
+              No
+            </label>
+
+          </div>
+
+
+          <div class="quiz-card">
+
+            <h3>
+              3. Who calculates Days Employed during
+              Employee Separation?
+            </h3>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q3"
+                value="a"
+              >
+              The manager manually calculates it
+            </label>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q3"
+                value="b"
+              >
+              SecureTrack automatically calculates it
+            </label>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q3"
+                value="c"
+              >
+              The employee enters it
+            </label>
+
+          </div>
+
+
+          <div class="quiz-card">
+
+            <h3>
+              4. An employee separates after 42 calendar
+              days. Which retention classification applies?
+            </h3>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q4"
+                value="a"
+              >
+              12+ Months
+            </label>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q4"
+                value="b"
+              >
+              Under 12 Months
+            </label>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q4"
+                value="c"
+              >
+              Not Reportable
+            </label>
+
+          </div>
+
+
+          <div class="quiz-card">
+
+            <h3>
+              5. What happens to the employee's historical
+              SecureTrack records after separation?
+            </h3>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q5"
+                value="a"
+              >
+              They are permanently deleted
+            </label>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q5"
+                value="b"
+              >
+              They are preserved for accountability and
+              reporting
+            </label>
+
+            <label class="quiz-option">
+              <input
+                type="radio"
+                name="q5"
+                value="c"
+              >
+              They are moved to the employee's personal
+              account
+            </label>
+
+          </div>
+
+
+          <button
+            id="submitQuiz"
+            class="quiz-submit"
+            type="button"
+          >
+            Submit Knowledge Check
+          </button>
+
+
+          <div
+            id="quizResult"
+            class="quiz-result"
+            role="status"
+            aria-live="polite"
+          ></div>
+
+
+          <div class="callout">
+
+            Training completion is not yet being written to
+            the SecureTrack database. Supabase completion and
+            quiz-history tracking will be connected in a
+            later step.
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             FOOTER
+             ================================================ -->
+
+        <footer class="module-footer">
+
+          <a href="/training/manager/">
+            ← Return to Manager Training
+          </a>
+
+          <a href="#overview">
+            Back to Top ↑
+          </a>
+
+        </footer>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- ======================================================
+     AUTHENTICATION
+     ====================================================== -->
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="/config.js"></script>
+<script src="/secure-page.js"></script>
+
+
+<script>
+
+(async function () {
+
+  "use strict";
+
+
+  function waitForAuth() {
+
+    if (
+      window.SecureTrackAuth
+    ) {
+
+      return Promise.resolve(
+        window.SecureTrackAuth
+      );
+
+    }
+
+
+    return new Promise(
+      (
+        resolve,
+        reject
+      ) => {
+
+        let settled =
+          false;
+
+
+        const finish =
+          value => {
+
+            if (settled) {
+              return;
+            }
+
+            settled =
+              true;
+
+            clearTimeout(
+              timeout
+            );
+
+            document
+              .removeEventListener(
+                "securetrack:authorized",
+                handler
+              );
+
+            resolve(
+              value
+            );
+
+          };
+
+
+        const handler =
+          event => {
+
+            finish(
+              event.detail ||
+              window.SecureTrackAuth
+            );
+
+          };
+
+
+        document
+          .addEventListener(
+            "securetrack:authorized",
+            handler
+          );
+
+
+        const timeout =
+          setTimeout(
+            () => {
+
+              if (settled) {
+                return;
+              }
+
+              settled =
+                true;
+
+              reject(
+                new Error(
+                  "SecureTrack authentication did not initialize."
+                )
+              );
+
+            },
+            8000
+          );
+
+      }
+    );
+
+  }
+
+
+  let auth;
+
+
+  try {
+
+    auth =
+      await waitForAuth();
+
+  }
+  catch (error) {
+
+    console.error(
+      "Training module authentication failed:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  const roles =
+    Array.isArray(
+      auth?.roles
+    )
+      ? auth.roles
+      : [];
+
+
+  const authorized =
+    roles.some(
+      role =>
+        [
+          "manager",
+          "director",
+          "admin"
+        ].includes(
+          role
+        )
+    );
+
+
+  if (
+    !authorized
+  ) {
+
+    window.location.replace(
+      "/hub.html"
+    );
+
+    return;
+
+  }
+
+
+  document
+    .getElementById(
+      "trainingSignOut"
+    )
+    .addEventListener(
+      "click",
+      async () => {
+
+        try {
+
+          await auth
+            .db
+            .auth
+            .signOut();
+
+        }
+        finally {
+
+          window.location.replace(
+            "/login.html"
+          );
+
+        }
+
+      }
+    );
+
+
+  // ======================================================
+  // KNOWLEDGE CHECK
+  // ======================================================
+
+  document
+    .getElementById(
+      "submitQuiz"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        const answers = {
+          q1: "b",
+          q2: "b",
+          q3: "b",
+          q4: "b",
+          q5: "b"
+        };
+
+
+        let score =
+          0;
+
+
+        let answered =
+          0;
+
+
+        Object
+          .entries(
+            answers
+          )
+          .forEach(
+            ([
+              question,
+              correctAnswer
+            ]) => {
+
+              const selected =
+                document.querySelector(
+                  `input[name="${question}"]:checked`
+                );
+
+
+              if (
+                selected
+              ) {
+
+                answered +=
+                  1;
+
+
+                if (
+                  selected.value ===
+                  correctAnswer
+                ) {
+
+                  score +=
+                    1;
+
+                }
+
+              }
+
+            }
+          );
+
+
+        const result =
+          document.getElementById(
+            "quizResult"
+          );
+
+
+        result.className =
+          "quiz-result show";
+
+
+        if (
+          answered < 5
+        ) {
+
+          result.classList.add(
+            "fail"
+          );
+
+          result.textContent =
+            `Answer all 5 questions before submitting. You have completed ${answered} of 5.`;
+
+          return;
+
+        }
+
+
+        const percentage =
+          Math.round(
+            (
+              score /
+              5
+            ) *
+            100
+          );
+
+
+        if (
+          percentage >=
+          80
+        ) {
+
+          result.classList.add(
+            "pass"
+          );
+
+          result.innerHTML =
+            `
+              <strong>Knowledge Check Passed</strong>
+              <br>
+              Score: ${score} of 5 (${percentage}%)
+              <br><br>
+              Module completion tracking will be recorded
+              automatically once SecureTrack training history
+              is connected.
+            `;
+
+        }
+        else {
+
+          result.classList.add(
+            "fail"
+          );
+
+          result.innerHTML =
+            `
+              <strong>Knowledge Check Not Yet Passed</strong>
+              <br>
+              Score: ${score} of 5 (${percentage}%)
+              <br><br>
+              Review the module and try the knowledge check
+              again. A score of 80% or higher is required.
+            `;
+
+        }
+
+      }
+    );
+
+})();
+
+</script>
+
+
+</body>
+
+</html>
