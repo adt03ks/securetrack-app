@@ -6,11 +6,11 @@
   // =========================================================
 
   const INACTIVITY_LIMIT =
-  60 * 1000; // 1 minute
-
+ 10 * 60 * 1000; // 10 minutes
+  
   const WARNING_BEFORE =
-    30 * 1000; // warning at 30 seconds
-
+   2 * 60 * 1000; // warning 2 minutes before logout
+  
   const ABSOLUTE_SESSION_LIMIT =
     12 * 60 * 60 * 1000; // 12 hours
 
