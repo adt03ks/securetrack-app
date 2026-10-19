@@ -1,0 +1,2015 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#080a0c"
+  >
+
+  <title>
+    SecureTrack | Manager Learning Center
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="/styles.css"
+  >
+
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(255,120,0,.06),
+          transparent 28%
+        ),
+        #080a0c;
+    }
+
+
+    .learning-shell {
+      width:
+        min(
+          1500px,
+          calc(100% - 32px)
+        );
+
+      margin:
+        28px auto 60px;
+    }
+
+
+    .learning-panel {
+      overflow: hidden;
+
+      border:
+        1px solid #30363d;
+
+      border-radius:
+        22px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #101419,
+          #0c1014
+        );
+
+      box-shadow:
+        0 24px 70px
+        rgba(0,0,0,.38);
+    }
+
+
+    /* ======================================================
+       HEADER
+       ====================================================== */
+
+    .learning-header {
+      padding:
+        30px 34px 32px;
+
+      border-bottom:
+        1px solid #2d3339;
+
+      background:
+        radial-gradient(
+          circle at top left,
+          rgba(255,120,0,.09),
+          transparent 34%
+        ),
+        #11161b;
+    }
+
+
+    .learning-header-row {
+      display: flex;
+
+      align-items:
+        flex-start;
+
+      justify-content:
+        space-between;
+
+      gap: 24px;
+
+      margin-bottom:
+        36px;
+    }
+
+
+    .learning-brand {
+      display: flex;
+
+      align-items:
+        center;
+
+      gap: 15px;
+    }
+
+
+    .learning-logo {
+      width: 58px;
+      height: 66px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      position: relative;
+
+      clip-path:
+        polygon(
+          50% 0%,
+          93% 18%,
+          87% 76%,
+          50% 100%,
+          13% 76%,
+          7% 18%
+        );
+
+      background:
+        linear-gradient(
+          145deg,
+          #666f78,
+          #20262c
+        );
+
+      box-shadow:
+        0 8px 22px
+        rgba(0,0,0,.45);
+    }
+
+
+    .learning-logo::before {
+      content: "";
+
+      width: 30px;
+      height: 27px;
+
+      position: absolute;
+
+      bottom: 15px;
+
+      border:
+        3px solid #f4f6f8;
+
+      border-radius:
+        4px;
+    }
+
+
+    .learning-logo::after {
+      content: "";
+
+      width: 22px;
+      height: 25px;
+
+      position: absolute;
+
+      top: 15px;
+
+      border:
+        3px solid #ff7800;
+
+      border-bottom: 0;
+
+      border-radius:
+        15px 15px 0 0;
+    }
+
+
+    .learning-wordmark {
+      font-size:
+        clamp(
+          30px,
+          4vw,
+          50px
+        );
+
+      line-height: .95;
+
+      font-weight: 900;
+
+      letter-spacing:
+        -.045em;
+
+      color: #f4f6f8;
+    }
+
+
+    .learning-wordmark span {
+      color: #ff7800;
+    }
+
+
+    .learning-brand-subtitle {
+      margin-top: 7px;
+
+      color: #aab2bb;
+
+      font-size: 11px;
+
+      font-weight: 800;
+
+      text-transform: uppercase;
+
+      letter-spacing: .16em;
+    }
+
+
+    .learning-actions {
+      display: flex;
+
+      gap: 10px;
+
+      align-items: center;
+
+      flex-wrap: wrap;
+
+      justify-content:
+        flex-end;
+    }
+
+
+    .learning-link,
+    .learning-signout {
+      min-height: 44px;
+
+      display: inline-flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding:
+        10px 15px;
+
+      border:
+        1px solid #39414a;
+
+      border-radius:
+        11px;
+
+      background:
+        #101419;
+
+      color:
+        #f1f3f5;
+
+      text-decoration:
+        none;
+
+      font: inherit;
+
+      font-weight: 750;
+
+      cursor: pointer;
+    }
+
+
+    .learning-link:hover,
+    .learning-signout:hover {
+      border-color:
+        #ff7800;
+    }
+
+
+    .learning-eyebrow {
+      margin-bottom: 8px;
+
+      color:
+        #ff7800;
+
+      font-size:
+        11px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .14em;
+    }
+
+
+    .learning-header h1 {
+      margin:
+        0;
+
+      color:
+        #f4f6f8;
+
+      font-size:
+        clamp(
+          34px,
+          5vw,
+          62px
+        );
+
+      line-height:
+        1;
+
+      letter-spacing:
+        -.04em;
+    }
+
+
+    .learning-intro {
+      max-width:
+        920px;
+
+      margin:
+        14px 0 0;
+
+      color:
+        #aeb6be;
+
+      font-size:
+        17px;
+
+      line-height:
+        1.6;
+    }
+
+
+    /* ======================================================
+       USER STRIP
+       ====================================================== */
+
+    .learning-user-strip {
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      gap: 20px;
+
+      align-items:
+        center;
+
+      padding:
+        16px 34px;
+
+      border-bottom:
+        1px solid #292f35;
+
+      background:
+        #0b0f13;
+    }
+
+
+    .learning-user-label {
+      color:
+        #858f99;
+
+      font-size:
+        11px;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .09em;
+
+      font-weight:
+        800;
+    }
+
+
+    #learningUserName {
+      margin-left: 8px;
+
+      color:
+        #f2f4f6;
+
+      font-weight:
+        850;
+    }
+
+
+    .learning-role {
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 6px;
+
+      color:
+        #ff9a3c;
+
+      font-size:
+        11px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .07em;
+    }
+
+
+    /* ======================================================
+       CONTENT
+       ====================================================== */
+
+    .learning-content {
+      padding:
+        30px 34px 36px;
+    }
+
+
+    .learning-section-head {
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        flex-end;
+
+      gap: 20px;
+
+      margin-bottom:
+        20px;
+    }
+
+
+    .learning-section-head h2 {
+      margin:
+        5px 0 0;
+
+      color:
+        #f4f6f8;
+
+      font-size:
+        28px;
+    }
+
+
+    .learning-section-head p {
+      max-width:
+        780px;
+
+      margin:
+        8px 0 0;
+
+      color:
+        #959fa8;
+
+      line-height:
+        1.55;
+    }
+
+
+    /* ======================================================
+       PROGRESS
+       ====================================================== */
+
+    .learning-progress-card {
+      margin-bottom:
+        30px;
+
+      padding:
+        22px;
+
+      border:
+        1px solid #30363d;
+
+      border-radius:
+        17px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #0b0f13,
+          #10151a
+        );
+    }
+
+
+    .learning-progress-top {
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      gap: 20px;
+
+      align-items:
+        center;
+
+      margin-bottom:
+        15px;
+    }
+
+
+    .learning-progress-title {
+      color:
+        #f2f4f6;
+
+      font-size:
+        18px;
+
+      font-weight:
+        850;
+    }
+
+
+    .learning-progress-meta {
+      margin-top:
+        4px;
+
+      color:
+        #929ca5;
+
+      font-size:
+        12px;
+    }
+
+
+    .learning-progress-status {
+      display: inline-flex;
+
+      padding:
+        6px 10px;
+
+      border:
+        1px solid
+        rgba(255,120,0,.42);
+
+      border-radius:
+        999px;
+
+      background:
+        rgba(255,120,0,.08);
+
+      color:
+        #ff9b45;
+
+      font-size:
+        10px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .07em;
+    }
+
+
+    .learning-progress-track {
+      height:
+        9px;
+
+      overflow:
+        hidden;
+
+      border:
+        1px solid #30363d;
+
+      border-radius:
+        999px;
+
+      background:
+        #070a0d;
+    }
+
+
+    .learning-progress-fill {
+      width:
+        0%;
+
+      height:
+        100%;
+
+      border-radius:
+        inherit;
+
+      background:
+        linear-gradient(
+          90deg,
+          #ff7800,
+          #ff9d45
+        );
+    }
+
+
+    .learning-progress-note {
+      margin:
+        12px 0 0;
+
+      color:
+        #858f98;
+
+      font-size:
+        12px;
+    }
+
+
+    /* ======================================================
+       MODULE CARD
+       ====================================================== */
+
+    .module-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0, 1fr)
+        );
+
+      gap:
+        18px;
+    }
+
+
+    .module-card {
+      position:
+        relative;
+
+      overflow:
+        hidden;
+
+      min-height:
+        390px;
+
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      padding:
+        24px;
+
+      border:
+        1px solid #343b42;
+
+      border-radius:
+        18px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #0a0e12,
+          #11161b
+        );
+    }
+
+
+    .module-card::before {
+      content: "";
+
+      position:
+        absolute;
+
+      left: 0;
+      top: 0;
+      bottom: 0;
+
+      width:
+        4px;
+
+      background:
+        #ff7800;
+    }
+
+
+    .module-card:hover {
+      border-color:
+        rgba(255,120,0,.72);
+
+      box-shadow:
+        0 12px 35px
+        rgba(0,0,0,.2);
+    }
+
+
+    .module-top {
+      display: flex;
+
+      align-items:
+        flex-start;
+
+      justify-content:
+        space-between;
+
+      gap:
+        15px;
+    }
+
+
+    .module-number {
+      color:
+        #ff7800;
+
+      font-size:
+        11px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .13em;
+    }
+
+
+    .module-status {
+      display: inline-flex;
+
+      padding:
+        6px 9px;
+
+      border:
+        1px solid
+        rgba(87,187,109,.38);
+
+      border-radius:
+        999px;
+
+      background:
+        rgba(87,187,109,.07);
+
+      color:
+        #9adea8;
+
+      font-size:
+        10px;
+
+      font-weight:
+        900;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .06em;
+    }
+
+
+    .module-card h3 {
+      margin:
+        18px 0 8px;
+
+      color:
+        #fff;
+
+      font-size:
+        28px;
+
+      line-height:
+        1.12;
+    }
+
+
+    .module-description {
+      margin:
+        0;
+
+      color:
+        #a4adb6;
+
+      line-height:
+        1.6;
+    }
+
+
+    .module-meta {
+      display: flex;
+
+      flex-wrap:
+        wrap;
+
+      gap:
+        8px;
+
+      margin-top:
+        18px;
+    }
+
+
+    .module-meta span {
+      display: inline-flex;
+
+      align-items:
+        center;
+
+      padding:
+        6px 9px;
+
+      border:
+        1px solid #333b43;
+
+      border-radius:
+        8px;
+
+      background:
+        #0a0d10;
+
+      color:
+        #aeb6be;
+
+      font-size:
+        11px;
+
+      font-weight:
+        750;
+    }
+
+
+    .module-topics {
+      display: flex;
+
+      flex-wrap:
+        wrap;
+
+      gap:
+        7px;
+
+      margin-top:
+        18px;
+    }
+
+
+    .module-topic {
+      padding:
+        5px 8px;
+
+      border:
+        1px solid #303840;
+
+      border-radius:
+        999px;
+
+      color:
+        #89939d;
+
+      font-size:
+        10px;
+
+      font-weight:
+        700;
+    }
+
+
+    .module-footer {
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      gap:
+        15px;
+
+      align-items:
+        center;
+
+      margin-top:
+        auto;
+
+      padding-top:
+        24px;
+    }
+
+
+    .module-availability {
+      color:
+        #8e979f;
+
+      font-size:
+        11px;
+    }
+
+
+    .module-button {
+      display: inline-flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      min-height:
+        43px;
+
+      padding:
+        10px 15px;
+
+      border:
+        1px solid #ff7800;
+
+      border-radius:
+        10px;
+
+      background:
+        #ff7800;
+
+      color:
+        #101214;
+
+      text-decoration:
+        none;
+
+      font-weight:
+        900;
+    }
+
+
+    .module-button:hover {
+      background:
+        #ff8c24;
+    }
+
+
+    /* ======================================================
+       COMING SOON
+       ====================================================== */
+
+    .future-card {
+      justify-content:
+        center;
+
+      align-items:
+        flex-start;
+
+      min-height:
+        390px;
+
+      border-style:
+        dashed;
+
+      background:
+        #0a0d10;
+    }
+
+
+    .future-icon {
+      width:
+        48px;
+
+      height:
+        48px;
+
+      display: grid;
+
+      place-items:
+        center;
+
+      margin-bottom:
+        18px;
+
+      border:
+        1px solid #373f47;
+
+      border-radius:
+        13px;
+
+      color:
+        #ff922b;
+
+      font-size:
+        22px;
+
+      font-weight:
+        900;
+
+      background:
+        rgba(255,120,0,.05);
+    }
+
+
+    .future-card h3 {
+      margin:
+        0 0 9px;
+
+      font-size:
+        23px;
+    }
+
+
+    .future-card p {
+      margin:
+        0;
+
+      color:
+        #88929c;
+
+      line-height:
+        1.55;
+    }
+
+
+    /* ======================================================
+       TRAINING PRINCIPLES
+       ====================================================== */
+
+    .learning-principles {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          3,
+          minmax(0, 1fr)
+        );
+
+      gap:
+        12px;
+
+      margin-top:
+        32px;
+    }
+
+
+    .learning-principle {
+      padding:
+        18px;
+
+      border:
+        1px solid #30363d;
+
+      border-radius:
+        14px;
+
+      background:
+        #0a0e12;
+    }
+
+
+    .learning-principle strong {
+      display:
+        block;
+
+      margin-bottom:
+        6px;
+
+      color:
+        #f2f4f6;
+    }
+
+
+    .learning-principle p {
+      margin:
+        0;
+
+      color:
+        #8f99a2;
+
+      font-size:
+        12px;
+
+      line-height:
+        1.5;
+    }
+
+
+    /* ======================================================
+       MESSAGE / ERROR
+       ====================================================== */
+
+    .learning-message {
+      display:
+        none;
+
+      margin-bottom:
+        20px;
+
+      padding:
+        13px 15px;
+
+      border:
+        1px solid
+        rgba(224,74,74,.45);
+
+      border-radius:
+        11px;
+
+      background:
+        rgba(224,74,74,.07);
+
+      color:
+        #ffadad;
+    }
+
+
+    .learning-message.show {
+      display:
+        block;
+    }
+
+
+    /* ======================================================
+       FOOTER
+       ====================================================== */
+
+    .learning-footer {
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      gap:
+        20px;
+
+      align-items:
+        center;
+
+      margin-top:
+        34px;
+
+      padding:
+        20px;
+
+      border:
+        1px solid #2d343b;
+
+      border-radius:
+        15px;
+
+      background:
+        #080b0e;
+
+      color:
+        #89939c;
+
+      font-size:
+        11px;
+    }
+
+
+    .learning-footer strong {
+      color:
+        #f1f3f5;
+
+      letter-spacing:
+        .06em;
+    }
+
+
+    /* ======================================================
+       RESPONSIVE
+       ====================================================== */
+
+    @media (
+      max-width: 900px
+    ) {
+
+      .module-grid,
+      .learning-principles {
+        grid-template-columns:
+          1fr;
+      }
+
+      .learning-header-row,
+      .learning-user-strip,
+      .learning-section-head,
+      .learning-progress-top,
+      .learning-footer {
+        align-items:
+          flex-start;
+
+        flex-direction:
+          column;
+      }
+
+      .learning-actions {
+        justify-content:
+          flex-start;
+      }
+
+    }
+
+
+    @media (
+      max-width: 600px
+    ) {
+
+      .learning-shell {
+        width:
+          calc(100% - 18px);
+
+        margin-top:
+          10px;
+      }
+
+      .learning-header,
+      .learning-content {
+        padding:
+          22px 18px;
+      }
+
+      .learning-user-strip {
+        padding:
+          14px 18px;
+      }
+
+      .learning-brand {
+        align-items:
+          flex-start;
+      }
+
+      .learning-logo {
+        width:
+          46px;
+
+        height:
+          53px;
+      }
+
+      .learning-wordmark {
+        font-size:
+          30px;
+      }
+
+      .module-card {
+        padding:
+          20px;
+      }
+
+      .module-footer {
+        align-items:
+          stretch;
+
+        flex-direction:
+          column;
+      }
+
+      .module-button {
+        width:
+          100%;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body
+  data-securetrack-roles="manager,director,admin"
+>
+
+<main class="learning-shell">
+
+  <section class="learning-panel">
+
+
+    <!-- ====================================================
+         HEADER
+         ==================================================== -->
+
+    <header class="learning-header">
+
+      <div class="learning-header-row">
+
+        <div class="learning-brand">
+
+          <div
+            class="learning-logo"
+            aria-hidden="true"
+          ></div>
+
+          <div>
+
+            <div class="learning-wordmark">
+              Secure<span>Track</span>
+            </div>
+
+            <div class="learning-brand-subtitle">
+              Learning Center
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="learning-actions">
+
+          <a
+            class="learning-link"
+            href="/manager-portal.html"
+          >
+            ← Manager Portal
+          </a>
+
+          <button
+            id="learningSignOut"
+            class="learning-signout"
+            type="button"
+          >
+            Sign Out
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="learning-eyebrow">
+        Role-Based Platform Training
+      </div>
+
+      <h1>
+        Manager Training
+      </h1>
+
+      <p class="learning-intro">
+        Learn the SecureTrack management tools used to
+        supervise personnel, maintain operational accountability,
+        manage workflows, and support consistent department
+        operations.
+      </p>
+
+    </header>
+
+
+    <!-- ====================================================
+         CURRENT USER
+         ==================================================== -->
+
+    <section
+      class="learning-user-strip"
+      aria-label="Current SecureTrack user"
+    >
+
+      <div>
+
+        <span class="learning-user-label">
+          Signed in as
+        </span>
+
+        <strong id="learningUserName">
+          Loading...
+        </strong>
+
+      </div>
+
+      <div
+        id="learningUserRole"
+        class="learning-role"
+      >
+        MANAGEMENT
+      </div>
+
+    </section>
+
+
+    <!-- ====================================================
+         CONTENT
+         ==================================================== -->
+
+    <div class="learning-content">
+
+      <div
+        id="learningMessage"
+        class="learning-message"
+        role="alert"
+      ></div>
+
+
+      <!-- ================================================
+           PROGRESS
+           ================================================ -->
+
+      <section
+        class="learning-progress-card"
+        aria-label="Manager training progress"
+      >
+
+        <div class="learning-progress-top">
+
+          <div>
+
+            <div class="learning-progress-title">
+              Manager Curriculum
+            </div>
+
+            <div class="learning-progress-meta">
+              1 training module currently available
+            </div>
+
+          </div>
+
+          <span class="learning-progress-status">
+            Curriculum Building
+          </span>
+
+        </div>
+
+
+        <div
+          class="learning-progress-track"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+          aria-label="Training completion"
+        >
+
+          <div
+            class="learning-progress-fill"
+          ></div>
+
+        </div>
+
+
+        <p class="learning-progress-note">
+          Individual completion, quiz scores, and training
+          history will appear here when SecureTrack training
+          progress tracking is connected.
+        </p>
+
+      </section>
+
+
+      <!-- ================================================
+           MODULES
+           ================================================ -->
+
+      <section>
+
+        <div class="learning-section-head">
+
+          <div>
+
+            <div class="learning-eyebrow">
+              Required Manager Training
+            </div>
+
+            <h2>
+              Training Modules
+            </h2>
+
+            <p>
+              Complete each available module to learn the
+              SecureTrack workflows assigned to management.
+              Training remains available for future reference
+              after completion.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="module-grid">
+
+
+          <!-- ============================================
+               MODULE 01
+               ============================================ -->
+
+          <article class="module-card">
+
+            <div class="module-top">
+
+              <div class="module-number">
+                Module 01
+              </div>
+
+              <span class="module-status">
+                Available
+              </span>
+
+            </div>
+
+
+            <h3>
+              Personnel Administration
+            </h3>
+
+            <p class="module-description">
+              Learn how to manage personnel profiles,
+              onboard officers, control account access,
+              process campus transfers and employee
+              separations, understand retention reporting,
+              and monitor unresolved property.
+            </p>
+
+
+            <div class="module-meta">
+
+              <span>
+                Manager / Director / Admin
+              </span>
+
+              <span>
+                Approx. 20–25 minutes
+              </span>
+
+              <span>
+                Knowledge Check
+              </span>
+
+            </div>
+
+
+            <div
+              class="module-topics"
+              aria-label="Module topics"
+            >
+
+              <span class="module-topic">
+                Active Personnel
+              </span>
+
+              <span class="module-topic">
+                Add New Officer
+              </span>
+
+              <span class="module-topic">
+                Account Access
+              </span>
+
+              <span class="module-topic">
+                Edit Personnel
+              </span>
+
+              <span class="module-topic">
+                Campus Transfer
+              </span>
+
+              <span class="module-topic">
+                Employee Separation
+              </span>
+
+              <span class="module-topic">
+                Retention Reporting
+              </span>
+
+              <span class="module-topic">
+                Outstanding Property
+              </span>
+
+            </div>
+
+
+            <div class="module-footer">
+
+              <div class="module-availability">
+                First manager training module
+              </div>
+
+              <a
+                class="module-button"
+                href="personnel-administration.html"
+              >
+                Start Module →
+              </a>
+
+            </div>
+
+          </article>
+
+
+          <!-- ============================================
+               FUTURE MODULES
+               ============================================ -->
+
+          <article
+            class="module-card future-card"
+          >
+
+            <div class="future-icon">
+              +
+            </div>
+
+            <h3>
+              Additional Manager Modules
+            </h3>
+
+            <p>
+              Additional Manager Portal training modules
+              will appear here as each workflow is prepared
+              and published.
+            </p>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================
+           TRAINING PRINCIPLES
+           ================================================ -->
+
+      <section
+        class="learning-principles"
+        aria-label="Learning Center principles"
+      >
+
+        <article class="learning-principle">
+
+          <strong>
+            Learn
+          </strong>
+
+          <p>
+            Follow guided instruction using the same
+            SecureTrack screens and workflows used during
+            daily operations.
+          </p>
+
+        </article>
+
+
+        <article class="learning-principle">
+
+          <strong>
+            Practice
+          </strong>
+
+          <p>
+            Review examples and decision points before
+            performing higher-impact actions in the live
+            platform.
+          </p>
+
+        </article>
+
+
+        <article class="learning-principle">
+
+          <strong>
+            Reference
+          </strong>
+
+          <p>
+            Return to completed modules whenever you need
+            a refresher on a SecureTrack process.
+          </p>
+
+        </article>
+
+      </section>
+
+
+      <!-- ================================================
+           FOOTER
+           ================================================ -->
+
+      <footer class="learning-footer">
+
+        <div>
+
+          <strong>
+            SECURE. ACCOUNTABLE. CONNECTED.
+          </strong>
+
+          <br>
+
+          SecureTrack Learning Center
+
+        </div>
+
+        <div>
+          ◉ MANAGEMENT TRAINING
+        </div>
+
+      </footer>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- ======================================================
+     SECURETRACK AUTHENTICATION
+     ====================================================== -->
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="/config.js"></script>
+<script src="/secure-page.js"></script>
+
+
+<script>
+
+(async function () {
+
+  "use strict";
+
+
+  const message =
+    document.getElementById(
+      "learningMessage"
+    );
+
+
+  function showError(text) {
+
+    message.textContent =
+      text;
+
+    message.classList.add(
+      "show"
+    );
+
+  }
+
+
+  function waitForAuth() {
+
+    if (
+      window.SecureTrackAuth
+    ) {
+
+      return Promise.resolve(
+        window.SecureTrackAuth
+      );
+
+    }
+
+
+    return new Promise(
+      (
+        resolve,
+        reject
+      ) => {
+
+        let settled =
+          false;
+
+
+        const finish =
+          value => {
+
+            if (settled) {
+              return;
+            }
+
+            settled =
+              true;
+
+            clearTimeout(
+              timeout
+            );
+
+            document
+              .removeEventListener(
+                "securetrack:authorized",
+                authorizedHandler
+              );
+
+            resolve(
+              value
+            );
+
+          };
+
+
+        const authorizedHandler =
+          event => {
+
+            finish(
+              event.detail ||
+              window.SecureTrackAuth
+            );
+
+          };
+
+
+        document
+          .addEventListener(
+            "securetrack:authorized",
+            authorizedHandler
+          );
+
+
+        const timeout =
+          setTimeout(
+            () => {
+
+              if (settled) {
+                return;
+              }
+
+              settled =
+                true;
+
+              document
+                .removeEventListener(
+                  "securetrack:authorized",
+                  authorizedHandler
+                );
+
+              reject(
+                new Error(
+                  "SecureTrack authentication did not initialize."
+                )
+              );
+
+            },
+            8000
+          );
+
+      }
+    );
+
+  }
+
+
+  let auth;
+
+
+  try {
+
+    auth =
+      await waitForAuth();
+
+  }
+  catch (error) {
+
+    console.error(
+      "Learning Center authentication failed:",
+      error
+    );
+
+    showError(
+      error.message ||
+      "Unable to initialize SecureTrack authentication."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !auth?.user ||
+    !auth?.db
+  ) {
+
+    showError(
+      "SecureTrack authentication is unavailable."
+    );
+
+    return;
+
+  }
+
+
+  const roles =
+    Array.isArray(
+      auth.roles
+    )
+      ? auth.roles
+      : [];
+
+
+  const hasManagementAccess =
+    roles.some(
+      role =>
+        [
+          "manager",
+          "director",
+          "admin"
+        ].includes(
+          role
+        )
+    );
+
+
+  if (
+    !hasManagementAccess
+  ) {
+
+    window.location.replace(
+      "/hub.html"
+    );
+
+    return;
+
+  }
+
+
+  const profile =
+    auth.profile || {};
+
+
+  document
+    .getElementById(
+      "learningUserName"
+    )
+    .textContent =
+      profile.display_name ||
+      auth.user.email ||
+      "SecureTrack User";
+
+
+  let roleLabel =
+    "MANAGER";
+
+
+  if (
+    roles.includes(
+      "admin"
+    )
+  ) {
+
+    roleLabel =
+      "ADMINISTRATOR";
+
+  }
+  else if (
+    roles.includes(
+      "director"
+    )
+  ) {
+
+    roleLabel =
+      "DIRECTOR";
+
+  }
+
+
+  document
+    .getElementById(
+      "learningUserRole"
+    )
+    .textContent =
+      roleLabel;
+
+
+  document
+    .getElementById(
+      "learningSignOut"
+    )
+    .addEventListener(
+      "click",
+      async () => {
+
+        try {
+
+          await auth
+            .db
+            .auth
+            .signOut();
+
+        }
+        catch (error) {
+
+          console.error(
+            "SecureTrack sign out failed:",
+            error
+          );
+
+        }
+        finally {
+
+          window.location.replace(
+            "/login.html"
+          );
+
+        }
+
+      }
+    );
+
+})();
+
+</script>
+
+
+</body>
+
+</html>
