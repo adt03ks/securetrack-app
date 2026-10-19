@@ -530,122 +530,99 @@
   // SIGN OUT
   // =========================================================
 
-  async function secureLogout(
-    reason = "timeout"
-  ) {
+ async function secureLogout(
+  reason = "timeout"
+) {
 
-    if (
-      logoutInProgress
-    ) {
-      return;
-    }
-
-    logoutInProgress =
-      true;
-
-    clearTimers();
-
-    if (
-      absoluteTimer
-    ) {
-      clearTimeout(
-        absoluteTimer
-      );
-    }
-
-    hideWarning();
-
-    try {
-
-      localStorage.setItem(
-        FORCE_LOGOUT_KEY,
-        String(
-          Date.now()
-        )
-      );
-
-      /*
-        Prefer the existing SecureTrack
-        sign-out helper when available.
-      */
-
-      if (
-        typeof
-        window.SecureTrackManager
-          ?.signOut ===
-        "function"
-      ) {
-
-        await window
-          .SecureTrackManager
-          .signOut();
-
-        return;
-      }
-
-      if (
-        typeof
-        window.SecureTrackAuth
-          ?.signOut ===
-        "function"
-      ) {
-
-        await window
-          .SecureTrackAuth
-          .signOut();
-
-        return;
-      }
-
-      const db =
-        window.SecureTrackAuth
-          ?.db ||
-        window.SecureTrackManager
-          ?.db;
-
-      if (
-        db?.auth
-          ?.signOut
-      ) {
-
-        await db.auth.signOut();
-
-      }
-
-    }
-    catch (
-      error
-    ) {
-
-      console.error(
-        "SecureTrack timeout logout failed:",
-        error
-      );
-
-    }
-    finally {
-
-      localStorage.removeItem(
-        LAST_ACTIVITY_KEY
-      );
-
-      sessionStorage.removeItem(
-        SESSION_STARTED_KEY
-      );
-
-      const next =
-        encodeURIComponent(
-          window.location.pathname +
-          window.location.search
-        );
-
-     window.location.replace(
-  `/login.html?reason=${encodeURIComponent(reason)}&next=${next}`
-);
-    }
+  if (logoutInProgress) {
+    return;
   }
 
+  logoutInProgress = true;
 
+  clearTimers();
+
+  if (absoluteTimer) {
+    clearTimeout(
+      absoluteTimer
+    );
+  }
+
+  hideWarning();
+
+  try {
+
+    localStorage.setItem(
+      FORCE_LOGOUT_KEY,
+      String(
+        Date.now()
+      )
+    );
+
+    /*
+      Sign out directly through Supabase.
+
+      Do not use page-specific SecureTrack
+      sign-out helpers here because some
+      perform their own relative redirect.
+    */
+
+    const db =
+      window.SecureTrackAuth?.db ||
+      window.SecureTrackManager?.db;
+
+    if (db?.auth?.signOut) {
+
+      await db.auth.signOut();
+
+    }
+
+  }
+  catch (error) {
+
+    console.error(
+      "SecureTrack timeout logout failed:",
+      error
+    );
+
+  }
+  finally {
+
+    localStorage.removeItem(
+      LAST_ACTIVITY_KEY
+    );
+
+    sessionStorage.removeItem(
+      SESSION_STARTED_KEY
+    );
+
+    const next =
+      window.location.pathname +
+      window.location.search;
+
+    const loginUrl =
+      new URL(
+        "/login.html",
+        window.location.origin
+      );
+
+    loginUrl.searchParams.set(
+      "reason",
+      reason
+    );
+
+    loginUrl.searchParams.set(
+      "next",
+      next
+    );
+
+    window.location.replace(
+      loginUrl.href
+    );
+
+  }
+
+}
   // =========================================================
   // CROSS-TAB SECURITY
   // =========================================================
