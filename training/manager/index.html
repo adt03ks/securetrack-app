@@ -18,7 +18,11 @@
   <title>
     SecureTrack | Manager Learning Center
   </title>
-
+<link
+  rel="icon"
+  type="image/png"
+  href="/assets/favicon.png"
+>
   <link
     rel="stylesheet"
     href="/styles.css"
@@ -115,7 +119,20 @@
         36px;
     }
 
+.learning-brand {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: inherit;
+  text-decoration: none;
+}
 
+.learning-brand-logo {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
     .learning-brand {
       display: flex;
 
@@ -123,77 +140,6 @@
         center;
 
       gap: 15px;
-    }
-
-
-    .learning-logo {
-      width: 58px;
-      height: 66px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      position: relative;
-
-      clip-path:
-        polygon(
-          50% 0%,
-          93% 18%,
-          87% 76%,
-          50% 100%,
-          13% 76%,
-          7% 18%
-        );
-
-      background:
-        linear-gradient(
-          145deg,
-          #666f78,
-          #20262c
-        );
-
-      box-shadow:
-        0 8px 22px
-        rgba(0,0,0,.45);
-    }
-
-
-    .learning-logo::before {
-      content: "";
-
-      width: 30px;
-      height: 27px;
-
-      position: absolute;
-
-      bottom: 15px;
-
-      border:
-        3px solid #f4f6f8;
-
-      border-radius:
-        4px;
-    }
-
-
-    .learning-logo::after {
-      content: "";
-
-      width: 22px;
-      height: 25px;
-
-      position: absolute;
-
-      top: 15px;
-
-      border:
-        3px solid #ff7800;
-
-      border-bottom: 0;
-
-      border-radius:
-        15px 15px 0 0;
     }
 
 
@@ -1296,24 +1242,31 @@
 
         <div class="learning-brand">
 
-          <div
-            class="learning-logo"
-            aria-hidden="true"
-          ></div>
+         <a
+  class="learning-brand"
+  href="/training/manager/"
+  aria-label="SecureTrack Learning Center"
+>
 
-          <div>
+  <img
+    class="learning-brand-logo"
+    src="/assets/favicon.png"
+    alt="SecureTrack OP logo"
+  >
 
-            <div class="learning-wordmark">
-              Secure<span>Track</span>
-            </div>
+  <div>
 
-            <div class="learning-brand-subtitle">
-              Learning Center
-            </div>
+    <div class="learning-wordmark">
+      Secure<span>Track</span>
+    </div>
 
-          </div>
+    <div class="learning-brand-subtitle">
+      Learning Center
+    </div>
 
-        </div>
+  </div>
+
+</a>
 
 
         <div class="learning-actions">
