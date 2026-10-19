@@ -639,10 +639,9 @@
           window.location.search
         );
 
-      window.location.replace(
-        `login.html?reason=${encodeURIComponent(reason)}&next=${next}`
-      );
-
+     window.location.replace(
+  `/login.html?reason=${encodeURIComponent(reason)}&next=${next}`
+);
     }
   }
 
