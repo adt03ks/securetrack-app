@@ -413,213 +413,192 @@
   <!-- =========================================
        INTAKE DATE FILTERS
        ========================================= -->
-
-  <div
-    id="propertyDateFilters"
-    style="
-      margin-top:18px;
-      padding:18px;
-      border:1px solid #30363d;
-      border-radius:14px;
-      background:#0b0f13;
-    "
-  >
-
-    <div
-      class="eyebrow"
-      style="margin-bottom:12px;"
-    >
-      INTAKE DATE
-    </div>
-
-
-    <div
-      class="form-grid two-col"
-      style="align-items:end;"
-    >
-
-      <label>
-
-        <span>
-          Date Search
-        </span>
-
-        <select
-          id="propertyDateMode"
-        >
-
-          <option value="all">
-            All Intake Dates
-          </option>
-
-          <option value="today">
-            Today
-          </option>
-
-          <option value="single">
-            Single Intake Date
-          </option>
-
-          <option value="range">
-            Intake Date Range
-          </option>
-
-        </select>
-
-      </label>
-
-
-      <div
-        id="propertySingleDateField"
-        hidden
-      >
-
-        <label>
-
-          <span>
-            Intake Date
-          </span>
-  <div style="display:flex; gap:8px; align-items:center;">
-
-      <input
-        id="propertySingleDate"
-        type="date"
-        style="flex:1;"
-      >
-
-      <button
-        id="openSingleDateCalendar"
-        class="button secondary"
-        type="button"
-        aria-label="Open intake date calendar"
-      >
-        📅
-      </button>
-
-    </div>
-
-  </label>
-
-</div>
-
-    </div>
-
-
-    <div
-      id="propertyDateRangeFields"
-      class="form-grid two-col"
-      style="margin-top:12px;"
-      hidden
-    >
-
-      <label>
-
-        <span>
-          From Date
-        </span>
-
-        <input
-          id="propertyDateFrom"
-          type="date"
-        >
-
-      </label>
-
-
-      <label>
-
-        <span>
-          Through Date
-        </span>
-
-       <div
-  id="propertyDateRangeFields"
-  class="form-grid two-col"
-  style="margin-top:12px;"
-  hidden
+<div
+  id="propertyDateFilters"
+  style="
+    margin-top:18px;
+    padding:18px;
+    border:1px solid #30363d;
+    border-radius:14px;
+    background:#0b0f13;
+  "
 >
 
-  <label>
-    <span>
-      From Date
-    </span>
+  <div
+    class="eyebrow"
+    style="margin-bottom:12px;"
+  >
+    INTAKE DATE
+  </div>
 
-    <div style="display:flex; gap:8px; align-items:center;">
+  <div class="form-grid two-col">
 
-      <input
-        id="propertyDateFrom"
-        type="date"
-        style="flex:1;"
-      >
+    <label>
+      <span>Date Search</span>
 
-      <button
-        id="openFromDateCalendar"
-        class="button secondary"
-        type="button"
-        aria-label="Open from date calendar"
-      >
-        📅
-      </button>
+      <select id="propertyDateMode">
 
-    </div>
+        <option value="all">
+          All Intake Dates
+        </option>
 
-  </label>
+        <option value="today">
+          Today
+        </option>
 
+        <option value="single">
+          Single Intake Date
+        </option>
 
-  <label>
-    <span>
-      Through Date
-    </span>
+        <option value="range">
+          Intake Date Range
+        </option>
 
-    <div style="display:flex; gap:8px; align-items:center;">
-
-      <input
-        id="propertyDateTo"
-        type="date"
-        style="flex:1;"
-      >
-
-      <button
-        id="openToDateCalendar"
-        class="button secondary"
-        type="button"
-        aria-label="Open through date calendar"
-      >
-        📅
-      </button>
-
-    </div>
-
-  </label>
-
-</div>
-
-    <div
-      class="form-actions"
-      style="margin-top:14px;"
-    >
-
-      <button
-        id="applyPropertyDateFilter"
-        class="button secondary"
-        type="button"
-      >
-        Apply Date
-      </button>
-
-      <button
-        id="clearPropertyDateFilter"
-        class="button ghost"
-        type="button"
-      >
-        Clear Dates
-      </button>
-
-    </div>
+      </select>
+    </label>
 
   </div>
 
 
+  <!-- SINGLE DATE -->
+
+  <div
+    id="propertySingleDateField"
+    style="margin-top:14px;"
+    hidden
+  >
+
+    <label>
+      <span>Intake Date</span>
+
+      <div
+        style="
+          display:flex;
+          gap:8px;
+          align-items:center;
+          max-width:520px;
+        "
+      >
+
+        <input
+          id="propertySingleDate"
+          type="date"
+          style="flex:1;"
+        >
+
+        <button
+          id="openSingleDateCalendar"
+          class="button secondary"
+          type="button"
+          aria-label="Open intake date calendar"
+        >
+          📅
+        </button>
+
+      </div>
+
+    </label>
+
+  </div>
+
+
+  <!-- DATE RANGE -->
+
+  <div
+    id="propertyDateRangeFields"
+    class="form-grid two-col"
+    style="margin-top:14px;"
+    hidden
+  >
+
+    <label>
+      <span>From Date</span>
+
+      <div
+        style="
+          display:flex;
+          gap:8px;
+          align-items:center;
+        "
+      >
+
+        <input
+          id="propertyDateFrom"
+          type="date"
+          style="flex:1;"
+        >
+
+        <button
+          id="openFromDateCalendar"
+          class="button secondary"
+          type="button"
+          aria-label="Open from date calendar"
+        >
+          📅
+        </button>
+
+      </div>
+
+    </label>
+
+
+    <label>
+      <span>Through Date</span>
+
+      <div
+        style="
+          display:flex;
+          gap:8px;
+          align-items:center;
+        "
+      >
+
+        <input
+          id="propertyDateTo"
+          type="date"
+          style="flex:1;"
+        >
+
+        <button
+          id="openToDateCalendar"
+          class="button secondary"
+          type="button"
+          aria-label="Open through date calendar"
+        >
+          📅
+        </button>
+
+      </div>
+
+    </label>
+
+  </div>
+
+
+  <div
+    class="form-actions"
+    style="margin-top:14px;"
+  >
+
+    <button
+      id="applyPropertyDateFilter"
+      class="button secondary"
+      type="button"
+    >
+      Apply Date
+    </button>
+
+    <button
+      id="clearPropertyDateFilter"
+      class="button ghost"
+      type="button"
+    >
+      Clear Dates
+    </button>
+
+  </div>
+
+</div>
   <p class="privacy-note">
     DG and MRN are displayed only inside the authenticated
     SecureTrack property module.
