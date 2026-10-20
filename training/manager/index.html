@@ -30,7 +30,22 @@
 
 
   <style>
+.module-preview {
+  width: 100%;
+  margin-top: 18px;
+  overflow: hidden;
+  border: 1px solid #303840;
+  border-radius: 13px;
+  background: #080b0e;
+}
 
+.module-preview img {
+  display: block;
+  width: 100%;
+  height: 185px;
+  object-fit: cover;
+  object-position: top;
+}
     * {
       box-sizing: border-box;
     }
@@ -1459,7 +1474,14 @@
 
             </div>
 
+<div class="module-preview">
 
+  <img
+    src="/training/assets/personnel/personnel-overview.webp"
+    alt="Preview of the SecureTrack Personnel Administration training module"
+  >
+
+</div>
             <h3>
               Personnel Administration
             </h3>
@@ -1674,7 +1696,44 @@
 <script src="/config.js"></script>
 <script src="/secure-page.js"></script>
 
+<script>
 
+window.SECURETRACK_TRAINING_ASSETS = {
+
+  personnelAdministration: {
+
+    personnelOverview:
+      "/training/assets/personnel/personnel-overview.webp",
+
+    activePersonnelCard:
+      "/training/assets/personnel/active-personnel-card.webp",
+
+    addNewOfficer:
+      "/training/assets/personnel/add-new-officer.webp",
+
+    campusTransfer:
+      "/training/assets/personnel/campus-transfer.webp",
+
+    editPersonnel:
+      "/training/assets/personnel/edit-personnel.webp",
+
+    employeeSeparationEntry:
+      "/training/assets/personnel/employee-separation-entry.webp",
+
+    employeeSeparation:
+      "/training/assets/personnel/employee-separation.webp",
+
+    finalSeparationAuthorization:
+      "/training/assets/personnel/final-separation-authorization.webp",
+
+    outstandingProperty:
+      "/training/assets/personnel/outstanding-property.webp"
+
+  }
+
+};
+
+</script>
 <script>
 
 (async function () {
