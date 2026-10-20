@@ -369,47 +369,246 @@
       </form>
     </section>
 
-    <section id="searchPanel" class="panel">
-      <div class="panel-heading">
-        <div>
-          <div class="eyebrow">LOOKUP</div>
-          <h2>Search Property</h2>
-        </div>
+   <section id="searchPanel" class="panel">
+
+  <div class="panel-heading">
+    <div>
+      <div class="eyebrow">LOOKUP</div>
+      <h2>Search Property</h2>
+      <p class="subtitle">
+        Search property records by identifying information,
+        intake date, or a combination of both.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- =========================================
+       KEYWORD SEARCH
+       ========================================= -->
+
+  <form
+    id="propertySearchForm"
+    class="search-bar"
+  >
+
+    <input
+      id="propertySearchInput"
+      type="search"
+      autocomplete="off"
+      placeholder="Property ID, DG, MRN, description, category, or storage location"
+    >
+
+    <button
+      id="propertySearchButton"
+      class="button primary"
+      type="submit"
+    >
+      Search
+    </button>
+
+  </form>
+
+
+  <!-- =========================================
+       INTAKE DATE FILTERS
+       ========================================= -->
+
+  <div
+    id="propertyDateFilters"
+    style="
+      margin-top:18px;
+      padding:18px;
+      border:1px solid #30363d;
+      border-radius:14px;
+      background:#0b0f13;
+    "
+  >
+
+    <div
+      class="eyebrow"
+      style="margin-bottom:12px;"
+    >
+      INTAKE DATE
+    </div>
+
+
+    <div
+      class="form-grid two-col"
+      style="align-items:end;"
+    >
+
+      <label>
+
+        <span>
+          Date Search
+        </span>
+
+        <select
+          id="propertyDateMode"
+        >
+
+          <option value="all">
+            All Intake Dates
+          </option>
+
+          <option value="today">
+            Today
+          </option>
+
+          <option value="single">
+            Single Intake Date
+          </option>
+
+          <option value="range">
+            Intake Date Range
+          </option>
+
+        </select>
+
+      </label>
+
+
+      <div
+        id="propertySingleDateField"
+        hidden
+      >
+
+        <label>
+
+          <span>
+            Intake Date
+          </span>
+
+          <input
+            id="propertySingleDate"
+            type="date"
+          >
+
+        </label>
+
       </div>
 
-      <form id="propertySearchForm" class="search-bar">
-        <input id="propertySearchInput" type="search" autocomplete="off" placeholder="Property ID, DG, MRN, description, category, or storage location">
-        <button id="propertySearchButton" class="button primary" type="submit">Search</button>
-      </form>
+    </div>
 
-      <p class="privacy-note">DG and MRN are displayed only inside the authenticated SecureTrack property module.</p>
 
-      <div id="searchMessage" class="message" role="status" aria-live="polite"></div>
+    <div
+      id="propertyDateRangeFields"
+      class="form-grid two-col"
+      style="margin-top:12px;"
+      hidden
+    >
 
-      <div class="table-wrap">
-        <table class="property-table">
-          <thead>
-            <tr>
-              <th>Property ID</th>
-              <th>DG</th>
-              <th>MRN</th>
-              <th>Description</th>
-              <th>Categories</th>
-              <th>Storage</th>
-              <th>Status</th>
-              <th>Received</th>
-              <th>Hold Age</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="propertyResultsBody">
-            <tr>
-              <td colspan="10" class="empty-cell">Search for a property record above.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+      <label>
+
+        <span>
+          From Date
+        </span>
+
+        <input
+          id="propertyDateFrom"
+          type="date"
+        >
+
+      </label>
+
+
+      <label>
+
+        <span>
+          Through Date
+        </span>
+
+        <input
+          id="propertyDateTo"
+          type="date"
+        >
+
+      </label>
+
+    </div>
+
+
+    <div
+      class="form-actions"
+      style="margin-top:14px;"
+    >
+
+      <button
+        id="applyPropertyDateFilter"
+        class="button secondary"
+        type="button"
+      >
+        Apply Date
+      </button>
+
+      <button
+        id="clearPropertyDateFilter"
+        class="button ghost"
+        type="button"
+      >
+        Clear Dates
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <p class="privacy-note">
+    DG and MRN are displayed only inside the authenticated
+    SecureTrack property module.
+  </p>
+
+
+  <div
+    id="searchMessage"
+    class="message"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <div class="table-wrap">
+
+    <table class="property-table">
+
+      <thead>
+
+        <tr>
+          <th>Property ID</th>
+          <th>DG</th>
+          <th>MRN</th>
+          <th>Description</th>
+          <th>Categories</th>
+          <th>Storage</th>
+          <th>Status</th>
+          <th>Received</th>
+          <th>Hold Age</th>
+          <th>Action</th>
+        </tr>
+
+      </thead>
+
+
+      <tbody id="propertyResultsBody">
+
+        <tr>
+          <td
+            colspan="10"
+            class="empty-cell"
+          >
+            Search for a property record above.
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
     <!-- =====================================================
      LOST & FOUND
      ===================================================== -->
