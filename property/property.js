@@ -1,3510 +1,891 @@
-(async function () {
-  "use strict";
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d10">
+  <title>SecureTrack | Property / Belongings</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="stylesheet" href="property.css">
 
-  const BUILD_ID = "2026-09-20-summary-links-fix";
-  console.log(`SecureTrack Property build ${BUILD_ID}`);
-
-  function waitForAuth(timeoutMs = 6000) {
-    if (window.SecureTrackAuth) {
-      return Promise.resolve(window.SecureTrackAuth);
+  <style>
+    .category-field { position: relative; }
+    .category-picker {
+      position: relative;
+      width: 100%;
     }
-
-    return new Promise((resolve, reject) => {
-      let settled = false;
-      const startedAt = Date.now();
-
-      const cleanup = () => {
-        document.removeEventListener("securetrack:authorized", handler);
-        window.clearInterval(pollTimer);
-      };
-
-      const finish = authValue => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        resolve(authValue);
-      };
-
-      const fail = error => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        reject(error);
-      };
-
-      const handler = event => {
-        finish(event.detail || window.SecureTrackAuth);
-      };
-
-      document.addEventListener("securetrack:authorized", handler);
-
-      const pollTimer = window.setInterval(() => {
-        if (window.SecureTrackAuth) {
-          finish(window.SecureTrackAuth);
-          return;
-        }
-
-        if (Date.now() - startedAt >= timeoutMs) {
-          fail(
-            new Error(
-              "SecureTrack authorization did not initialize."
-            )
-          );
-        }
-      }, 100);
-    });
-  }
-
-  let auth;
-
-  try {
-    auth = await waitForAuth();
-  } catch (error) {
-    console.error(
-      "SecureTrack Property authentication failed:",
-      error
-    );
-
-    const currentUserName =
-      document.getElementById("currentUserName");
-
-    if (currentUserName) {
-      currentUserName.textContent =
-        "Authentication unavailable";
+    .category-picker summary {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 46px;
+      padding: 11px 12px;
+      border: 1px solid #343a41;
+      border-radius: 10px;
+      background: #080b0e;
+      color: #f4f6f7;
     }
-
-    return;
-  }
-
-  if (!auth?.db || !auth?.user) {
-    console.error(
-      "SecureTrack authorization returned without a database client or user.",
-      auth
-    );
-    return;
-  }
-
-  const db = auth.db;
-  const profile = auth.profile || {};
-  const roles = Array.isArray(auth.roles)
-    ? auth.roles
-    : [];
-
-  const isDisposalManager =
-    roles.includes("manager") ||
-    roles.includes("director");
-
-  const currentUserName =
-    document.getElementById("currentUserName");
-
-  const currentUserRole =
-    document.getElementById("currentUserRole");
-
-  const receivingOfficer =
-    document.getElementById("receivingOfficer");
-
-  const signOutButton =
-    document.getElementById("signOutButton");
-
-  const storedCount =
-    document.getElementById("storedCount");
-
-  const releasedCount =
-    document.getElementById("releasedCount");
-
-  const disposedCount =
-    document.getElementById("disposedCount");
-
-  const totalCount =
-    document.getElementById("totalCount");
-
-  const intakeForm =
-    document.getElementById("propertyIntakeForm");
-
-  const dgNumber =
-    document.getElementById("dgNumber");
-
-  const mrnNumber =
-    document.getElementById("mrnNumber");
-
-  const description =
-    document.getElementById("description");
-
-  const category =
-    document.getElementById("category");
-
-  const receivedAt =
-    document.getElementById("receivedAt");
-
-  const locationReceived =
-    document.getElementById("locationReceived");
-
- const storageLocation =
-  document.getElementById("storageLocation");
-
-const clinicalStaffName =
-  document.getElementById("clinicalStaffName");
-
-const clinicalStaffBadgeNumber =
-  document.getElementById("clinicalStaffBadgeNumber");
-
-const notes =
-  document.getElementById("notes");
-
-  const intakeResult =
-    document.getElementById("intakeResult");
-
-  const savePropertyButton =
-    document.getElementById("savePropertyButton");
-
-  const clearPropertyButton =
-    document.getElementById("clearPropertyButton");
-
-  const searchForm =
-    document.getElementById("propertySearchForm");
-
-  const searchInput =
-    document.getElementById("propertySearchInput");
-
-  const searchButton =
-    document.getElementById("propertySearchButton");
-
-  const searchMessage =
-    document.getElementById("searchMessage");
-
-  const resultsBody =
-    document.getElementById("propertyResultsBody");
-
-  let openDisposalRequests = new Map();
-  let currentDisposalItem = null;
-  let currentManagementRequest = null;
-  let activePropertyStatusFilter = null;
-
-  function roleLabel(roleList) {
-    const order = [
-      "admin",
-      "director",
-      "manager",
-      "team_lead",
-      "senior_officer",
-      "dispatcher",
-      "officer"
-    ];
-
-    const found =
-      order.find(
-        role =>
-          roleList.includes(role)
-      );
-
-    return (
-      found ||
-      roleList[0] ||
-      "user"
-    ).replaceAll("_", " ");
-  }
-
-  function showMessage(
-    element,
-    message,
-    type = "info"
-  ) {
-    if (!element) return;
-
-    element.textContent =
-      message;
-
-    element.className =
-      `message show ${type}`;
-  }
-
-  function clearMessage(element) {
-    if (!element) return;
-
-    element.textContent = "";
-    element.className = "message";
-  }
-
-  function localDateTimeValue(
-    date = new Date()
-  ) {
-    const local =
-      new Date(
-        date.getTime() -
-        date.getTimezoneOffset() * 60000
-      );
-
-    return local
-      .toISOString()
-      .slice(0, 16);
-  }
-
-  function formatDate(value) {
-    if (!value) return "—";
-
-    const date =
-      new Date(value);
-
-    if (
-      Number.isNaN(
-        date.getTime()
-      )
-    ) {
-      return "—";
+    .category-picker summary::-webkit-details-marker { display: none; }
+    .category-picker summary::after {
+      content: "▾";
+      color: #ff922b;
+      font-size: 14px;
     }
-
-    return date.toLocaleString();
-  }
-
-  function categoryList(value) {
-    return String(
-      value || ""
-    )
-      .split("|")
-      .map(
-        item =>
-          item.trim()
-      )
-      .filter(Boolean);
-  }
-
-  function hasCategory(
-    value,
-    wanted
-  ) {
-    return categoryList(
-      value
-    ).some(
-      item =>
-        item.toLowerCase() ===
-        String(wanted)
-          .trim()
-          .toLowerCase()
-    );
-  }
-// =========================================================
-// PROPERTY HOLD AGE
-// =========================================================
-
-function propertyAgeBand(
-  days
-) {
-
-  const value =
-    Number(
-      days || 0
-    );
-
-
-  if (
-    value >= 90
-  ) {
-
-    return {
-
-      className:
-        "age-band age-90-plus",
-
-      label:
-        `${value} days • Disposal Eligible`
-
-    };
-
-  }
-
-
-  if (
-    value >= 61
-  ) {
-
-    return {
-
-      className:
-        "age-band age-61-89",
-
-      label:
-        `${value} days • 61–89`
-
-    };
-
-  }
-
-
-  if (
-    value >= 31
-  ) {
-
-    return {
-
-      className:
-        "age-band age-31-60",
-
-      label:
-        `${value} days • 31–60`
-
-    };
-
-  }
-
-
-  return {
-
-    className:
-      "age-band age-0-30",
-
-    label:
-      `${value} days • 0–30`
-
-  };
-
-}
-  function escapeHtml(value) {
-    return String(
-      value ?? ""
-    ).replace(
-      /[&<>"']/g,
-      character =>
-        ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#39;"
-        })[character]
-    );
-  }
-
-  function setUserDisplay() {
-    const name =
-      profile.display_name ||
-      auth.user.email ||
-      "SecureTrack User";
-
-    currentUserName.textContent =
-      name;
-
-    currentUserRole.textContent =
-      roleLabel(roles);
-
-    receivingOfficer.value =
-      name;
-  }
-
-  async function loadSummary() {
-    const {
-      data,
-      error
-    } =
-      await db
-        .from("property_items")
-        .select("status");
-
-    if (error) {
-      console.error(
-        "Property summary load error:",
-        error
-      );
-
-      storedCount.textContent = "—";
-      releasedCount.textContent = "—";
-      disposedCount.textContent = "—";
-      totalCount.textContent = "—";
-
-      return;
+    .category-picker[open] summary::after { content: "▴"; }
+    .category-menu {
+      position: absolute;
+      z-index: 40;
+      left: 0;
+      right: 0;
+      top: calc(100% + 6px);
+      max-height: 360px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #343a41;
+      border-radius: 12px;
+      background: #0b0f13;
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
     }
-
-    const rows =
-      data || [];
-
-    storedCount.textContent =
-      rows.filter(
-        row =>
-          row.status === "stored"
-      ).length;
-
-    releasedCount.textContent =
-      rows.filter(
-        row =>
-          row.status === "released"
-      ).length;
-
-    disposedCount.textContent =
-      rows.filter(
-        row =>
-          row.status === "disposed"
-      ).length;
-
-    totalCount.textContent =
-      rows.length;
-  }
-
-  function clearIntakeForm(
-    {
-      keepMessage = false
-    } = {}
-  ) {
-    intakeForm.reset();
-
-    receivedAt.value =
-      localDateTimeValue();
-
-    receivingOfficer.value =
-      profile.display_name ||
-      auth.user.email ||
-      "SecureTrack User";
-
-    if (!keepMessage) {
-      clearMessage(
-        intakeResult
-      );
+    .category-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 9px;
+      cursor: pointer;
     }
-  }
-
-  async function loadOpenDisposalRequests() {
-    try {
-      const {
-        data,
-        error
-      } =
-        await db.rpc(
-          "get_open_property_disposal_requests"
-        );
-
-      if (error) {
-        throw error;
-      }
-
-      openDisposalRequests =
-        new Map(
-          (data || []).map(
-            row => [
-              row.property_item_id,
-              row
-            ]
-          )
-        );
-    } catch (error) {
-      console.warn(
-        "Unable to load open disposal requests:",
-        error
-      );
-
-      openDisposalRequests =
-        new Map();
+    .category-option:hover { background: #121820; }
+    .category-option input {
+      width: 17px;
+      height: 17px;
+      margin-top: 2px;
+      accent-color: #ff7a00;
+      flex: 0 0 auto;
     }
-  }
-
-  function injectWorkflowStyles() {
-    if (
-      document.getElementById(
-        "propertyWorkflowStyles"
-      )
-    ) {
-      return;
+    .category-option span {
+      color: #e8ebee;
+      line-height: 1.35;
     }
-
-    const style =
-      document.createElement("style");
-
-    style.id =
-      "propertyWorkflowStyles";
-
-    style.textContent = `
-      .property-action-stack {
-        display:flex;
-        flex-wrap:wrap;
-        gap:7px;
-        align-items:center;
-      }
-
-      .disposal-pending-badge,
-      .weapon-alert-badge {
-        display:inline-flex;
-        align-items:center;
-        border-radius:999px;
-        padding:5px 8px;
-        font-size:11px;
-        font-weight:800;
-        letter-spacing:.02em;
-        white-space:nowrap;
-      }
-
-      .disposal-pending-badge {
-        border:1px solid rgba(255,166,70,.45);
-        background:rgba(255,139,35,.10);
-        color:#ffbf79;
-      }
-
-      .weapon-alert-badge {
-        border:1px solid rgba(255,83,83,.50);
-        background:rgba(255,70,70,.10);
-        color:#ffabab;
-      }
-
-      .button.compact.danger-action {
-        border-color:rgba(255,90,90,.55);
-      }
-
-      .property-dialog {
-        width:min(92vw,620px);
-        border:1px solid #353b42;
-        border-radius:18px;
-        background:#111418;
-        color:#fff;
-        padding:0;
-        box-shadow:0 24px 80px rgba(0,0,0,.55);
-      }
-
-      .property-dialog::backdrop {
-        background:rgba(0,0,0,.72);
-      }
-
-      .property-dialog-inner {
-        padding:22px;
-      }
-
-      .property-dialog h3 {
-        margin:4px 0 8px;
-      }
-
-      .property-dialog .dialog-summary {
-        color:#c1c7ce;
-        margin-bottom:16px;
-        line-height:1.45;
-      }
-
-      .property-dialog label {
-        display:block;
-        margin:12px 0;
-      }
-
-      .property-dialog label > span {
-        display:block;
-        margin-bottom:6px;
-        font-weight:700;
-      }
-
-      .property-dialog textarea,
-      .property-dialog input[type="text"] {
-        width:100%;
-        box-sizing:border-box;
-      }
-
-      .property-dialog .confirm-row {
-        display:flex;
-        gap:9px;
-        align-items:flex-start;
-        margin-top:14px;
-      }
-
-      .property-dialog .confirm-row input {
-        margin-top:3px;
-      }
-
-      .property-dialog-actions {
-        display:flex;
-        flex-wrap:wrap;
-        gap:9px;
-        justify-content:flex-end;
-        margin-top:18px;
-      }
-
-      .property-review-panel .table-wrap {
-        margin-top:14px;
-      }
-
-      .property-review-section +
-      .property-review-section {
-        margin-top:30px;
-        padding-top:24px;
-        border-top:1px solid #30363d;
-      }
-
-      .review-count {
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        min-width:24px;
-        height:24px;
-        padding:0 7px;
-        border-radius:999px;
-        background:rgba(255,139,35,.12);
-        color:#ffb46a;
-        font-weight:800;
-        font-size:12px;
-        margin-left:7px;
-      }
-
-      .management-action-buttons {
-        display:flex;
-        flex-wrap:wrap;
-        gap:6px;
-      }
-
-      .active-summary-filter {
-        border-color:#ff7a00 !important;
-        box-shadow:
-          0 0 0 1px rgba(255,122,0,.25),
-          0 8px 24px rgba(0,0,0,.30);
-      }
-    `;
-
-    document.head.appendChild(
-      style
-    );
-  }
-
-  function installDialogs() {
-    if (
-      !document.getElementById(
-        "requestDisposalDialog"
-      )
-    ) {
-      const dialog =
-        document.createElement(
-          "dialog"
-        );
-
-      dialog.id =
-        "requestDisposalDialog";
-
-      dialog.className =
-        "property-dialog";
-
-      dialog.innerHTML = `
-        <form
-          id="requestDisposalForm"
-          method="dialog"
-          class="property-dialog-inner"
-        >
-          <div class="eyebrow">
-            DISPOSAL REQUEST
-          </div>
-
-          <h3>
-            Request Property Disposal
-          </h3>
-
-          <div
-            id="requestDisposalSummary"
-            class="dialog-summary"
-          ></div>
-
-          <label>
-            <span>
-              Request Notes
-            </span>
-<label
-  id="earlyDisposalReasonField"
-  hidden
->
-
-  <span>
-    Early Disposal Reason <b>*</b>
-  </span>
-
-  <select
-    id="earlyDisposalReason"
-  >
-
-    <option value="">
-      Select reason
-    </option>
-
-    <option value="hazardous">
-      Hazardous
-    </option>
-
-    <option value="soiled">
-      Soiled / Contaminated
-    </option>
-
-  </select>
-
-  <small class="category-help">
-    Property under 90 days may only be requested
-    for early disposal when it is hazardous or
-    soiled / contaminated.
-  </small>
-
-</label>
-            <textarea
-              id="requestDisposalNotes"
-              rows="4"
-              placeholder="Reason for disposal request or inspection information"
-            ></textarea>
-          </label>
-
-          <div
-            id="requestDisposalMessage"
-            class="message"
-            role="status"
-            aria-live="polite"
-          ></div>
-
-          <div class="property-dialog-actions">
-            <button
-              id="cancelRequestDisposal"
-              class="button secondary"
-              type="button"
-            >
-              Cancel
-            </button>
-
-            <button
-              id="confirmRequestDisposal"
-              class="button primary"
-              type="submit"
-            >
-              Send Disposal Request
-            </button>
-          </div>
-        </form>
-      `;
-
-      document.body.appendChild(
-        dialog
-      );
+    .category-help {
+      display: block;
+      margin-top: 6px;
+      color: #8f979f;
+      font-size: 12px;
     }
-
-    if (
-      isDisposalManager &&
-      !document.getElementById(
-        "completeDisposalDialog"
-      )
-    ) {
-      const dialog =
-        document.createElement(
-          "dialog"
-        );
-
-      dialog.id =
-        "completeDisposalDialog";
-
-      dialog.className =
-        "property-dialog";
-
-      dialog.innerHTML = `
-        <form
-          id="completeDisposalForm"
-          method="dialog"
-          class="property-dialog-inner"
-        >
-          <div class="eyebrow">
-            MANAGEMENT DISPOSAL
-          </div>
-
-          <h3>
-            Approve & Physically Dispose
-          </h3>
-
-          <div
-            id="completeDisposalSummary"
-            class="dialog-summary"
-          ></div>
-
-          <label>
-            <span>
-              Disposal Method <b>*</b>
-            </span>
-
-            <input
-              id="disposalMethod"
-              type="text"
-              required
-              placeholder="Example: Transferred to law enforcement"
-            >
-          </label>
-
-          <label>
-            <span>
-              Witness
-            </span>
-
-            <input
-              id="disposalWitness"
-              type="text"
-              placeholder="Optional witness name"
-            >
-          </label>
-
-          <label>
-            <span>
-              Disposal / Review Notes
-            </span>
-
-            <textarea
-              id="completeDisposalNotes"
-              rows="4"
-              placeholder="Inspection findings or disposal notes"
-            ></textarea>
-          </label>
-
-          <label class="confirm-row">
-            <input
-              id="physicalDisposalConfirmed"
-              type="checkbox"
-              required
-            >
-
-            <span>
-              I personally inspected this property and physically completed the disposal.
-            </span>
-          </label>
-
-          <div
-            id="completeDisposalMessage"
-            class="message"
-            role="status"
-            aria-live="polite"
-          ></div>
-
-          <div class="property-dialog-actions">
-            <button
-              id="cancelCompleteDisposal"
-              class="button secondary"
-              type="button"
-            >
-              Cancel
-            </button>
-
-            <button
-              id="confirmCompleteDisposal"
-              class="button primary danger-action"
-              type="submit"
-            >
-              Approve & Mark Disposed
-            </button>
-          </div>
-        </form>
-      `;
-
-      document.body.appendChild(
-        dialog
-      );
+    .category-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 9px;
+      min-height: 0;
     }
-  }
-
-  function installManagementPanel() {
-    if (!isDisposalManager) {
-      return;
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 8px;
+      border: 1px solid rgba(255,146,43,.35);
+      border-radius: 999px;
+      background: rgba(255,146,43,.08);
+      color: #ffbf79;
+      font-size: 11px;
+      font-weight: 800;
     }
-
-    if (
-      document.getElementById(
-        "propertyReviewPanel"
-      )
-    ) {
-      return;
+    .category-error {
+      display: none;
+      margin-top: 7px;
+      color: #ffadad;
+      font-size: 12px;
+      font-weight: 700;
     }
+    .category-error.show { display: block; }
 
-    const tabs =
-      document.querySelector(
-        ".tabs"
-      );
-
-    const searchPanel =
-      document.getElementById(
-        "searchPanel"
-      );
-
-    if (
-      !tabs ||
-      !searchPanel
-    ) {
-      return;
+    /* Clickable summary cards */
+    .summary-link {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
     }
+    .summary-link:hover {
+      transform: translateY(-2px);
+      border-color: rgba(242,140,40,.65);
+      box-shadow: 0 10px 28px rgba(0,0,0,.24);
+    }
+    .summary-link:focus-visible {
+      outline: 2px solid #f28c28;
+      outline-offset: 3px;
+    }
+    .summary-link small {
+      display: block;
+      margin-top: 14px;
+      color: #f2a04b;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
 
-    const tab =
-      document.createElement(
-        "button"
-      );
-
-    tab.className =
-      "tab";
-
-    tab.type =
-      "button";
-
-    tab.dataset.panel =
-      "propertyReviewPanel";
-
-    tab.innerHTML = `
-      Disposal Review
-      <span
-        id="disposalReviewCount"
-        class="review-count"
-      >
-        0
-      </span>
-    `;
-
-    tabs.appendChild(
-      tab
-    );
-
-    const panel =
-      document.createElement(
-        "section"
-      );
-
-    panel.id =
-      "propertyReviewPanel";
-
-    panel.className =
-      "panel property-review-panel";
-
-    panel.innerHTML = `
-      <div class="panel-heading">
-        <div>
-          <div class="eyebrow">
-            MANAGEMENT REVIEW
-          </div>
-
-          <h2>
-            Property Disposal Review
-          </h2>
-
-          <p class="subtitle">
-            Pending disposal requests require a physical management inspection before disposal.
-          </p>
-        </div>
-
-        <button
-          id="refreshDisposalQueue"
-          class="button secondary"
-          type="button"
-        >
-          Refresh
-        </button>
+<body data-securetrack-roles="officer,dispatcher,senior_officer,team_lead,manager,director,admin">
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="brand">SECURE<span>TRACK</span></div>
+        <div class="eyebrow">PROPERTY ACCOUNTABILITY</div>
+        <h1>Property / Belongings</h1>
+        <p class="subtitle">Log, locate, and track patient belongings with accountable chain-of-custody records.</p>
       </div>
 
-      <div
-        id="managementPropertyMessage"
-        class="message"
-        role="status"
-        aria-live="polite"
-      ></div>
+      <div class="top-actions">
+        <a class="button secondary" href="../hub.html">← Operations Hub</a>
+        <button id="signOutButton" class="button ghost" type="button">Sign Out</button>
+      </div>
+    </header>
 
-      <section class="property-review-section">
-        <h3>
-          Pending Disposal Requests
-        </h3>
+    <section class="user-strip" aria-label="Current user">
+      <span>Signed in as</span>
+      <strong id="currentUserName">Loading…</strong>
+      <span id="currentUserRole" class="role-pill"></span>
+    </section>
 
-        <div class="table-wrap">
-          <table class="property-table">
-            <thead>
-              <tr>
-                <th>Property ID</th>
-                <th>Description</th>
-                <th>Categories</th>
-                <th>Storage</th>
-                <th>Requested By</th>
-                <th>Requested</th>
-                <th>Disposal Basis</th>
-                <th>Request Notes</th>
-                <th>Assigned Reviewers</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+    <section class="summary-grid" aria-label="Property summary">
+      <button class="summary-card summary-link" type="button" data-property-status="stored" aria-label="View stored property records">
+        <span>Stored</span>
+        <strong id="storedCount">—</strong>
+        <small>View Records →</small>
+      </button>
 
-            <tbody id="disposalQueueBody">
-              <tr>
-                <td
-                  colspan="10"
-                  class="empty-cell"
-                >
-                  Loading disposal requests…
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <button class="summary-card summary-link" type="button" data-property-status="released" aria-label="View released property records">
+        <span>Released</span>
+        <strong id="releasedCount">—</strong>
+        <small>View Records →</small>
+      </button>
+
+      <button class="summary-card summary-link" type="button" data-property-status="disposed" aria-label="View disposed property records">
+        <span>Disposed</span>
+        <strong id="disposedCount">—</strong>
+        <small>View Records →</small>
+      </button>
+
+      <button class="summary-card summary-link" type="button" data-property-status="" aria-label="View all property records">
+        <span>Total Records</span>
+        <strong id="totalCount">—</strong>
+        <small>View All Records →</small>
+      </button>
+    </section>
+
+    <nav class="tabs" aria-label="Property functions">
+      <button class="tab active" type="button" data-panel="intakePanel">Log New Property</button>
+      <button class="tab" type="button" data-panel="searchPanel">Search Property</button>
+      <button
+  class="tab"
+  type="button"
+  data-panel="lostFoundPanel"
+>
+  Lost &amp; Found
+</button>
+    </nav>
+
+    <section id="intakePanel" class="panel active">
+      <div class="panel-heading">
+        <div>
+          <div class="eyebrow">NEW RECORD</div>
+          <h2>Log New Property</h2>
         </div>
-      </section>
+        <div class="auto-id">Property ID is generated automatically</div>
+      </div>
 
-      <section class="property-review-section">
-        <div class="panel-heading">
-          <div>
-            <div class="eyebrow">
-              LEADERSHIP ALERTS
-            </div>
+      <form id="propertyIntakeForm" autocomplete="off">
+        <div class="form-grid two-col">
+          <label>
+            <span>DG Number</span>
+            <input id="dgNumber" name="dgNumber" type="text" inputmode="numeric" autocomplete="off" placeholder="DG number from physical form">
+          </label>
 
-            <h3>
-              Weapon Property Alerts
-            </h3>
+          <label>
+            <span>MRN Number</span>
+            <input id="mrnNumber" name="mrnNumber" type="text" inputmode="numeric" autocomplete="off" placeholder="MRN from physical form">
+          </label>
+        </div>
+
+        <label>
+          <span>Property Description <b>*</b></span>
+          <textarea id="description" name="description" rows="3" required placeholder="Example: Black backpack containing clothing, wallet, medication and phone charger"></textarea>
+        </label>
+
+        <div class="form-grid two-col">
+          <div class="category-field">
+            <span>Property Categories <b>*</b></span>
+
+            <!--
+              property.js can continue reading document.getElementById('category').value.
+              Selected checkboxes are combined into this hidden text value.
+            -->
+            <input id="category" name="category" type="hidden" value="">
+
+            <details id="categoryPicker" class="category-picker">
+              <summary id="categorySummary">Select property categories</summary>
+
+              <div class="category-menu" role="group" aria-label="Property categories">
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Cash & Financial Items">
+                  <span>Cash & Financial Items</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Identification & Documents">
+                  <span>Identification & Documents</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Electronics">
+                  <span>Electronics</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Jewelry & Valuables">
+                  <span>Jewelry & Valuables</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Clothing & Personal Accessories">
+                  <span>Clothing & Personal Accessories</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Bags, Wallets & Containers">
+                  <span>Bags, Wallets & Containers</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Keys & Access Items">
+                  <span>Keys & Access Items</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Medical, Medication & Assistive Items">
+                  <span>Medical, Medication & Assistive Items</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Weapons">
+                  <span>Weapons</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Restricted & Hazardous Items">
+                  <span>Restricted & Hazardous Items</span>
+                </label>
+
+                <label class="category-option">
+                  <input type="checkbox" name="propertyCategory" value="Other Personal Property">
+                  <span>Other Personal Property</span>
+                </label>
+              </div>
+            </details>
+
+            <small class="category-help">Select all that apply. The description should list each item in detail.</small>
+            <div id="categoryBadges" class="category-badges" aria-live="polite"></div>
+            <div id="categoryError" class="category-error" role="alert">Select at least one property category.</div>
           </div>
 
-          <button
-            id="refreshWeaponAlerts"
-            class="button secondary"
-            type="button"
+          <label>
+            <span>Date / Time Received <b>*</b></span>
+            <input id="receivedAt" name="receivedAt" type="datetime-local" required>
+          </label>
+        </div>
+
+        <div class="form-grid two-col">
+          <label>
+            <span>Location Received <b>*</b></span>
+            <input id="locationReceived" name="locationReceived" type="text" required placeholder="Example: Emergency Center">
+          </label>
+
+          <label>
+            <span>Storage / Bin <b>*</b></span>
+            <input id="storageLocation" name="storageLocation" type="text" required placeholder="Example: Property Locker B-04">
+          </label>
+        </div>
+<div style="margin-top:24px; margin-bottom:12px;">
+  <div class="eyebrow">CLINICAL STAFF / PATIENT RELATIONS</div>
+
+  <p class="privacy-note" style="margin-top:6px;">
+    If hospital clinical staff or Patient Relations are involved in the
+    property intake, record the staff member's name and badge number.
+    If one field is entered, both are required.
+  </p>
+</div>
+
+<div class="form-grid two-col">
+  <label>
+    <span>Clinical Staff / Patient Relations Name</span>
+
+    <input
+      id="clinicalStaffName"
+      name="clinicalStaffName"
+      type="text"
+      autocomplete="off"
+      placeholder="Example: Jane Smith, RN"
+    >
+  </label>
+
+  <label>
+    <span>Staff Badge Number</span>
+
+    <input
+      id="clinicalStaffBadgeNumber"
+      name="clinicalStaffBadgeNumber"
+      type="text"
+      autocomplete="off"
+      placeholder="Hospital badge number"
+    >
+  </label>
+</div>
+        <label>
+          <span>Receiving Officer</span>
+          <input id="receivingOfficer" type="text" readonly>
+        </label>
+
+        <label>
+          <span>Notes</span>
+          <textarea id="notes" name="notes" rows="3" placeholder="Optional operational notes"></textarea>
+        </label>
+
+        <div id="intakeResult" class="message" role="status" aria-live="polite"></div>
+
+        <div class="form-actions">
+          <button id="savePropertyButton" class="button primary" type="submit">Create Property Record</button>
+          <button id="clearPropertyButton" class="button secondary" type="button">Clear Form</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="searchPanel" class="panel">
+      <div class="panel-heading">
+        <div>
+          <div class="eyebrow">LOOKUP</div>
+          <h2>Search Property</h2>
+        </div>
+      </div>
+
+      <form id="propertySearchForm" class="search-bar">
+        <input id="propertySearchInput" type="search" autocomplete="off" placeholder="Property ID, DG, MRN, description, category, or storage location">
+        <button id="propertySearchButton" class="button primary" type="submit">Search</button>
+      </form>
+
+      <p class="privacy-note">DG and MRN are displayed only inside the authenticated SecureTrack property module.</p>
+
+      <div id="searchMessage" class="message" role="status" aria-live="polite"></div>
+
+      <div class="table-wrap">
+        <table class="property-table">
+          <thead>
+            <tr>
+              <th>Property ID</th>
+              <th>DG</th>
+              <th>MRN</th>
+              <th>Description</th>
+              <th>Categories</th>
+              <th>Storage</th>
+              <th>Status</th>
+              <th>Received</th>
+              <th>Hold Age</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="propertyResultsBody">
+            <tr>
+              <td colspan="10" class="empty-cell">Search for a property record above.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <!-- =====================================================
+     LOST & FOUND
+     ===================================================== -->
+
+<section
+  id="lostFoundPanel"
+  class="panel"
+>
+
+  <div class="panel-heading">
+
+    <div>
+
+      <div class="eyebrow">
+        LOST &amp; FOUND
+      </div>
+
+      <h2>
+        Lost &amp; Found Inventory
+      </h2>
+
+      <p class="subtitle">
+        Log and track found property retained by Security.
+        Items are held for seven days before disposal becomes available.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       LOST & FOUND SUMMARY
+       =================================================== -->
+
+  <section
+    class="summary-grid"
+    aria-label="Lost and Found summary"
+  >
+
+    <div class="summary-card">
+
+      <span>
+        Active Items
+      </span>
+
+      <strong id="lostFoundActiveCount">
+        0
+      </strong>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <span>
+        Due for Disposal
+      </span>
+
+      <strong id="lostFoundDueCount">
+        0
+      </strong>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <span>
+        Closed Records
+      </span>
+
+      <strong id="lostFoundClosedCount">
+        0
+      </strong>
+
+      <small>
+        Returned / Disposed
+      </small>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================
+       NEW LOST & FOUND ITEM
+       =================================================== -->
+
+  <div
+    class="panel-heading"
+    style="margin-top:28px;"
+  >
+
+    <div>
+
+      <div class="eyebrow">
+        NEW LOST &amp; FOUND RECORD
+      </div>
+
+      <h3>
+        Log Found Item
+      </h3>
+
+    </div>
+
+  </div>
+
+
+  <form
+    id="lostFoundForm"
+    autocomplete="off"
+  >
+
+    <div class="form-grid two-col">
+
+      <label>
+
+        <span>
+          Item Description <b>*</b>
+        </span>
+
+        <input
+          id="lostFoundDescription"
+          type="text"
+          required
+          placeholder="Example: Black wallet with keys"
+        >
+
+      </label>
+
+
+      <label>
+
+        <span>
+          Turned In By <b>*</b>
+        </span>
+
+        <input
+          id="lostFoundTurnedInBy"
+          type="text"
+          required
+          placeholder="Name, department, visitor, or other identifier"
+        >
+
+      </label>
+
+    </div>
+
+
+    <div class="form-grid two-col">
+
+      <label>
+
+        <span>
+          Date / Time Turned In <b>*</b>
+        </span>
+
+        <input
+          id="lostFoundTurnedInAt"
+          type="datetime-local"
+          required
+        >
+
+      </label>
+
+
+      <label>
+
+        <span>
+          Locker / Storage Location <b>*</b>
+        </span>
+
+        <input
+          id="lostFoundStorage"
+          type="text"
+          required
+          placeholder="Example: Lost & Found Locker LF-04"
+        >
+
+      </label>
+
+    </div>
+
+
+    <label>
+
+      <span>
+        Received By
+      </span>
+
+      <input
+        id="lostFoundReceivedBy"
+        type="text"
+        readonly
+      >
+
+    </label>
+
+
+    <label>
+
+      <span>
+        Notes
+      </span>
+
+      <textarea
+        id="lostFoundNotes"
+        rows="3"
+        placeholder="Optional notes about the item or circumstances"
+      ></textarea>
+
+    </label>
+
+
+    <div
+      id="lostFoundMessage"
+      class="message"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+
+    <div class="form-actions">
+
+      <button
+        id="saveLostFoundButton"
+        class="button primary"
+        type="submit"
+      >
+        Add Lost &amp; Found Item
+      </button>
+
+
+      <button
+        id="clearLostFoundButton"
+        class="button secondary"
+        type="button"
+      >
+        Clear
+      </button>
+
+    </div>
+
+  </form>
+
+
+  <!-- ===================================================
+       LOST & FOUND INVENTORY
+       =================================================== -->
+
+  <div
+    class="panel-heading"
+    style="margin-top:34px;"
+  >
+
+    <div>
+
+      <div class="eyebrow">
+        INVENTORY
+      </div>
+
+      <h3>
+        Lost &amp; Found Records
+      </h3>
+
+      <p class="subtitle">
+        Active items remain in inventory until returned or disposed.
+      </p>
+
+    </div>
+
+
+    <button
+      id="refreshLostFoundButton"
+      class="button secondary"
+      type="button"
+    >
+      Refresh
+    </button>
+
+  </div>
+
+
+  <form
+    id="lostFoundSearchForm"
+    class="search-bar"
+  >
+
+    <input
+      id="lostFoundSearchInput"
+      type="search"
+      autocomplete="off"
+      placeholder="Item ID, description, turned in by, or storage location"
+    >
+
+    <button
+      class="button primary"
+      type="submit"
+    >
+      Search
+    </button>
+
+  </form>
+
+
+  <div class="table-wrap">
+
+    <table class="property-table">
+
+      <thead>
+
+        <tr>
+
+          <th>
+            Item ID
+          </th>
+
+          <th>
+            Description
+          </th>
+
+          <th>
+            Turned In By
+          </th>
+
+          <th>
+            Storage
+          </th>
+
+          <th>
+            Age
+          </th>
+
+          <th>
+            Disposal Eligible
+          </th>
+
+          <th>
+            Status
+          </th>
+
+          <th>
+            Action
+          </th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody id="lostFoundResultsBody">
+
+        <tr>
+
+          <td
+            colspan="8"
+            class="empty-cell"
           >
-            Refresh Alerts
-          </button>
-        </div>
-
-        <div class="table-wrap">
-          <table class="property-table">
-            <thead>
-              <tr>
-                <th>Property ID</th>
-                <th>Alert</th>
-                <th>Priority</th>
-                <th>Created</th>
-                <th>Push</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody id="weaponAlertsBody">
-              <tr>
-                <td
-                  colspan="7"
-                  class="empty-cell"
-                >
-                  Loading leadership alerts…
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    `;
-
-    searchPanel.insertAdjacentElement(
-      "afterend",
-      panel
-    );
-  }
-
-  function openRequestDisposalDialog(
-    item
-  ) {
-    currentDisposalItem =
-      item;
-
-    const dialog =
-      document.getElementById(
-        "requestDisposalDialog"
-      );
-
-    const summary =
-      document.getElementById(
-        "requestDisposalSummary"
-      );
-
-    const notesInput =
-      document.getElementById(
-        "requestDisposalNotes"
-      );
-
-    const message =
-      document.getElementById(
-        "requestDisposalMessage"
-      );
-    const ageDays =
-  Number(
-    item.hold_age_days ||
-    0
-  );
-
-   summary.innerHTML =
-  `
-    <strong>
-      ${escapeHtml(
-        item.property_number ||
-        "Property"
-      )}
-    </strong>
-
-    <br>
-
-    ${escapeHtml(
-      item.description ||
-      "No description"
-    )}
-
-    <br>
-
-    ${escapeHtml(
-      item.current_storage_location ||
-      "—"
-    )}
-
-    <br><br>
-
-    <span class="subtle">
-
-      <strong>Hold Age:</strong>
-      ${ageDays}
-      day${ageDays === 1 ? "" : "s"}
-
-      <br>
-
-      <strong>Standard Disposal Eligible:</strong>
-      ${escapeHtml(
-        formatDate(
-          item.disposal_eligible_at
-        )
-      )}
-
-    </span>
-  `;
-
-    notesInput.value =
-      "";
-
-    clearMessage(
-      message
-    );
-
-    dialog.showModal();
-  }
-
-  function openCompleteDisposalDialog(
-    request
-  ) {
-    if (!isDisposalManager) {
-      return;
-    }
-
-    currentManagementRequest =
-      request;
-
-    const dialog =
-      document.getElementById(
-        "completeDisposalDialog"
-      );
-
-    const summary =
-      document.getElementById(
-        "completeDisposalSummary"
-      );
-
-    const method =
-      document.getElementById(
-        "disposalMethod"
-      );
-
-    const witness =
-      document.getElementById(
-        "disposalWitness"
-      );
-
-    const disposalNotes =
-      document.getElementById(
-        "completeDisposalNotes"
-      );
-
-    const confirmed =
-      document.getElementById(
-        "physicalDisposalConfirmed"
-      );
-
-    const message =
-      document.getElementById(
-        "completeDisposalMessage"
-      );
-
-   const basis =
-  String(
-    request.eligibility_basis ||
-    ""
-  ).toLowerCase();
-
-
-const reason =
-  String(
-    request.early_disposal_reason ||
-    ""
-  ).toLowerCase();
-
-
-const holdDays =
-  Number(
-    request.hold_days_at_request ||
-    0
-  );
-
-
-let disposalBasisText =
-  "Standard Disposal Request";
-
-
-if (
-  basis === "hazardous"
-) {
-
-  disposalBasisText =
-    `Early Disposal — Hazardous • ${holdDays} days held`;
-
-}
-else if (
-  basis === "soiled"
-) {
-
-  disposalBasisText =
-    `Early Disposal — Soiled / Contaminated • ${holdDays} days held`;
-
-}
-else if (
-  basis === "90_day_hold"
-) {
-
-  disposalBasisText =
-    `90-Day Hold Complete • ${holdDays} days held`;
-
-}
-
-
-summary.innerHTML =
-  `
-    <strong>
-      ${escapeHtml(
-        request.property_number ||
-        "Property"
-      )}
-    </strong>
-
-    <br>
-
-    ${escapeHtml(
-      request.description ||
-      "No description"
-    )}
-
-    <br>
-
-    <span class="subtle">
-
-      Storage:
-      ${escapeHtml(
-        request.storage_location ||
-        "—"
-      )}
-
-      <br>
-
-      <strong>Disposal Basis:</strong>
-      ${escapeHtml(
-        disposalBasisText
-      )}
-
-      <br>
-
-      <strong>Request Notes:</strong>
-      ${escapeHtml(
-        request.request_notes ||
-        "—"
-      )}
-
-    </span>
-  `;
-
-    method.value = "";
-    witness.value = "";
-    disposalNotes.value = "";
-    confirmed.checked = false;
-
-    clearMessage(
-      message
-    );
-
-    dialog.showModal();
-  }
-
-async function requestDisposal(
-  item,
-  requestNotes,
-  earlyReason = null
-) {
-
-  const {
-    data,
-    error
-  } =
-    await db.rpc(
-      "request_property_disposal_v2",
-      {
-
-        p_property_number:
-          item.property_number,
-
-        p_notes:
-          requestNotes.trim() ||
-          null,
-
-        p_early_reason:
-          earlyReason ||
-          null
-
-      }
-    );
-
-
-  if (
-    error
-  ) {
-
-    throw error;
-
-  }
-
-
-  return data || {};
-
-}
-
-  async function denyDisposal(
-    request
-  ) {
-    const reason =
-      window.prompt(
-        `Reason for denying disposal of ${request.property_number}:`
-      );
-
-    if (
-      reason === null
-    ) {
-      return;
-    }
-
-    if (
-      !reason.trim()
-    ) {
-      showMessage(
-        document.getElementById(
-          "managementPropertyMessage"
-        ),
-        "Enter a reason before denying a disposal request.",
-        "error"
-      );
-
-      return;
-    }
-
-    if (
-      !window.confirm(
-        `Deny disposal request for ${request.property_number}?`
-      )
-    ) {
-      return;
-    }
-
-    try {
-      const {
-        error
-      } =
-        await db.rpc(
-          "deny_property_disposal",
-          {
-            p_disposal_request_id:
-              request.disposal_request_id,
-
-            p_notes:
-              reason.trim()
-          }
-        );
-
-      if (error) {
-        throw error;
+            No Lost &amp; Found records loaded.
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../secure-page.js"></script>
+  <script src="property.js?v=20261009-property-aging-1"></script>
+  <script src="lost-found.js?v=20261009-1"></script>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const form = document.getElementById("propertyIntakeForm");
+      const categoryInput = document.getElementById("category");
+      const categoryPicker = document.getElementById("categoryPicker");
+      const categorySummary = document.getElementById("categorySummary");
+      const categoryBadges = document.getElementById("categoryBadges");
+      const categoryError = document.getElementById("categoryError");
+      const checkboxes = [
+        ...document.querySelectorAll('input[name="propertyCategory"]')
+      ];
+
+      function selectedCategories() {
+        return checkboxes
+          .filter(box => box.checked)
+          .map(box => box.value);
       }
 
-      showMessage(
-        document.getElementById(
-          "managementPropertyMessage"
-        ),
-        `${request.property_number} disposal request denied. The property remains stored.`,
-        "success"
-      );
+      function syncCategories() {
+        const selected = selectedCategories();
 
-      await Promise.all([
-        loadManagementPanel(),
+        categoryInput.value = selected.join(" | ");
 
-        runSearch(
-          searchInput.value,
-          {
-            preserveMessage:
-              true
-          }
-        ),
-
-        loadSummary()
-      ]);
-    } catch (error) {
-      console.error(
-        "Deny property disposal error:",
-        error
-      );
-
-      showMessage(
-        document.getElementById(
-          "managementPropertyMessage"
-        ),
-        error.message ||
-        "Unable to deny disposal request.",
-        "error"
-      );
-    }
-  }
-
-  async function notifyWeaponLeadership(
-    propertyItemId
-  ) {
-    if (!propertyItemId) {
-      throw new Error(
-        "Weapon property was created, but its record ID was not returned."
-      );
-    }
-
-    if (
-      !db.functions?.invoke
-    ) {
-      throw new Error(
-        "SecureTrack push notification service is unavailable."
-      );
-    }
-
-    const {
-      data,
-      error
-    } =
-      await db.functions.invoke(
-        "send-security-ntfy",
-        {
-          body: {
-            property_item_id:
-              propertyItemId
-          }
-        }
-      );
-
-    if (error) {
-      throw error;
-    }
-
-    if (
-      data?.ok === false
-    ) {
-      throw new Error(
-        data.error ||
-        "Weapon leadership notification failed."
-      );
-    }
-
-    return data;
-  }
-
-  function renderSearchResults(
-    rows
-  ) {
-    resultsBody.innerHTML =
-      "";
-
-    if (!rows.length) {
-      const tr =
-        document.createElement(
-          "tr"
-        );
-
-      const td =
-        document.createElement(
-          "td"
-        );
-
-      td.colSpan = 10;
-      td.className = "empty-cell";
-      td.textContent =
-        "No matching property records found.";
-
-      tr.appendChild(
-        td
-      );
-
-      resultsBody.appendChild(
-        tr
-      );
-
-      return;
-    }
-
-    rows.forEach(
-      item => {
-        const tr =
-          document.createElement(
-            "tr"
-          );
-
-        const pendingRequest =
-          openDisposalRequests.get(
-            item.id
-          );
-
-        const values = [
-          {
-            value:
-              item.property_number ||
-              "—",
-
-            className:
-              "property-number"
-          },
-
-          {
-            value:
-              item.dg_number ||
-              "—"
-          },
-
-          {
-            value:
-              item.mrn_number ||
-              "—"
-          },
-
-          {
-            value:
-              item.description ||
-              "—"
-          },
-
-          {
-            value:
-              item.category ||
-              "—"
-          },
-
-          {
-            value:
-              item.current_storage_location ||
-              "—"
-          }
-        ];
-
-        values.forEach(
-          entry => {
-            const td =
-              document.createElement(
-                "td"
-              );
-
-            td.textContent =
-              entry.value;
-
-            if (
-              entry.className
-            ) {
-              td.className =
-                entry.className;
-            }
-
-            tr.appendChild(
-              td
-            );
-          }
-        );
-
-        const statusTd =
-          document.createElement(
-            "td"
-          );
-
-        const status =
-          document.createElement(
-            "span"
-          );
-
-        status.className =
-          `status-pill ${item.status || ""}`;
-
-        status.textContent =
-          String(
-            item.status ||
-            "—"
-          ).replaceAll(
-            "_",
-            " "
-          );
-
-        statusTd.appendChild(
-          status
-        );
-
-        if (
-          pendingRequest
-        ) {
-          const pending =
-            document.createElement(
-              "span"
-            );
-
-          pending.className =
-            "disposal-pending-badge";
-
-          pending.textContent =
-            "Disposal Requested";
-
-          pending.title =
-            `Requested by ${
-              pendingRequest
-                .requested_by_name ||
-              "SecureTrack user"
-            } ${formatDate(
-              pendingRequest
-                .requested_at
-            )}`;
-
-          statusTd.appendChild(
-            document.createTextNode(
-              " "
-            )
-          );
-
-          statusTd.appendChild(
-            pending
-          );
-        }
-
-        if (
-          hasCategory(
-            item.category,
-            "Weapons"
-          )
-        ) {
-          const weapon =
-            document.createElement(
-              "span"
-            );
-
-          weapon.className =
-            "weapon-alert-badge";
-
-          weapon.textContent =
-            "Weapon";
-
-          statusTd.appendChild(
-            document.createTextNode(
-              " "
-            )
-          );
-
-          statusTd.appendChild(
-            weapon
-          );
-        }
-
-        tr.appendChild(
-          statusTd
-        );
-
-        const dateTd =
-          document.createElement(
-            "td"
-          );
-
-        dateTd.textContent =
-          formatDate(
-            item.received_at
-          );
-
-        tr.appendChild(
-          dateTd
-        );
-       
-// =========================================
-// PROPERTY HOLD AGE
-// =========================================
-
-const ageTd =
-  document.createElement(
-    "td"
-  );
-
-
-const ageInfo =
-  propertyAgeBand(
-    item.hold_age_days
-  );
-
-
-const ageBadge =
-  document.createElement(
-    "span"
-  );
-
-
-ageBadge.className =
-  ageInfo.className;
-
-
-ageBadge.textContent =
-  ageInfo.label;
-
-
-ageBadge.title =
-  `Standard disposal eligible ${formatDate(
-    item.disposal_eligible_at
-  )}`;
-
-
-ageTd.appendChild(
-  ageBadge
-);
-
-
-tr.appendChild(
-  ageTd
-);
-        const actionTd =
-          document.createElement(
-            "td"
-          );
-
-        const actionStack =
-          document.createElement(
-            "div"
-          );
-
-        actionStack.className =
-          "property-action-stack";
-
-        const openLink =
-          document.createElement(
-            "a"
-          );
-
-        openLink.className =
-          "button secondary compact";
-
-        openLink.href =
-          `record.html?id=${encodeURIComponent(
-            item.id
-          )}`;
-
-        openLink.textContent =
-          "Open";
-
-        actionStack.appendChild(
-          openLink
-        );
-
-if (
-  item.status ===
-    "stored"
-) {
-
-  const disposalButton =
-    document.createElement(
-      "button"
-    );
-
-
-  disposalButton.type =
-    "button";
-
-
-  disposalButton.className =
-    "button secondary compact";
-
-
-  if (
-    pendingRequest
-  ) {
-
-    disposalButton.textContent =
-      "Disposal Requested";
-
-
-    disposalButton.disabled =
-      true;
-
-  }
-  else {
-
-    // =========================================
-    // 90-DAY PROPERTY HOLD RULE
-    // =========================================
-
-    if (
-      item.disposal_eligible ===
-        true
-    ) {
-
-      disposalButton.textContent =
-        "Request Disposal";
-
-
-      disposalButton.title =
-        "This property has completed the 90-day retention period.";
-
-    }
-    else {
-
-      disposalButton.textContent =
-        "Request Early Disposal";
-
-
-      disposalButton.title =
-        "Property under 90 days may only be disposed early if it is hazardous or soiled / contaminated.";
-
-    }
-
-
-    disposalButton.addEventListener(
-      "click",
-      () => {
-
-        openRequestDisposalDialog(
-          item
-        );
-
-      }
-    );
-
-  }
-
-
-  actionStack.appendChild(
-    disposalButton
-  );
-
-}
-
-        actionTd.appendChild(
-          actionStack
-        );
-
-        tr.appendChild(
-          actionTd
-        );
-
-        tr.classList.add(
-          "clickable-row"
-        );
-
-        tr.addEventListener(
-          "dblclick",
-          event => {
-            if (
-              event.target.closest(
-                "a,button"
-              )
-            ) {
-              return;
-            }
-
-            window.location.href =
-              openLink.href;
-          }
-        );
-
-        resultsBody.appendChild(
-          tr
-        );
-      }
-    );
-  }
-
-  async function runSearch(
-    searchTerm = "",
-    {
-      preserveMessage = false
-    } = {}
-  ) {
-    searchButton.disabled =
-      true;
-
-    searchButton.textContent =
-      "Searching…";
-
-    if (!preserveMessage) {
-      clearMessage(
-        searchMessage
-      );
-    }
-
-    try {
-      const [
-        searchResult
-      ] =
-        await Promise.all([
-          db.rpc(
-            "search_property_items_v2",
-            {
-              p_search:
-                searchTerm.trim()
-            }
-          ),
-
-          loadOpenDisposalRequests()
-        ]);
-
-      if (
-        searchResult.error
-      ) {
-        throw searchResult.error;
-      }
-
-      const allRows =
-        searchResult.data ||
-        [];
-
-      const rows =
-        activePropertyStatusFilter
-          ? allRows.filter(
-              row =>
-                row.status ===
-                activePropertyStatusFilter
-            )
-          : allRows;
-
-      renderSearchResults(
-        rows
-      );
-
-      if (!preserveMessage) {
-        if (
-          activePropertyStatusFilter
-        ) {
-          const label =
-            activePropertyStatusFilter
-              .charAt(0)
-              .toUpperCase() +
-            activePropertyStatusFilter
-              .slice(1);
-
-          showMessage(
-            searchMessage,
-            `Showing ${rows.length} ${label.toLowerCase()} property record${rows.length === 1 ? "" : "s"}.`,
-            "info"
-          );
-        } else if (
-          searchTerm.trim()
-        ) {
-          showMessage(
-            searchMessage,
-            `${rows.length} matching record${rows.length === 1 ? "" : "s"} found.`,
-            rows.length
-              ? "success"
-              : "info"
-          );
-        } else {
-          showMessage(
-            searchMessage,
-            `Showing ${rows.length} most recent property record${rows.length === 1 ? "" : "s"}.`,
-            "info"
-          );
-        }
-      }
-    } catch (error) {
-      console.error(
-        "Property search error:",
-        error
-      );
-
-      showMessage(
-        searchMessage,
-        error.message ||
-        "Unable to search property records.",
-        "error"
-      );
-    } finally {
-      searchButton.disabled =
-        false;
-
-      searchButton.textContent =
-        "Search";
-    }
-  }
-
-  function renderDisposalQueue(
-    rows
-  ) {
-    const body =
-      document.getElementById(
-        "disposalQueueBody"
-      );
-
-    const count =
-      document.getElementById(
-        "disposalReviewCount"
-      );
-
-    if (!body) {
-      return;
-    }
-
-    if (count) {
-      count.textContent =
-        String(rows.length);
-    }
-
-    body.innerHTML =
-      "";
-
-    if (!rows.length) {
-      const tr =
-        document.createElement(
-          "tr"
-        );
-
-      const td =
-        document.createElement(
-          "td"
-        );
-
-      td.colSpan = 10;
-      td.className = "empty-cell";
-
-      td.textContent =
-        "No pending property disposal requests.";
-
-      tr.appendChild(
-        td
-      );
-
-      body.appendChild(
-        tr
-      );
-
-      return;
-    }
-
-    rows.forEach(
-      request => {
-        const tr =
-          document.createElement(
-            "tr"
-          );
-
-       [
-  request.property_number || "—",
-  request.description || "—",
-  request.category || "—",
-  request.storage_location || "—",
-  request.requested_by_name || "—",
-  formatDate(request.requested_at)
-].forEach(value => {
-
-  const td =
-    document.createElement(
-      "td"
-    );
-
-  td.textContent =
-    value;
-
-  tr.appendChild(
-    td
-  );
-
-});
-
-
-// =========================================
-// DISPOSAL BASIS
-// =========================================
-
-const basisTd =
-  document.createElement(
-    "td"
-  );
-
-
-const basis =
-  String(
-    request.eligibility_basis ||
-    ""
-  ).toLowerCase();
-
-
-const earlyReason =
-  String(
-    request.early_disposal_reason ||
-    ""
-  ).toLowerCase();
-
-
-const holdDays =
-  Number(
-    request.hold_days_at_request ||
-    0
-  );
-
-
-if (
-  basis === "hazardous" ||
-  basis === "soiled"
-) {
-
-  const badge =
-    document.createElement(
-      "span"
-    );
-
-  badge.className =
-    "early-disposal-badge";
-
-  badge.textContent =
-    "Early Disposal";
-
-  basisTd.appendChild(
-    badge
-  );
-
-
-  const detail =
-    document.createElement(
-      "div"
-    );
-
-  detail.className =
-    "subtle";
-
-  detail.style.marginTop =
-    "6px";
-
-
-  const reasonLabel =
-    earlyReason === "soiled"
-      ? "Soiled / Contaminated"
-      : "Hazardous";
-
-
-  detail.textContent =
-    `${reasonLabel} • ${holdDays} days held`;
-
-  basisTd.appendChild(
-    detail
-  );
-
-}
-else if (
-  basis === "90_day_hold"
-) {
-
-  const badge =
-    document.createElement(
-      "span"
-    );
-
-  badge.className =
-    "age-band age-90-plus";
-
-  badge.textContent =
-    "90-Day Hold Complete";
-
-  basisTd.appendChild(
-    badge
-  );
-
-
-  const detail =
-    document.createElement(
-      "div"
-    );
-
-  detail.className =
-    "subtle";
-
-  detail.style.marginTop =
-    "6px";
-
-  detail.textContent =
-    `${holdDays} days held`;
-
-  basisTd.appendChild(
-    detail
-  );
-
-}
-else {
-
-  basisTd.textContent =
-    "Standard Disposal Request";
-
-}
-
-
-tr.appendChild(
-  basisTd
-);
-
-// =========================================
-// REQUEST NOTES
-// =========================================
-
-const notesTd =
-  document.createElement(
-    "td"
-  );
-
-
-notesTd.textContent =
-  request.request_notes ||
-  "—";
-
-
-tr.appendChild(
-  notesTd
-);
-// =========================================
-// ASSIGNED REVIEWERS
-// =========================================
-
-const reviewersTd =
-  document.createElement(
-    "td"
-  );
-
-reviewersTd.textContent =
-  request.assigned_reviewers ||
-  "—";
-
-tr.appendChild(
-  reviewersTd
-);
-        const actionTd =
-          document.createElement(
-            "td"
-          );
-
-        const buttons =
-          document.createElement(
-            "div"
-          );
-
-        buttons.className =
-          "management-action-buttons";
-
-        const openLink =
-          document.createElement(
-            "a"
-          );
-
-        openLink.className =
-          "button secondary compact";
-
-        openLink.href =
-          `record.html?id=${encodeURIComponent(
-            request.property_item_id
-          )}`;
-
-        openLink.textContent =
-          "Open";
-
-        buttons.appendChild(
-          openLink
-        );
-
-        const disposeButton =
-          document.createElement(
-            "button"
-          );
-
-        disposeButton.type =
-          "button";
-
-        disposeButton.className =
-          "button primary compact danger-action";
-
-        disposeButton.textContent =
-          "Approve & Dispose";
-
-        disposeButton.addEventListener(
-          "click",
-          () => {
-            openCompleteDisposalDialog(
-              request
-            );
-          }
-        );
-
-        buttons.appendChild(
-          disposeButton
-        );
-
-        const denyButton =
-          document.createElement(
-            "button"
-          );
-
-        denyButton.type =
-          "button";
-
-        denyButton.className =
-          "button secondary compact";
-
-        denyButton.textContent =
-          "Deny";
-
-        denyButton.addEventListener(
-          "click",
-          () =>
-            denyDisposal(
-              request
-            )
-        );
-
-        buttons.appendChild(
-          denyButton
-        );
-
-        actionTd.appendChild(
-          buttons
-        );
-
-        tr.appendChild(
-          actionTd
-        );
-
-        body.appendChild(
-          tr
-        );
-      }
-    );
-  }
-
-  function renderWeaponAlerts(
-    rows
-  ) {
-    const body =
-      document.getElementById(
-        "weaponAlertsBody"
-      );
-
-    if (!body) {
-      return;
-    }
-
-    body.innerHTML =
-      "";
-
-    if (!rows.length) {
-      const tr =
-        document.createElement(
-          "tr"
-        );
-
-      const td =
-        document.createElement(
-          "td"
-        );
-
-      td.colSpan = 7;
-      td.className = "empty-cell";
-
-      td.textContent =
-        "No weapon property alerts for this account.";
-
-      tr.appendChild(
-        td
-      );
-
-      body.appendChild(
-        tr
-      );
-
-      return;
-    }
-
-    rows.forEach(
-      alert => {
-        const tr =
-          document.createElement(
-            "tr"
-          );
-
-        const values = [
-          alert.property_number ||
-            "—",
-
-          alert.title ||
-            "Weapon Property Alert",
-
-          alert.priority ||
-            "high",
-
-          formatDate(
-            alert.created_at
-          ),
-
-          alert.push_status ||
-            "—",
-
-          alert.read_at
-            ? "Read"
-            : "Unread"
-        ];
-
-        values.forEach(
-          (
-            value,
-            index
-          ) => {
-            const td =
-              document.createElement(
-                "td"
-              );
-
-            td.textContent =
-              value;
-
-            if (
-              index === 2 &&
-              String(value)
-                .toLowerCase() ===
-                "high"
-            ) {
-              td.className =
-                "weapon-alert-badge";
-            }
-
-            tr.appendChild(
-              td
-            );
-          }
-        );
-
-        const actionTd =
-          document.createElement(
-            "td"
-          );
-
-        const buttons =
-          document.createElement(
-            "div"
-          );
-
-        buttons.className =
-          "management-action-buttons";
-
-        const openLink =
-          document.createElement(
-            "a"
-          );
-
-        openLink.className =
-          "button secondary compact";
-
-        openLink.href =
-          `record.html?id=${encodeURIComponent(
-            alert.property_item_id
-          )}`;
-
-        openLink.textContent =
-          "Open";
-
-        buttons.appendChild(
-          openLink
-        );
-
-        if (
-          !alert.read_at
-        ) {
-          const readButton =
-            document.createElement(
-              "button"
-            );
-
-          readButton.type =
-            "button";
-
-          readButton.className =
-            "button secondary compact";
-
-          readButton.textContent =
-            "Mark Read";
-
-          readButton.addEventListener(
-            "click",
-            async () => {
-              readButton.disabled =
-                true;
-
-              try {
-                const {
-                  error
-                } =
-                  await db.rpc(
-                    "mark_property_leadership_alert_read",
-                    {
-                      p_alert_id:
-                        alert.alert_id
-                    }
-                  );
-
-                if (error) {
-                  throw error;
-                }
-
-                await loadWeaponAlerts();
-              } catch (error) {
-                console.error(
-                  "Mark property alert read error:",
-                  error
-                );
-
-                showMessage(
-                  document.getElementById(
-                    "managementPropertyMessage"
-                  ),
-                  error.message ||
-                  "Unable to mark leadership alert as read.",
-                  "error"
-                );
-              } finally {
-                readButton.disabled =
-                  false;
-              }
-            }
-          );
-
-          buttons.appendChild(
-            readButton
-          );
-        }
-
-        actionTd.appendChild(
-          buttons
-        );
-
-        tr.appendChild(
-          actionTd
-        );
-
-        body.appendChild(
-          tr
-        );
-      }
-    );
-  }
-
-  async function loadDisposalQueue() {
-    if (!isDisposalManager) {
-      return [];
-    }
-
-    const {
-      data,
-      error
-    } =
-      await db.rpc(
-        "get_property_disposal_queue_v2"
-      );
-
-    if (error) {
-      throw error;
-    }
-
-    const rows =
-      data || [];
-
-    renderDisposalQueue(
-      rows
-    );
-
-    return rows;
-  }
-
-  async function loadWeaponAlerts() {
-    if (!isDisposalManager) {
-      return [];
-    }
-
-    try {
-      const {
-        data,
-        error
-      } =
-        await db.rpc(
-          "get_my_property_leadership_alerts",
-          {
-            p_unread_only:
-              false
-          }
-        );
-
-      if (error) {
-        throw error;
-      }
-
-      const rows =
-        data || [];
-
-      renderWeaponAlerts(
-        rows
-      );
-
-      return rows;
-    } catch (error) {
-      const body =
-        document.getElementById(
-          "weaponAlertsBody"
-        );
-
-      if (body) {
-        body.innerHTML =
-          "";
-
-        const tr =
-          document.createElement(
-            "tr"
-          );
-
-        const td =
-          document.createElement(
-            "td"
-          );
-
-        td.colSpan = 7;
-        td.className = "empty-cell";
-
-        td.textContent =
-          error.message ||
-          "Unable to load weapon property alerts.";
-
-        tr.appendChild(
-          td
-        );
-
-        body.appendChild(
-          tr
-        );
-      }
-
-      console.warn(
-        "Unable to load property leadership alerts:",
-        error
-      );
-
-      return [];
-    }
-  }
-
-  async function loadManagementPanel() {
-    if (!isDisposalManager) {
-      return;
-    }
-
-    const message =
-      document.getElementById(
-        "managementPropertyMessage"
-      );
-
-    try {
-      await Promise.all([
-        loadDisposalQueue(),
-        loadWeaponAlerts()
-      ]);
-    } catch (error) {
-      console.error(
-        "Property disposal queue load error:",
-        error
-      );
-
-      showMessage(
-        message,
-        error.message ||
-        "Unable to load the property disposal queue.",
-        "error"
-      );
-    }
-  }
-
-  injectWorkflowStyles();
-  installDialogs();
-  installManagementPanel();
-
-  document
-    .querySelectorAll(
-      ".tab"
-    )
-    .forEach(
-      tab => {
-        tab.addEventListener(
-          "click",
-          async () => {
-            document
-              .querySelectorAll(
-                ".tab"
-              )
-              .forEach(
-                item =>
-                  item.classList.remove(
-                    "active"
-                  )
-              );
-
-            document
-              .querySelectorAll(
-                ".panel"
-              )
-              .forEach(
-                panel =>
-                  panel.classList.remove(
-                    "active"
-                  )
-              );
-
-            tab.classList.add(
-              "active"
-            );
-
-            document
-              .getElementById(
-                tab.dataset.panel
-              )
-              ?.classList.add(
-                "active"
-              );
-
-            if (
-              tab.dataset.panel ===
-              "searchPanel"
-            ) {
-              searchInput.focus();
-
-              await runSearch(
-                searchInput.value
-              );
-            }
-
-            if (
-              tab.dataset.panel ===
-              "propertyReviewPanel"
-            ) {
-              await loadManagementPanel();
-            }
-          }
-        );
-      }
-    );
-
-  const requestDisposalDialog =
-    document.getElementById(
-      "requestDisposalDialog"
-    );
-
-  const requestDisposalForm =
-    document.getElementById(
-      "requestDisposalForm"
-    );
-
-  const requestDisposalNotes =
-    document.getElementById(
-      "requestDisposalNotes"
-    );
-
-  const requestDisposalMessage =
-    document.getElementById(
-      "requestDisposalMessage"
-    );
-
-  const confirmRequestDisposal =
-    document.getElementById(
-      "confirmRequestDisposal"
-    );
-
-  document
-    .getElementById(
-      "cancelRequestDisposal"
-    )
-    ?.addEventListener(
-      "click",
-      () =>
-        requestDisposalDialog.close()
-    );
-
-  requestDisposalForm
-    ?.addEventListener(
-      "submit",
-      async event => {
-        event.preventDefault();
-
-        if (
-          !currentDisposalItem
-        ) {
+        if (!selected.length) {
+          categorySummary.textContent = "Select property categories";
+          categoryBadges.innerHTML = "";
           return;
         }
 
-        confirmRequestDisposal.disabled =
-          true;
+        categorySummary.textContent =
+          selected.length === 1
+            ? selected[0]
+            : `${selected.length} categories selected`;
 
-        confirmRequestDisposal.textContent =
-          "Sending Request…";
+        categoryBadges.innerHTML = selected
+          .map(value => {
+            const safe = String(value)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
 
-        clearMessage(
-          requestDisposalMessage
-        );
-const ageDays =
-  Number(
-    currentDisposalItem.hold_age_days ||
-    0
-  );
+            return `<span class="category-badge">${safe}</span>`;
+          })
+          .join("");
 
-
-const earlyReason =
-  ageDays < 90
-    ? (
-        document.getElementById(
-          "earlyDisposalReason"
-        )?.value ||
-        ""
-      )
-    : null;
-
-
-if (
-  ageDays < 90 &&
-  !earlyReason
-) {
-
-  showMessage(
-    requestDisposalMessage,
-    "Select Hazardous or Soiled / Contaminated for an early disposal request.",
-    "error"
-  );
-
-  requestDisposalButton.disabled =
-    false;
-
-  return;
-
-}
-        try {
-          const result =
-            await requestDisposal(
-              currentDisposalItem,
-              requestDisposalNotes.value,
-              earlyReason
-            );
-
-          requestDisposalDialog.close();
-
-          showMessage(
-            searchMessage,
-            result.already_pending
-              ? `${currentDisposalItem.property_number} already has a pending disposal request.`
-              : `${currentDisposalItem.property_number} sent to Archie and Cory for disposal review.`,
-            "success"
-          );
-
-          await Promise.all([
-            runSearch(
-              searchInput.value,
-              {
-                preserveMessage:
-                  true
-              }
-            ),
-
-            isDisposalManager
-              ? loadManagementPanel()
-              : Promise.resolve()
-          ]);
-        } catch (error) {
-          console.error(
-            "Request property disposal error:",
-            error
-          );
-
-          showMessage(
-            requestDisposalMessage,
-            error.message ||
-            "Unable to request property disposal.",
-            "error"
-          );
-        } finally {
-          confirmRequestDisposal.disabled =
-            false;
-
-          confirmRequestDisposal.textContent =
-            "Send Disposal Request";
-        }
+        categoryError.classList.remove("show");
       }
-    );
 
-  if (isDisposalManager) {
-    const completeDisposalDialog =
-      document.getElementById(
-        "completeDisposalDialog"
-      );
+      checkboxes.forEach(box => {
+        box.addEventListener("change", syncCategories);
+      });
 
-    const completeDisposalForm =
-      document.getElementById(
-        "completeDisposalForm"
-      );
-
-    const disposalMethod =
-      document.getElementById(
-        "disposalMethod"
-      );
-
-    const disposalWitness =
-      document.getElementById(
-        "disposalWitness"
-      );
-
-    const completeDisposalNotes =
-      document.getElementById(
-        "completeDisposalNotes"
-      );
-
-    const physicalDisposalConfirmed =
-      document.getElementById(
-        "physicalDisposalConfirmed"
-      );
-
-    const completeDisposalMessage =
-      document.getElementById(
-        "completeDisposalMessage"
-      );
-
-    const confirmCompleteDisposal =
-      document.getElementById(
-        "confirmCompleteDisposal"
-      );
-
-    document
-      .getElementById(
-        "cancelCompleteDisposal"
-      )
-      ?.addEventListener(
-        "click",
-        () =>
-          completeDisposalDialog.close()
-      );
-
-    completeDisposalForm
-      ?.addEventListener(
+      form.addEventListener(
         "submit",
-        async event => {
-          event.preventDefault();
+        event => {
+          syncCategories();
 
-          if (
-            !currentManagementRequest
-          ) {
-            return;
+          if (!selectedCategories().length) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            categoryError.classList.add("show");
+            categoryPicker.open = true;
+            categoryPicker.scrollIntoView({ behavior: "smooth", block: "center" });
           }
-
-          if (
-            !physicalDisposalConfirmed.checked
-          ) {
-            showMessage(
-              completeDisposalMessage,
-              "Confirm that you personally inspected and physically disposed of the property.",
-              "error"
-            );
-
-            return;
-          }
-
-          confirmCompleteDisposal.disabled =
-            true;
-
-          confirmCompleteDisposal.textContent =
-            "Recording Disposal…";
-
-          clearMessage(
-            completeDisposalMessage
-          );
-
-          try {
-            const {
-              data,
-              error
-            } =
-              await db.rpc(
-                "dispose_property_item",
-                {
-                  p_disposal_request_id:
-                    currentManagementRequest
-                      .disposal_request_id,
-
-                  p_disposal_method:
-                    disposalMethod
-                      .value
-                      .trim(),
-
-                  p_witness:
-                    disposalWitness
-                      .value
-                      .trim() ||
-                    null,
-
-                  p_notes:
-                    completeDisposalNotes
-                      .value
-                      .trim() ||
-                    null
-                }
-              );
-
-            if (error) {
-              throw error;
-            }
-
-            completeDisposalDialog.close();
-
-            showMessage(
-              document.getElementById(
-                "managementPropertyMessage"
-              ),
-              `${
-                data?.property_number ||
-                currentManagementRequest
-                  .property_number
-              } marked disposed by ${
-                data?.disposed_by ||
-                profile.display_name ||
-                "management"
-              }.`,
-              "success"
-            );
-
-            await Promise.all([
-              loadManagementPanel(),
-
-              runSearch(
-                searchInput.value,
-                {
-                  preserveMessage:
-                    true
-                }
-              ),
-
-              loadSummary()
-            ]);
-          } catch (error) {
-            console.error(
-              "Dispose property error:",
-              error
-            );
-
-            showMessage(
-              completeDisposalMessage,
-              error.message ||
-              "Unable to complete property disposal.",
-              "error"
-            );
-          } finally {
-            confirmCompleteDisposal.disabled =
-              false;
-
-            confirmCompleteDisposal.textContent =
-              "Approve & Mark Disposed";
-          }
-        }
+        },
+        true
       );
 
-    document
-      .getElementById(
-        "refreshDisposalQueue"
-      )
-      ?.addEventListener(
-        "click",
-        loadManagementPanel
-      );
+      form.addEventListener("reset", () => {
+        window.setTimeout(() => {
+          checkboxes.forEach(box => {
+            box.checked = false;
+          });
+          categoryInput.value = "";
+          categorySummary.textContent = "Select property categories";
+          categoryBadges.innerHTML = "";
+          categoryError.classList.remove("show");
+          categoryPicker.open = false;
+        }, 0);
+      });
 
-    document
-      .getElementById(
-        "refreshWeaponAlerts"
-      )
-      ?.addEventListener(
-        "click",
-        loadWeaponAlerts
-      );
-  }
-
-  intakeForm.addEventListener(
-    "submit",
-    async event => {
-      event.preventDefault();
-
-      clearMessage(
-        intakeResult
-      );
-
-      const receivedDate =
-        new Date(
-          receivedAt.value
-        );
-
-      if (
-        !receivedAt.value ||
-        Number.isNaN(
-          receivedDate.getTime()
-        )
-      ) {
-        showMessage(
-          intakeResult,
-          "Enter a valid received date and time.",
-          "error"
-        );
-
-        receivedAt.focus();
-
-        return;
-      }
-
-      const selectedCategories =
-        categoryList(
-          category.value
-        );
-
-      if (
-        !selectedCategories.length
-      ) {
-        showMessage(
-          intakeResult,
-          "Select at least one property category.",
-          "error"
-        );
-
-        document
-          .getElementById(
-            "categoryPicker"
-          )
-          ?.setAttribute(
-            "open",
-            ""
-          );
-
-        return;
-      }
-const clinicalName =
-  clinicalStaffName
-    .value
-    .trim();
-
-const clinicalBadge =
-  clinicalStaffBadgeNumber
-    .value
-    .trim();
-
-
-if (
-  (clinicalName && !clinicalBadge) ||
-  (!clinicalName && clinicalBadge)
-) {
-  showMessage(
-    intakeResult,
-    "Enter both the clinical staff name and badge number, or leave both fields blank.",
-    "error"
-  );
-
-  if (!clinicalName) {
-    clinicalStaffName.focus();
-  } else {
-    clinicalStaffBadgeNumber.focus();
-  }
-
-  return;
-}
-      savePropertyButton.disabled =
-        true;
-
-      savePropertyButton.textContent =
-        "Creating Record…";
-
-      try {
-        const isWeaponProperty =
-          hasCategory(
-            category.value,
-            "Weapons"
-          );
-
-       const {
-  data,
-  error
-} =
-  await db.rpc(
-    "create_property_item",
-    {
-      p_description:
-        description
-          .value
-          .trim(),
-
-      p_category:
-        category.value,
-
-      p_location_received:
-        locationReceived
-          .value
-          .trim(),
-
-      p_storage_location:
-        storageLocation
-          .value
-          .trim(),
-
-      p_dg_number:
-        dgNumber
-          .value
-          .trim() ||
-        null,
-
-      p_mrn_number:
-        mrnNumber
-          .value
-          .trim() ||
-        null,
-
-      p_notes:
-        notes
-          .value
-          .trim() ||
-        null,
-
-      p_received_at:
-        receivedDate
-          .toISOString(),
-
-      p_clinical_staff_name:
-        clinicalName ||
-        null,
-
-      p_clinical_staff_badge_number:
-        clinicalBadge ||
-        null
-    }
-  );
-
-        if (error) {
-          throw error;
-        }
-
-        const propertyNumber =
-          data?.property_number ||
-          "Property record";
-
-        let weaponPushWarning =
-          "";
-
+      document.addEventListener("click", event => {
         if (
-          isWeaponProperty
+          categoryPicker.open &&
+          !categoryPicker.contains(event.target)
         ) {
-          try {
-            await notifyWeaponLeadership(
-              data?.id
-            );
-          } catch (notifyError) {
-            console.error(
-              "Weapon leadership push error:",
-              notifyError
-            );
-
-            weaponPushWarning =
-              " The weapon leadership alert was recorded, but push delivery could not be confirmed. Leadership can still review the alert inside SecureTrack.";
-          }
+          categoryPicker.open = false;
         }
+      });
 
-        clearIntakeForm({
-          keepMessage:
-            true
-        });
+      syncCategories();
+    })();
+  </script>
 
-        showMessage(
-          intakeResult,
-          isWeaponProperty &&
-          !weaponPushWarning
-            ? `${propertyNumber} created successfully. WEAPON ALERT sent to Security Leadership. Match this Property ID to the physical property form.`
-            : `${propertyNumber} created successfully. Match this Property ID to the physical property form.${weaponPushWarning}`,
-          weaponPushWarning
-            ? "info"
-            : "success"
-        );
-
-        await Promise.all([
-          loadSummary(),
-
-          isDisposalManager &&
-          isWeaponProperty
-            ? loadWeaponAlerts()
-            : Promise.resolve()
-        ]);
-      } catch (error) {
-        console.error(
-          "Create property error:",
-          error
-        );
-
-        showMessage(
-          intakeResult,
-          error.message ||
-          "Unable to create property record.",
-          "error"
-        );
-      } finally {
-        savePropertyButton.disabled =
-          false;
-
-        savePropertyButton.textContent =
-          "Create Property Record";
-      }
-    }
-  );
-
-  clearPropertyButton.addEventListener(
-    "click",
-    () =>
-      clearIntakeForm()
-  );
-
-  searchForm.addEventListener(
-    "submit",
-    event => {
-      event.preventDefault();
-
-      activePropertyStatusFilter =
-        null;
-
-      document
-        .querySelectorAll(
-          "[data-property-status]"
-        )
-        .forEach(
-          card => {
-            card.classList.remove(
-              "active-summary-filter"
-            );
-          }
-        );
-
-      runSearch(
-        searchInput.value
-      );
-    }
-  );
-
-  // =========================================================
-  // SUMMARY CARD SHORTCUTS
-  // =========================================================
-
-  document
-    .querySelectorAll(
-      "[data-property-status]"
-    )
-    .forEach(
-      card => {
-        card.addEventListener(
-          "click",
-          async () => {
-            activePropertyStatusFilter =
-              card.dataset
-                .propertyStatus ||
-              null;
-
-            searchInput.value =
-              "";
-
-            document
-              .querySelectorAll(
-                "[data-property-status]"
-              )
-              .forEach(
-                item => {
-                  item.classList.toggle(
-                    "active-summary-filter",
-                    item === card
-                  );
-                }
-              );
-
-            document
-              .querySelectorAll(
-                ".tab"
-              )
-              .forEach(
-                tab => {
-                  tab.classList.remove(
-                    "active"
-                  );
-                }
-              );
-
-            document
-              .querySelectorAll(
-                ".panel"
-              )
-              .forEach(
-                panel => {
-                  panel.classList.remove(
-                    "active"
-                  );
-                }
-              );
-
-            document
-              .querySelector(
-                '.tab[data-panel="searchPanel"]'
-              )
-              ?.classList.add(
-                "active"
-              );
-
-            document
-              .getElementById(
-                "searchPanel"
-              )
-              ?.classList.add(
-                "active"
-              );
-
-            await runSearch(
-              ""
-            );
-
-            document
-              .getElementById(
-                "searchPanel"
-              )
-              ?.scrollIntoView({
-                behavior:
-                  "smooth",
-
-                block:
-                  "start"
-              });
-          }
-        );
-      }
-    );
-
-  signOutButton.addEventListener(
-    "click",
-    async () => {
-      signOutButton.disabled =
-        true;
-
-      signOutButton.textContent =
-        "Signing Out…";
-
-      await db.auth.signOut();
-
-      window.location.replace(
-        new URL(
-          "login.html",
-          auth.appRootUrl ||
-          "../"
-        ).href
-      );
-    }
-  );
-
-  setUserDisplay();
-
-  receivedAt.value =
-    localDateTimeValue();
-
-  await loadSummary();
-
-  if (
-    isDisposalManager
-  ) {
-    await loadManagementPanel();
-  }
-})();
+</body>
+</html>
