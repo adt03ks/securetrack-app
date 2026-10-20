@@ -18,11 +18,13 @@
   <title>
     SecureTrack Training | Personnel Administration
   </title>
-<link
-  rel="icon"
-  type="image/png"
-  href="/assets/favicon.png"
->
+
+  <link
+    rel="icon"
+    type="image/png"
+    href="/assets/favicon.png"
+  >
+
   <link
     rel="stylesheet"
     href="/styles.css"
@@ -78,39 +80,41 @@
         0 24px 70px
         rgba(0,0,0,.4);
     }
-.training-screen {
-  margin: 24px 0;
-  padding: 14px;
-  border: 1px solid #303840;
-  border-radius: 16px;
-  background: #090d11;
-}
 
-.training-screen img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-}
+    .training-screen {
+      margin: 24px 0;
+      padding: 14px;
+      border: 1px solid #303840;
+      border-radius: 16px;
+      background: #090d11;
+    }
 
-.training-screen figcaption {
-  margin-top: 11px;
-  color: #8f99a3;
-  font-size: 12px;
-  line-height: 1.5;
-}
+    .training-screen img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
 
-.training-screen.compact {
-  max-width: 900px;
-}
+    .training-screen figcaption {
+      margin-top: 11px;
+      color: #8f99a3;
+      font-size: 12px;
+      line-height: 1.5;
+    }
 
-.training-screen.tall {
-  max-width: 820px;
-}
+    .training-screen.compact {
+      max-width: 900px;
+    }
 
-.training-screen.tall img {
-  width: 100%;
-}
+    .training-screen.tall {
+      max-width: 820px;
+    }
+
+    .training-screen.tall img {
+      width: 100%;
+    }
+
 
     /* ======================================================
        HEADER
@@ -146,20 +150,22 @@
       margin-bottom:
         30px;
     }
-.training-brand-wrap {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  color: inherit;
-  text-decoration: none;
-}
 
-.training-brand-logo {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  flex: 0 0 auto;
-}
+    .training-brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .training-brand-logo {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
+
     .training-brand {
       font-size:
         34px;
@@ -523,61 +529,6 @@
     .training-list li {
       margin-bottom:
         5px;
-    }
-
-
-    /* ======================================================
-       SCREENSHOT PLACEHOLDER
-       ====================================================== */
-
-    .screen-placeholder {
-      min-height:
-        260px;
-
-      display:
-        flex;
-
-      align-items:
-        center;
-
-      justify-content:
-        center;
-
-      flex-direction:
-        column;
-
-      gap: 8px;
-
-      margin:
-        22px 0;
-
-      padding:
-        25px;
-
-      border:
-        1px dashed #46505a;
-
-      border-radius:
-        15px;
-
-      background:
-        #090d11;
-
-      text-align:
-        center;
-
-      color:
-        #7f8a94;
-    }
-
-    .screen-placeholder strong {
-      color:
-        #d7dce1;
-    }
-
-    .screen-placeholder code {
-      color:
-        #ff9a3c;
     }
 
 
@@ -1133,33 +1084,31 @@
 
       <div class="training-header-top">
 
-        <div>
-
         <a
-  class="training-brand-wrap"
-  href="/training/manager/"
-  aria-label="SecureTrack Learning Center"
->
+          class="training-brand-wrap"
+          href="/training/manager/"
+          aria-label="SecureTrack Learning Center"
+        >
 
-  <img
-    class="training-brand-logo"
-    src="/assets/favicon.png"
-    alt="SecureTrack OP logo"
-  >
+          <img
+            class="training-brand-logo"
+            src="/assets/favicon.png"
+            alt="SecureTrack OP logo"
+          >
 
-  <div>
+          <div>
 
-    <div class="training-brand">
-      Secure<span>Track</span>
-    </div>
+            <div class="training-brand">
+              Secure<span>Track</span>
+            </div>
 
-    <div class="training-subbrand">
-      Learning Center
-    </div>
+            <div class="training-subbrand">
+              Learning Center
+            </div>
 
-  </div>
+          </div>
 
-</a>
+        </a>
 
 
         <div class="training-actions">
@@ -1362,36 +1311,39 @@
           </ul>
 
 
-        <figure class="training-screen">
+          <figure class="training-screen">
 
-  <img
-    src="/training/assets/personnel/personnel-overview.webp"
-    alt="SecureTrack Personnel Administration overview showing Active Personnel, Outside Officers, Open Property Cases, Transfer Pending, and management tabs."
-  >
+            <img
+              src="/training/assets/personnel/personnel-overview.webp"
+              alt="SecureTrack Personnel Administration overview showing Active Personnel, Outside Officers, Open Property Cases, Transfer Pending, and management tabs."
+            >
 
-  <figcaption>
-    Personnel Administration provides a management overview
-    of active personnel, outside officers, open property
-    cases, and pending transfers.
-  </figcaption>
+            <figcaption>
+              Personnel Administration provides a management overview
+              of active personnel, outside officers, open property
+              cases, and pending transfers.
+            </figcaption>
 
-</figure>
+          </figure>
 
-<figure class="training-screen">
 
-  <img
-    src="/training/assets/personnel/active-personnel-directory.webp"
-    alt="SecureTrack Active Personnel directory showing multiple officers assigned to the local campus."
-  >
+          <figure class="training-screen">
 
-  <figcaption>
-    The Active Personnel directory allows managers to review
-    personnel assigned to the campus and quickly identify
-    each officer's current rank, shift, contact information,
-    and personnel status.
-  </figcaption>
+            <img
+              src="/training/assets/personnel/personnel-management-guide.webp"
+              alt="SecureTrack Personnel Management training guide showing summary counters, navigation, search and filtering controls, and assigned officer cards."
+            >
 
-</figure>
+            <figcaption>
+              The Personnel Management guide explains the manager's
+              assigned-officer list, summary counters, navigation tabs,
+              search and shift filters, account access, personnel actions,
+              campus transfer, and employee separation controls.
+            </figcaption>
+
+          </figure>
+
+
           <div class="callout">
 
             <strong>
@@ -1439,20 +1391,22 @@
           </p>
 
 
-         <figure class="training-screen compact">
+          <figure class="training-screen compact">
 
-  <img
-    src="/training/assets/personnel/active-personnel-card.webp"
-    alt="SecureTrack Active Personnel card showing officer information, account access status, Edit Personnel, Qualifications, Transfer to Outside Officer, and Employee Separation controls."
-  >
+            <img
+              src="/training/assets/personnel/active-personnel-card.webp"
+              alt="SecureTrack Active Personnel card showing officer information, account access status, Edit Personnel, Qualifications, Transfer to Outside Officer, and Employee Separation controls."
+            >
 
-  <figcaption>
-    Each Active Personnel card provides a quick view of the
-    officer's current personnel information, SecureTrack
-    account-access status, and available management actions.
-  </figcaption>
+            <figcaption>
+              Each Active Personnel card provides a quick view of the
+              officer's current personnel information, SecureTrack
+              account-access status, and available management actions.
+            </figcaption>
 
-</figure>
+          </figure>
+
+
           <h3>
             Available Personnel Actions
           </h3>
@@ -1508,17 +1462,21 @@
           </p>
 
 
-          <div class="screen-placeholder">
+          <figure class="training-screen">
 
-            <strong>
-              Add New Officer Screenshot
-            </strong>
+            <img
+              src="/training/assets/personnel/add-new-officer.webp"
+              alt="SecureTrack Add New Officer training guide showing required and optional onboarding fields, account setup notice, rank, shift, qualification, profile photo, and save controls."
+            >
 
-            <code>
-              add-new-officer.webp
-            </code>
+            <figcaption>
+              Add New Officer field guide — review required and optional
+              onboarding information before saving the employee's personnel
+              profile. Account access is sent separately when the employee
+              is ready to establish SecureTrack access.
+            </figcaption>
 
-          </div>
+          </figure>
 
 
           <h3>
@@ -1666,17 +1624,21 @@
           </p>
 
 
-          <div class="screen-placeholder">
+          <figure class="training-screen">
 
-            <strong>
-              Edit Personnel Screenshot
-            </strong>
+            <img
+              src="/training/assets/personnel/edit-personnel.webp"
+              alt="SecureTrack Edit Personnel field guide showing required, optional, and system-controlled personnel fields."
+            >
 
-            <code>
-              edit-personnel.webp
-            </code>
+            <figcaption>
+              Edit Personnel field guide — use this screen to maintain
+              authorized personnel information. Required, optional,
+              and system-controlled fields are identified for manager
+              reference.
+            </figcaption>
 
-          </div>
+          </figure>
 
 
           <p>
@@ -1820,17 +1782,38 @@
           </p>
 
 
-          <div class="screen-placeholder">
+          <figure class="training-screen">
 
-            <strong>
-              Transfer to Outside Officer Screenshot
-            </strong>
+            <img
+              src="/training/assets/personnel/campus-transfer.webp"
+              alt="SecureTrack Transfer to Outside Officer screen showing destination campus, effective date, notes, confirmation, and transfer controls."
+            >
 
-            <code>
-              campus-transfer.webp
-            </code>
+            <figcaption>
+              Transfer to Outside Officer — confirm the receiving campus,
+              effective date, notes, and access-change acknowledgement
+              before completing the transfer.
+            </figcaption>
 
-          </div>
+          </figure>
+
+
+          <figure class="training-screen">
+
+            <img
+              src="/training/assets/personnel/officer-transfer-guide.webp"
+              alt="SecureTrack Transfer to Outside Officer training guide explaining the transfer workflow and access impact."
+            >
+
+            <figcaption>
+              Transfer workflow guide — transferring an employee to
+              Outside Officer removes the employee from active local
+              personnel, closes the local shift assignment, revokes
+              current local application access, and preserves historical
+              records.
+            </figcaption>
+
+          </figure>
 
 
           <p>
@@ -1960,17 +1943,37 @@
           </p>
 
 
-          <div class="screen-placeholder">
+          <figure class="training-screen">
 
-            <strong>
-              Employee Separation Form Screenshot
-            </strong>
+            <img
+              src="/training/assets/personnel/employee-separation-entry.webp"
+              alt="SecureTrack training guide showing the two available ways a manager can begin an Employee Separation workflow."
+            >
 
-            <code>
-              employee-separation.webp
-            </code>
+            <figcaption>
+              Employee Separation can be initiated from the individual
+              employee card or from the Employee Separation tab within
+              Personnel Management.
+            </figcaption>
 
-          </div>
+          </figure>
+
+
+          <figure class="training-screen">
+
+            <img
+              src="/training/assets/personnel/employee-separation.webp"
+              alt="SecureTrack Employee Separation manager field guide showing employee details, effective separation date, retention calculations, HR approval, separation reason, and property return status."
+            >
+
+            <figcaption>
+              Employee Separation field guide — verify employee information,
+              effective date, HR approval, separation reason, and the return
+              status of organization-issued property before advancing to
+              final review.
+            </figcaption>
+
+          </figure>
 
 
           <p>
@@ -2031,17 +2034,23 @@
           </h3>
 
 
-          <div class="screen-placeholder">
+          <figure class="training-screen">
 
-            <strong>
-              Final Separation Authorization Screenshot
-            </strong>
+            <img
+              src="/training/assets/personnel/final-separation-authorization.webp"
+              alt="SecureTrack Final Separation Authorization training guide showing the multi-step review, SEPARATE confirmation, and finalization controls."
+            >
 
-            <code>
-              final-separation-authorization.webp
-            </code>
+            <figcaption>
+              Final Separation Authorization is the last safeguard before
+              removal from active personnel. Review the separation summary,
+              confirm HR approval, type SEPARATE, and finalize only after all
+              information has been verified. Finalization revokes the
+              employee's SecureTrack operational access immediately while
+              preserving historical records.
+            </figcaption>
 
-          </div>
+          </figure>
 
 
           <p>
@@ -2307,17 +2316,25 @@
           </p>
 
 
-          <div class="screen-placeholder">
+          <figure class="training-screen">
 
-            <strong>
-              Outstanding Property Screenshot
-            </strong>
+            <img
+              src="/training/assets/personnel/outstanding-property.webp"
+              alt="SecureTrack Outstanding Property training guide showing open property cases, outstanding item counts, and manager device collection and check-in accountability."
+            >
 
-            <code>
-              outstanding-property.webp
-            </code>
+            <figcaption>
+              Outstanding Property helps management track unresolved
+              organization-issued equipment after separation. The outstanding
+              count shows how many tracked items remain unresolved. Once a
+              manager physically takes possession of a device such as a body
+              camera, Taser or CEW, radio, keys, badge, phone, laptop, or
+              similar equipment, the manager can use the authorized recovery
+              or override workflow to return the device to organizational
+              accountability.
+            </figcaption>
 
-          </div>
+          </figure>
 
 
           <p>
