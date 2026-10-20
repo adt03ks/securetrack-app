@@ -2316,6 +2316,72 @@ function propertyDateDescription() {
 
   return "";
 }
+
+function getPropertyReceivedFrom() {
+
+  if (!propertyDateMode) {
+    return null;
+  }
+
+  const mode =
+    propertyDateMode.value;
+
+  if (mode === "today") {
+    return formatLocalDateKey(
+      new Date()
+    );
+  }
+
+  if (mode === "single") {
+    return (
+      propertySingleDate?.value ||
+      null
+    );
+  }
+
+  if (mode === "range") {
+    return (
+      propertyDateFrom?.value ||
+      null
+    );
+  }
+
+  return null;
+}
+
+
+function getPropertyReceivedTo() {
+
+  if (!propertyDateMode) {
+    return null;
+  }
+
+  const mode =
+    propertyDateMode.value;
+
+  if (mode === "today") {
+    return formatLocalDateKey(
+      new Date()
+    );
+  }
+
+  if (mode === "single") {
+    return (
+      propertySingleDate?.value ||
+      null
+    );
+  }
+
+  if (mode === "range") {
+    return (
+      propertyDateTo?.value ||
+      null
+    );
+  }
+
+  return null;
+}
+  
   async function runSearch(
     searchTerm = "",
     {
@@ -2339,13 +2405,19 @@ function propertyDateDescription() {
         searchResult
       ] =
         await Promise.all([
-          db.rpc(
-            "search_property_items_v2",
-            {
-              p_search:
-                searchTerm.trim()
-            }
-          ),
+         db.rpc(
+  "search_property_items_v2",
+  {
+    p_search:
+      searchTerm.trim(),
+
+    p_received_from:
+      getPropertyReceivedFrom(),
+
+    p_received_to:
+      getPropertyReceivedTo()
+  }
+),
 
           loadOpenDisposalRequests()
         ]);
