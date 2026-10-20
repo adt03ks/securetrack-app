@@ -479,15 +479,28 @@
           <span>
             Intake Date
           </span>
+  <div style="display:flex; gap:8px; align-items:center;">
 
-          <input
-            id="propertySingleDate"
-            type="date"
-          >
+      <input
+        id="propertySingleDate"
+        type="date"
+        style="flex:1;"
+      >
 
-        </label>
+      <button
+        id="openSingleDateCalendar"
+        class="button secondary"
+        type="button"
+        aria-label="Open intake date calendar"
+      >
+        📅
+      </button>
 
-      </div>
+    </div>
+
+  </label>
+
+</div>
 
     </div>
 
@@ -519,15 +532,67 @@
           Through Date
         </span>
 
-        <input
-          id="propertyDateTo"
-          type="date"
-        >
+       <div
+  id="propertyDateRangeFields"
+  class="form-grid two-col"
+  style="margin-top:12px;"
+  hidden
+>
 
-      </label>
+  <label>
+    <span>
+      From Date
+    </span>
+
+    <div style="display:flex; gap:8px; align-items:center;">
+
+      <input
+        id="propertyDateFrom"
+        type="date"
+        style="flex:1;"
+      >
+
+      <button
+        id="openFromDateCalendar"
+        class="button secondary"
+        type="button"
+        aria-label="Open from date calendar"
+      >
+        📅
+      </button>
 
     </div>
 
+  </label>
+
+
+  <label>
+    <span>
+      Through Date
+    </span>
+
+    <div style="display:flex; gap:8px; align-items:center;">
+
+      <input
+        id="propertyDateTo"
+        type="date"
+        style="flex:1;"
+      >
+
+      <button
+        id="openToDateCalendar"
+        class="button secondary"
+        type="button"
+        aria-label="Open through date calendar"
+      >
+        📅
+      </button>
+
+    </div>
+
+  </label>
+
+</div>
 
     <div
       class="form-actions"
