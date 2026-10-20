@@ -194,7 +194,21 @@ const applyPropertyDateFilter =
 const clearPropertyDateFilter =
   document.getElementById("clearPropertyDateFilter");
 
+const openSingleDateCalendar =
+  document.getElementById(
+    "openSingleDateCalendar"
+  );
 
+const openFromDateCalendar =
+  document.getElementById(
+    "openFromDateCalendar"
+  );
+
+const openToDateCalendar =
+  document.getElementById(
+    "openToDateCalendar"
+  );
+  
 const searchMessage =
   document.getElementById("searchMessage");
 
@@ -281,7 +295,41 @@ const searchMessage =
 
     return date.toLocaleString();
   }
+function openNativeDatePicker(
+  input
+) {
 
+  if (!input) {
+    return;
+  }
+
+  try {
+
+    if (
+      typeof input.showPicker ===
+      "function"
+    ) {
+
+      input.showPicker();
+
+    }
+    else {
+
+      input.focus();
+      input.click();
+
+    }
+
+  }
+  catch (error) {
+
+    input.focus();
+    input.click();
+
+  }
+
+}
+  
   function categoryList(value) {
     return String(
       value || ""
@@ -1934,7 +1982,44 @@ if (
 // =========================================================
 // PROPERTY INTAKE DATE SEARCH
 // =========================================================
+openSingleDateCalendar
+  ?.addEventListener(
+    "click",
+    () => {
 
+      openNativeDatePicker(
+        propertySingleDate
+      );
+
+    }
+  );
+
+
+openFromDateCalendar
+  ?.addEventListener(
+    "click",
+    () => {
+
+      openNativeDatePicker(
+        propertyDateFrom
+      );
+
+    }
+  );
+
+
+openToDateCalendar
+  ?.addEventListener(
+    "click",
+    () => {
+
+      openNativeDatePicker(
+        propertyDateTo
+      );
+
+    }
+  );
+  
 function formatLocalDateKey(
   value
 ) {
