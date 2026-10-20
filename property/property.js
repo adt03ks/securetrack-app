@@ -167,10 +167,36 @@ const notes =
     document.getElementById("propertySearchInput");
 
   const searchButton =
-    document.getElementById("propertySearchButton");
+  document.getElementById("propertySearchButton");
 
-  const searchMessage =
-    document.getElementById("searchMessage");
+
+const propertyDateMode =
+  document.getElementById("propertyDateMode");
+
+const propertySingleDateField =
+  document.getElementById("propertySingleDateField");
+
+const propertySingleDate =
+  document.getElementById("propertySingleDate");
+
+const propertyDateRangeFields =
+  document.getElementById("propertyDateRangeFields");
+
+const propertyDateFrom =
+  document.getElementById("propertyDateFrom");
+
+const propertyDateTo =
+  document.getElementById("propertyDateTo");
+
+const applyPropertyDateFilter =
+  document.getElementById("applyPropertyDateFilter");
+
+const clearPropertyDateFilter =
+  document.getElementById("clearPropertyDateFilter");
+
+
+const searchMessage =
+  document.getElementById("searchMessage");
 
   const resultsBody =
     document.getElementById("propertyResultsBody");
@@ -1905,7 +1931,306 @@ if (
       }
     );
   }
+// =========================================================
+// PROPERTY INTAKE DATE SEARCH
+// =========================================================
 
+function formatLocalDateKey(
+  value
+) {
+
+  if (!value) {
+    return "";
+  }
+
+
+  const date =
+    value instanceof Date
+      ? value
+      : new Date(value);
+
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+
+  const year =
+    date.getFullYear();
+
+  const month =
+    String(
+      date.getMonth() + 1
+    ).padStart(
+      2,
+      "0"
+    );
+
+  const day =
+    String(
+      date.getDate()
+    ).padStart(
+      2,
+      "0"
+    );
+
+
+  return `${year}-${month}-${day}`;
+}
+
+
+function updatePropertyDateFields() {
+
+  if (
+    !propertyDateMode
+  ) {
+    return;
+  }
+
+
+  const mode =
+    propertyDateMode.value;
+
+
+  if (
+    propertySingleDateField
+  ) {
+
+    propertySingleDateField.hidden =
+      mode !== "single";
+
+  }
+
+
+  if (
+    propertyDateRangeFields
+  ) {
+
+    propertyDateRangeFields.hidden =
+      mode !== "range";
+
+  }
+
+}
+
+
+function filterPropertyRowsByDate(
+  rows
+) {
+
+  if (
+    !propertyDateMode
+  ) {
+    return rows;
+  }
+
+
+  const mode =
+    propertyDateMode.value;
+
+
+  if (
+    mode === "all"
+  ) {
+    return rows;
+  }
+
+
+  if (
+    mode === "today"
+  ) {
+
+    const today =
+      formatLocalDateKey(
+        new Date()
+      );
+
+
+    return rows.filter(
+      row =>
+        formatLocalDateKey(
+          row.received_at
+        ) === today
+    );
+
+  }
+
+
+  if (
+    mode === "single"
+  ) {
+
+    const selectedDate =
+      propertySingleDate
+        ?.value ||
+      "";
+
+
+    if (
+      !selectedDate
+    ) {
+      return rows;
+    }
+
+
+    return rows.filter(
+      row =>
+        formatLocalDateKey(
+          row.received_at
+        ) === selectedDate
+    );
+
+  }
+
+
+  if (
+    mode === "range"
+  ) {
+
+    const fromDate =
+      propertyDateFrom
+        ?.value ||
+      "";
+
+    const toDate =
+      propertyDateTo
+        ?.value ||
+      "";
+
+
+    if (
+      !fromDate &&
+      !toDate
+    ) {
+      return rows;
+    }
+
+
+    return rows.filter(
+      row => {
+
+        const receivedDate =
+          formatLocalDateKey(
+            row.received_at
+          );
+
+
+        if (
+          !receivedDate
+        ) {
+          return false;
+        }
+
+
+        if (
+          fromDate &&
+          receivedDate < fromDate
+        ) {
+          return false;
+        }
+
+
+        if (
+          toDate &&
+          receivedDate > toDate
+        ) {
+          return false;
+        }
+
+
+        return true;
+
+      }
+    );
+
+  }
+
+
+  return rows;
+}
+
+
+function propertyDateDescription() {
+
+  if (
+    !propertyDateMode
+  ) {
+    return "";
+  }
+
+
+  const mode =
+    propertyDateMode.value;
+
+
+  if (
+    mode === "today"
+  ) {
+    return " received today";
+  }
+
+
+  if (
+    mode === "single" &&
+    propertySingleDate?.value
+  ) {
+
+    return ` received on ${propertySingleDate.value}`;
+
+  }
+
+
+  if (
+    mode === "range"
+  ) {
+
+    const fromDate =
+      propertyDateFrom
+        ?.value ||
+      "";
+
+    const toDate =
+      propertyDateTo
+        ?.value ||
+      "";
+
+
+    if (
+      fromDate &&
+      toDate
+    ) {
+
+      return ` received from ${fromDate} through ${toDate}`;
+
+    }
+
+
+    if (
+      fromDate
+    ) {
+
+      return ` received on or after ${fromDate}`;
+
+    }
+
+
+    if (
+      toDate
+    ) {
+
+      return ` received on or before ${toDate}`;
+
+    }
+
+  }
+
+
+  return "";
+}
   async function runSearch(
     searchTerm = "",
     {
@@ -1947,21 +2272,29 @@ if (
       }
 
       const allRows =
-        searchResult.data ||
-        [];
+  searchResult.data ||
+  [];
 
-      const rows =
-        activePropertyStatusFilter
-          ? allRows.filter(
-              row =>
-                row.status ===
-                activePropertyStatusFilter
-            )
-          : allRows;
 
-      renderSearchResults(
-        rows
-      );
+let rows =
+  activePropertyStatusFilter
+    ? allRows.filter(
+        row =>
+          row.status ===
+          activePropertyStatusFilter
+      )
+    : allRows;
+
+
+rows =
+  filterPropertyRowsByDate(
+    rows
+  );
+
+
+renderSearchResults(
+  rows
+);
 
       if (!preserveMessage) {
         if (
@@ -3353,7 +3686,164 @@ if (
     () =>
       clearIntakeForm()
   );
+// =========================================================
+// PROPERTY DATE FILTER CONTROLS
+// =========================================================
 
+propertyDateMode
+  ?.addEventListener(
+    "change",
+    () => {
+
+      updatePropertyDateFields();
+
+    }
+  );
+
+
+applyPropertyDateFilter
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      const mode =
+        propertyDateMode
+          ?.value ||
+        "all";
+
+
+      if (
+        mode === "single" &&
+        !propertySingleDate?.value
+      ) {
+
+        showMessage(
+          searchMessage,
+          "Select an intake date before applying the filter.",
+          "error"
+        );
+
+        propertySingleDate
+          ?.focus();
+
+        return;
+
+      }
+
+
+      if (
+        mode === "range"
+      ) {
+
+        const fromDate =
+          propertyDateFrom
+            ?.value ||
+          "";
+
+        const toDate =
+          propertyDateTo
+            ?.value ||
+          "";
+
+
+        if (
+          !fromDate &&
+          !toDate
+        ) {
+
+          showMessage(
+            searchMessage,
+            "Enter a From Date, Through Date, or both.",
+            "error"
+          );
+
+          propertyDateFrom
+            ?.focus();
+
+          return;
+
+        }
+
+
+        if (
+          fromDate &&
+          toDate &&
+          fromDate > toDate
+        ) {
+
+          showMessage(
+            searchMessage,
+            "The From Date cannot be later than the Through Date.",
+            "error"
+          );
+
+          propertyDateFrom
+            ?.focus();
+
+          return;
+
+        }
+
+      }
+
+
+      await runSearch(
+        searchInput.value
+      );
+
+    }
+  );
+
+
+clearPropertyDateFilter
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      if (
+        propertyDateMode
+      ) {
+        propertyDateMode.value =
+          "all";
+      }
+
+
+      if (
+        propertySingleDate
+      ) {
+        propertySingleDate.value =
+          "";
+      }
+
+
+      if (
+        propertyDateFrom
+      ) {
+        propertyDateFrom.value =
+          "";
+      }
+
+
+      if (
+        propertyDateTo
+      ) {
+        propertyDateTo.value =
+          "";
+      }
+
+
+      updatePropertyDateFields();
+
+
+      await runSearch(
+        searchInput.value
+      );
+
+    }
+  );
+
+
+updatePropertyDateFields();
   searchForm.addEventListener(
     "submit",
     event => {
