@@ -1531,7 +1531,17 @@ if (
 
         absenceNotes.value = "";
 
+extendedAbsence.checked =
+  false;
 
+endDate.disabled =
+  false;
+
+endDate.required =
+  true;
+
+endDate.value =
+  startDate.value;
         /*
           Move review date to start
           date so the new record can
