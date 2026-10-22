@@ -75,6 +75,9 @@
   const endDate =
     document.getElementById("endDate");
 
+const extendedAbsence =
+  document.getElementById("extendedAbsence");
+  
   const absenceShift =
     document.getElementById("absenceShift");
 
@@ -1429,20 +1432,35 @@
       }
 
 
-      if (
-        !startDate.value ||
-        !endDate.value
-      ) {
+    if (
+  !startDate.value
+) {
 
-        showMessage(
-          formMessage,
-          "Enter a start and end date.",
-          "error"
-        );
+  showMessage(
+    formMessage,
+    "Enter a start date.",
+    "error"
+  );
 
-        return;
+  return;
 
-      }
+}
+
+
+if (
+  !extendedAbsence.checked &&
+  !endDate.value
+) {
+
+  showMessage(
+    formMessage,
+    "Enter an end date or select Extended Absence — No End Date.",
+    "error"
+  );
+
+  return;
+
+}
 
 
       if (
@@ -1485,8 +1503,10 @@
               p_start_date:
                 startDate.value,
 
-              p_end_date:
-                endDate.value,
+             p_end_date:
+  extendedAbsence.checked
+    ? null
+    : endDate.value,
 
               p_shift_name:
                 officer.shift_name,
@@ -1678,24 +1698,76 @@
     }
   );
 
+startDate.addEventListener(
+  "change",
+  () => {
 
-  startDate.addEventListener(
-    "change",
-    () => {
+    if (
+      extendedAbsence?.checked
+    ) {
+      return;
+    }
 
-      if (
-        !endDate.value ||
-        endDate.value <
-        startDate.value
-      ) {
+   if (
+  !extendedAbsence.checked &&
+  endDate.value <
+  startDate.value
+) {
 
-        endDate.value =
-          startDate.value;
-
-      }
+      endDate.value =
+        startDate.value;
 
     }
-  );
+
+  }
+);
+
+
+extendedAbsence.addEventListener(
+  "change",
+  () => {
+
+    clearMessage(
+      formMessage
+    );
+
+
+    if (
+      extendedAbsence.checked
+    ) {
+
+      endDate.value = "";
+
+      endDate.disabled =
+        true;
+
+      endDate.required =
+        false;
+
+      return;
+
+    }
+
+
+    endDate.disabled =
+      false;
+
+    endDate.required =
+      true;
+
+
+    if (
+      !endDate.value
+    ) {
+
+      endDate.value =
+        startDate.value ||
+        todayString();
+
+    }
+
+  }
+);
 
 
   // =========================================================
