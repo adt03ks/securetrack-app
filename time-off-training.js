@@ -733,7 +733,18 @@ const extendedAbsence =
     const officer =
       state.selectedOfficer;
 
+const activeAbsence =
+  officer
+    ? getOfficerAbsence(
+        officer.user_id
+      )
+    : null;
 
+const hasExtendedAbsence =
+  !!activeAbsence &&
+  activeAbsence.status === "active" &&
+  activeAbsence.end_date == null;
+    
     if (!officer) {
 
       selectedOfficerBox.hidden = true;
@@ -829,6 +840,69 @@ if (
     selectedOfficerDetails.textContent =
       details.join(" • ");
 
+    if (
+  hasExtendedAbsence
+) {
+
+  extendedAbsence.checked =
+    true;
+
+  startDate.value =
+    activeAbsence.start_date ||
+    todayString();
+
+  startDate.disabled =
+    true;
+
+  endDate.value = "";
+
+  endDate.disabled =
+    true;
+
+  endDate.required =
+    false;
+
+  absenceType.value =
+    activeAbsence.absence_type ||
+    "";
+
+  absenceType.disabled =
+    true;
+
+  absenceNotes.value =
+    activeAbsence.notes ||
+    "";
+
+  absenceNotes.disabled =
+    true;
+
+  saveAbsenceButton.textContent =
+    "Officer Is Currently Out";
+
+} else {
+
+  extendedAbsence.checked =
+    false;
+
+  startDate.disabled =
+    false;
+
+  endDate.disabled =
+    false;
+
+  endDate.required =
+    true;
+
+  absenceType.disabled =
+    false;
+
+  absenceNotes.disabled =
+    false;
+
+  saveAbsenceButton.textContent =
+    "Mark Officer Out";
+
+}
 
     absenceShift.innerHTML = "";
 
@@ -1426,7 +1500,21 @@ if (
       const officer =
         state.selectedOfficer;
 
+      
+      
+const activeAbsence =
+  officer
+    ? getOfficerAbsence(
+        officer.user_id
+      )
+    : null;
 
+
+const returningFromExtendedAbsence =
+  !!activeAbsence &&
+  activeAbsence.status === "active" &&
+  activeAbsence.end_date == null &&
+  !extendedAbsence.checked;
       if (!officer) {
 
         showMessage(
@@ -1438,7 +1526,133 @@ if (
         return;
 
       }
+if (
+  returningFromExtendedAbsence
+) {
 
+  if (
+    !endDate.value
+  ) {
+
+    showMessage(
+      formMessage,
+      "Enter the officer's return to rotation date.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (
+    endDate.value <
+    activeAbsence.start_date
+  ) {
+
+    showMessage(
+      formMessage,
+      "The return date cannot be before the extended absence start date.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  saveAbsenceButton.disabled =
+    true;
+
+  saveAbsenceButton.textContent =
+    "Returning Officer…";
+
+
+  try {
+
+    const {
+      error
+    } =
+      await db.rpc(
+        "return_officer_to_rotation",
+        {
+          p_unavailability_id:
+            activeAbsence.unavailability_id,
+
+          p_return_date:
+            endDate.value
+        }
+      );
+
+
+    if (
+      error
+    ) {
+      throw error;
+    }
+
+
+    showMessage(
+      formMessage,
+      `${officer.display_name} has been returned to rotation.`,
+      "success"
+    );
+
+
+    extendedAbsence.checked =
+      false;
+
+    startDate.disabled =
+      false;
+
+    endDate.disabled =
+      false;
+
+    endDate.required =
+      true;
+
+    absenceType.disabled =
+      false;
+
+    absenceNotes.disabled =
+      false;
+
+
+    await loadRecords();
+
+    renderSelectedOfficer();
+    renderOfficerPicker();
+
+
+  } catch (
+    error
+  ) {
+
+    console.error(
+      "SecureTrack return to rotation error:",
+      error
+    );
+
+
+    showMessage(
+      formMessage,
+      error.message ||
+      "The officer could not be returned to rotation.",
+      "error"
+    );
+
+
+  } finally {
+
+    saveAbsenceButton.disabled =
+      false;
+
+  }
+
+
+  return;
+
+}
 
       if (!officer.shift_name) {
 
@@ -1769,6 +1983,90 @@ extendedAbsence.addEventListener(
     );
 
 
+    const officer =
+      state.selectedOfficer;
+
+
+    const activeAbsence =
+      officer
+        ? getOfficerAbsence(
+            officer.user_id
+          )
+        : null;
+
+
+    const hasExtendedAbsence =
+      !!activeAbsence &&
+      activeAbsence.status === "active" &&
+      activeAbsence.end_date == null;
+
+
+    // ========================================================
+    // EXISTING EXTENDED ABSENCE
+    // Manager is unchecking the box to return officer.
+    // ========================================================
+
+    if (
+      hasExtendedAbsence &&
+      !extendedAbsence.checked
+    ) {
+
+      endDate.disabled =
+        false;
+
+      endDate.required =
+        true;
+
+      endDate.value =
+        todayString();
+
+      saveAbsenceButton.disabled =
+        false;
+
+      saveAbsenceButton.textContent =
+        "Return Officer to Rotation";
+
+
+      showMessage(
+        formMessage,
+        "Enter the officer's return date, then select Return Officer to Rotation.",
+        "success"
+      );
+
+      return;
+
+    }
+
+
+    // ========================================================
+    // EXISTING EXTENDED ABSENCE REMAINS CHECKED
+    // ========================================================
+
+    if (
+      hasExtendedAbsence &&
+      extendedAbsence.checked
+    ) {
+
+      endDate.value = "";
+
+      endDate.disabled =
+        true;
+
+      endDate.required =
+        false;
+
+      saveAbsenceButton.textContent =
+        "Officer Is Currently Out";
+
+      return;
+
+    }
+
+
+    // ========================================================
+    // NEW EXTENDED ABSENCE
+    // ========================================================
+
     if (
       extendedAbsence.checked
     ) {
@@ -1785,6 +2083,10 @@ extendedAbsence.addEventListener(
 
     }
 
+
+    // ========================================================
+    // NORMAL NEW ABSENCE
+    // ========================================================
 
     endDate.disabled =
       false;
@@ -1805,8 +2107,6 @@ extendedAbsence.addEventListener(
 
   }
 );
-
-
   // =========================================================
   // INITIALIZE
   // =========================================================
