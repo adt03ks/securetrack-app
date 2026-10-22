@@ -751,8 +751,52 @@ const extendedAbsence =
           </option>
         `;
 
-      saveAbsenceButton.disabled =
-        true;
+     if (
+  !startDate.value
+) {
+
+  showMessage(
+    formMessage,
+    "Enter a start date.",
+    "error"
+  );
+
+  return;
+
+}
+
+
+if (
+  !extendedAbsence.checked &&
+  !endDate.value
+) {
+
+  showMessage(
+    formMessage,
+    "Enter an end date or select Extended Absence — No End Date.",
+    "error"
+  );
+
+  return;
+
+}
+
+
+if (
+  !extendedAbsence.checked &&
+  endDate.value &&
+  endDate.value < startDate.value
+) {
+
+  showMessage(
+    formMessage,
+    "The end date cannot be before the start date.",
+    "error"
+  );
+
+  return;
+
+}
 
       return;
 
