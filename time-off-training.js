@@ -790,7 +790,7 @@ if (
 
   showMessage(
     formMessage,
-    "The end date cannot be before the start date.",
+    ".",
     "error"
   );
 
@@ -1505,23 +1505,6 @@ if (
   return;
 
 }
-
-
-      if (
-        endDate.value <
-        startDate.value
-      ) {
-
-        showMessage(
-          formMessage,
-          "The end date cannot be before the start date.",
-          "error"
-        );
-
-        return;
-
-      }
-
 
       saveAbsenceButton.disabled =
         true;
