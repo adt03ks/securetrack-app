@@ -507,37 +507,96 @@
 <script src="/notification-bell.js"></script>
 
 <script>
+/* ============================================
+   SECURETRACK OP
+   MANAGER PORTAL INITIALIZATION
+   WITH NOTIFICATION CENTER
+   ============================================ */
 
 (async function () {
+  "use strict";
 
-  const STM =
-    window.SecureTrackManager;
+  const STM = window.SecureTrackManager;
 
   if (!STM) {
+    console.error(
+      "SecureTrack Manager initialization unavailable."
+    );
     return;
   }
 
-  const manager =
-    await STM.requireManager();
+  // =========================================
+  // VERIFY MANAGER AUTHORIZATION
+  // =========================================
+
+  const manager = await STM.requireManager();
 
   if (!manager) {
     return;
   }
 
-  document
-    .getElementById("logoutButton")
-    .addEventListener(
+  // =========================================
+  // INITIALIZE NOTIFICATION BELL
+  // =========================================
+
+  if (
+    window.SecureTrackNotifications &&
+    STM.db
+  ) {
+    try {
+      const initialized =
+        await window.SecureTrackNotifications.init({
+          client: STM.db,
+          userId: manager.session.user.id,
+          target: "#securetrack-notification-mount"
+        });
+
+      if (!initialized) {
+        console.warn(
+          "Notification Center did not initialize."
+        );
+      }
+
+    } catch (error) {
+      console.error(
+        "SecureTrack Notification Center error:",
+        error
+      );
+    }
+
+  } else {
+    console.warn(
+      "Notification Center script or Supabase client missing."
+    );
+  }
+
+  // =========================================
+  // SIGN OUT
+  // =========================================
+
+  const logoutButton =
+    document.getElementById("logoutButton");
+
+  if (logoutButton) {
+    logoutButton.addEventListener(
       "click",
       async () => {
 
-        await STM.signOut();
+        // Stop notification listeners before logout.
+        if (window.SecureTrackNotifications) {
+          window.SecureTrackNotifications.destroy();
+        }
 
+        // Preserve existing OneSignal and
+        // SecureTrack logout functionality.
+        await STM.signOut();
       }
     );
+  }
 
 })();
-
 </script>
+
 <!-- SECURETRACK MANAGER PORTAL FOOTER -->
 <div id="securetrack-footer"
      data-variant="manager"></div>
