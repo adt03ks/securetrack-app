@@ -1792,8 +1792,10 @@ async function loadReportingOfficers() {
   }
 
 
+ 
   // =========================================================
   // SECURITY ALERT REPORTS
+  // Uses actual incident occurrence date and time
   // =========================================================
 
   async function generateSecurityAlertReport(type, range) {
@@ -1812,12 +1814,40 @@ async function loadReportingOfficers() {
       throw new Error("Unsupported security alert report.");
     }
 
+    // Convert the selected local date range into
+    // calendar dates for the occurrence_date column.
+    function localDateString(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    const startDateValue = localDateString(range.start);
+    const endDateValue = localDateString(range.end);
+
+    // =====================================================
+    // LOAD SECURITY INCIDENTS
+    // =====================================================
+
     let query = db
       .from("security_incidents")
-      .select("id, incident_type, submitted_by_user_id, created_at")
-      .gte("created_at", range.start.toISOString())
-      .lte("created_at", range.end.toISOString())
-      .order("created_at", { ascending: false });
+      .select(`
+        id,
+        incident_type,
+        occurrence_date,
+        occurrence_time,
+        location,
+        submitted_at
+      `)
+      .gte("occurrence_date", startDateValue)
+      .lte("occurrence_date", endDateValue)
+      .order("occurrence_date", {
+        ascending: false
+      })
+      .order("occurrence_time", {
+        ascending: false
+      });
 
     if (
       type !== "all_security_alerts" &&
@@ -1834,12 +1864,16 @@ async function loadReportingOfficers() {
 
     const incidents = data || [];
 
-    // Load shift associations separately to avoid
-    // depending on inferred Supabase relationships.
+    // =====================================================
+    // LOAD INCIDENT / SHIFT RELATIONSHIPS
+    // =====================================================
+
     const incidentIds = incidents.map(item => item.id);
+
     let links = [];
 
     if (incidentIds.length) {
+
       const response = await db
         .from("security_incident_shift_links")
         .select("incident_id, shift_instance_id")
@@ -1852,13 +1886,22 @@ async function loadReportingOfficers() {
       links = response.data || [];
     }
 
+    // =====================================================
+    // LOAD ASSOCIATED SHIFTS
+    // =====================================================
+
     const shiftIds = [
-      ...new Set(links.map(item => item.shift_instance_id))
+      ...new Set(
+        links
+          .map(item => item.shift_instance_id)
+          .filter(Boolean)
+      )
     ];
 
     let shifts = [];
 
     if (shiftIds.length) {
+
       const response = await db
         .from("shift_instances")
         .select("id, shift_name, shift_date")
@@ -1878,26 +1921,44 @@ async function loadReportingOfficers() {
     const linksByIncident = new Map();
 
     links.forEach(link => {
+
       if (!linksByIncident.has(link.incident_id)) {
         linksByIncident.set(link.incident_id, []);
       }
-      linksByIncident.get(link.incident_id).push(link);
+
+      linksByIncident
+        .get(link.incident_id)
+        .push(link);
+
     });
+
+    // =====================================================
+    // BUILD REPORT RESULTS
+    // =====================================================
 
     const rows = [];
 
     incidents.forEach(incident => {
+
       const associations =
         linksByIncident.get(incident.id) || [];
 
-      const matchingAssociations = associations.filter(link => {
-        const linkedShift = shiftMap.get(link.shift_instance_id);
+      const matchingAssociations =
+        associations.filter(link => {
 
-        return shift.value === "all" ||
-          linkedShift?.shift_name === shift.value;
-      });
+          const linkedShift =
+            shiftMap.get(link.shift_instance_id);
 
-      if (shift.value !== "all" && !matchingAssociations.length) {
+          return (
+            shift.value === "all" ||
+            linkedShift?.shift_name === shift.value
+          );
+        });
+
+      if (
+        shift.value !== "all" &&
+        matchingAssociations.length === 0
+      ) {
         return;
       }
 
@@ -1907,68 +1968,121 @@ async function loadReportingOfficers() {
           : [null];
 
       displayAssociations.forEach(link => {
+
         const linkedShift = link
           ? shiftMap.get(link.shift_instance_id)
           : null;
 
         rows.push({
-          date: new Date(incident.created_at).toLocaleString(),
-          type: String(incident.incident_type || "")
-            .replaceAll("_", " ")
-            .toUpperCase(),
-          shift: linkedShift?.shift_name || "Unassigned",
-          shiftDate: linkedShift?.shift_date || "—",
-          incidentId: incident.id
+
+          date:
+            incident.occurrence_date || "—",
+
+          time:
+            incident.occurrence_time
+              ? String(incident.occurrence_time)
+                  .slice(0, 5)
+              : "—",
+
+          type:
+            String(incident.incident_type || "")
+              .replaceAll("_", " ")
+              .toUpperCase(),
+
+          shift:
+            linkedShift?.shift_name || "Unassigned",
+
+          shiftDate:
+            linkedShift?.shift_date || "—",
+
+          location:
+            incident.location || "—",
+
+          incidentId:
+            incident.id
+
         });
+
       });
+
     });
 
+    // =====================================================
+    // SECURITY ALERTS BY SHIFT
+    // =====================================================
+
     if (type === "alerts_by_shift") {
+
       const counts = new Map();
 
       rows.forEach(row => {
+
         counts.set(
           row.shift,
           (counts.get(row.shift) || 0) + 1
         );
+
       });
 
       renderSummary([
-        { label: "Linked Alert Records", value: rows.length },
-        { label: "Shifts Represented", value: counts.size }
+        {
+          label: "Incident / Shift Records",
+          value: rows.length
+        },
+        {
+          label: "Shifts Represented",
+          value: counts.size
+        }
       ]);
 
       renderTable(
         [
           { key: "shift", label: "Shift" },
-          { key: "count", label: "Alert Records" }
+          { key: "count", label: "Alerts" }
         ],
-        Array.from(counts, ([shiftName, count]) => ({
-          shift: shiftName,
-          count
-        }))
+        Array.from(
+          counts,
+          ([shiftName, count]) => ({
+            shift: shiftName,
+            count
+          })
+        )
       );
 
       return;
     }
 
+    // =====================================================
+    // ALL OTHER SECURITY ALERT REPORTS
+    // =====================================================
+
+    const uniqueIncidents =
+      new Set(rows.map(row => row.incidentId));
+
     renderSummary([
-      { label: "Reported Alerts", value: new Set(rows.map(r => r.incidentId)).size },
-      { label: "Shift Associations", value: rows.length }
+      {
+        label: "Security Incidents",
+        value: uniqueIncidents.size
+      },
+      {
+        label: "Shift Associations",
+        value: rows.length
+      }
     ]);
 
     renderTable(
       [
-        { key: "date", label: "Reported" },
+        { key: "date", label: "Occurrence Date" },
+        { key: "time", label: "Time" },
         { key: "type", label: "Alert Type" },
         { key: "shift", label: "Shift" },
-        { key: "shiftDate", label: "Shift Date" },
+        { key: "location", label: "Location" },
         { key: "incidentId", label: "Reference ID" }
       ],
       rows
     );
-  }
 
+  }
 
   // =========================================================
   // GENERATE REPORT
