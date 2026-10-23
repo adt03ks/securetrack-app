@@ -780,38 +780,39 @@ if (
     </div>
 
 
-    <div class="field">
+   <div class="field">
 
-      <label for="slipFallPersonPhone">
-        Phone Number
-      </label>
+  <label for="slipFallPersonPhone">
+    Phone Number *
+  </label>
 
-      <input
-        id="slipFallPersonPhone"
-        type="tel"
-        maxlength="50"
-        autocomplete="tel"
-        placeholder="Phone number"
-      >
+  <input
+    id="slipFallPersonPhone"
+    type="tel"
+    maxlength="50"
+    autocomplete="tel"
+    placeholder="Phone number"
+    required
+  >
 
-    </div>
+</div>
 
+   <div class="field">
 
-    <div class="field">
+  <label for="slipFallPersonEmail">
+    Email Address *
+  </label>
 
-      <label for="slipFallPersonEmail">
-        Email Address
-      </label>
+  <input
+    id="slipFallPersonEmail"
+    type="email"
+    maxlength="254"
+    autocomplete="email"
+    placeholder="Email address"
+    required
+  >
 
-      <input
-        id="slipFallPersonEmail"
-        type="email"
-        maxlength="254"
-        autocomplete="email"
-        placeholder="Email address"
-      >
-
-    </div>
+</div>
 
 
     <div class="field full-width">
