@@ -1,0 +1,158 @@
+
+/* =========================================
+   SECURETRACK OP
+   UNIVERSAL NOTIFICATION BELL
+   ========================================= */
+
+.st-notification-root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  z-index: 100;
+}
+
+.st-notification-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 43px;
+  height: 43px;
+  padding: 0;
+  border: 1px solid #713239;
+  border-radius: 12px;
+  background: #180f12;
+  color: #ef4444;
+  cursor: pointer;
+}
+
+.st-notification-toggle:hover,
+.st-notification-toggle:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+.st-notification-badge {
+  position: absolute;
+  top: -7px;
+  right: -8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: #dc2626;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.st-notification-badge.is-visible {
+  display: flex;
+}
+
+.st-notification-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 1000;
+  width: min(390px, calc(100vw - 24px));
+  max-height: 65vh;
+  overflow-y: auto;
+  border: 1px solid #454b55;
+  border-radius: 15px;
+  background: #11151a;
+  color: #f7f7f7;
+  box-shadow: 0 18px 55px #0009;
+}
+
+.st-notification-panel[hidden] {
+  display: none !important;
+}
+
+.st-notification-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 14px;
+  border-bottom: 1px solid #31363d;
+}
+
+.st-notification-heading strong {
+  font-size: 15px;
+}
+
+.st-notification-markall {
+  border: 0;
+  background: transparent;
+  color: #f8a56a;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.st-notification-entry {
+  display: block;
+  width: 100%;
+  padding: 13px 15px;
+  border: 0;
+  border-bottom: 1px solid #31363d;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.st-notification-entry:hover {
+  background: #242a32;
+}
+
+.st-notification-entry.is-unread {
+  background: #24191c;
+}
+
+.st-notification-entry-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.st-notification-entry-body {
+  display: block;
+  margin-top: 4px;
+  color: #d0d4db;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.st-notification-entry-meta {
+  display: block;
+  margin-top: 6px;
+  color: #b5b9c2;
+  font-size: 11px;
+}
+
+.st-notification-empty {
+  padding: 20px 14px;
+  color: #bdc4cc;
+  font-size: 13px;
+}
+
+.st-notification-message {
+  padding: 8px 14px;
+  color: #ffb4ab;
+  font-size: 12px;
+}
+
+@media (max-width: 540px) {
+  .st-notification-panel {
+    position: fixed;
+    top: 75px;
+    right: 12px;
+    max-height: 70vh;
+  }
+}
