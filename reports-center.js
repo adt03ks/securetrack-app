@@ -1792,6 +1792,183 @@ async function loadReportingOfficers() {
   }
 
 
+  // =========================================================
+  // SECURITY ALERT REPORTS
+  // =========================================================
+
+  async function generateSecurityAlertReport(type, range) {
+
+    const supportedTypes = [
+      "all_security_alerts",
+      "alerts_by_shift",
+      "code_green",
+      "taser_pull",
+      "ctw",
+      "officer_injury",
+      "insufficient_staffing"
+    ];
+
+    if (!supportedTypes.includes(type)) {
+      throw new Error("Unsupported security alert report.");
+    }
+
+    let query = db
+      .from("security_incidents")
+      .select("id, incident_type, submitted_by_user_id, created_at")
+      .gte("created_at", range.start.toISOString())
+      .lte("created_at", range.end.toISOString())
+      .order("created_at", { ascending: false });
+
+    if (
+      type !== "all_security_alerts" &&
+      type !== "alerts_by_shift"
+    ) {
+      query = query.eq("incident_type", type);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw error;
+    }
+
+    const incidents = data || [];
+
+    // Load shift associations separately to avoid
+    // depending on inferred Supabase relationships.
+    const incidentIds = incidents.map(item => item.id);
+    let links = [];
+
+    if (incidentIds.length) {
+      const response = await db
+        .from("security_incident_shift_links")
+        .select("incident_id, shift_instance_id")
+        .in("incident_id", incidentIds);
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      links = response.data || [];
+    }
+
+    const shiftIds = [
+      ...new Set(links.map(item => item.shift_instance_id))
+    ];
+
+    let shifts = [];
+
+    if (shiftIds.length) {
+      const response = await db
+        .from("shift_instances")
+        .select("id, shift_name, shift_date")
+        .in("id", shiftIds);
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      shifts = response.data || [];
+    }
+
+    const shiftMap = new Map(
+      shifts.map(item => [item.id, item])
+    );
+
+    const linksByIncident = new Map();
+
+    links.forEach(link => {
+      if (!linksByIncident.has(link.incident_id)) {
+        linksByIncident.set(link.incident_id, []);
+      }
+      linksByIncident.get(link.incident_id).push(link);
+    });
+
+    const rows = [];
+
+    incidents.forEach(incident => {
+      const associations =
+        linksByIncident.get(incident.id) || [];
+
+      const matchingAssociations = associations.filter(link => {
+        const linkedShift = shiftMap.get(link.shift_instance_id);
+
+        return shift.value === "all" ||
+          linkedShift?.shift_name === shift.value;
+      });
+
+      if (shift.value !== "all" && !matchingAssociations.length) {
+        return;
+      }
+
+      const displayAssociations =
+        matchingAssociations.length
+          ? matchingAssociations
+          : [null];
+
+      displayAssociations.forEach(link => {
+        const linkedShift = link
+          ? shiftMap.get(link.shift_instance_id)
+          : null;
+
+        rows.push({
+          date: new Date(incident.created_at).toLocaleString(),
+          type: String(incident.incident_type || "")
+            .replaceAll("_", " ")
+            .toUpperCase(),
+          shift: linkedShift?.shift_name || "Unassigned",
+          shiftDate: linkedShift?.shift_date || "—",
+          incidentId: incident.id
+        });
+      });
+    });
+
+    if (type === "alerts_by_shift") {
+      const counts = new Map();
+
+      rows.forEach(row => {
+        counts.set(
+          row.shift,
+          (counts.get(row.shift) || 0) + 1
+        );
+      });
+
+      renderSummary([
+        { label: "Linked Alert Records", value: rows.length },
+        { label: "Shifts Represented", value: counts.size }
+      ]);
+
+      renderTable(
+        [
+          { key: "shift", label: "Shift" },
+          { key: "count", label: "Alert Records" }
+        ],
+        Array.from(counts, ([shiftName, count]) => ({
+          shift: shiftName,
+          count
+        }))
+      );
+
+      return;
+    }
+
+    renderSummary([
+      { label: "Reported Alerts", value: new Set(rows.map(r => r.incidentId)).size },
+      { label: "Shift Associations", value: rows.length }
+    ]);
+
+    renderTable(
+      [
+        { key: "date", label: "Reported" },
+        { key: "type", label: "Alert Type" },
+        { key: "shift", label: "Shift" },
+        { key: "shiftDate", label: "Shift Date" },
+        { key: "incidentId", label: "Reference ID" }
+      ],
+      rows
+    );
+  }
+
 
   // =========================================================
   // GENERATE REPORT
@@ -1857,6 +2034,13 @@ async function loadReportingOfficers() {
     range
   );
 
+
+} else if (activeModule === "alerts") {
+
+  await generateSecurityAlertReport(
+    selectedReport,
+    range
+  );
 
 } else {
 
