@@ -171,19 +171,6 @@ window.SECURETRACK_DB = db;
     return { profile, roles };
   }
 
-// ========================================
-// SECURETRACK HUB NOTIFICATION CENTER
-// ========================================
-
-// Replace hubSupabaseClient with the actual
-// authenticated Supabase client variable
-// used by hub.html.
-
-await window.SecureTrackNotifications.init({
-  client: hubSupabaseClient,
-  target: "#securetrack-notification-mount"
-});
-
   // ==========================================
   // LOGIN & PASSWORD RECOVERY
   // ==========================================
@@ -477,13 +464,55 @@ await window.SecureTrackNotifications.init({
     const userRoles = document.getElementById("userRoles");
     const logoutButton = document.getElementById("logoutButton");
 
-    logoutButton.addEventListener("click", async () => {
-      logoutButton.disabled = true;
-      logoutButton.textContent = "Signing out…";
+   
+logoutButton.addEventListener(
+  "click",
+  async () => {
 
+    logoutButton.disabled = true;
+
+    logoutButton.textContent =
+      "Signing out…";
+
+    // Disconnect notification listeners
+    // before the user signs out.
+    if (
+      window.SecureTrackNotifications &&
+      typeof
+        window.SecureTrackNotifications.destroy ===
+        "function"
+    ) {
+
+      window.SecureTrackNotifications.destroy();
+
+    }
+
+    // Preserve existing Supabase logout.
+    const { error } =
       await db.auth.signOut();
-      window.location.replace("login.html");
-    });
+
+    if (error) {
+
+      console.error(
+        "SecureTrack logout failed:",
+        error
+      );
+
+      logoutButton.disabled = false;
+
+      logoutButton.textContent =
+        "Sign Out";
+
+      return;
+    }
+
+    window.location.replace(
+      "login.html"
+    );
+
+  }
+);
+
 
     try {
       const user = await getSessionUser();
@@ -516,6 +545,74 @@ await window.SecureTrackNotifications.init({
       loading.hidden = true;
       moduleGrid.hidden = false;
 
+
+// ============================================
+// SECURETRACK OP
+// UNIVERSAL NOTIFICATION CENTER
+// ALL AUTHENTICATED EMPLOYEE ROLES
+// ============================================
+
+try {
+
+  const notifications =
+    window.SecureTrackNotifications;
+
+  const notificationMount =
+    document.getElementById(
+      "securetrack-notification-mount"
+    );
+
+  if (
+    notifications &&
+    notificationMount
+  ) {
+
+    const initialized =
+      await notifications.init({
+        client: db,
+        userId: user.id,
+        target:
+          "#securetrack-notification-mount"
+      });
+
+    if (initialized) {
+
+      console.log(
+        "SecureTrack Notification Center active."
+      );
+
+    } else {
+
+      console.warn(
+        "SecureTrack Notification Center " +
+        "could not initialize."
+      );
+
+    }
+
+  } else {
+
+    console.warn(
+      "SecureTrack notification script " +
+      "or mount is unavailable."
+    );
+
+  }
+
+} catch (notificationError) {
+
+  // Notification errors must never
+  // prevent employees from accessing
+  // the Operations Hub.
+
+  console.error(
+    "SecureTrack notification initialization error:",
+    notificationError
+  );
+
+}
+
+      
     } catch (error) {
       showFatal(
         error?.message ||
