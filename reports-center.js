@@ -635,36 +635,136 @@
     manager.email ||
     "Management";
 
+
 async function loadReportingOfficers() {
 
-  const {
-    data,
-    error
-  } =
-    await db
-      .from(
-        "overtime_signups"
-      )
-      .select(
-        "user_id, display_name"
-      )
-      .not(
-        "user_id",
-        "is",
-        null
-      );
+  // =========================================================
+  // SECURETRACK OP - REPORTING OFFICER DIRECTORY
+  // Load all active employees instead of overtime signups
+  // =========================================================
 
+  try {
 
-  if (error) {
+    const { data, error } = await db
+      .from("profiles")
+      .select(`
+        id,
+        employee_id,
+        display_name,
+        first_name,
+        last_name,
+        employee_number,
+        is_active,
+        employment_status
+      `)
+      .eq("is_active", true)
+      .eq("employment_status", "active")
+      .order("display_name", {
+        ascending: true
+      });
 
-    console.warn(
-      "Unable to load reporting officers:",
+    if (error) {
+      throw error;
+    }
+
+    const officers = new Map();
+
+    (data || []).forEach(profile => {
+
+      if (!profile.id) {
+        return;
+      }
+
+      const fullName = [
+        profile.first_name,
+        profile.last_name
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+
+      const displayName =
+        profile.display_name?.trim() ||
+        fullName ||
+        `Employee ${profile.employee_number || ""}`;
+
+      officers.set(profile.id, {
+        id: profile.id,
+        name: displayName,
+        employeeNumber: profile.employee_number
+      });
+
+    });
+
+    // Preserve the All Officers option.
+
+    officer.innerHTML = "";
+
+    const allOption =
+      document.createElement("option");
+
+    allOption.value = "all";
+    allOption.textContent = "All Officers";
+
+    officer.appendChild(allOption);
+
+    // Sort alphabetically.
+
+    const sortedOfficers =
+      Array.from(officers.values())
+        .sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+
+    sortedOfficers.forEach(person => {
+
+      const option =
+        document.createElement("option");
+
+      option.value = person.id;
+
+      option.textContent =
+        person.employeeNumber
+          ? `${person.name} (#${person.employeeNumber})`
+          : person.name;
+
+      officer.appendChild(option);
+
+    });
+
+    console.log(
+      `Reporting Center: Loaded ${sortedOfficers.length} active personnel profiles.`
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Unable to load Reporting Center officers:",
       error
     );
 
-    return;
+    // Keep the basic dropdown usable.
+
+    officer.innerHTML = "";
+
+    const fallback =
+      document.createElement("option");
+
+    fallback.value = "all";
+    fallback.textContent = "All Officers";
+
+    officer.appendChild(fallback);
+
+    result.className = "result show error";
+
+    result.textContent =
+      "Unable to load the employee directory. " +
+      "Please refresh or contact an administrator.";
 
   }
+
+}
+
 
 
   const unique =
