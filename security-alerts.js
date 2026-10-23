@@ -1764,74 +1764,817 @@ function addSlipFallWitnessRow() {
     };
 
   }
+// ========================================================
+// SLIP & FALL SUBMISSION HELPERS
+// ========================================================
+
+function collectSlipFallWitnesses() {
+
+  const rows =
+    Array.from(
+      document.querySelectorAll(
+        ".slip-fall-witness-row"
+      )
+    );
 
 
-  // ========================================================
-  // SUBMIT
-  // ========================================================
+  return rows.map(
+    row => ({
 
-  form.addEventListener(
-    "submit",
-    async event => {
+      name:
+        row
+          .querySelector(
+            ".slip-fall-witness-name"
+          )
+          ?.value
+          ?.trim()
+        || "",
 
-      event.preventDefault();
+      phone:
+        row
+          .querySelector(
+            ".slip-fall-witness-phone"
+          )
+          ?.value
+          ?.trim()
+        || "",
 
-      clearMessage();
+      email:
+        row
+          .querySelector(
+            ".slip-fall-witness-email"
+          )
+          ?.value
+          ?.trim()
+        || "",
+
+      affiliation:
+        row
+          .querySelector(
+            ".slip-fall-witness-affiliation"
+          )
+          ?.value
+        || "",
+
+      notes:
+        row
+          .querySelector(
+            ".slip-fall-witness-notes"
+          )
+          ?.value
+          ?.trim()
+        || ""
+
+    })
+  );
+
+}
+
+
+// ========================================================
+// SLIP & FALL EVIDENCE CONFIGURATION
+// ========================================================
+
+const SLIP_FALL_EVIDENCE_FIELDS = [
+
+  {
+    inputId:
+      "shoeSolesImages",
+
+    category:
+      "shoe_soles"
+  },
+
+  {
+    inputId:
+      "fallSceneImages",
+
+    category:
+      "fall_scene"
+  },
+
+  {
+    inputId:
+      "areaCamerasImages",
+
+    category:
+      "area_cameras"
+  },
+
+  {
+    inputId:
+      "nearbySignageImages",
+
+    category:
+      "nearby_signage"
+  },
+
+  {
+    inputId:
+      "injuryImages",
+
+    category:
+      "injury"
+  }
+
+];
+
+
+// ========================================================
+// CLEAN FILE NAME
+// ========================================================
+
+function safeEvidenceFileName(
+  fileName
+) {
+
+  const value =
+    String(
+      fileName || "image"
+    )
+      .trim()
+      .toLowerCase();
+
+
+  return value
+    .replace(
+      /[^a-z0-9._-]+/g,
+      "-"
+    )
+    .replace(
+      /-+/g,
+      "-"
+    )
+    .replace(
+      /^[-.]+|[-.]+$/g,
+      ""
+    )
+    || "image";
+
+}
+
+
+// ========================================================
+// SAVE SLIP & FALL DETAILS
+// ========================================================
+
+async function saveSlipFallDetails(
+  incidentId
+) {
+
+  const riskManagementNotified =
+    Boolean(
+      document.getElementById(
+        "riskManagementNotified"
+      )?.checked
+    );
+
+
+  const witnesses =
+    collectSlipFallWitnesses();
+
+
+  const {
+    data,
+    error
+  } =
+    await db.rpc(
+      "save_slip_fall_details",
+      {
+
+        p_incident_id:
+          incidentId,
+
+        p_person_name:
+          document
+            .getElementById(
+              "slipFallPersonName"
+            )
+            .value
+            .trim(),
+
+        p_person_phone:
+          nullable(
+            document.getElementById(
+              "slipFallPersonPhone"
+            )?.value
+          ),
+
+        p_person_email:
+          nullable(
+            document.getElementById(
+              "slipFallPersonEmail"
+            )?.value
+          ),
+
+        p_fall_location:
+          document
+            .getElementById(
+              "location"
+            )
+            .value
+            .trim(),
+
+        p_occurrence_date:
+          document
+            .getElementById(
+              "occurrenceDate"
+            )
+            .value,
+
+        p_occurrence_time:
+          document
+            .getElementById(
+              "occurrenceTime"
+            )
+            .value,
+
+        p_risk_management_notified:
+          riskManagementNotified,
+
+        p_risk_management_details:
+          riskManagementNotified
+
+            ? nullable(
+                document.getElementById(
+                  "riskManagementDetails"
+                )?.value
+              )
+
+            : null,
+
+        p_additional_details:
+          nullable(
+            document.getElementById(
+              "slipFallAdditionalDetails"
+            )?.value
+          ),
+
+        p_witnesses:
+          witnesses
+
+      }
+    );
+
+
+  if (error) {
+
+    throw error;
+
+  }
+
+
+  if (
+    !data ||
+    data.ok !== true
+  ) {
+
+    throw new Error(
+      "SecureTrack could not save the Slip & Fall follow-up details."
+    );
+
+  }
+
+
+  return data;
+
+}
+
+
+// ========================================================
+// UPLOAD ONE SLIP & FALL IMAGE
+// ========================================================
+
+async function uploadSlipFallEvidenceFile(
+  incidentId,
+  category,
+  slot,
+  file
+) {
+
+  if (
+    !file
+  ) {
+
+    return null;
+
+  }
+
+
+  if (
+    file.size >
+    10485760
+  ) {
+
+    throw new Error(
+      `${file.name} exceeds the 10 MB evidence-image limit.`
+    );
+
+  }
+
+
+  const uniquePart =
+
+    typeof crypto !== "undefined"
+
+    &&
+    typeof crypto.randomUUID ===
+      "function"
+
+      ? crypto.randomUUID()
+
+      : (
+          Date.now()
+          +
+          "-"
+          +
+          Math.random()
+            .toString(36)
+            .slice(2)
+        );
+
+
+  const cleanName =
+    safeEvidenceFileName(
+      file.name
+    );
+
+
+  const storagePath =
+    `${incidentId}/${category}/${slot}-${uniquePart}-${cleanName}`;
+
+
+  const {
+    error: uploadError
+  } =
+    await db
+      .storage
+      .from(
+        "slip-fall-evidence"
+      )
+      .upload(
+        storagePath,
+        file,
+        {
+
+          cacheControl:
+            "3600",
+
+          upsert:
+            false,
+
+          contentType:
+            file.type ||
+            undefined
+
+        }
+      );
+
+
+  if (
+    uploadError
+  ) {
+
+    throw new Error(
+      `Unable to upload ${file.name}: ${uploadError.message}`
+    );
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await db.rpc(
+      "save_slip_fall_evidence",
+      {
+
+        p_incident_id:
+          incidentId,
+
+        p_evidence_category:
+          category,
+
+        p_evidence_slot:
+          slot,
+
+        p_storage_path:
+          storagePath,
+
+        p_original_file_name:
+          file.name,
+
+        p_mime_type:
+          file.type ||
+          null,
+
+        p_file_size_bytes:
+          file.size
+
+      }
+    );
+
+
+  if (
+    error
+  ) {
+
+    /*
+      The file reached Storage but the database
+      registration failed. Remove the orphaned
+      object before reporting the failure.
+    */
+
+    await db
+      .storage
+      .from(
+        "slip-fall-evidence"
+      )
+      .remove(
+        [
+          storagePath
+        ]
+      );
+
+
+    throw error;
+
+  }
+
+
+  return data;
+
+}
+
+
+// ========================================================
+// UPLOAD ALL SLIP & FALL EVIDENCE
+// ========================================================
+
+async function uploadAllSlipFallEvidence(
+  incidentId
+) {
+
+  let uploadedCount =
+    0;
+
+
+  for (
+    const evidenceField
+    of SLIP_FALL_EVIDENCE_FIELDS
+  ) {
+
+    const input =
+      document.getElementById(
+        evidenceField.inputId
+      );
+
+
+    const files =
+      Array.from(
+        input?.files || []
+      );
+
+
+    if (
+      files.length > 4
+    ) {
+
+      throw new Error(
+        "A maximum of four images may be uploaded in each evidence category."
+      );
+
+    }
+
+
+    for (
+      let index = 0;
+      index < files.length;
+      index += 1
+    ) {
+
+      await uploadSlipFallEvidenceFile(
+
+        incidentId,
+
+        evidenceField.category,
+
+        index + 1,
+
+        files[index]
+
+      );
+
+
+      uploadedCount +=
+        1;
+
+    }
+
+  }
+
+
+  return uploadedCount;
+
+}
+
+// ========================================================
+// SUBMIT
+// ========================================================
+
+form.addEventListener(
+
+  "submit",
+
+  async event => {
+
+    event.preventDefault();
+
+    clearMessage();
+
+
+    if (
+      !form.checkValidity()
+    ) {
+
+      form.reportValidity();
+
+      return;
+
+    }
+
+
+    const isSlipFall =
+      incidentType.value ===
+      "slip_and_fall";
+
+
+    /*
+      Check evidence counts before creating the incident.
+    */
+
+    if (
+      isSlipFall
+    ) {
+
+      for (
+        const evidenceField
+        of SLIP_FALL_EVIDENCE_FIELDS
+      ) {
+
+        const input =
+          document.getElementById(
+            evidenceField.inputId
+          );
+
+
+        const files =
+          Array.from(
+            input?.files || []
+          );
+
+
+        if (
+          files.length > 4
+        ) {
+
+          showMessage(
+            "A maximum of four images may be uploaded in each Slip & Fall evidence category.",
+            "error"
+          );
+
+          return;
+
+        }
+
+
+        const oversizedFile =
+          files.find(
+            file =>
+              file.size >
+              10485760
+          );
+
+
+        if (
+          oversizedFile
+        ) {
+
+          showMessage(
+
+            `${oversizedFile.name} exceeds the 10 MB evidence-image limit.`,
+
+            "error"
+
+          );
+
+          return;
+
+        }
+
+      }
+
+    }
+
+
+    submitButton.disabled =
+      true;
+
+
+    submitButton.textContent =
+
+      isSlipFall
+
+        ? "Saving Slip & Fall..."
+
+        : "Submitting Alert...";
+
+
+    let createdIncidentId =
+      null;
+
+
+    try {
+
+      // ======================================================
+      // STEP 1 — CREATE SECURITY ALERT
+      // ======================================================
+
+      const payload =
+        buildPayload();
+
+
+      const {
+        data,
+        error
+      } =
+        await db.rpc(
+          "submit_security_incident",
+          payload
+        );
 
 
       if (
-        !form.checkValidity()
+        error
       ) {
 
-        form.reportValidity();
-
-        return;
+        throw error;
 
       }
 
 
-      submitButton.disabled =
-        true;
+      if (
+        !data ||
+        data.ok !== true
+      ) {
+
+        throw new Error(
+          "SecureTrack did not confirm the incident submission."
+        );
+
+      }
 
 
-      submitButton.textContent =
-        "Submitting Alert...";
+      createdIncidentId =
+        data.incident_id;
 
 
-      try {
+      // ======================================================
+      // STEP 2 — SLIP & FALL DETAILS / WITNESSES
+      // ======================================================
 
-        const payload =
-          buildPayload();
+      let evidenceCount =
+        0;
 
 
-        const {
-          data,
-          error
-        } =
-          await db.rpc(
-            "submit_security_incident",
-            payload
+      if (
+        isSlipFall
+      ) {
+
+        submitButton.textContent =
+          "Saving Follow-Up Details...";
+
+
+        await saveSlipFallDetails(
+          createdIncidentId
+        );
+
+
+        // ====================================================
+        // STEP 3 — PRIVATE EVIDENCE UPLOADS
+        // ====================================================
+
+        submitButton.textContent =
+          "Uploading Evidence...";
+
+
+        evidenceCount =
+          await uploadAllSlipFallEvidence(
+            createdIncidentId
           );
 
-
-        if (error) {
-
-          throw error;
-
-        }
+      }
 
 
-        if (
-          !data ||
-          data.ok !== true
-        ) {
+      // ======================================================
+      // COMPLETE
+      // ======================================================
 
-          throw new Error(
-            "SecureTrack did not confirm the incident submission."
-          );
+      form.classList.add(
+        "hidden"
+      );
 
-        }
 
+      successPanel.classList.remove(
+        "hidden"
+      );
+
+
+      if (
+        isSlipFall
+      ) {
+
+        successMessage.textContent =
+
+          evidenceCount > 0
+
+            ? (
+                "The Slip & Fall alert was recorded, "
+                +
+                "follow-up details were saved, and "
+                +
+                `${evidenceCount} evidence image(s) were uploaded securely.`
+              )
+
+            : (
+                "The Slip & Fall alert and follow-up details were recorded successfully."
+              );
+
+      }
+
+      else {
+
+        successMessage.textContent =
+
+          data.notification_status ===
+            "queued"
+
+            ? (
+                "The incident was recorded and the SecureTrack leadership notification was queued."
+              )
+
+            : (
+                "The incident was recorded successfully."
+              );
+
+      }
+
+
+      incidentReference.textContent =
+
+        createdIncidentId
+
+          ? (
+              "Incident Reference: "
+              +
+              createdIncidentId
+            )
+
+          : "";
+
+
+      successPanel.scrollIntoView({
+
+        behavior:
+          "smooth",
+
+        block:
+          "center"
+
+      });
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        "Security Alert submission failed:",
+        error
+      );
+
+
+      /*
+        If the main incident was already created,
+        NEVER tell the user simply to submit again.
+        That could create a duplicate Security Alert.
+      */
+
+      if (
+        createdIncidentId
+      ) {
 
         form.classList.add(
           "hidden"
@@ -1844,21 +2587,31 @@ function addSlipFallWitnessRow() {
 
 
         successMessage.textContent =
-          data.notification_status ===
-            "queued"
 
-            ? "The incident was recorded and the SecureTrack leadership notification was queued."
-
-            : "The incident was recorded successfully.";
+          (
+            "The Security Alert was created, but part of the Slip & Fall follow-up could not be completed. "
+            +
+            "Do not submit a duplicate alert. "
+            +
+            "Provide this Incident Reference to shift leadership or a manager so the record can be completed."
+          );
 
 
         incidentReference.textContent =
-          data.incident_id
 
-            ? "Incident Reference: " +
-              data.incident_id
+          "Incident Reference: "
+          +
+          createdIncidentId;
 
-            : "";
+
+        showMessage(
+
+          error.message ||
+          "The follow-up record could not be completed.",
+
+          "error"
+
+        );
 
 
         successPanel.scrollIntoView({
@@ -1871,40 +2624,38 @@ function addSlipFallWitnessRow() {
 
         });
 
-      }
-      catch (error) {
 
-        console.error(
-          "Security Alert submission failed:",
-          error
-        );
-
-
-        showMessage(
-
-          error.message ||
-          "The Security Alert could not be submitted. Contact leadership directly if immediate notification is required.",
-
-          "error"
-
-        );
+        return;
 
       }
-      finally {
-
-        submitButton.disabled =
-          false;
 
 
-        submitButton.textContent =
-          "Submit Security Alert";
+      showMessage(
 
-      }
+        error.message ||
+
+        "The Security Alert could not be submitted. Contact leadership directly if immediate notification is required.",
+
+        "error"
+
+      );
 
     }
-  );
+
+    finally {
+
+      submitButton.disabled =
+        false;
 
 
+      submitButton.textContent =
+        "Submit Security Alert";
+
+    }
+
+  }
+
+);
   // ========================================================
   // NEW REPORT
   // ========================================================
