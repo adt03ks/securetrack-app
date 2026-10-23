@@ -521,6 +521,41 @@ if (
 
   }
 
+  function slipFallImageField(
+  id,
+  label
+) {
+
+  return `
+
+    <div class="field full-width">
+
+      <label for="${id}Images">
+        ${escapeHtml(label)}
+      </label>
+
+      <input
+        id="${id}Images"
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+        multiple
+      >
+
+      <small>
+        Maximum 4 images • Maximum 10 MB per image
+      </small>
+
+      <div
+        id="${id}ImageStatus"
+        class="muted"
+        style="margin-top:6px;"
+      ></div>
+
+    </div>
+
+  `;
+
+}
 
   // ========================================================
   // INCIDENT TEMPLATES
@@ -675,6 +710,271 @@ if (
 
     },
 
+    slip_and_fall: {
+
+  help:
+    "Document the Slip & Fall, person involved, witnesses, Risk Management notification, and required photographic evidence.",
+
+  html: () => `
+
+    <div class="field">
+
+      <label for="occurrenceDate">
+        Date *
+      </label>
+
+      <input
+        id="occurrenceDate"
+        type="date"
+        required
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label for="occurrenceTime">
+        Time *
+      </label>
+
+      <input
+        id="occurrenceTime"
+        type="time"
+        required
+      >
+
+    </div>
+
+
+    <div class="field full-width">
+
+      <label for="location">
+        Location of Fall *
+      </label>
+
+      <input
+        id="location"
+        type="text"
+        maxlength="300"
+        required
+        placeholder="Building, department, hallway, room, entrance, parking area, etc."
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label for="slipFallPersonName">
+        Person Involved Name *
+      </label>
+
+      <input
+        id="slipFallPersonName"
+        type="text"
+        maxlength="180"
+        required
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label for="slipFallPersonPhone">
+        Phone Number
+      </label>
+
+      <input
+        id="slipFallPersonPhone"
+        type="tel"
+        maxlength="50"
+        autocomplete="tel"
+        placeholder="Phone number"
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label for="slipFallPersonEmail">
+        Email Address
+      </label>
+
+      <input
+        id="slipFallPersonEmail"
+        type="email"
+        maxlength="254"
+        autocomplete="email"
+        placeholder="Email address"
+      >
+
+    </div>
+
+
+    <div class="field full-width">
+
+      <label>
+        Witnesses
+      </label>
+
+      <div
+        id="slipFallWitnessList"
+        style="
+          display:grid;
+          gap:12px;
+          margin-top:8px;
+        "
+      ></div>
+
+      <button
+        id="addSlipFallWitness"
+        class="secondary-button"
+        type="button"
+        style="margin-top:10px;"
+      >
+        + Add Witness
+      </button>
+
+      <div class="muted" style="margin-top:8px;">
+        Record witness name, contact information, and whether
+        the witness is a visitor or employee.
+      </div>
+
+    </div>
+
+
+    <div class="field full-width">
+
+      <label
+        style="
+          display:flex;
+          align-items:flex-start;
+          gap:10px;
+          cursor:pointer;
+        "
+      >
+
+        <input
+          id="riskManagementNotified"
+          type="checkbox"
+          style="
+            width:18px;
+            height:18px;
+            margin-top:3px;
+          "
+        >
+
+        <span>
+          <strong>
+            Risk Management Notified
+          </strong>
+
+          <small
+            style="
+              display:block;
+              margin-top:4px;
+            "
+          >
+            Check this box when Risk Management has been contacted.
+          </small>
+        </span>
+
+      </label>
+
+    </div>
+
+
+    <div
+      id="riskManagementDetailsField"
+      class="field full-width"
+      style="display:none;"
+    >
+
+      <label for="riskManagementDetails">
+        Risk Management Notification Details *
+      </label>
+
+      <textarea
+        id="riskManagementDetails"
+        rows="4"
+        maxlength="1500"
+        placeholder="Document who was contacted, when, instructions received, reference number, or other relevant details."
+      ></textarea>
+
+    </div>
+
+
+    <div class="field full-width">
+
+      <label for="slipFallAdditionalDetails">
+        Additional Slip & Fall Details
+      </label>
+
+      <textarea
+        id="slipFallAdditionalDetails"
+        rows="4"
+        maxlength="2000"
+        placeholder="Enter additional operational details relevant to the incident."
+      ></textarea>
+
+    </div>
+
+
+    <div class="field full-width">
+
+      <div
+        style="
+          font-weight:800;
+          margin-bottom:6px;
+        "
+      >
+        Photographic Evidence
+      </div>
+
+      <div class="privacy-note">
+        Up to 4 images may be uploaded in each category.
+        Photograph only what is operationally necessary and authorized.
+        Do not capture unrelated medical information.
+      </div>
+
+    </div>
+
+
+    ${slipFallImageField(
+      "shoeSoles",
+      "Bottom / Soles of Shoes"
+    )}
+
+
+    ${slipFallImageField(
+      "fallScene",
+      "Scene Where the Fall Occurred"
+    )}
+
+
+    ${slipFallImageField(
+      "areaCameras",
+      "Cameras Within the Area"
+    )}
+
+
+    ${slipFallImageField(
+      "nearbySignage",
+      "Nearby Signage / Warnings"
+    )}
+
+
+    ${slipFallImageField(
+      "injury",
+      "Visible Injuries"
+    )}
+
+  `
+
+},
 
     insufficient_staffing: {
 
@@ -913,6 +1213,14 @@ tsi: {
       dynamicFields.innerHTML =
         template.html();
 
+      if (
+  selected ===
+  "slip_and_fall"
+) {
+
+  initializeSlipFallForm();
+
+}
 
       detailsSection.classList.remove(
         "hidden"
@@ -1001,7 +1309,319 @@ tsi: {
     }
 
   }
+function initializeSlipFallForm() {
 
+  const addWitnessButton =
+    document.getElementById(
+      "addSlipFallWitness"
+    );
+
+  const riskCheckbox =
+    document.getElementById(
+      "riskManagementNotified"
+    );
+
+  const riskField =
+    document.getElementById(
+      "riskManagementDetailsField"
+    );
+
+  const riskDetails =
+    document.getElementById(
+      "riskManagementDetails"
+    );
+
+
+  if (addWitnessButton) {
+
+    addWitnessButton.addEventListener(
+      "click",
+      () => {
+
+        addSlipFallWitnessRow();
+
+      }
+    );
+
+  }
+
+
+  if (
+    riskCheckbox &&
+    riskField &&
+    riskDetails
+  ) {
+
+    riskCheckbox.addEventListener(
+      "change",
+      () => {
+
+        riskField.style.display =
+          riskCheckbox.checked
+            ? ""
+            : "none";
+
+
+        riskDetails.required =
+          riskCheckbox.checked;
+
+
+        if (
+          !riskCheckbox.checked
+        ) {
+
+          riskDetails.value =
+            "";
+
+        }
+
+      }
+    );
+
+  }
+
+
+  [
+    "shoeSoles",
+    "fallScene",
+    "areaCameras",
+    "nearbySignage",
+    "injury"
+  ].forEach(
+    id => {
+
+      const input =
+        document.getElementById(
+          `${id}Images`
+        );
+
+      const status =
+        document.getElementById(
+          `${id}ImageStatus`
+        );
+
+
+      input?.addEventListener(
+        "change",
+        () => {
+
+          const files =
+            Array.from(
+              input.files || []
+            );
+
+
+          if (
+            files.length > 4
+          ) {
+
+            input.value =
+              "";
+
+            if (status) {
+
+              status.textContent =
+                "Maximum 4 images allowed in this category.";
+
+            }
+
+            return;
+
+          }
+
+
+          const oversized =
+            files.find(
+              file =>
+                file.size >
+                10485760
+            );
+
+
+          if (oversized) {
+
+            input.value =
+              "";
+
+            if (status) {
+
+              status.textContent =
+                `${oversized.name} exceeds the 10 MB limit.`;
+
+            }
+
+            return;
+
+          }
+
+
+          if (status) {
+
+            status.textContent =
+              files.length
+                ? `${files.length} image(s) selected.`
+                : "";
+
+          }
+
+        }
+      );
+
+    }
+  );
+
+}
+
+
+function addSlipFallWitnessRow() {
+
+  const list =
+    document.getElementById(
+      "slipFallWitnessList"
+    );
+
+
+  if (!list) {
+    return;
+  }
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+
+  row.className =
+    "slip-fall-witness-row";
+
+
+  row.style.cssText =
+    `
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:12px;
+      padding:14px;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    `;
+
+
+  row.innerHTML =
+    `
+
+      <div class="field">
+        <label>
+          Witness Name *
+        </label>
+
+        <input
+          class="slip-fall-witness-name"
+          type="text"
+          maxlength="180"
+          required
+        >
+      </div>
+
+
+      <div class="field">
+        <label>
+          Witness Type *
+        </label>
+
+        <select
+          class="slip-fall-witness-affiliation"
+          required
+        >
+
+          <option value="">
+            Select...
+          </option>
+
+          <option value="visitor">
+            Visitor
+          </option>
+
+          <option value="employee">
+            Employee
+          </option>
+
+        </select>
+      </div>
+
+
+      <div class="field">
+        <label>
+          Phone
+        </label>
+
+        <input
+          class="slip-fall-witness-phone"
+          type="tel"
+          maxlength="50"
+        >
+      </div>
+
+
+      <div class="field">
+        <label>
+          Email
+        </label>
+
+        <input
+          class="slip-fall-witness-email"
+          type="email"
+          maxlength="254"
+        >
+      </div>
+
+
+      <div class="field full-width">
+        <label>
+          Witness Notes
+        </label>
+
+        <textarea
+          class="slip-fall-witness-notes"
+          rows="2"
+          maxlength="750"
+        ></textarea>
+      </div>
+
+
+      <div class="field full-width">
+
+        <button
+          type="button"
+          class="secondary-button slip-fall-remove-witness"
+        >
+          Remove Witness
+        </button>
+
+      </div>
+
+    `;
+
+
+  row
+    .querySelector(
+      ".slip-fall-remove-witness"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+
+        row.remove();
+
+      }
+    );
+
+
+  list.appendChild(
+    row
+  );
+
+}
 
   // ========================================================
   // BUILD RPC PAYLOAD
