@@ -2084,6 +2084,442 @@ async function loadReportingOfficers() {
 
   }
 
+
+  // =========================================================
+  // DUTY STATION REPORTS
+  // SecureTrack OP Reporting Center
+  // =========================================================
+
+  async function generateDutyStationReport(type, range) {
+
+    const supportedTypes = [
+      "finalized_duty",
+      "duty_by_officer",
+      "duty_overrides",
+      "post_publish_changes",
+      "repeat_assignments"
+    ];
+
+    if (!supportedTypes.includes(type)) {
+      throw new Error("Unsupported Duty Station report.");
+    }
+
+    function localDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    const fromDate = localDate(range.start);
+    const toDate = localDate(range.end);
+
+    // =====================================================
+    // LOAD SHIFTS WITHIN THE REPORTING PERIOD
+    // =====================================================
+
+    let shiftQuery = db
+      .from("shift_instances")
+      .select("id, shift_name, shift_date, status")
+      .gte("shift_date", fromDate)
+      .lte("shift_date", toDate)
+      .order("shift_date", { ascending: false });
+
+    if (shift.value !== "all") {
+      shiftQuery = shiftQuery.eq(
+        "shift_name",
+        shift.value
+      );
+    }
+
+    const {
+      data: shiftData,
+      error: shiftError
+    } = await shiftQuery;
+
+    if (shiftError) throw shiftError;
+
+    const shifts = shiftData || [];
+
+    const shiftMap = new Map(
+      shifts.map(item => [item.id, item])
+    );
+
+    const shiftIds = shifts.map(item => item.id);
+
+    if (!shiftIds.length) {
+      renderSummary([
+        { label: "Matching Shifts", value: 0 },
+        { label: "Records", value: 0 }
+      ]);
+
+      renderTable(
+        [{ key: "message", label: "Result" }],
+        []
+      );
+      return;
+    }
+
+    // =====================================================
+    // LOAD DUTY STATION ASSIGNMENTS
+    // =====================================================
+
+    let assignmentQuery = db
+      .from("station_assignments")
+      .select(`
+        id,
+        shift_instance_id,
+        station_id,
+        user_id,
+        display_name,
+        is_locked,
+        assignment_source,
+        assigned_by_user_id,
+        assigned_at
+      `)
+      .in("shift_instance_id", shiftIds);
+
+    if (officer.value !== "all") {
+      assignmentQuery = assignmentQuery.eq(
+        "user_id",
+        officer.value
+      );
+    }
+
+    const {
+      data: assignmentData,
+      error: assignmentError
+    } = await assignmentQuery;
+
+    if (assignmentError) throw assignmentError;
+
+    const assignments = assignmentData || [];
+
+    const formatDateTime = value =>
+      value
+        ? new Date(value).toLocaleString()
+        : "—";
+
+    const formatStation = value =>
+      value
+        ? String(value).slice(0, 8).toUpperCase()
+        : "Unassigned";
+
+    // =====================================================
+    // FINALIZED DUTY STATIONS
+    // =====================================================
+
+    if (
+      type === "finalized_duty" ||
+      type === "duty_by_officer"
+    ) {
+
+      const filtered = type === "finalized_duty"
+        ? assignments.filter(item =>
+            shiftMap.get(item.shift_instance_id)
+              ?.status === "published"
+          )
+        : assignments;
+
+      const rows = filtered.map(item => {
+
+        const workShift =
+          shiftMap.get(item.shift_instance_id);
+
+        return {
+          date: workShift?.shift_date || "—",
+          shift: workShift?.shift_name || "—",
+          officer: item.display_name || "Unknown",
+          station: formatStation(item.station_id),
+          source: item.assignment_source || "—",
+          status: workShift?.status || "—",
+          locked: item.is_locked ? "Yes" : "No",
+          assigned: formatDateTime(item.assigned_at)
+        };
+      });
+
+      renderSummary([
+        {
+          label: "Duty Assignments",
+          value: rows.length
+        },
+        {
+          label: "Officers",
+          value: new Set(
+            filtered.map(item => item.user_id)
+              .filter(Boolean)
+          ).size
+        },
+        {
+          label: "Shifts",
+          value: new Set(
+            filtered.map(item => item.shift_instance_id)
+          ).size
+        }
+      ]);
+
+      renderTable(
+        [
+          { key: "date", label: "Shift Date" },
+          { key: "shift", label: "Shift" },
+          { key: "officer", label: "Officer" },
+          { key: "station", label: "Station ID" },
+          { key: "source", label: "Assignment Source" },
+          { key: "status", label: "Shift Status" },
+          { key: "locked", label: "Locked" },
+          { key: "assigned", label: "Assigned At" }
+        ],
+        rows
+      );
+
+      return;
+    }
+
+    // =====================================================
+    // LOAD DUTY STATION CHANGE HISTORY
+    // =====================================================
+
+    let historyQuery = db
+      .from("station_assignment_history")
+      .select(`
+        id,
+        shift_instance_id,
+        user_id,
+        display_name,
+        from_station_id,
+        to_station_id,
+        action_type,
+        reason,
+        actor_display_name,
+        occurred_at
+      `)
+      .in("shift_instance_id", shiftIds)
+      .order("occurred_at", { ascending: false });
+
+    if (officer.value !== "all") {
+      historyQuery = historyQuery.eq(
+        "user_id",
+        officer.value
+      );
+    }
+
+    const {
+      data: historyData,
+      error: historyError
+    } = await historyQuery;
+
+    if (historyError) throw historyError;
+
+    const history = historyData || [];
+
+    // =====================================================
+    // DUTY STATION OVERRIDES
+    // =====================================================
+
+    if (type === "duty_overrides") {
+
+      const overrideAssignments =
+        assignments.filter(item =>
+          item.assignment_source === "override" ||
+          item.assignment_source === "manual"
+        );
+
+      const overrideHistory =
+        history.filter(item =>
+          String(item.action_type || "")
+            .toLowerCase()
+            .includes("override")
+        );
+
+      const rows = [
+        ...overrideAssignments.map(item => {
+          const s = shiftMap.get(item.shift_instance_id);
+
+          return {
+            date: s?.shift_date || "—",
+            shift: s?.shift_name || "—",
+            officer: item.display_name || "—",
+            action: item.assignment_source || "—",
+            from: "—",
+            to: formatStation(item.station_id),
+            actor: "—",
+            notes: "Current assignment"
+          };
+        }),
+        ...overrideHistory.map(item => {
+          const s = shiftMap.get(item.shift_instance_id);
+
+          return {
+            date: s?.shift_date || "—",
+            shift: s?.shift_name || "—",
+            officer: item.display_name || "—",
+            action: item.action_type || "—",
+            from: formatStation(item.from_station_id),
+            to: formatStation(item.to_station_id),
+            actor: item.actor_display_name || "—",
+            notes: item.reason || "—"
+          };
+        })
+      ];
+
+      renderSummary([
+        {
+          label: "Current Manual / Override Assignments",
+          value: overrideAssignments.length
+        },
+        {
+          label: "Override History Events",
+          value: overrideHistory.length
+        }
+      ]);
+
+      renderTable(
+        [
+          { key: "date", label: "Shift Date" },
+          { key: "shift", label: "Shift" },
+          { key: "officer", label: "Officer" },
+          { key: "action", label: "Change Type" },
+          { key: "from", label: "Previous Station" },
+          { key: "to", label: "New Station" },
+          { key: "actor", label: "Changed By" },
+          { key: "notes", label: "Reason / Notes" }
+        ],
+        rows
+      );
+
+      return;
+    }
+
+    // =====================================================
+    // CHANGES AFTER FINALIZATION
+    // =====================================================
+
+    if (type === "post_publish_changes") {
+
+      // A published shift plus a history entry does not,
+      // by itself, prove the change occurred AFTER publish.
+      // Only report records with explicit post-publish
+      // action naming; otherwise avoid a false claim.
+
+      const changes = history.filter(item =>
+        /post.publish|after.final/i.test(
+          String(item.action_type || "")
+        )
+      );
+
+      const rows = changes.map(item => {
+        const s = shiftMap.get(item.shift_instance_id);
+
+        return {
+          date: s?.shift_date || "—",
+          shift: s?.shift_name || "—",
+          officer: item.display_name || "—",
+          from: formatStation(item.from_station_id),
+          to: formatStation(item.to_station_id),
+          action: item.action_type || "—",
+          changed: formatDateTime(item.occurred_at),
+          actor: item.actor_display_name || "—",
+          reason: item.reason || "—"
+        };
+      });
+
+      renderSummary([
+        {
+          label: "Explicitly Logged Post-Publish Changes",
+          value: rows.length
+        }
+      ]);
+
+      renderTable(
+        [
+          { key: "date", label: "Shift Date" },
+          { key: "shift", label: "Shift" },
+          { key: "officer", label: "Officer" },
+          { key: "from", label: "Previous Station" },
+          { key: "to", label: "New Station" },
+          { key: "action", label: "Action" },
+          { key: "changed", label: "Changed At" },
+          { key: "actor", label: "Changed By" },
+          { key: "reason", label: "Reason" }
+        ],
+        rows
+      );
+
+      return;
+    }
+
+    // =====================================================
+    // REPEATED DUTY STATION ASSIGNMENTS
+    // =====================================================
+
+    if (type === "repeat_assignments") {
+
+      const assignmentCounts = new Map();
+
+      assignments.forEach(item => {
+
+        if (!item.user_id || !item.station_id) {
+          return;
+        }
+
+        const key =
+          `${item.user_id}:${item.station_id}`;
+
+        if (!assignmentCounts.has(key)) {
+          assignmentCounts.set(key, {
+            officer: item.display_name || "—",
+            station: formatStation(item.station_id),
+            count: 0,
+            shiftDates: new Set()
+          });
+        }
+
+        const record = assignmentCounts.get(key);
+        record.count += 1;
+
+        const workShift =
+          shiftMap.get(item.shift_instance_id);
+
+        if (workShift?.shift_date) {
+          record.shiftDates.add(workShift.shift_date);
+        }
+      });
+
+      const repeated = Array.from(
+        assignmentCounts.values()
+      )
+      .filter(item => item.shiftDates.size > 1)
+      .map(item => ({
+        officer: item.officer,
+        station: item.station,
+        assignments: item.count,
+        days: item.shiftDates.size
+      }))
+      .sort((a, b) => b.days - a.days);
+
+      renderSummary([
+        {
+          label: "Repeated Officer / Station Combinations",
+          value: repeated.length
+        }
+      ]);
+
+      renderTable(
+        [
+          { key: "officer", label: "Officer" },
+          { key: "station", label: "Station ID" },
+          { key: "assignments", label: "Assignments" },
+          { key: "days", label: "Different Days" }
+        ],
+        repeated
+      );
+
+      return;
+    }
+
+  }
+
+  
   // =========================================================
   // GENERATE REPORT
   // =========================================================
@@ -2152,6 +2588,13 @@ async function loadReportingOfficers() {
 } else if (activeModule === "alerts") {
 
   await generateSecurityAlertReport(
+    selectedReport,
+    range
+  );
+
+} else if (activeModule === "duty") {
+
+  await generateDutyStationReport(
     selectedReport,
     range
   );
