@@ -24,6 +24,55 @@
     STM.db;
 
 
+  // =========================================================
+  // UNIVERSAL NOTIFICATION BELL
+  // =========================================================
+
+  async function initializeReportingNotifications() {
+    try {
+      const { data, error } =
+        await db.auth.getUser();
+
+      if (error) {
+        throw error;
+      }
+
+      const userId = data?.user?.id;
+
+      if (!userId) {
+        console.warn(
+          "Reporting Center: no authenticated notification user."
+        );
+        return;
+      }
+
+      if (!window.SecureTrackNotifications?.init) {
+        console.warn(
+          "Reporting Center: notification bell script unavailable."
+        );
+        return;
+      }
+
+      await window.SecureTrackNotifications.init({
+        client: db,
+        userId,
+        target: "#securetrack-notification-mount"
+      });
+
+      console.log(
+        "Reporting Center notification bell initialized."
+      );
+
+    } catch (error) {
+      console.error(
+        "Reporting Center notification initialization failed:",
+        error
+      );
+    }
+  }
+
+  await initializeReportingNotifications();
+
 
   // =========================================================
   // ELEMENTS
@@ -3292,8 +3341,78 @@ async function generateOvertimeReport(
   // INITIALIZE
   // =========================================================
 
- loadReportTypes();
 
-await loadReportingOfficers();
+  // =========================================================
+  // REPORTING CENTER INITIALIZATION
+  // =========================================================
+
+  loadReportTypes();
+
+  await loadReportingOfficers();
+
+
+  // =========================================================
+  // NOTIFICATION DEEP-LINK ROUTING
+  // =========================================================
+
+  const reportingParams =
+    new URLSearchParams(window.location.search);
+
+  const requestedModule =
+    reportingParams.get("module");
+
+  const requestedReport =
+    reportingParams.get("report");
+
+  const autoGenerate =
+    reportingParams.get("run") === "1";
+
+  if (
+    requestedModule &&
+    requestedReport &&
+    Object.prototype.hasOwnProperty.call(
+      reportDefinitions,
+      requestedModule
+    )
+  ) {
+
+    const moduleDefinition =
+      reportDefinitions[requestedModule];
+
+    const matchingReport =
+      moduleDefinition.reports.find(
+        item => item.value === requestedReport
+      );
+
+    if (matchingReport) {
+
+      activeModule = requestedModule;
+
+      document
+        .querySelectorAll(".report-tab")
+        .forEach(tab => {
+          tab.classList.toggle(
+            "active",
+            tab.dataset.module === activeModule
+          );
+        });
+
+      loadReportTypes();
+
+      reportType.value = requestedReport;
+
+      // Only auto-generate modules that
+      // currently have implemented report handlers.
+      if (
+        autoGenerate &&
+        (
+          activeModule === "devices" ||
+          activeModule === "overtime"
+        )
+      ) {
+        await generateReport();
+      }
+    }
+  }
 
 })();
