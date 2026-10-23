@@ -171,6 +171,19 @@ window.SECURETRACK_DB = db;
     return { profile, roles };
   }
 
+// ========================================
+// SECURETRACK HUB NOTIFICATION CENTER
+// ========================================
+
+// Replace hubSupabaseClient with the actual
+// authenticated Supabase client variable
+// used by hub.html.
+
+await window.SecureTrackNotifications.init({
+  client: hubSupabaseClient,
+  target: "#securetrack-notification-mount"
+});
+
   // ==========================================
   // LOGIN & PASSWORD RECOVERY
   // ==========================================
