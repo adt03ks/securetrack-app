@@ -3226,6 +3226,627 @@ async function generatePersonnelReport(type, range) {
   // Date, shift, and officer filters
   // Management-authorized data access
 }
+
+
+  // =========================================================
+  // PERSONNEL REPORTS
+  // SECURETRACK OP - MANAGER REPORTING CENTER
+  // READ ONLY
+  // =========================================================
+
+  async function generatePersonnelReport(type, range) {
+
+    const supported = [
+      "active_officers",
+      "officers_by_shift",
+      "unarmed_officers",
+      "new_hires",
+      "separations",
+      "turnover"
+    ];
+
+    if (!supported.includes(type)) {
+      throw new Error("Unsupported Personnel report.");
+    }
+
+    function localDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1)
+        .padStart(2, "0");
+      const d = String(date.getDate())
+        .padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    const fromDate = localDate(range.start);
+    const toDate = localDate(range.end);
+
+    const selectedShift = shift.value || "all";
+    const selectedOfficer = officer.value || "all";
+
+    // -----------------------------------------------------
+    // DATABASE QUERY HELPER
+    // -----------------------------------------------------
+
+    async function fetchAll(table, columns = "*") {
+      const all = [];
+      let offset = 0;
+      const pageSize = 500;
+
+      while (true) {
+        const { data, error } = await db
+          .from(table)
+          .select(columns)
+          .range(offset, offset + pageSize - 1);
+
+        if (error) {
+          throw new Error(
+            `${table}: ${error.message}`
+          );
+        }
+
+        const page = data || [];
+        all.push(...page);
+
+        if (page.length < pageSize) {
+          break;
+        }
+
+        offset += pageSize;
+      }
+
+      return all;
+    }
+
+    // -----------------------------------------------------
+    // LOAD PERSONNEL AND ROLES
+    // -----------------------------------------------------
+
+    const profiles = await fetchAll(
+      "profiles",
+      "id,display_name,first_name,last_name," +
+      "employee_number,is_active,employment_status"
+    );
+
+    const roles = await fetchAll(
+      "user_roles",
+      "user_id,role"
+    );
+
+    const personnelRoles = new Set([
+      "officer",
+      "senior_officer",
+      "team_lead"
+    ]);
+
+    const rolesByUser = new Map();
+
+    roles.forEach(item => {
+      if (!rolesByUser.has(item.user_id)) {
+        rolesByUser.set(item.user_id, new Set());
+      }
+
+      rolesByUser.get(item.user_id).add(
+        String(item.role || "").toLowerCase()
+      );
+    });
+
+    const nameOf = profile => {
+      const full = [
+        profile.first_name,
+        profile.last_name
+      ].filter(Boolean).join(" ").trim();
+
+      return profile.display_name || full ||
+        "Unnamed Officer";
+    };
+
+    const personnel = profiles
+      .filter(profile => {
+        const userRoles =
+          rolesByUser.get(profile.id) || new Set();
+
+        return [...userRoles].some(role =>
+          personnelRoles.has(role)
+        );
+      })
+      .map(profile => ({
+        ...profile,
+        name: nameOf(profile),
+        roles: [
+          ...(rolesByUser.get(profile.id) || [])
+        ]
+      }));
+
+    const personById = new Map(
+      personnel.map(person => [person.id, person])
+    );
+
+    const active = personnel.filter(person =>
+      person.is_active === true &&
+      person.employment_status === "active"
+    );
+
+    // -----------------------------------------------------
+    // LOAD PERMANENT SHIFT ROSTER
+    // -----------------------------------------------------
+
+    const roster = await fetchAll(
+      "officer_shift_roster"
+    );
+
+    // Resolve common roster ID column names.
+    // Unknown mappings are not treated as valid data.
+
+    const rosterIdFields = [
+      "user_id",
+      "officer_user_id",
+      "officer_id",
+      "profile_id"
+    ];
+
+    const rosterIdField = rosterIdFields.find(
+      field => roster.some(
+        record => Object.prototype.hasOwnProperty.call(
+          record, field
+        )
+      )
+    );
+
+    if (roster.length && !rosterIdField) {
+      throw new Error(
+        "Cannot match officer_shift_roster to personnel. " +
+        "The roster's officer ID column must be mapped."
+      );
+    }
+
+    const shiftsByUser = new Map();
+
+    roster.forEach(record => {
+
+      const userId = record[rosterIdField];
+
+      if (!userId || !record.shift_name) {
+        return;
+      }
+
+      // Ignore explicitly inactive roster entries.
+      if (
+        record.is_active === false ||
+        record.active === false
+      ) {
+        return;
+      }
+
+      if (!shiftsByUser.has(userId)) {
+        shiftsByUser.set(userId, new Set());
+      }
+
+      shiftsByUser.get(userId).add(
+        record.shift_name
+      );
+    });
+
+    function getShifts(userId) {
+      return [
+        ...(shiftsByUser.get(userId) || [])
+      ].sort();
+    }
+
+    function matchesFilters(userId) {
+
+      if (
+        selectedOfficer !== "all" &&
+        userId !== selectedOfficer
+      ) {
+        return false;
+      }
+
+      if (
+        selectedShift !== "all" &&
+        !getShifts(userId).includes(selectedShift)
+      ) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function personRows(list) {
+      return list
+        .filter(person => matchesFilters(person.id))
+        .map(person => ({
+          officer: person.name,
+          employeeNumber:
+            person.employee_number || "—",
+          role: person.roles.join(", ") || "—",
+          shift: getShifts(person.id).join(", ") ||
+            "Unassigned",
+          status: person.employment_status || "—"
+        }))
+        .sort((a, b) =>
+          a.officer.localeCompare(b.officer)
+        );
+    }
+
+    const standardColumns = [
+      { key: "officer", label: "Officer" },
+      {
+        key: "employeeNumber",
+        label: "Employee Number"
+      },
+      { key: "role", label: "Role" },
+      { key: "shift", label: "Assigned Shift" },
+      { key: "status", label: "Employment Status" }
+    ];
+
+    // =====================================================
+    // 1. ACTIVE OFFICERS
+    // =====================================================
+
+    if (type === "active_officers") {
+
+      const rows = personRows(active);
+
+      renderSummary([
+        {
+          label: "Active Officers",
+          value: rows.length
+        },
+        {
+          label: "Assigned to Shift",
+          value: rows.filter(
+            item => item.shift !== "Unassigned"
+          ).length
+        },
+        {
+          label: "Without Shift Assignment",
+          value: rows.filter(
+            item => item.shift === "Unassigned"
+          ).length
+        }
+      ]);
+
+      renderTable(standardColumns, rows);
+      return;
+    }
+
+    // =====================================================
+    // 2. OFFICERS BY SHIFT
+    // =====================================================
+
+    if (type === "officers_by_shift") {
+
+      const rows = [];
+
+      active.forEach(person => {
+
+        if (
+          selectedOfficer !== "all" &&
+          selectedOfficer !== person.id
+        ) {
+          return;
+        }
+
+        const assignedShifts = getShifts(person.id);
+
+        assignedShifts.forEach(shiftName => {
+
+          if (
+            selectedShift !== "all" &&
+            selectedShift !== shiftName
+          ) {
+            return;
+          }
+
+          rows.push({
+            shift: shiftName,
+            officer: person.name,
+            employeeNumber:
+              person.employee_number || "—",
+            role: person.roles.join(", ") || "—"
+          });
+
+        });
+
+      });
+
+      rows.sort((a, b) =>
+        a.shift.localeCompare(b.shift) ||
+        a.officer.localeCompare(b.officer)
+      );
+
+      renderSummary([
+        {
+          label: "Officer / Shift Assignments",
+          value: rows.length
+        },
+        {
+          label: "Unique Officers",
+          value: new Set(
+            rows.map(item => item.employeeNumber +
+              "|" + item.officer)
+          ).size
+        },
+        {
+          label: "Shifts Represented",
+          value: new Set(
+            rows.map(item => item.shift)
+          ).size
+        }
+      ]);
+
+      renderTable([
+        { key: "shift", label: "Shift" },
+        { key: "officer", label: "Officer" },
+        {
+          key: "employeeNumber",
+          label: "Employee Number"
+        },
+        { key: "role", label: "Role" }
+      ], rows);
+
+      return;
+    }
+
+    // =====================================================
+    // 3. OFFICERS WITHOUT ARMED QUALIFICATION
+    // =====================================================
+
+    if (type === "unarmed_officers") {
+
+      const qualifications = await fetchAll(
+        "officer_qualifications",
+        "user_id,qualification_code,status"
+      );
+
+      const armedUsers = new Set(
+        qualifications
+          .filter(record =>
+            String(record.qualification_code || "")
+              .trim()
+              .toUpperCase() === "ARMED" &&
+            String(record.status || "")
+              .trim()
+              .toLowerCase() === "active"
+          )
+          .map(record => record.user_id)
+      );
+
+      const rows = personRows(
+        active.filter(person =>
+          !armedUsers.has(person.id)
+        )
+      );
+
+      renderSummary([
+        {
+          label: "Without Active Armed Qualification",
+          value: rows.length
+        },
+        {
+          label: "Active Armed Qualification",
+          value: active.filter(person =>
+            matchesFilters(person.id) &&
+            armedUsers.has(person.id)
+          ).length
+        }
+      ]);
+
+      renderTable(standardColumns, rows);
+      return;
+    }
+
+    // =====================================================
+    // 4. NEW HIRES
+    // =====================================================
+
+    if (type === "new_hires") {
+
+      const details = await fetchAll(
+        "officer_personnel_details",
+        "user_id,hire_date"
+      );
+
+      const hireMap = new Map(
+        details.map(item => [
+          item.user_id,
+          item.hire_date
+        ])
+      );
+
+      const rows = personnel
+        .filter(person => {
+
+          const hired = hireMap.get(person.id);
+
+          return (
+            hired &&
+            hired >= fromDate &&
+            hired <= toDate &&
+            matchesFilters(person.id)
+          );
+        })
+        .map(person => ({
+          ...personRows([person])[0],
+          hireDate: hireMap.get(person.id)
+        }))
+        .sort((a, b) =>
+          b.hireDate.localeCompare(a.hireDate)
+        );
+
+      renderSummary([
+        {
+          label: "New Hires",
+          value: rows.length
+        }
+      ]);
+
+      renderTable([
+        { key: "hireDate", label: "Hire Date" },
+        ...standardColumns
+      ], rows);
+
+      return;
+    }
+
+    // =====================================================
+    // 5. EMPLOYEE SEPARATIONS
+    // =====================================================
+
+    if (
+      type === "separations" ||
+      type === "turnover"
+    ) {
+
+      const separations = await fetchAll(
+        "employee_separations",
+        "id,user_id,status," +
+        "termination_effective_date," +
+        "display_name_snapshot," +
+        "employee_number_snapshot," +
+        "shift_name_snapshot," +
+        "separation_reason,reversed_at"
+      );
+
+      const confirmed = separations.filter(item =>
+        String(item.status || "").toLowerCase() ===
+          "confirmed" &&
+        !item.reversed_at &&
+        item.termination_effective_date &&
+        item.termination_effective_date >= fromDate &&
+        item.termination_effective_date <= toDate
+      );
+
+      const selected = confirmed.filter(item => {
+
+        if (
+          selectedOfficer !== "all" &&
+          item.user_id !== selectedOfficer
+        ) {
+          return false;
+        }
+
+        if (selectedShift !== "all") {
+          const originalShift =
+            item.shift_name_snapshot;
+
+          if (originalShift !== selectedShift) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      if (type === "separations") {
+
+        const rows = selected.map(item => {
+
+          const person = personById.get(item.user_id);
+
+          return {
+            date: item.termination_effective_date,
+            officer:
+              item.display_name_snapshot ||
+              person?.name ||
+              "Unknown Employee",
+            employeeNumber:
+              item.employee_number_snapshot ||
+              person?.employee_number ||
+              "—",
+            shift:
+              item.shift_name_snapshot || "—",
+            status: item.status,
+            reason:
+              item.separation_reason || "—"
+          };
+
+        }).sort((a, b) =>
+          b.date.localeCompare(a.date)
+        );
+
+        renderSummary([
+          {
+            label: "Confirmed Separations",
+            value: rows.length
+          }
+        ]);
+
+        renderTable([
+          { key: "date", label: "Effective Date" },
+          { key: "officer", label: "Employee" },
+          {
+            key: "employeeNumber",
+            label: "Employee Number"
+          },
+          { key: "shift", label: "Previous Shift" },
+          { key: "status", label: "Status" },
+          { key: "reason", label: "Reason" }
+        ], rows);
+
+        return;
+      }
+
+      // =================================================
+      // 6. TURNOVER
+      // =================================================
+
+      // Historical average workforce is required for
+      // an accurate period turnover percentage.
+      // The current active roster alone cannot provide
+      // a reliable past-period denominator.
+
+      const separatedUsers = new Set(
+        selected.map(item => item.user_id)
+      );
+
+      const uniqueSeparations = separatedUsers.size;
+
+      renderSummary([
+        {
+          label: "Confirmed Separated Employees",
+          value: uniqueSeparations
+        },
+        {
+          label: "Current Active Officers",
+          value: active.filter(person =>
+            matchesFilters(person.id)
+          ).length
+        },
+        {
+          label: "Historical Turnover Rate",
+          value: "Not calculated"
+        }
+      ]);
+
+      renderTable([
+        { key: "metric", label: "Metric" },
+        { key: "value", label: "Result" }
+      ], [
+        {
+          metric: "Reporting Period",
+          value: `${fromDate} to ${toDate}`
+        },
+        {
+          metric: "Confirmed Separations",
+          value: uniqueSeparations
+        },
+        {
+          metric: "Average Historical Headcount",
+          value: "Not established"
+        },
+        {
+          metric: "Turnover Percentage",
+          value: "Requires historical headcount"
+        }
+      ]);
+
+      return;
+    }
+
+  }
+
   
   // =========================================================
   // GENERATE REPORT
@@ -3312,8 +3933,6 @@ async function generatePersonnelReport(type, range) {
     selectedReport,
     range
   );
-
-} else {
 
    } else if (activeModule === "personnel") {
 
