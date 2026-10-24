@@ -1233,6 +1233,70 @@
 
     }
 
+
+/* ==========================================
+   SECURETRACK OP - MANAGER TRAINING HEADER
+   ========================================== */
+
+.learning-header .learning-header-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  margin-bottom: 32px;
+}
+
+.learning-header .learning-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.learning-header .learning-brand-text {
+  min-width: 0;
+}
+
+.learning-header .learning-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.learning-header .learning-header-intro {
+  display: block;
+  width: 100%;
+}
+
+.learning-header .learning-header-intro h1 {
+  margin: 0;
+}
+
+.learning-header .learning-header-intro .learning-intro {
+  margin: 14px 0 0;
+}
+
+@media (max-width: 700px) {
+  .learning-header .learning-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .learning-header .learning-actions {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+}
+
+    
   </style>
 
 </head>
@@ -1251,77 +1315,88 @@
          HEADER
          ==================================================== -->
 
-    <header class="learning-header">
+   
+<!-- ============================================
+     SECURETRACK OP
+     MANAGER TRAINING HEADER
+     ============================================ -->
 
-      <div class="learning-header-row">
+<header class="learning-header">
 
-        <div class="learning-brand">
+  <!-- TOP ROW: BRAND LEFT / BUTTONS RIGHT -->
 
-         <a
-  class="learning-brand"
-  href="/training/manager/"
-  aria-label="SecureTrack Learning Center"
->
+  <div class="learning-header-row">
 
-  <img
-    class="learning-brand-logo"
-    src="/assets/favicon.png"
-    alt="SecureTrack OP logo"
-  >
+    <a
+      class="learning-brand"
+      href="/training/manager/"
+      aria-label="SecureTrack Learning Center"
+    >
 
-  <div>
+      <img
+        class="learning-brand-logo"
+        src="/assets/favicon.png"
+        alt="SecureTrack OP logo"
+      >
 
-    <div class="learning-wordmark">
-      Secure<span>Track</span>
-    </div>
+      <div class="learning-brand-text">
 
-    <div class="learning-brand-subtitle">
-      Learning Center
-    </div>
+        <div class="learning-wordmark">
+          Secure<span>Track</span>
+        </div>
 
-  </div>
-
-</a>
-
-
-        <div class="learning-actions">
-
-          <a
-            class="learning-link"
-            href="/manager-portal.html"
-          >
-            ← Manager Portal
-          </a>
-
-          <button
-            id="learningSignOut"
-            class="learning-signout"
-            type="button"
-          >
-            Sign Out
-          </button>
-
+        <div class="learning-brand-subtitle">
+          Learning Center
         </div>
 
       </div>
 
+    </a>
 
-      <div class="learning-eyebrow">
-        Role-Based Platform Training
-      </div>
+    <div class="learning-actions">
 
-      <h1>
-        Manager Training
-      </h1>
+      <a
+        class="learning-link"
+        href="/manager-portal.html"
+      >
+        ← Manager Portal
+      </a>
 
-      <p class="learning-intro">
-        Learn the SecureTrack management tools used to
-        supervise personnel, maintain operational accountability,
-        manage workflows, and support consistent department
-        operations.
-      </p>
+      <button
+        id="learningSignOut"
+        class="learning-signout"
+        type="button"
+      >
+        Sign Out
+      </button>
 
-    </header>
+    </div>
+
+  </div>
+
+  <!-- TITLE BELOW TOP ROW -->
+
+  <div class="learning-header-intro">
+
+    <div class="learning-eyebrow">
+      Role-Based Platform Training
+    </div>
+
+    <h1>
+      Manager Training
+    </h1>
+
+    <p class="learning-intro">
+      Learn the SecureTrack management tools used to
+      supervise personnel, maintain operational
+      accountability, manage workflows, and support
+      consistent department operations.
+    </p>
+
+  </div>
+
+</header>
+
 
 
     <!-- ====================================================
