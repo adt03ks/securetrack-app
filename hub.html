@@ -1,7 +1,6 @@
 
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
 
@@ -11,44 +10,56 @@
   >
 
   <meta name="theme-color" content="#080a0c">
-
   <title>SecureTrack | Operations Hub</title>
 
-  <link
-    rel="icon"
-    type="image/png"
-    href="/assets/favicon.png"
-  >
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
 
+  <!-- STYLESHEETS -->
   <link rel="stylesheet" href="hub.css">
   <link rel="stylesheet" href="/footer.css">
   <link rel="stylesheet" href="/notification-bell.css">
 
+  <!-- PRELOAD FIRST VISIBLE HUB ICONS -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/hub-device-management.png"
+  >
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/hub-security-alerts.png"
+  >
+
   <style>
     /* ==========================================
        SECURETRACK OP
-       OPERATIONS HUB CARD IMAGES
+       OPERATIONS HUB
+       OPTIMIZED ICON LOADING AND LAYOUT
        ========================================== */
 
-    /* Preserve the original Hub layout */
-
     #moduleGrid .module-card {
+      display: grid !important;
+      grid-template-columns:
+        105px minmax(0, 1fr) 24px !important;
+      column-gap: 22px !important;
+      align-items: center !important;
       min-width: 0;
       box-sizing: border-box;
-      align-items: center;
     }
 
-    /* Replace initials with consistent images */
+    /* ICON CONTAINER */
 
     #moduleGrid .module-icon.hub-image-icon {
-      width: 88px !important;
-      height: 88px !important;
-      min-width: 88px !important;
-      flex: 0 0 88px !important;
+      width: 90px !important;
+      height: 90px !important;
+      min-width: 90px !important;
+      flex: 0 0 90px !important;
 
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
+      justify-self: center !important;
 
       padding: 0 !important;
       margin: 0 !important;
@@ -59,15 +70,19 @@
       border: 0;
     }
 
+    /* OPTIMIZED ICON IMAGES */
+
     #moduleGrid .hub-card-image {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      display: block !important;
+      width: 90px !important;
+      height: 90px !important;
+
+      max-width: 100%;
+      object-fit: contain !important;
       border-radius: 15px;
     }
 
-    /* Original initials remain as a fallback */
+    /* FALLBACK ICONS */
 
     #moduleGrid .hub-icon-fallback {
       display: none;
@@ -86,21 +101,25 @@
       font-size: 18px;
     }
 
-    #moduleGrid .hub-image-icon.image-missing
-      .hub-card-image {
-      display: none;
+    #moduleGrid
+    .hub-image-icon.image-missing
+    .hub-card-image {
+      display: none !important;
     }
 
-    #moduleGrid .hub-image-icon.image-missing
-      .hub-icon-fallback {
+    #moduleGrid
+    .hub-image-icon.image-missing
+    .hub-icon-fallback {
       display: flex;
     }
 
-    /* Keep headings, descriptions, and links aligned */
+    /* MODULE TEXT */
 
     #moduleGrid .hub-module-text {
-      min-width: 0;
-      flex: 1 1 auto;
+      min-width: 0 !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
     #moduleGrid .hub-module-text h2 {
@@ -113,12 +132,16 @@
       line-height: 1.45;
     }
 
+    /* NAVIGATION ARROW */
+
     #moduleGrid .module-arrow {
+      justify-self: end !important;
+      align-self: center !important;
       flex-shrink: 0;
+      margin: 0 !important;
     }
 
-    /* Keep the notification bell and user information
-       aligned without the duplicate user-area wrapper */
+    /* HEADER USER AREA */
 
     .hub-topbar .user-area {
       display: flex;
@@ -128,15 +151,38 @@
       flex-wrap: wrap;
     }
 
-    /* Mobile adjustments */
+    /* MANAGER ACCESS VISIBILITY */
+
+    #moduleGrid .manager-card[hidden] {
+      display: none !important;
+    }
+
+    #moduleGrid .module-card[hidden] {
+      display: none !important;
+    }
+
+    /* MOBILE OPTIMIZATION */
 
     @media (max-width: 600px) {
 
+      #moduleGrid .module-card {
+        grid-template-columns:
+          70px minmax(0, 1fr) 16px !important;
+
+        column-gap: 12px !important;
+        padding: 15px !important;
+      }
+
       #moduleGrid .module-icon.hub-image-icon {
-        width: 64px !important;
-        height: 64px !important;
-        min-width: 64px !important;
-        flex-basis: 64px !important;
+        width: 62px !important;
+        height: 62px !important;
+        min-width: 62px !important;
+        flex-basis: 62px !important;
+      }
+
+      #moduleGrid .hub-card-image {
+        width: 62px !important;
+        height: 62px !important;
       }
 
       #moduleGrid .hub-module-text h2 {
@@ -148,88 +194,6 @@
       }
 
     }
-
-  
-/* ==========================================
-   SECURETRACK OP
-   HUB CARD LOGO SPACING CORRECTION
-   ========================================== */
-
-/* Give each card three defined areas:
-   image | text | navigation arrow */
-
-#moduleGrid .module-card {
-  display: grid !important;
-  grid-template-columns:
-    105px minmax(0, 1fr) 24px !important;
-  column-gap: 22px !important;
-  align-items: center !important;
-}
-
-/* Keep the logo inside its own area */
-
-#moduleGrid .module-icon.hub-image-icon {
-  width: 90px !important;
-  height: 90px !important;
-  min-width: 90px !important;
-  justify-self: center !important;
-  margin: 0 !important;
-}
-
-/* Prevent the logo from overlapping text */
-
-#moduleGrid .hub-card-image {
-  width: 90px !important;
-  height: 90px !important;
-  object-fit: contain !important;
-  display: block !important;
-}
-
-/* Align all headings and descriptions */
-
-#moduleGrid .hub-module-text {
-  min-width: 0 !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Keep navigation arrows on the far right */
-
-#moduleGrid .module-arrow {
-  justify-self: end !important;
-  align-self: center !important;
-  margin: 0 !important;
-}
-
-/* Mobile adjustments */
-
-@media (max-width: 600px) {
-
-  #moduleGrid .module-card {
-    grid-template-columns:
-      70px minmax(0, 1fr) 16px !important;
-    column-gap: 12px !important;
-    padding: 15px !important;
-  }
-
-  #moduleGrid .module-icon.hub-image-icon,
-  #moduleGrid .hub-card-image {
-    width: 62px !important;
-    height: 62px !important;
-    min-width: 62px !important;
-  }
-
-}
-  
-/* ==========================================
-   MANAGER PORTAL ACCESS VISIBILITY
-   ========================================== */
-
-#moduleGrid .manager-card[hidden] {
-  display: none !important;
-}
-
   </style>
 </head>
 
@@ -341,9 +305,7 @@
       hidden
     >
 
-      <!-- ========================================
-           DEVICE MANAGEMENT
-           ======================================== -->
+      <!-- DEVICE MANAGEMENT -->
 
       <a
         class="module-card"
@@ -357,7 +319,11 @@
             src="/assets/hub-device-management.png"
             alt=""
             class="hub-card-image"
-            loading="lazy"
+            width="90"
+            height="90"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
           >
 
           <span class="hub-icon-fallback">DV</span>
@@ -383,9 +349,7 @@
 
       </a>
 
-      <!-- ========================================
-           SECURITY ALERTS
-           ======================================== -->
+      <!-- SECURITY ALERTS -->
 
       <a
         class="module-card"
@@ -399,7 +363,11 @@
             src="/assets/hub-security-alerts.png"
             alt=""
             class="hub-card-image"
-            loading="lazy"
+            width="90"
+            height="90"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
           >
 
           <span class="hub-icon-fallback">AL</span>
@@ -426,9 +394,7 @@
 
       </a>
 
-      <!-- ========================================
-           PROPERTY / BELONGINGS
-           ======================================== -->
+      <!-- PROPERTY / BELONGINGS -->
 
       <a
         class="module-card"
@@ -442,7 +408,10 @@
             src="/assets/hub-property-belongings.png"
             alt=""
             class="hub-card-image"
-            loading="lazy"
+            width="90"
+            height="90"
+            loading="eager"
+            decoding="async"
           >
 
           <span class="hub-icon-fallback">PR</span>
@@ -468,9 +437,7 @@
 
       </a>
 
-      <!-- ========================================
-           DUTY STATION ASSIGNMENT
-           ======================================== -->
+      <!-- DUTY STATION ASSIGNMENT -->
 
       <a
         class="module-card"
@@ -484,7 +451,10 @@
             src="/assets/hub-duty-stations.png"
             alt=""
             class="hub-card-image"
-            loading="lazy"
+            width="90"
+            height="90"
+            loading="eager"
+            decoding="async"
           >
 
           <span class="hub-icon-fallback">DS</span>
@@ -510,9 +480,7 @@
 
       </a>
 
-      <!-- ========================================
-           OVERTIME OPPORTUNITIES
-           ======================================== -->
+      <!-- OVERTIME OPPORTUNITIES -->
 
       <a
         class="module-card"
@@ -526,7 +494,10 @@
             src="/assets/hub-overtime.png"
             alt=""
             class="hub-card-image"
-            loading="lazy"
+            width="90"
+            height="90"
+            loading="eager"
+            decoding="async"
           >
 
           <span class="hub-icon-fallback">OT</span>
@@ -552,9 +523,7 @@
 
       </a>
 
-      <!-- ========================================
-           NOTIFICATION SETTINGS
-           ======================================== -->
+      <!-- NOTIFICATION SETTINGS -->
 
       <a
         class="module-card"
@@ -568,7 +537,10 @@
             src="/assets/hub-notifications.png"
             alt=""
             class="hub-card-image"
-            loading="lazy"
+            width="90"
+            height="90"
+            loading="eager"
+            decoding="async"
           >
 
           <span class="hub-icon-fallback">NT</span>
@@ -595,18 +567,17 @@
 
       </a>
 
-      <!-- ========================================
+      <!-- ==========================================
            MANAGER PORTAL
-           ======================================== -->
+           ROLE ACCESS CONTROLLED
+           ========================================== -->
 
-     
-<a
-  class="module-card manager-card"
-  data-module="manager"
-  href="manager-portal.html"
-  hidden
->
-
+      <a
+        class="module-card manager-card"
+        data-module="manager"
+        href="manager-portal.html"
+        hidden
+      >
 
         <div class="module-icon hub-image-icon">
 
@@ -614,7 +585,10 @@
             src="/assets/hub-manager-portal.png"
             alt=""
             class="hub-card-image"
-            loading="lazy"
+            width="90"
+            height="90"
+            loading="eager"
+            decoding="async"
           >
 
           <span class="hub-icon-fallback">MP</span>
@@ -640,9 +614,7 @@
 
       </a>
 
-      <!-- ========================================
-           END-OF-SHIFT HANDOFF
-           ======================================== -->
+      <!-- END-OF-SHIFT HANDOFF -->
 
       <a
         class="module-card"
@@ -656,7 +628,10 @@
             src="/assets/hub-shift-handoff.png"
             alt=""
             class="hub-card-image"
-            loading="lazy"
+            width="90"
+            height="90"
+            loading="eager"
+            decoding="async"
           >
 
           <span class="hub-icon-fallback">⇄</span>
@@ -704,19 +679,22 @@
 
   <!-- ==========================================
        APPLICATION SCRIPTS
+       PRESERVE DEPENDENCY ORDER
        ========================================== -->
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    defer
+  ></script>
 
-  <script src="/config.js"></script>
+  <script src="/config.js" defer></script>
 
-  <script src="/notification-bell.js"></script>
+  <script src="/notification-bell.js" defer></script>
 
-  <script src="/hub-auth.js"></script>
+  <script src="/hub-auth.js" defer></script>
 
   <!-- ==========================================
-       IMAGE FALLBACK
-       Restores original initials for missing files
+       IMAGE FALLBACK HANDLING
        ========================================== -->
 
   <script>
@@ -729,15 +707,18 @@
           ".hub-image-icon"
         ).forEach(function (container) {
 
-          const image =
-            container.querySelector(".hub-card-image");
+          const image = container.querySelector(
+            ".hub-card-image"
+          );
 
           if (!image) return;
 
           function showFallback() {
-            container.classList.add(
-              "image-missing"
-            );
+            container.classList.add("image-missing");
+          }
+
+          function showImage() {
+            container.classList.remove("image-missing");
           }
 
           image.addEventListener(
@@ -745,9 +726,17 @@
             showFallback
           );
 
-          if (image.complete &&
-              image.naturalWidth === 0) {
-            showFallback();
+          image.addEventListener(
+            "load",
+            showImage
+          );
+
+          if (image.complete) {
+            if (image.naturalWidth === 0) {
+              showFallback();
+            } else {
+              showImage();
+            }
           }
 
         });
@@ -766,9 +755,7 @@
     })();
   </script>
 
-  <!-- ==========================================
-       SECURETRACK OPERATIONS HUB FOOTER
-       ========================================== -->
+  <!-- SECURETRACK FOOTER -->
 
   <div
     id="securetrack-footer"
