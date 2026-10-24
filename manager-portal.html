@@ -235,6 +235,78 @@
   }
 }
 
+/* ==========================================
+   SECURETRACK OP
+   CENTER MANAGER TRAINING GUIDE
+   ========================================== */
+
+.training-guide-card {
+  /* Span both columns if inside the module grid */
+  grid-column: 1 / -1 !important;
+
+  /* Center the card itself */
+  justify-self: center !important;
+  align-self: center !important;
+
+  width: min(850px, 100%) !important;
+  max-width: 850px !important;
+  margin: 40px auto 60px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 35px 30px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+}
+
+.training-guide-card .training-guide-image-wrap {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.training-guide-card .training-guide-image {
+  display: block !important;
+  width: 360px !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 auto !important;
+}
+
+.training-guide-card .module-content {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.training-guide-card h2,
+.training-guide-card p,
+.training-guide-card .module-kicker,
+.training-guide-card .module-arrow {
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .training-guide-card {
+    width: 100% !important;
+    padding: 25px 18px !important;
+  }
+
+  .training-guide-card .training-guide-image {
+    width: 100% !important;
+    max-width: 360px !important;
+  }
+}
+
   </style>
 <link rel="stylesheet" href="/footer.css">
 </head>
