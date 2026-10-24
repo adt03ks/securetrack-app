@@ -1,71 +1,479 @@
+
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
   <meta name="theme-color" content="#080a0c">
+
   <title>SecureTrack | Operations Hub</title>
-  <link rel="icon" type="image/png" href="/assets/favicon.png">
+
+  <link
+    rel="icon"
+    type="image/png"
+    href="/assets/favicon.png"
+  >
+
   <link rel="stylesheet" href="hub.css">
   <link rel="stylesheet" href="/footer.css">
-  
-<!-- SecureTrack Universal Notifications -->
-<link rel="stylesheet" href="/notification-bell.css">
+  <link rel="stylesheet" href="/notification-bell.css">
 
+  <style>
+    /* ==========================================
+       SECURETRACK OP
+       OPERATIONS HUB CARD IMAGES
+       ========================================== */
+
+    /* Preserve the original Hub layout */
+
+    #moduleGrid .module-card {
+      min-width: 0;
+      box-sizing: border-box;
+      align-items: center;
+    }
+
+    /* Replace initials with consistent images */
+
+    #moduleGrid .module-icon.hub-image-icon {
+      width: 88px !important;
+      height: 88px !important;
+      min-width: 88px !important;
+      flex: 0 0 88px !important;
+
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: hidden;
+
+      border-radius: 16px;
+      background: transparent;
+      border: 0;
+    }
+
+    #moduleGrid .hub-card-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 15px;
+    }
+
+    /* Original initials remain as a fallback */
+
+    #moduleGrid .hub-icon-fallback {
+      display: none;
+      width: 100%;
+      height: 100%;
+
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 14px;
+      border: 1px solid rgba(255, 130, 0, 0.35);
+      background: rgba(255, 130, 0, 0.09);
+
+      color: #ff8c1a;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    #moduleGrid .hub-image-icon.image-missing
+      .hub-card-image {
+      display: none;
+    }
+
+    #moduleGrid .hub-image-icon.image-missing
+      .hub-icon-fallback {
+      display: flex;
+    }
+
+    /* Keep headings, descriptions, and links aligned */
+
+    #moduleGrid .hub-module-text {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    #moduleGrid .hub-module-text h2 {
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+
+    #moduleGrid .hub-module-text p {
+      margin-bottom: 0;
+      line-height: 1.45;
+    }
+
+    #moduleGrid .module-arrow {
+      flex-shrink: 0;
+    }
+
+    /* Keep the notification bell and user information
+       aligned without the duplicate user-area wrapper */
+
+    .hub-topbar .user-area {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Mobile adjustments */
+
+    @media (max-width: 600px) {
+
+      #moduleGrid .module-icon.hub-image-icon {
+        width: 64px !important;
+        height: 64px !important;
+        min-width: 64px !important;
+        flex-basis: 64px !important;
+      }
+
+      #moduleGrid .hub-module-text h2 {
+        font-size: 18px;
+      }
+
+      #moduleGrid .hub-module-text p {
+        font-size: 13px;
+      }
+
+    }
+
+  </style>
 </head>
+
 <body data-page="hub">
+
   <main class="hub-shell">
+
+    <!-- ==========================================
+         OPERATIONS HUB HEADER
+         ========================================== -->
+
     <header class="hub-topbar">
+
       <div class="hub-brand">
-        <div class="hub-logo" aria-hidden="true"><span class="hub-lock"></span></div>
-        <div><div class="hub-wordmark"><span>Secure</span><strong>Track</strong></div><div class="hub-tagline">OPERATIONS HUB</div></div>
+
+        <div class="hub-logo" aria-hidden="true">
+          <span class="hub-lock"></span>
+        </div>
+
+        <div>
+          <div class="hub-wordmark">
+            <span>Secure</span><strong>Track</strong>
+          </div>
+
+          <div class="hub-tagline">
+            OPERATIONS HUB
+          </div>
+        </div>
+
       </div>
+
       <div class="user-area">
-       
-<div class="user-area">
 
-  <div>
-    <div id="userName" class="user-name">
-      Loading…
-    </div>
+        <div>
+          <div id="userName" class="user-name">
+            Loading…
+          </div>
 
-    <div id="userRoles" class="user-roles">
-      Verifying access
-    </div>
-  </div>
+          <div id="userRoles" class="user-roles">
+            Verifying access
+          </div>
+        </div>
 
-  <!-- UNIVERSAL NOTIFICATION BELL -->
-  <div id="securetrack-notification-mount"></div>
+        <!-- UNIVERSAL NOTIFICATION BELL -->
 
-  <button
-    id="logoutButton"
-    class="hub-secondary"
-    type="button"
-  >
-    Sign Out
-  </button>
+        <div id="securetrack-notification-mount"></div>
 
-</div>
+        <!-- SIGN OUT -->
+
+        <button
+          id="logoutButton"
+          class="hub-secondary"
+          type="button"
+        >
+          Sign Out
+        </button>
 
       </div>
+
     </header>
 
+    <!-- ==========================================
+         HUB INTRODUCTION
+         ========================================== -->
+
     <section class="hub-hero">
-      <div><div class="eyebrow">Security Operations</div><h1>Choose a function.</h1><p class="muted">Your available tools are based on your SecureTrack permissions.</p></div>
-      <div class="status-chip"><span></span>Authenticated Session</div>
+
+      <div>
+
+        <div class="eyebrow">
+          Security Operations
+        </div>
+
+        <h1>
+          Choose a function.
+        </h1>
+
+        <p class="muted">
+          Your available tools are based on your
+          SecureTrack permissions.
+        </p>
+
+      </div>
+
+      <div class="status-chip">
+        <span></span>
+        Authenticated Session
+      </div>
+
     </section>
 
-    <section id="loadingPanel" class="hub-panel loading-panel" aria-live="polite">Loading your SecureTrack permissions…</section>
+    <!-- AUTHORIZATION LOADING -->
 
-    <section id="moduleGrid" class="module-grid" hidden>
-      <a class="module-card" data-module="devices" href="device.html"><div class="module-icon">DV</div><div><div class="module-kicker">Equipment Accountability</div><h2>Device Management</h2><p>Verify, inspect, check out, return, and report equipment issues.</p></div><span class="module-arrow">→</span></a>
-      <a class="module-card" data-module="incidents" href="security-alerts.html"><div class="module-icon">AL</div><div><div class="module-kicker">Real-Time Reporting</div><h2>Security Alerts</h2><p>Record Code Green, Taser Pull, CTW, officer injury, staffing incidents, and TSI requests.</p></div><span class="module-arrow">→</span></a>
-      <a class="module-card" data-module="property" href="property/index.html"><div class="module-icon">PR</div><div><div class="module-kicker">Property Accountability</div><h2>Property / Belongings</h2><p>Log received property and maintain an accountable chain of custody.</p></div><span class="module-arrow">→</span></a>
-      <a class="module-card" data-module="assignments" href="assignments/index.html"><div class="module-icon">DS</div><div><div class="module-kicker">Shift Operations</div><h2>Duty Station Assignment</h2><p>Generate and manage history-aware officer duty station rotations.</p></div><span class="module-arrow">→</span></a>
-      <a class="module-card" data-module="overtime" href="overtime/index.html"><div class="module-icon">OT</div><div><div class="module-kicker">Staffing</div><h2>Overtime Opportunities</h2><p>View open overtime opportunities and manage signup requests.</p></div><span class="module-arrow">→</span></a>
-           <!-- =========================================
+    <section
+      id="loadingPanel"
+      class="hub-panel loading-panel"
+      aria-live="polite"
+    >
+      Loading your SecureTrack permissions…
+    </section>
+
+    <!-- ==========================================
+         OPERATIONS HUB MODULE GRID
+         ========================================== -->
+
+    <section
+      id="moduleGrid"
+      class="module-grid"
+      hidden
+    >
+
+      <!-- ========================================
+           DEVICE MANAGEMENT
+           ======================================== -->
+
+      <a
+        class="module-card"
+        data-module="devices"
+        href="device.html"
+      >
+
+        <div class="module-icon hub-image-icon">
+
+          <img
+            src="/assets/hub-device-management.png"
+            alt=""
+            class="hub-card-image"
+            loading="lazy"
+          >
+
+          <span class="hub-icon-fallback">DV</span>
+
+        </div>
+
+        <div class="hub-module-text">
+
+          <div class="module-kicker">
+            Equipment Accountability
+          </div>
+
+          <h2>Device Management</h2>
+
+          <p>
+            Verify, inspect, check out, return,
+            and report equipment issues.
+          </p>
+
+        </div>
+
+        <span class="module-arrow">→</span>
+
+      </a>
+
+      <!-- ========================================
+           SECURITY ALERTS
+           ======================================== -->
+
+      <a
+        class="module-card"
+        data-module="incidents"
+        href="security-alerts.html"
+      >
+
+        <div class="module-icon hub-image-icon">
+
+          <img
+            src="/assets/hub-security-alerts.png"
+            alt=""
+            class="hub-card-image"
+            loading="lazy"
+          >
+
+          <span class="hub-icon-fallback">AL</span>
+
+        </div>
+
+        <div class="hub-module-text">
+
+          <div class="module-kicker">
+            Real-Time Reporting
+          </div>
+
+          <h2>Security Alerts</h2>
+
+          <p>
+            Record Code Green, Taser Pull, CTW,
+            officer injury, staffing incidents,
+            and TSI requests.
+          </p>
+
+        </div>
+
+        <span class="module-arrow">→</span>
+
+      </a>
+
+      <!-- ========================================
+           PROPERTY / BELONGINGS
+           ======================================== -->
+
+      <a
+        class="module-card"
+        data-module="property"
+        href="property/index.html"
+      >
+
+        <div class="module-icon hub-image-icon">
+
+          <img
+            src="/assets/hub-property-belongings.png"
+            alt=""
+            class="hub-card-image"
+            loading="lazy"
+          >
+
+          <span class="hub-icon-fallback">PR</span>
+
+        </div>
+
+        <div class="hub-module-text">
+
+          <div class="module-kicker">
+            Property Accountability
+          </div>
+
+          <h2>Property / Belongings</h2>
+
+          <p>
+            Log received property and maintain
+            an accountable chain of custody.
+          </p>
+
+        </div>
+
+        <span class="module-arrow">→</span>
+
+      </a>
+
+      <!-- ========================================
+           DUTY STATION ASSIGNMENT
+           ======================================== -->
+
+      <a
+        class="module-card"
+        data-module="assignments"
+        href="assignments/index.html"
+      >
+
+        <div class="module-icon hub-image-icon">
+
+          <img
+            src="/assets/hub-duty-stations.png"
+            alt=""
+            class="hub-card-image"
+            loading="lazy"
+          >
+
+          <span class="hub-icon-fallback">DS</span>
+
+        </div>
+
+        <div class="hub-module-text">
+
+          <div class="module-kicker">
+            Shift Operations
+          </div>
+
+          <h2>Duty Station Assignment</h2>
+
+          <p>
+            Generate and manage history-aware
+            officer duty station rotations.
+          </p>
+
+        </div>
+
+        <span class="module-arrow">→</span>
+
+      </a>
+
+      <!-- ========================================
+           OVERTIME OPPORTUNITIES
+           ======================================== -->
+
+      <a
+        class="module-card"
+        data-module="overtime"
+        href="overtime/index.html"
+      >
+
+        <div class="module-icon hub-image-icon">
+
+          <img
+            src="/assets/hub-overtime.png"
+            alt=""
+            class="hub-card-image"
+            loading="lazy"
+          >
+
+          <span class="hub-icon-fallback">OT</span>
+
+        </div>
+
+        <div class="hub-module-text">
+
+          <div class="module-kicker">
+            Staffing
+          </div>
+
+          <h2>Overtime Opportunities</h2>
+
+          <p>
+            View open overtime opportunities
+            and manage signup requests.
+          </p>
+
+        </div>
+
+        <span class="module-arrow">→</span>
+
+      </a>
+
+      <!-- ========================================
            NOTIFICATION SETTINGS
-           ========================================= -->
+           ======================================== -->
 
       <a
         class="module-card"
@@ -73,90 +481,217 @@
         href="notification-settings.html"
       >
 
-        <div class="module-icon">
-          NT
+        <div class="module-icon hub-image-icon">
+
+          <img
+            src="/assets/hub-notifications.png"
+            alt=""
+            class="hub-card-image"
+            loading="lazy"
+          >
+
+          <span class="hub-icon-fallback">NT</span>
+
         </div>
 
-        <div>
+        <div class="hub-module-text">
 
           <div class="module-kicker">
-            Alerts & Communications
+            Alerts &amp; Communications
           </div>
 
-          <h2>
-            Notification Settings
-          </h2>
+          <h2>Notification Settings</h2>
 
           <p>
             Manage email, ntfy push, SMS,
-            and SecureTrack operational alert preferences.
+            and SecureTrack operational alert
+            preferences.
           </p>
 
         </div>
 
-        <span class="module-arrow">
-          →
-        </span>
+        <span class="module-arrow">→</span>
 
       </a>
-      <a class="module-card manager-card" data-module="manager" href="manager-portal.html"><div class="module-icon">MP</div><div><div class="module-kicker">Leadership Oversight</div><h2>Manager Portal</h2><p>View equipment, incidents, staffing, property, approvals, and operational history.</p></div><span class="module-arrow">→</span></a>
-   <a
-  class="module-card"
-  data-module="endOfShift"
-  href="end-of-shift-report.html"
->
 
-  <div class="module-icon">
-    ⇄
-  </div>
+      <!-- ========================================
+           MANAGER PORTAL
+           ======================================== -->
 
-  <div class="module-content">
+      <a
+        class="module-card manager-card"
+        data-module="manager"
+        href="manager-portal.html"
+      >
 
-    <div class="module-eyebrow">
-      SHIFT LEADERSHIP
-    </div>
+        <div class="module-icon hub-image-icon">
 
-    <h2>
-      End-of-Shift Handoff
-    </h2>
+          <img
+            src="/assets/hub-manager-portal.png"
+            alt=""
+            class="hub-card-image"
+            loading="lazy"
+          >
 
-    <p>
-      Review shift activity, resolve or carry forward
-      Security Leadership Alerts, publish the official
-      shift handoff, and acknowledge incoming reports.
-    </p>
+          <span class="hub-icon-fallback">MP</span>
 
-  </div>
+        </div>
 
-  <div class="module-arrow">
-    →
-  </div>
+        <div class="hub-module-text">
 
-</a>
+          <div class="module-kicker">
+            Leadership Oversight
+          </div>
+
+          <h2>Manager Portal</h2>
+
+          <p>
+            View equipment, incidents, staffing,
+            property, approvals, and operational history.
+          </p>
+
+        </div>
+
+        <span class="module-arrow">→</span>
+
+      </a>
+
+      <!-- ========================================
+           END-OF-SHIFT HANDOFF
+           ======================================== -->
+
+      <a
+        class="module-card"
+        data-module="endOfShift"
+        href="end-of-shift-report.html"
+      >
+
+        <div class="module-icon hub-image-icon">
+
+          <img
+            src="/assets/hub-shift-handoff.png"
+            alt=""
+            class="hub-card-image"
+            loading="lazy"
+          >
+
+          <span class="hub-icon-fallback">⇄</span>
+
+        </div>
+
+        <div class="hub-module-text">
+
+          <div class="module-eyebrow">
+            SHIFT LEADERSHIP
+          </div>
+
+          <h2>End-of-Shift Handoff</h2>
+
+          <p>
+            Review shift activity, resolve or
+            carry forward Security Leadership Alerts,
+            publish the official shift handoff,
+            and acknowledge incoming reports.
+          </p>
+
+        </div>
+
+        <span class="module-arrow">→</span>
+
+      </a>
+
     </section>
 
-    <section id="hubError" class="hub-message error" role="alert" hidden></section>
-    <footer class="hub-footer">SecureTrack Operations Hub • Authorized security personnel only</footer>
+    <!-- HUB ERRORS -->
+
+    <section
+      id="hubError"
+      class="hub-message error"
+      role="alert"
+      hidden
+    ></section>
+
+    <footer class="hub-footer">
+      SecureTrack Operations Hub •
+      Authorized security personnel only
+    </footer>
+
   </main>
 
+  <!-- ==========================================
+       APPLICATION SCRIPTS
+       ========================================== -->
 
-<!-- SUPABASE LIBRARY -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- SECURETRACK CONFIGURATION -->
-<script src="/config.js"></script>
+  <script src="/config.js"></script>
 
-<!-- UNIVERSAL NOTIFICATION CENTER -->
-<script src="/notification-bell.js"></script>
+  <script src="/notification-bell.js"></script>
 
-<!-- OPERATIONS HUB AUTHENTICATION -->
-<script src="/hub-auth.js"></script>
+  <script src="/hub-auth.js"></script>
 
+  <!-- ==========================================
+       IMAGE FALLBACK
+       Restores original initials for missing files
+       ========================================== -->
 
-  <!-- SECURETRACK OPERATIONS HUB FOOTER -->
-<div id="securetrack-footer"
-     data-variant="hub"></div>
+  <script>
+    (function () {
+      "use strict";
 
-<script src="/footer.js" defer></script>
+      function setupHubImageFallbacks() {
+
+        document.querySelectorAll(
+          ".hub-image-icon"
+        ).forEach(function (container) {
+
+          const image =
+            container.querySelector(".hub-card-image");
+
+          if (!image) return;
+
+          function showFallback() {
+            container.classList.add(
+              "image-missing"
+            );
+          }
+
+          image.addEventListener(
+            "error",
+            showFallback
+          );
+
+          if (image.complete &&
+              image.naturalWidth === 0) {
+            showFallback();
+          }
+
+        });
+
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener(
+          "DOMContentLoaded",
+          setupHubImageFallbacks
+        );
+      } else {
+        setupHubImageFallbacks();
+      }
+
+    })();
+  </script>
+
+  <!-- ==========================================
+       SECURETRACK OPERATIONS HUB FOOTER
+       ========================================== -->
+
+  <div
+    id="securetrack-footer"
+    data-variant="hub"
+  ></div>
+
+  <script src="/footer.js" defer></script>
+
 </body>
 </html>
