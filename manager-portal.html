@@ -1,469 +1,289 @@
+
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080a0c">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1"
-  >
+  <title>SecureTrack | Manager Portal</title>
 
-  <meta
-    name="theme-color"
-    content="#080a0c"
-  >
-
-  <title>
-    SecureTrack | Manager Portal
-  </title>
-<link rel="icon" type="image/png" href="/assets/favicon.png">
-  <link
-    rel="stylesheet"
-    href="styles.css"
-  >
-
-<link rel="stylesheet" href="/notification-bell.css">
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/notification-bell.css">
+  <link rel="stylesheet" href="/footer.css">
 
   <style>
+    /* ==========================================
+       SECURETRACK OP - MANAGER PORTAL
+       ========================================== */
 
-    .portal-grid {
+    .manager-console .portal-grid {
       display: grid;
-      grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
       padding: 24px;
+      align-items: stretch;
     }
 
-    .portal-card {
-      display: block;
-      text-decoration: none;
-      color: inherit;
+    /* HORIZONTAL CARD LAYOUT */
 
-      border: 1px solid #343a41;
-      border-radius: 17px;
-
+    .manager-console .portal-card {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      column-gap: 20px;
+      align-items: center;
+      min-width: 0;
       padding: 22px;
 
-      background:
-        linear-gradient(
-          145deg,
-          #0b0e11,
-          #11151a
-        );
+      border: 1px solid #343a41;
+      border-radius: 18px;
+
+      background: linear-gradient(
+        145deg,
+        #0b0e11,
+        #11151a
+      );
+
+      color: inherit;
+      text-decoration: none;
+      box-sizing: border-box;
+      overflow: hidden;
 
       transition:
         transform .15s ease,
         border-color .15s ease;
     }
 
-    .portal-card:hover {
+    .manager-console .portal-card:hover,
+    .manager-console .portal-card:focus-visible {
+      border-color: #ff8500;
       transform: translateY(-2px);
-      border-color: #ff7800;
     }
 
-    .portal-card h2 {
-      margin: 7px 0 8px;
+    .manager-console .portal-card.priority {
+      border-color: rgba(255, 120, 0, .48);
+
+      background: linear-gradient(
+        145deg,
+        rgba(255, 120, 0, .08),
+        #11151a
+      );
     }
 
-    .portal-card p {
-      margin-bottom: 0;
-    }
+    /* LEFT IMAGE */
 
-    .portal-arrow {
-      display: block;
-      margin-top: 18px;
+    .manager-console .portal-image-wrap {
+      width: 112px;
+      min-width: 0;
 
-      color: #ff8c1a;
-      font-weight: 800;
-    }
-
-    .portal-card.priority {
-      border-color:
-        rgba(255,120,0,.45);
-
-      background:
-        linear-gradient(
-          145deg,
-          rgba(255,120,0,.08),
-          #11151a
-        );
-    }
-
-    .portal-badge {
-      display: inline-flex;
+      display: flex;
+      justify-content: center;
       align-items: center;
+    }
 
-      margin-top: 10px;
+    .manager-console .portal-logo {
+      display: block;
+      width: 112px;
+      height: 112px;
+      max-width: 100%;
+      object-fit: contain;
+      border-radius: 15px;
+    }
 
-      padding: 5px 9px;
+    /* RIGHT TEXT */
+
+    .manager-console .portal-card-body {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .manager-console .portal-card .eyebrow {
+      margin: 0;
+      color: #ff8500;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .manager-console .portal-card h2 {
+      margin: 0;
+      font-size: clamp(19px, 1.65vw, 27px);
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+      color: #ffffff;
+    }
+
+    .manager-console .portal-card p {
+      margin: 0;
+      color: #a7b6c5;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .manager-console .portal-badge {
+      display: inline-flex;
+      width: fit-content;
+      padding: 5px 10px;
+      margin-top: 3px;
 
       border-radius: 999px;
-
-      background:
-        rgba(255,120,0,.12);
-
-      border:
-        1px solid rgba(255,120,0,.32);
+      border: 1px solid rgba(255, 120, 0, .32);
+      background: rgba(255, 120, 0, .12);
 
       color: #ff9b45;
-
       font-size: 11px;
       font-weight: 800;
-
-      text-transform: uppercase;
       letter-spacing: .06em;
+      text-transform: uppercase;
     }
 
-    @media (max-width: 700px) {
+    .manager-console .portal-arrow {
+      display: block;
+      margin-top: 8px;
+      color: #ff8c1a;
+      font-weight: 800;
+      line-height: 1.35;
+    }
 
-      .portal-grid {
+    /* ==========================================
+       TRAINING GUIDE - CENTERED BOTTOM CARD
+       ========================================== */
+
+    .manager-console .training-guide-card {
+      grid-column: 1 / -1;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+
+      width: min(850px, 100%);
+      justify-self: center;
+
+      margin: 24px 0 20px;
+      padding: 28px;
+
+      border: 1px solid #343a41;
+      border-radius: 22px;
+
+      background: #101317;
+      text-align: center;
+      color: #ffffff;
+      text-decoration: none;
+      box-sizing: border-box;
+
+      transition:
+        border-color .15s ease,
+        transform .15s ease;
+    }
+
+    .manager-console .training-guide-card:hover,
+    .manager-console .training-guide-card:focus-visible {
+      border-color: #ff8500;
+      transform: translateY(-2px);
+    }
+
+    .manager-console .training-guide-image {
+      display: block;
+      width: min(300px, 100%);
+      height: auto;
+      border-radius: 20px;
+      margin: 0 auto;
+    }
+
+    .manager-console .training-guide-card h2 {
+      margin: 0;
+      color: #ffffff;
+      font-size: clamp(22px, 3vw, 30px);
+    }
+
+    .manager-console .training-guide-card p {
+      margin: 0;
+      max-width: 640px;
+      color: #a7b6c5;
+      line-height: 1.5;
+    }
+
+    .manager-console .training-guide-card .portal-arrow {
+      margin-top: 0;
+    }
+
+    .manager-console .portal-card *,
+    .manager-console .training-guide-card * {
+      text-decoration: none;
+    }
+
+    /* ==========================================
+       RESPONSIVE DESIGN
+       ========================================== */
+
+    @media (max-width: 900px) {
+      .manager-console .portal-grid {
         grid-template-columns: 1fr;
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .manager-console .portal-card {
+        grid-template-columns: 82px minmax(0, 1fr);
+        column-gap: 14px;
+        padding: 16px;
       }
 
+      .manager-console .portal-image-wrap {
+        width: 82px;
+      }
+
+      .manager-console .portal-logo {
+        width: 82px;
+        height: 82px;
+      }
+
+      .manager-console .portal-card h2 {
+        font-size: 19px;
+      }
+
+      .manager-console .portal-card p {
+        font-size: 14px;
+      }
+
+      .manager-console .portal-card .eyebrow {
+        font-size: 11px;
+      }
+
+      .manager-console .training-guide-card {
+        padding: 20px;
+      }
     }
-    
-/* ==========================================
-   SECURETRACK OP
-   HORIZONTAL MANAGER PORTAL CARDS
-   ========================================== */
-
-.module-card.manager-horizontal-card {
-  display: grid !important;
-  grid-template-columns: 130px minmax(0, 1fr) !important;
-  align-items: center !important;
-  column-gap: 24px !important;
-
-  padding: 28px !important;
-  text-decoration: none !important;
-  box-sizing: border-box;
-}
-
-/* LEFT IMAGE CONTAINER */
-
-.manager-horizontal-card .manager-card-image-wrap {
-  width: 130px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* LEFT IMAGE */
-
-.manager-horizontal-card .manager-card-logo {
-  width: 125px !important;
-  height: 125px !important;
-  max-width: 100%;
-  object-fit: contain;
-  border-radius: 18px;
-  display: block;
-  margin: 0 !important;
-  flex-shrink: 0;
-}
-
-/* RIGHT TEXT CONTAINER */
-
-.manager-horizontal-card .manager-card-text {
-  min-width: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  text-align: left;
-}
-
-/* TEXT */
-
-.manager-horizontal-card .module-kicker {
-  color: #ff8200;
-  font-weight: 800;
-  letter-spacing: 2px;
-}
-
-.manager-horizontal-card h2 {
-  margin: 0;
-  font-size: clamp(22px, 2vw, 32px);
-  color: #ffffff;
-}
-
-.manager-horizontal-card p {
-  margin: 0;
-  color: #a7b6c5;
-  line-height: 1.5;
-}
-
-.manager-horizontal-card .manager-access-badge {
-  display: inline-block;
-  padding: 7px 12px;
-  color: #ff9431;
-  background: rgba(255, 130, 0, 0.12);
-  border: 1px solid rgba(255, 130, 0, 0.35);
-  border-radius: 999px;
-  font-weight: 800;
-  font-size: 13px;
-}
-
-.manager-horizontal-card .manager-card-action {
-  margin-top: 6px;
-  color: #ff8200;
-  font-weight: 800;
-  font-size: 17px;
-}
-
-/* KEEP CARD LINK TEXT CLEAN */
-
-.manager-horizontal-card,
-.manager-horizontal-card * {
-  text-decoration: none !important;
-}
-
-/* MOBILE RESPONSIVE */
-
-@media (max-width: 600px) {
-
-  .module-card.manager-horizontal-card {
-    grid-template-columns: 88px minmax(0, 1fr) !important;
-    column-gap: 14px !important;
-    padding: 18px !important;
-  }
-
-  .manager-horizontal-card .manager-card-image-wrap {
-    width: 88px;
-  }
-
-  .manager-horizontal-card .manager-card-logo {
-    width: 84px !important;
-    height: 84px !important;
-  }
-
-  .manager-horizontal-card h2 {
-    font-size: 20px;
-  }
-
-  .manager-horizontal-card p {
-    font-size: 14px;
-  }
-
-  .manager-horizontal-card .manager-card-action {
-    font-size: 15px;
-  }
-}
-
-/* =========================================
-   MANAGER PORTAL TRAINING GUIDE
-   LARGE, CENTERED BOTTOM CARD
-   ========================================= */
-
-.training-guide-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  /* Center beneath all other portal cards */
-  width: 100%;
-  max-width: 850px;
-  margin: 45px auto 60px;
-
-  padding: 35px 30px;
-  box-sizing: border-box;
-
-  text-align: center;
-  gap: 18px;
-
-  background: #101317;
-  border: 1px solid #303841;
-  border-radius: 24px;
-
-  color: #ffffff;
-  text-decoration: none;
-}
-
-.training-guide-image-wrap {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.training-guide-image {
-  width: 360px;
-  max-width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 20px;
-}
-
-.training-guide-card .module-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-}
-
-.training-guide-card .module-kicker {
-  color: #ff8200;
-  font-weight: 800;
-  letter-spacing: 2px;
-  text-decoration: none;
-}
-
-.training-guide-card h2 {
-  margin: 0;
-  color: #ffffff;
-  font-size: 30px;
-  text-decoration: none;
-}
-
-.training-guide-card p {
-  margin: 0;
-  max-width: 700px;
-  color: #a7b6c5;
-  font-size: 17px;
-  line-height: 1.65;
-  text-decoration: none;
-}
-
-.training-guide-card .module-arrow {
-  color: #ff8200;
-  font-weight: 800;
-  font-size: 18px;
-}
-
-.training-guide-card:hover {
-  border-color: #ff8200;
-  box-shadow: 0 8px 30px rgba(255, 130, 0, 0.12);
-  transform: translateY(-3px);
-  transition: all 0.2s ease;
-}
-
-/* Prevent link underlining */
-.training-guide-card,
-.training-guide-card * {
-  text-decoration: none !important;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 600px) {
-  .training-guide-card {
-    width: 100%;
-    margin: 30px auto 45px;
-    padding: 25px 18px;
-  }
-
-  .training-guide-image {
-    width: 100%;
-    max-width: 360px;
-  }
-
-  .training-guide-card h2 {
-    font-size: 24px;
-  }
-}
-
-/* ==========================================
-   SECURETRACK OP
-   CENTER MANAGER TRAINING GUIDE
-   ========================================== */
-
-.training-guide-card {
-  /* Span both columns if inside the module grid */
-  grid-column: 1 / -1 !important;
-
-  /* Center the card itself */
-  justify-self: center !important;
-  align-self: center !important;
-
-  width: min(850px, 100%) !important;
-  max-width: 850px !important;
-  margin: 40px auto 60px !important;
-
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  padding: 35px 30px !important;
-  box-sizing: border-box !important;
-  text-align: center !important;
-}
-
-.training-guide-card .training-guide-image-wrap {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  width: 100% !important;
-}
-
-.training-guide-card .training-guide-image {
-  display: block !important;
-  width: 360px !important;
-  max-width: 100% !important;
-  height: auto !important;
-  margin: 0 auto !important;
-}
-
-.training-guide-card .module-content {
-  width: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  text-align: center !important;
-}
-
-.training-guide-card h2,
-.training-guide-card p,
-.training-guide-card .module-kicker,
-.training-guide-card .module-arrow {
-  text-align: center !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .training-guide-card {
-    width: 100% !important;
-    padding: 25px 18px !important;
-  }
-
-  .training-guide-card .training-guide-image {
-    width: 100% !important;
-    max-width: 360px !important;
-  }
-}
-
   </style>
-<link rel="stylesheet" href="/footer.css">
 </head>
 
-
-<body
-  data-securetrack-roles="manager,director,admin"
->
+<body data-securetrack-roles="manager,director,admin">
 
 <main class="shell">
-
   <section class="panel manager-console">
 
+    <!-- ==========================================
+         HEADER
+         ========================================== -->
 
     <header class="panel-head manager-header">
 
       <div class="manager-header-row">
 
         <div class="brandbar">
-
-          <div
-            class="logo-mark"
-            aria-hidden="true"
-          >
+          <div class="logo-mark" aria-hidden="true">
             <span class="logo-lock"></span>
           </div>
 
           <div>
-
             <div class="wordmark">
               <span>Secure</span><span>Track</span>
             </div>
@@ -471,377 +291,355 @@
             <div class="tagline">
               Operations Management
             </div>
-
           </div>
-
         </div>
-
 
         <div class="manager-user-area">
 
-<!-- SECURETRACK NOTIFICATION CENTER -->
-<div id="securetrack-notification-mount"></div>
-<!-- END NOTIFICATION CENTER -->
+          <!-- NOTIFICATION BELL -->
+          <div id="securetrack-notification-mount"></div>
 
-          <a
-            class="back-link"
-            href="hub.html"
-          >
+          <a class="back-link" href="hub.html">
             ← Operations Hub
           </a>
 
+          <button type="button" id="logoutButton">
             Sign Out
           </button>
 
         </div>
-
       </div>
-
 
       <div class="eyebrow">
         Management Command Center
       </div>
 
-      <h1>
-        Manager Portal
-      </h1>
+      <h1>Manager Portal</h1>
 
       <p class="subtle">
-        Personnel, staffing, equipment and
-        operational management from one location.
+        Personnel, staffing, equipment and operational
+        management from one location.
       </p>
 
     </header>
 
+    <!-- ==========================================
+         MANAGER PORTAL MODULE GRID
+         ========================================== -->
 
-    <section class="portal-grid">
+    <section class="portal-grid"
+             aria-label="Management modules">
 
+      <!-- PERSONNEL ADMINISTRATION -->
 
-      <!-- =========================================
-           PERSONNEL ADMINISTRATION
-           ========================================= -->
+      <a class="portal-card priority"
+         href="personnel-administration.html">
 
-      <a   href="personnel-administration.html"
-        class="module-card manager-horizontal-card"
+        <div class="portal-image-wrap">
+          <img
+            class="portal-logo"
+            src="/assets/personnel-administration.png"
+            alt=""
+            loading="lazy">
+        </div>
 
-         <!-- LOGO ON LEFT -->
-        <div class="manager-card-imae-wrap">
+        <div class="portal-card-body">
+          <div class="eyebrow">
+            Personnel Management
+          </div>
+
+          <h2>Personnel Administration</h2>
+
+          <p>
+            Add and manage officers, photos, ranks,
+            qualifications, shifts, outside officers
+            and employee separations.
+          </p>
+
+          <span class="portal-badge">
+            Manager / Director
+          </span>
+
+          <span class="portal-arrow">
+            Open Personnel Administration →
+          </span>
+        </div>
+
+      </a>
+
+      <!-- OFFICER DIRECTORY -->
+
+      <a class="portal-card"
+         href="officer-directory.html">
+
+        <div class="portal-image-wrap">
+          <img
+            class="portal-logo"
+            src="/assets/officer-directory.png"
+            alt=""
+            loading="lazy">
+        </div>
+
+        <div class="portal-card-body">
+          <div class="eyebrow">Personnel</div>
+
+          <h2>Officer Directory</h2>
+
+          <p>
+            View officer profiles, shift assignments,
+            armed qualifications and command transfers.
+          </p>
+
+          <span class="portal-arrow">
+            Open Officer Directory →
+          </span>
+        </div>
+
+      </a>
+
+      <!-- TIME OFF & TRAINING -->
+
+      <a class="portal-card"
+         href="time-off-training.html">
+
+        <div class="portal-image-wrap">
+          <img
+            class="portal-logo"
+            src="/assets/time-off-training.png"
+            alt=""
+            loading="lazy">
+        </div>
+
+        <div class="portal-card-body">
+          <div class="eyebrow">Staffing</div>
+
+          <h2>Time Off &amp; Training</h2>
+
+          <p>
+            Record planned absences, training
+            and expected staffing availability.
+          </p>
+
+          <span class="portal-arrow">
+            Manage Availability →
+          </span>
+        </div>
+
+      </a>
+
+      <!-- DUTY STATION OVERSIGHT -->
+
+      <a class="portal-card"
+         href="assignments/index.html">
+
+        <div class="portal-image-wrap">
+          <img
+            class="portal-logo"
+            src="/assets/duty-station-oversight.png"
+            alt=""
+            loading="lazy">
+        </div>
+
+        <div class="portal-card-body">
+          <div class="eyebrow">
+            Shift Operations • Director Enabled
+          </div>
+
+          <h2>Duty Station Oversight</h2>
+
+          <p>
+            Review active duty stations, current shift
+            assignments, staffing gaps, and published
+            or draft assignments.
+          </p>
+
+          <span class="portal-arrow">
+            Open Shift Operations →
+          </span>
+        </div>
+
+      </a>
+
+      <!-- DAILY ACTIVITY & SHIFT ACCOUNTABILITY -->
+
+      <a class="portal-card priority"
+         href="daily-activity-access.html">
+
+        <div class="portal-image-wrap">
+          <img
+            class="portal-logo"
+            src="/assets/daily-activity-accountability.png"
+            alt=""
+            loading="lazy">
+        </div>
+
+        <div class="portal-card-body">
+          <div class="eyebrow">
+            Live Shift Operations
+          </div>
+
+          <h2>Daily Activity &amp; Shift Accountability</h2>
+
+          <p>
+            Review live shift activity, alerts,
+            staffing, property, equipment exceptions,
+            special assignments, TSI requests and
+            operational follow-up.
+          </p>
+
+          <span class="portal-badge">
+            Manager / Director
+          </span>
+
+          <span class="portal-arrow">
+            Open Current Shift Reports →
+          </span>
+        </div>
+
+      </a>
+
+      <!-- SECURITY EQUIPMENT -->
+
+      <a class="portal-card"
+         href="manager.html">
+
+        <div class="portal-image-wrap">
+          <img
+            class="portal-logo"
+            src="/assets/security-equipment.png"
+            alt=""
+            loading="lazy">
+        </div>
+
+        <div class="portal-card-body">
+          <div class="eyebrow">Equipment</div>
+
+          <h2>Security Equipment</h2>
+
+          <p>
+            Device status, custody, inspections,
+            issues and equipment accountability.
+          </p>
+
+          <span class="portal-arrow">
+            Open Equipment Dashboard →
+          </span>
+        </div>
+
+      </a>
+
+      <!-- IDENTITYLINK -->
+
+      <a class="portal-card"
+         href="/identitylink/">
+
+        <div class="portal-image-wrap">
+          <img
+            class="portal-logo"
+            src="/identitylink/identity-link-logo.png"
+            alt=""
+            loading="lazy">
+        </div>
+
+        <div class="portal-card-body">
+          <div class="eyebrow">
+            Patient Identification
+          </div>
+
+          <h2>IdentityLink</h2>
+
+          <p>
+            Manage unknown patient identification files,
+            image authorizations, fingerprint requests,
+            secure subject images and identification outcomes.
+          </p>
+
+          <span class="portal-badge">
+            Manager / Director
+          </span>
+
+          <span class="portal-arrow">
+            Open IdentityLink →
+          </span>
+        </div>
+
+      </a>
+
+      <!-- REPORTING CENTER -->
+
+      <a class="portal-card"
+         href="reports-center.html">
+
+        <div class="portal-image-wrap">
+          <img
+            class="portal-logo"
+            src="/assets/reporting-center.png"
+            alt=""
+            loading="lazy">
+        </div>
+
+        <div class="portal-card-body">
+          <div class="eyebrow">
+            Management Intelligence
+          </div>
+
+          <h2>Reporting Center</h2>
+
+          <p>
+            Generate reports across overtime, equipment,
+            security alerts, duty stations, shift handoffs,
+            personnel and notifications.
+          </p>
+
+          <span class="portal-arrow">
+            Open Reporting Center →
+          </span>
+        </div>
+
+      </a>
+
+      <!-- ==========================================
+           MANAGER PORTAL TRAINING GUIDE
+           ========================================== -->
+
+      <a class="training-guide-card"
+         href="/training/manager/index.html">
+
         <img
-  src="/assets/personnel-administration.png"
-  alt="Personnel Administration"
-  class="manager-card-logo"
-  loading="lazy"
->
-       
-        </div>
-         <!-- ALL TEXT ON RIGHT -->
-  <div class="manager-card-text">
-    
-        <div class="module-kicker">
-          Personnel Management
-        </div>
+          class="training-guide-image"
+          src="/assets/manager-training-guide.png"
+          alt=""
+          loading="lazy">
 
         <h2>
-          Personnel Administration
+          Manager Portal Training Guide
         </h2>
 
-        <p class="subtle">
-          Add and manage officers, photos,
-          ranks, qualifications, shifts,
-          outside officers and employee separations.
+        <p>
+          Step-by-step guidance on SecureTrack OP
+          leadership workflows, approvals, reports,
+          staffing, notifications and shift accountability.
         </p>
 
-        <span class="portal-badge">
-          Manager / Director
-        </span>
-
         <span class="portal-arrow">
-          Open Personnel Administration →
+          Open Training Guide →
         </span>
 
       </a>
 
-
-      <!-- =========================================
-           OFFICER DIRECTORY
-           ========================================= -->
-<img src="/assets/officer-directory.png"
-     alt="Officer Directory"
-     class="manager-card-logo"
-     loading="lazy">
-      <a
-        class="portal-card"
-        href="officer-directory.html"
-      >
-
-        <div class="eyebrow">
-          Personnel
-        </div>
-
-        <h2>
-          Officer Directory
-        </h2>
-
-        <p class="subtle">
-          View officer profiles, shift assignments,
-          armed qualifications and command transfers.
-        </p>
-
-        <span class="portal-arrow">
-          Open Officer Directory →
-        </span>
-
-      </a>
-
-
-      <!-- =========================================
-           TIME OFF / TRAINING
-           ========================================= -->
-<img src="/assets/time-off-training.png"
-     alt="Time Off and Training"
-     class="manager-card-logo"
-     loading="lazy">
-      <a
-        class="portal-card"
-        href="time-off-training.html"
-      >
-
-        <div class="eyebrow">
-          Staffing
-        </div>
-
-        <h2>
-          Time Off & Training
-        </h2>
-
-        <p class="subtle">
-          Record planned absences, training and
-          expected staffing availability.
-        </p>
-
-        <span class="portal-arrow">
-          Manage Availability →
-        </span>
-
-      </a>
-
-<!-- DIRECTOR DUTY STATION TEST 2026-09-21 -->
-      <!-- =========================================
-           DUTY STATION ASSIGNMENTS
-           ========================================= -->
-<img src="/assets/duty-station-oversight.png"
-     alt="Duty Station Oversight"
-     class="manager-card-logo"
-     loading="lazy">
-      <a
-        class="portal-card"
-        href="assignments/index.html"
-      >
-
-        <div class="eyebrow">
-         Shift Operations • Director Enabled
-        </div>
-
-        <h2>
-          Duty Station Oversight
-        </h2>
-
-        <p class="subtle">
- Review active duty stations, current shift assignments,
-  staffing gaps, and published or draft assignments.
-        </p>
-
-        <span class="portal-arrow">
-          Open Shift Operations →
-        </span>
-
-      </a>
-
-<!-- ==========================================
-     DAILY ACTIVITY & SHIFT ACCOUNTABILITY
-     ========================================== -->
-<img src="/assets/daily-activity-accountability.png"
-     alt="Daily Activity and Shift Accountability"
-     class="manager-card-logo"
-     loading="lazy">
-      
-<a
-  class="portal-card priority"
-  href="daily-activity-access.html"
->
-
-  <div class="eyebrow">
-    Live Shift Operations
-  </div>
-
-
-  <h2>
-    Daily Activity & Shift Accountability
-  </h2>
-
-
-  <p class="subtle">
-    Open the live Daily Activity Report for any
-    shift currently in progress. Review shift
-    activity, alerts, staffing, property,
-    equipment exceptions, special assignments,
-    TSI requests and operational follow-up.
-  </p>
-
-
-  <span class="portal-badge">
-    Manager / Director
-  </span>
-
-
-  <span class="portal-arrow">
-    Open Current Shift Reports →
-  </span>
-
-</a>
-      <!-- =========================================
-           SECURITY EQUIPMENT
-           ========================================= -->
-<img src="/assets/security-equipment.png"
-     alt="Security Equipment"
-     class="manager-card-logo"
-     loading="lazy">
-      
-      <a
-        class="portal-card"
-        href="manager.html"
-      >
-
-        <div class="eyebrow">
-          Equipment
-        </div>
-
-        <h2>
-          Security Equipment
-        </h2>
-
-        <p class="subtle">
-          Device status, custody, inspections,
-          issues and equipment accountability.
-        </p>
-
-        <span class="portal-arrow">
-          Open Equipment Dashboard →
-        </span>
-
-      </a>
-
-            <!-- =========================================
-           IDENTITYLINK
-           ========================================= -->
-<img src="/identitylink/identity-link-logo.png"
-     alt="Identitylink"
-     class="manager-card-logo"
-     loading="lazy">
-      
-      <a
-        class="portal-card"
-        href="/identitylink/"
-      >
-
-        <div class="eyebrow">
-          Patient Identification
-        </div>
-
-        <h2>
-          IdentityLink
-        </h2>
-
-        <p class="subtle">
-          Manage unknown patient identification files,
-          image authorizations, fingerprint requests,
-          secure subject images and identification outcomes.
-        </p>
-
-        <span class="portal-badge">
-          Manager / Director
-        </span>
-
-        <span class="portal-arrow">
-          Open IdentityLink →
-        </span>
-
-      </a>
-
-     
-<!-- =========================================================
-   MANAGER PORTAL - REPORTING CENTER CARD
-   ========================================================= -->
-    
-      <a
-  href="reports-center.html"
-  class="management-card"
->
-
-  <div class="eyebrow">
-    Management Intelligence
-  </div>
-
-  <h2>
-    Reporting Center
-  </h2>
-
-  <p>
-    Generate reports across overtime, equipment,
-    security alerts, duty stations, shift handoffs,
-    personnel and notifications.
-  </p>
-
-  <span class="management-card-link">
-    Open Reporting Center →
-  </span>
-
-</a>
-<!-- =========================================
-     MANAGER PORTAL TRAINING GUIDE CARD
-     ========================================= -->
-
-<a
-  class="module-card training-guide-card"
-  href="/training/manager/index.html"
->
-  <div class="training-guide-image-wrap">
-    <img
-      src="/assets/manager-training-guide.png"
-      alt="Manager Portal Training Guide"
-      class="training-guide-image"
-    >
-  </div>
-
-  <div class="module-content">
-   
-    <h2>
-      Manager Portal Training Guide
-    </h2>
-
-  </div>
-
-  <div class="module-arrow">
-    →
-  </div>
-</a>
     </section>
 
+    <!-- PORTAL TRUST FOOTER -->
 
     <div class="actions">
-
       <div class="footer-trust">
 
         <div>
-
           <strong>
             SECURE. ACCOUNTABLE. CONNECTED.
           </strong>
-
           <br>
-
           SecureTrack Operations Management
-
         </div>
 
         <div>
@@ -849,32 +647,22 @@
         </div>
 
       </div>
-
     </div>
 
-
   </section>
-
 </main>
 
+<!-- ==========================================
+     APPLICATION SCRIPTS
+     ========================================== -->
 
-<script
-  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-></script>
-
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="secure-page.js"></script>
 <script src="manager-common.js"></script>
 <script src="/notification-bell.js"></script>
 
 <script>
-/* ============================================
-   SECURETRACK OP
-   MANAGER PORTAL INITIALIZATION
-   WITH NOTIFICATION CENTER
-   ============================================ */
-
 (async function () {
   "use strict";
 
@@ -887,24 +675,16 @@
     return;
   }
 
-  // =========================================
-  // VERIFY MANAGER AUTHORIZATION
-  // =========================================
-
+  // Verify Manager Authorization
   const manager = await STM.requireManager();
 
   if (!manager) {
     return;
   }
 
-  // =========================================
-  // INITIALIZE NOTIFICATION BELL
-  // =========================================
+  // Initialize Notification Center
+  if (window.SecureTrackNotifications && STM.db) {
 
-  if (
-    window.SecureTrackNotifications &&
-    STM.db
-  ) {
     try {
       const initialized =
         await window.SecureTrackNotifications.init({
@@ -932,10 +712,7 @@
     );
   }
 
-  // =========================================
-  // SIGN OUT
-  // =========================================
-
+  // Sign Out
   const logoutButton =
     document.getElementById("logoutButton");
 
@@ -944,13 +721,10 @@
       "click",
       async () => {
 
-        // Stop notification listeners before logout.
         if (window.SecureTrackNotifications) {
           window.SecureTrackNotifications.destroy();
         }
 
-        // Preserve existing OneSignal and
-        // SecureTrack logout functionality.
         await STM.signOut();
       }
     );
@@ -960,9 +734,11 @@
 </script>
 
 <!-- SECURETRACK MANAGER PORTAL FOOTER -->
+
 <div id="securetrack-footer"
      data-variant="manager"></div>
 
 <script src="/footer.js" defer></script>
+
 </body>
 </html>
