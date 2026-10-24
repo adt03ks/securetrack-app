@@ -123,15 +123,33 @@
 
     }
 /* =========================================
-   MANAGER PORTAL TRAINING GUIDE CARD
+   MANAGER PORTAL TRAINING GUIDE
+   LARGE, CENTERED BOTTOM CARD
    ========================================= */
 
 .training-guide-card {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+
+  /* Center beneath all other portal cards */
+  width: 100%;
+  max-width: 850px;
+  margin: 45px auto 60px;
+
+  padding: 35px 30px;
+  box-sizing: border-box;
+
   text-align: center;
-  gap: 16px;
+  gap: 18px;
+
+  background: #101317;
+  border: 1px solid #303841;
+  border-radius: 24px;
+
+  color: #ffffff;
+  text-decoration: none;
 }
 
 .training-guide-image-wrap {
@@ -139,30 +157,84 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 8px;
 }
 
 .training-guide-image {
-  width: 120px;
+  width: 360px;
   max-width: 100%;
   height: auto;
   display: block;
-  border-radius: 18px;
+  border-radius: 20px;
 }
 
 .training-guide-card .module-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.training-guide-card .module-kicker {
+  color: #ff8200;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-decoration: none;
 }
 
 .training-guide-card h2 {
   margin: 0;
+  color: #ffffff;
+  font-size: 30px;
+  text-decoration: none;
 }
 
 .training-guide-card p {
   margin: 0;
+  max-width: 700px;
+  color: #a7b6c5;
+  font-size: 17px;
+  line-height: 1.65;
+  text-decoration: none;
 }
+
+.training-guide-card .module-arrow {
+  color: #ff8200;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.training-guide-card:hover {
+  border-color: #ff8200;
+  box-shadow: 0 8px 30px rgba(255, 130, 0, 0.12);
+  transform: translateY(-3px);
+  transition: all 0.2s ease;
+}
+
+/* Prevent link underlining */
+.training-guide-card,
+.training-guide-card * {
+  text-decoration: none !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .training-guide-card {
+    width: 100%;
+    margin: 30px auto 45px;
+    padding: 25px 18px;
+  }
+
+  .training-guide-image {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .training-guide-card h2 {
+    font-size: 24px;
+  }
+}
+
   </style>
 <link rel="stylesheet" href="/footer.css">
 </head>
@@ -509,22 +581,11 @@
   </div>
 
   <div class="module-content">
-    <div class="module-kicker">
-      TRAINING & SUPPORT
-    </div>
-
+   
     <h2>
       Manager Portal Training Guide
     </h2>
 
-    <p>
-      The Manager Portal Training Guide provides step-by-step instruction
-      for using SecureTrack OP leadership tools. It helps managers learn
-      how to navigate the portal, review daily activity, manage approvals,
-      monitor staffing functions, understand notifications, complete shift
-      accountability tasks, and follow the correct workflow for operational
-      oversight.
-    </p>
   </div>
 
   <div class="module-arrow">
