@@ -122,7 +122,47 @@
       }
 
     }
+/* =========================================
+   MANAGER PORTAL TRAINING GUIDE CARD
+   ========================================= */
 
+.training-guide-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.training-guide-image-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.training-guide-image {
+  width: 120px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 18px;
+}
+
+.training-guide-card .module-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.training-guide-card h2 {
+  margin: 0;
+}
+
+.training-guide-card p {
+  margin: 0;
+}
   </style>
 <link rel="stylesheet" href="/footer.css">
 </head>
@@ -177,17 +217,7 @@
           >
             ← Operations Hub
           </a>
-<a
-  class="back-link"
-  href="/training/manager/"
->
-  Manager Training
-</a>
-          <button
-            id="logoutButton"
-            class="back-link"
-            type="button"
-          >
+
             Sign Out
           </button>
 
@@ -462,7 +492,45 @@
   </span>
 
 </a>
+<!-- =========================================
+     MANAGER PORTAL TRAINING GUIDE CARD
+     ========================================= -->
 
+<a
+  class="module-card training-guide-card"
+  href="/training/index.html"
+>
+  <div class="training-guide-image-wrap">
+    <img
+      src="/assets/manager-training-guide.png"
+      alt="Manager Portal Training Guide"
+      class="training-guide-image"
+    >
+  </div>
+
+  <div class="module-content">
+    <div class="module-kicker">
+      TRAINING & SUPPORT
+    </div>
+
+    <h2>
+      Manager Portal Training Guide
+    </h2>
+
+    <p>
+      The Manager Portal Training Guide provides step-by-step instruction
+      for using SecureTrack OP leadership tools. It helps managers learn
+      how to navigate the portal, review daily activity, manage approvals,
+      monitor staffing functions, understand notifications, complete shift
+      accountability tasks, and follow the correct workflow for operational
+      oversight.
+    </p>
+  </div>
+
+  <div class="module-arrow">
+    →
+  </div>
+</a>
     </section>
 
 
