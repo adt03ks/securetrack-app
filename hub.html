@@ -222,6 +222,14 @@
 
 }
   
+/* ==========================================
+   MANAGER PORTAL ACCESS VISIBILITY
+   ========================================== */
+
+#moduleGrid .manager-card[hidden] {
+  display: none !important;
+}
+
   </style>
 </head>
 
@@ -591,11 +599,14 @@
            MANAGER PORTAL
            ======================================== -->
 
-      <a
-        class="module-card manager-card"
-        data-module="manager"
-        href="manager-portal.html"
-      >
+     
+<a
+  class="module-card manager-card"
+  data-module="manager"
+  href="manager-portal.html"
+  hidden
+>
+
 
         <div class="module-icon hub-image-icon">
 
