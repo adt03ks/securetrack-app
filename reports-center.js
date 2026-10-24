@@ -2534,6 +2534,406 @@ async function loadReportingOfficers() {
       return;
     }
 
+
+    // =====================================================
+    // DAMAGED EQUIPMENT / REPORTED EQUIPMENT ISSUES
+    // SECURETRACK OP - DEVICE REPORTING
+    // READ ONLY
+    // =====================================================
+
+    if (type === "damaged_equipment") {
+
+      if (shift.value !== "all") {
+        throw new Error(
+          "Select All Shifts. Equipment issue records " +
+          "do not contain a verified shift assignment."
+        );
+      }
+
+      // -------------------------------------------------
+      // RESOLVE SELECTED OFFICER
+      // -------------------------------------------------
+
+      let selectedEmployeeId = null;
+
+      if (officer.value !== "all") {
+
+        const { data, error } = await db
+          .from("profiles")
+          .select("employee_id")
+          .eq("id", officer.value)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        selectedEmployeeId =
+          data?.employee_id || null;
+      }
+
+      // -------------------------------------------------
+      // LOAD EQUIPMENT ISSUES
+      // -------------------------------------------------
+
+      const issues = [];
+      const pageSize = 500;
+      let offset = 0;
+
+      if (
+        officer.value === "all" ||
+        selectedEmployeeId
+      ) {
+
+        while (true) {
+
+          let query = db
+            .from("device_issues")
+            .select(`
+              id,
+              device_id,
+              employee_id,
+              category,
+              description,
+              severity,
+              status,
+              occurred_at,
+              resolved_at
+            `)
+            .gte("occurred_at", startISO)
+            .lte("occurred_at", endISO)
+            .order("occurred_at", {
+              ascending: false
+            })
+            .order("id", {
+              ascending: false
+            });
+
+          if (selectedEmployeeId) {
+            query = query.eq(
+              "employee_id",
+              selectedEmployeeId
+            );
+          }
+
+          const { data, error } = await query
+            .range(
+              offset,
+              offset + pageSize - 1
+            );
+
+          if (error) throw error;
+
+          const page = data || [];
+
+          issues.push(...page);
+
+          if (page.length < pageSize) {
+            break;
+          }
+
+          offset += pageSize;
+        }
+
+      }
+
+      // -------------------------------------------------
+      // LOAD DEVICE INFORMATION
+      // -------------------------------------------------
+
+      const deviceIds = [
+        ...new Set(
+          issues
+            .map(item => item.device_id)
+            .filter(Boolean)
+        )
+      ];
+
+      const deviceMap = new Map();
+
+      for (
+        let i = 0;
+        i < deviceIds.length;
+        i += 100
+      ) {
+
+        const { data, error } = await db
+          .from("devices")
+          .select(`
+            id,
+            asset_code,
+            device_type,
+            manufacturer,
+            model,
+            status,
+            attention_required
+          `)
+          .in(
+            "id",
+            deviceIds.slice(i, i + 100)
+          );
+
+        if (error) throw error;
+
+        (data || []).forEach(device => {
+          deviceMap.set(device.id, device);
+        });
+      }
+
+      // -------------------------------------------------
+      // LOAD REPORTING OFFICER NAMES
+      // -------------------------------------------------
+
+      const employeeIds = [
+        ...new Set(
+          issues
+            .map(item => item.employee_id)
+            .filter(Boolean)
+        )
+      ];
+
+      const employeeMap = new Map();
+
+      for (
+        let i = 0;
+        i < employeeIds.length;
+        i += 100
+      ) {
+
+        const { data, error } = await db
+          .from("employees")
+          .select(`
+            id,
+            display_name,
+            employee_number
+          `)
+          .in(
+            "id",
+            employeeIds.slice(i, i + 100)
+          );
+
+        if (error) throw error;
+
+        (data || []).forEach(employee => {
+          employeeMap.set(employee.id, employee);
+        });
+      }
+
+      // -------------------------------------------------
+      // BUILD REPORT ROWS
+      // -------------------------------------------------
+
+      const rows = issues.map(item => {
+
+        const device =
+          deviceMap.get(item.device_id);
+
+        const employee =
+          employeeMap.get(item.employee_id);
+
+        const employeeName = employee
+          ? `${employee.display_name || "Unknown"}${
+              employee.employee_number
+                ? " (#" +
+                  employee.employee_number +
+                  ")"
+                : ""
+            }`
+          : "Not recorded";
+
+        const isResolved =
+          Boolean(item.resolved_at) ||
+          ["resolved", "closed"].includes(
+            String(item.status || "")
+              .trim()
+              .toLowerCase()
+          );
+
+        return {
+
+          asset:
+            device?.asset_code ||
+            "Unknown Device",
+
+          type:
+            device?.device_type || "—",
+
+          equipment: [
+            device?.manufacturer,
+            device?.model
+          ].filter(Boolean).join(" ") || "—",
+
+          officer:
+            employeeName,
+
+          category:
+            item.category || "Not specified",
+
+          severity:
+            item.severity || "Not specified",
+
+          description:
+            item.description || "—",
+
+          reported:
+            item.occurred_at
+              ? new Date(
+                  item.occurred_at
+                ).toLocaleString()
+              : "—",
+
+          issueStatus:
+            item.status ||
+            (isResolved ? "Resolved" : "Unknown"),
+
+          resolved:
+            item.resolved_at
+              ? new Date(
+                  item.resolved_at
+                ).toLocaleString()
+              : "—",
+
+          currentStatus:
+            device?.status || "Unknown",
+
+          attention:
+            device?.attention_required === true
+              ? "Yes"
+              : device?.attention_required === false
+                ? "No"
+                : "Unknown",
+
+          issueId:
+            item.id
+
+        };
+      });
+
+      // -------------------------------------------------
+      // CALCULATE SUMMARY
+      // -------------------------------------------------
+
+      const isIssueResolved = item =>
+        Boolean(item.resolved_at) ||
+        ["resolved", "closed"].includes(
+          String(item.status || "")
+            .trim()
+            .toLowerCase()
+        );
+
+      const unresolved = issues.filter(
+        item => !isIssueResolved(item)
+      );
+
+      const resolved = issues.filter(
+        isIssueResolved
+      );
+
+      const affectedDevices = new Set(
+        issues
+          .map(item => item.device_id)
+          .filter(Boolean)
+      );
+
+      const categories = new Map();
+
+      issues.forEach(item => {
+        const category =
+          item.category || "Not specified";
+
+        categories.set(
+          category,
+          (categories.get(category) || 0) + 1
+        );
+      });
+
+      // -------------------------------------------------
+      // SUMMARY CARDS
+      // -------------------------------------------------
+
+      renderSummary([
+        {
+          label: "Reported Equipment Issues",
+          value: issues.length
+        },
+        {
+          label: "Affected Devices",
+          value: affectedDevices.size
+        },
+        {
+          label: "Unresolved Issues",
+          value: unresolved.length
+        },
+        {
+          label: "Resolved Issues",
+          value: resolved.length
+        },
+        {
+          label: "Issue Categories",
+          value: categories.size
+        }
+      ]);
+
+      // -------------------------------------------------
+      // DISPLAY REPORT
+      // -------------------------------------------------
+
+      renderTable([
+        {
+          key: "asset",
+          label: "Asset Number"
+        },
+        {
+          key: "type",
+          label: "Device Type"
+        },
+        {
+          key: "equipment",
+          label: "Equipment"
+        },
+        {
+          key: "officer",
+          label: "Reporting Officer"
+        },
+        {
+          key: "category",
+          label: "Issue Category"
+        },
+        {
+          key: "severity",
+          label: "Severity"
+        },
+        {
+          key: "description",
+          label: "Issue Description"
+        },
+        {
+          key: "reported",
+          label: "Date Reported"
+        },
+        {
+          key: "issueStatus",
+          label: "Issue Status"
+        },
+        {
+          key: "resolved",
+          label: "Resolved At"
+        },
+        {
+          key: "currentStatus",
+          label: "Current Device Status"
+        },
+        {
+          key: "attention",
+          label: "Attention Required"
+        },
+        {
+          key: "issueId",
+          label: "Issue Reference"
+        }
+      ], rows);
+
+      return;
+    }
+
     
     throw new Error(
       "This device report is being added in the next reporting module update."
