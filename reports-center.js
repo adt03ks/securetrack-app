@@ -2220,15 +2220,58 @@ async function loadReportingOfficers() {
 
     const assignments = assignmentData || [];
 
+   
+    // =====================================================
+    // LOAD DUTY STATION NAMES
+    // =====================================================
+
+    const {
+      data: stationData,
+      error: stationError
+    } = await db
+      .from("duty_stations")
+      .select(`
+        id,
+        station_code,
+        station_name
+      `);
+
+    if (stationError) {
+      throw stationError;
+    }
+
+    const stationMap = new Map(
+      (stationData || []).map(station => [
+        station.id,
+        station
+      ])
+    );
+
     const formatDateTime = value =>
       value
         ? new Date(value).toLocaleString()
         : "—";
 
-    const formatStation = value =>
-      value
-        ? String(value).slice(0, 8).toUpperCase()
-        : "Unassigned";
+    const formatStation = stationId => {
+
+      if (!stationId) {
+        return "Unassigned";
+      }
+
+      const station = stationMap.get(stationId);
+
+      if (!station) {
+        return "Unknown Station";
+      }
+
+      return (
+        station.station_name ||
+        station.station_code ||
+        "Unnamed Station"
+      );
+
+    };
+
 
     // =====================================================
     // FINALIZED DUTY STATIONS
@@ -2288,7 +2331,7 @@ async function loadReportingOfficers() {
           { key: "date", label: "Shift Date" },
           { key: "shift", label: "Shift" },
           { key: "officer", label: "Officer" },
-          { key: "station", label: "Station ID" },
+         { key: "station", label: "Duty Station" },
           { key: "source", label: "Assignment Source" },
           { key: "status", label: "Shift Status" },
           { key: "locked", label: "Locked" },
