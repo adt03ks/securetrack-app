@@ -1,9 +1,9 @@
 
 {
   "name": "SecureTrack OP",
-  "short_name": "SecureTrack",
+  "short_name": "SecureTrack OP",
   "description": "SecureTrack OP Security Operations Platform",
-  "start_url": "/",
+  "start_url": "/login.html",
   "scope": "/",
   "display": "standalone",
   "background_color": "#111827",
@@ -19,7 +19,7 @@
       "src": "/assets/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
