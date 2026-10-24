@@ -2131,6 +2131,410 @@ async function loadReportingOfficers() {
       return;
     }
 
+
+    // =====================================================
+    // ADMINISTRATIVE RECOVERIES
+    // SECURETRACK OP - DEVICE REPORTING
+    // READ ONLY
+    // =====================================================
+
+    if (type === "administrative_recoveries") {
+
+      if (shift.value !== "all") {
+        throw new Error(
+          "Select All Shifts. Administrative recovery " +
+          "records do not have a verified shift association."
+        );
+      }
+
+      // -------------------------------------------------
+      // LOAD RECOVERY RECORDS
+      // -------------------------------------------------
+
+      const recoveries = [];
+      const pageSize = 500;
+      let offset = 0;
+
+      while (true) {
+
+        const { data, error } = await db
+          .from("device_recoveries")
+          .select(`
+            id,
+            device_id,
+            reason,
+            notes,
+            occurred_at,
+            recovered_by_user_id
+          `)
+          .gte("occurred_at", startISO)
+          .lte("occurred_at", endISO)
+          .order("occurred_at", {
+            ascending: false
+          })
+          .order("id", {
+            ascending: false
+          })
+          .range(offset, offset + pageSize - 1);
+
+        if (error) throw error;
+
+        const page = data || [];
+        recoveries.push(...page);
+
+        if (page.length < pageSize) break;
+
+        offset += pageSize;
+      }
+
+      // -------------------------------------------------
+      // LOAD EQUIPMENT INFORMATION
+      // -------------------------------------------------
+
+      const deviceIds = [
+        ...new Set(
+          recoveries
+            .map(r => r.device_id)
+            .filter(Boolean)
+        )
+      ];
+
+      const deviceMap = new Map();
+
+      for (let i = 0; i < deviceIds.length; i += 100) {
+
+        const { data, error } = await db
+          .from("devices")
+          .select(`
+            id,
+            asset_code,
+            manufacturer,
+            model,
+            status
+          `)
+          .in("id", deviceIds.slice(i, i + 100));
+
+        if (error) throw error;
+
+        (data || []).forEach(device => {
+          deviceMap.set(device.id, device);
+        });
+      }
+
+      // -------------------------------------------------
+      // LOAD RECOVERING MANAGER NAMES
+      // -------------------------------------------------
+
+      const managerIds = [
+        ...new Set(
+          recoveries
+            .map(r => r.recovered_by_user_id)
+            .filter(Boolean)
+        )
+      ];
+
+      const managerMap = new Map();
+
+      for (let i = 0; i < managerIds.length; i += 100) {
+
+        const { data, error } = await db
+          .from("profiles")
+          .select(`
+            id,
+            display_name,
+            first_name,
+            last_name
+          `)
+          .in("id", managerIds.slice(i, i + 100));
+
+        if (error) throw error;
+
+        (data || []).forEach(person => {
+
+          const fullName = [
+            person.first_name,
+            person.last_name
+          ].filter(Boolean).join(" ").trim();
+
+          managerMap.set(
+            person.id,
+            person.display_name || fullName ||
+              "Unknown Manager"
+          );
+        });
+      }
+
+      // -------------------------------------------------
+      // LOOK UP LAST TRANSACTION BEFORE RECOVERY
+      // -------------------------------------------------
+      //
+      // The latest checkout is not always the
+      // custodian at recovery time.
+      //
+      // If the most recent transaction was a normal
+      // return, do not claim the officer still had
+      // the equipment.
+      // -------------------------------------------------
+
+      const priorTransactionMap = new Map();
+
+      for (const recovery of recoveries) {
+
+        if (!recovery.device_id ||
+            !recovery.occurred_at) {
+          continue;
+        }
+
+        const { data, error } = await db
+          .from("device_transactions")
+          .select(`
+            id,
+            action,
+            employee_id,
+            occurred_at
+          `)
+          .eq("device_id", recovery.device_id)
+          .lte("occurred_at", recovery.occurred_at)
+          .order("occurred_at", {
+            ascending: false
+          })
+          .order("id", {
+            ascending: false
+          })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        priorTransactionMap.set(recovery.id, data);
+      }
+
+      // -------------------------------------------------
+      // LOAD LAST RECORDED CHECKOUT OFFICERS
+      // -------------------------------------------------
+
+      const employeeIds = [
+        ...new Set(
+          Array.from(
+            priorTransactionMap.values()
+          )
+            .filter(t =>
+              t?.action === "checkout" &&
+              t.employee_id
+            )
+            .map(t => t.employee_id)
+        )
+      ];
+
+      const employeeMap = new Map();
+
+      for (let i = 0; i < employeeIds.length; i += 100) {
+
+        const { data, error } = await db
+          .from("employees")
+          .select(`
+            id,
+            display_name,
+            employee_number
+          `)
+          .in("id", employeeIds.slice(i, i + 100));
+
+        if (error) throw error;
+
+        (data || []).forEach(employee => {
+          employeeMap.set(employee.id, employee);
+        });
+      }
+
+      // -------------------------------------------------
+      // RESOLVE SELECTED OFFICER
+      // -------------------------------------------------
+
+      let selectedEmployeeId = null;
+
+      if (officer.value !== "all") {
+
+        const { data, error } = await db
+          .from("profiles")
+          .select("employee_id")
+          .eq("id", officer.value)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        selectedEmployeeId =
+          data?.employee_id || null;
+      }
+
+      // -------------------------------------------------
+      // BUILD RECOVERY RESULTS
+      // -------------------------------------------------
+
+      const rows = recoveries
+        .filter(recovery => {
+
+          if (officer.value === "all") {
+            return true;
+          }
+
+          if (!selectedEmployeeId) {
+            return false;
+          }
+
+          const transaction =
+            priorTransactionMap.get(recovery.id);
+
+          return (
+            transaction?.action === "checkout" &&
+            transaction.employee_id === selectedEmployeeId
+          );
+        })
+        .map(recovery => {
+
+          const device =
+            deviceMap.get(recovery.device_id);
+
+          const transaction =
+            priorTransactionMap.get(recovery.id);
+
+          const priorEmployee =
+            transaction?.action === "checkout"
+              ? employeeMap.get(
+                  transaction.employee_id
+                )
+              : null;
+
+          const lastCustodian =
+            priorEmployee
+              ? `${priorEmployee.display_name || "Unknown"}${
+                  priorEmployee.employee_number
+                    ? " (#" +
+                      priorEmployee.employee_number +
+                      ")"
+                    : ""
+                }`
+              : "Not established";
+
+          return {
+
+            asset:
+              device?.asset_code || "Unknown Device",
+
+            equipment: [
+              device?.manufacturer,
+              device?.model
+            ].filter(Boolean).join(" ") || "—",
+
+            previousCustodian: lastCustodian,
+
+            recoveredBy:
+              managerMap.get(
+                recovery.recovered_by_user_id
+              ) || "Not recorded",
+
+            date: recovery.occurred_at
+              ? new Date(
+                  recovery.occurred_at
+                ).toLocaleString()
+              : "—",
+
+            reason:
+              recovery.reason || "Not provided",
+
+            notes:
+              recovery.notes || "—",
+
+            currentStatus:
+              device?.status || "Unknown",
+
+            recoveryId:
+              recovery.id
+          };
+        });
+
+      // -------------------------------------------------
+      // SUMMARY CARDS
+      // -------------------------------------------------
+
+      renderSummary([
+        {
+          label: "Administrative Recoveries",
+          value: rows.length
+        },
+        {
+          label: "Unique Devices Recovered",
+          value: new Set(
+            recoveries
+              .filter(r =>
+                officer.value === "all" ||
+                (
+                  selectedEmployeeId &&
+                  priorTransactionMap.get(r.id)
+                    ?.action === "checkout" &&
+                  priorTransactionMap.get(r.id)
+                    ?.employee_id === selectedEmployeeId
+                )
+              )
+              .map(r => r.device_id)
+              .filter(Boolean)
+          ).size
+        },
+        {
+          label: "Previous Custodian Established",
+          value: rows.filter(
+            r => r.previousCustodian !==
+              "Not established"
+          ).length
+        }
+      ]);
+
+      // -------------------------------------------------
+      // DISPLAY REPORT
+      // -------------------------------------------------
+
+      renderTable([
+        {
+          key: "asset",
+          label: "Device Asset Number"
+        },
+        {
+          key: "equipment",
+          label: "Equipment"
+        },
+        {
+          key: "previousCustodian",
+          label: "Last Recorded Custodian"
+        },
+        {
+          key: "recoveredBy",
+          label: "Recovered By"
+        },
+        {
+          key: "date",
+          label: "Recovery Date / Time"
+        },
+        {
+          key: "reason",
+          label: "Recovery Reason"
+        },
+        {
+          key: "notes",
+          label: "Recovery Notes"
+        },
+        {
+          key: "currentStatus",
+          label: "Current Device Status"
+        },
+        {
+          key: "recoveryId",
+          label: "Recovery Reference"
+        }
+      ], rows);
+
+      return;
+    }
+
+    
     throw new Error(
       "This device report is being added in the next reporting module update."
     );
