@@ -149,6 +149,79 @@
 
     }
 
+  
+/* ==========================================
+   SECURETRACK OP
+   HUB CARD LOGO SPACING CORRECTION
+   ========================================== */
+
+/* Give each card three defined areas:
+   image | text | navigation arrow */
+
+#moduleGrid .module-card {
+  display: grid !important;
+  grid-template-columns:
+    105px minmax(0, 1fr) 24px !important;
+  column-gap: 22px !important;
+  align-items: center !important;
+}
+
+/* Keep the logo inside its own area */
+
+#moduleGrid .module-icon.hub-image-icon {
+  width: 90px !important;
+  height: 90px !important;
+  min-width: 90px !important;
+  justify-self: center !important;
+  margin: 0 !important;
+}
+
+/* Prevent the logo from overlapping text */
+
+#moduleGrid .hub-card-image {
+  width: 90px !important;
+  height: 90px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+/* Align all headings and descriptions */
+
+#moduleGrid .hub-module-text {
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Keep navigation arrows on the far right */
+
+#moduleGrid .module-arrow {
+  justify-self: end !important;
+  align-self: center !important;
+  margin: 0 !important;
+}
+
+/* Mobile adjustments */
+
+@media (max-width: 600px) {
+
+  #moduleGrid .module-card {
+    grid-template-columns:
+      70px minmax(0, 1fr) 16px !important;
+    column-gap: 12px !important;
+    padding: 15px !important;
+  }
+
+  #moduleGrid .module-icon.hub-image-icon,
+  #moduleGrid .hub-card-image {
+    width: 62px !important;
+    height: 62px !important;
+    min-width: 62px !important;
+  }
+
+}
+  
   </style>
 </head>
 
