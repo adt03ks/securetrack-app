@@ -122,6 +122,134 @@
       }
 
     }
+    
+/* ==========================================
+   SECURETRACK OP
+   HORIZONTAL MANAGER PORTAL CARDS
+   ========================================== */
+
+.module-card.manager-horizontal-card {
+  display: grid !important;
+  grid-template-columns: 130px minmax(0, 1fr) !important;
+  align-items: center !important;
+  column-gap: 24px !important;
+
+  padding: 28px !important;
+  text-decoration: none !important;
+  box-sizing: border-box;
+}
+
+/* LEFT IMAGE CONTAINER */
+
+.manager-horizontal-card .manager-card-image-wrap {
+  width: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* LEFT IMAGE */
+
+.manager-horizontal-card .manager-card-logo {
+  width: 125px !important;
+  height: 125px !important;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 18px;
+  display: block;
+  margin: 0 !important;
+  flex-shrink: 0;
+}
+
+/* RIGHT TEXT CONTAINER */
+
+.manager-horizontal-card .manager-card-text {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+}
+
+/* TEXT */
+
+.manager-horizontal-card .module-kicker {
+  color: #ff8200;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.manager-horizontal-card h2 {
+  margin: 0;
+  font-size: clamp(22px, 2vw, 32px);
+  color: #ffffff;
+}
+
+.manager-horizontal-card p {
+  margin: 0;
+  color: #a7b6c5;
+  line-height: 1.5;
+}
+
+.manager-horizontal-card .manager-access-badge {
+  display: inline-block;
+  padding: 7px 12px;
+  color: #ff9431;
+  background: rgba(255, 130, 0, 0.12);
+  border: 1px solid rgba(255, 130, 0, 0.35);
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.manager-horizontal-card .manager-card-action {
+  margin-top: 6px;
+  color: #ff8200;
+  font-weight: 800;
+  font-size: 17px;
+}
+
+/* KEEP CARD LINK TEXT CLEAN */
+
+.manager-horizontal-card,
+.manager-horizontal-card * {
+  text-decoration: none !important;
+}
+
+/* MOBILE RESPONSIVE */
+
+@media (max-width: 600px) {
+
+  .module-card.manager-horizontal-card {
+    grid-template-columns: 88px minmax(0, 1fr) !important;
+    column-gap: 14px !important;
+    padding: 18px !important;
+  }
+
+  .manager-horizontal-card .manager-card-image-wrap {
+    width: 88px;
+  }
+
+  .manager-horizontal-card .manager-card-logo {
+    width: 84px !important;
+    height: 84px !important;
+  }
+
+  .manager-horizontal-card h2 {
+    font-size: 20px;
+  }
+
+  .manager-horizontal-card p {
+    font-size: 14px;
+  }
+
+  .manager-horizontal-card .manager-card-action {
+    font-size: 15px;
+  }
+}
+
 /* =========================================
    MANAGER PORTAL TRAINING GUIDE
    LARGE, CENTERED BOTTOM CARD
@@ -393,12 +521,23 @@
            PERSONNEL ADMINISTRATION
            ========================================= -->
 
-      <a
-        class="portal-card priority"
-        href="personnel-administration.html"
-      >
+      <a   href="personnel-administration.html"
+        class="module-card manager-horizontal-card"
 
-        <div class="eyebrow">
+         <!-- LOGO ON LEFT -->
+        <div class="manager-card-imae-wrap">
+        <img
+  src="/assets/personnel-administration.png"
+  alt="Personnel Administration"
+  class="manager-card-logo"
+  loading="lazy"
+>
+       
+        </div>
+         <!-- ALL TEXT ON RIGHT -->
+  <div class="manager-card-text">
+    
+        <div class="module-kicker">
           Personnel Management
         </div>
 
@@ -426,7 +565,10 @@
       <!-- =========================================
            OFFICER DIRECTORY
            ========================================= -->
-
+<img src="/assets/officer-directory.png"
+     alt="Officer Directory"
+     class="manager-card-logo"
+     loading="lazy">
       <a
         class="portal-card"
         href="officer-directory.html"
@@ -455,7 +597,10 @@
       <!-- =========================================
            TIME OFF / TRAINING
            ========================================= -->
-
+<img src="/assets/time-off-training.png"
+     alt="Time Off and Training"
+     class="manager-card-logo"
+     loading="lazy">
       <a
         class="portal-card"
         href="time-off-training.html"
@@ -484,7 +629,10 @@
       <!-- =========================================
            DUTY STATION ASSIGNMENTS
            ========================================= -->
-
+<img src="/assets/duty-station-oversight.png"
+     alt="Duty Station Oversight"
+     class="manager-card-logo"
+     loading="lazy">
       <a
         class="portal-card"
         href="assignments/index.html"
@@ -512,7 +660,11 @@
 <!-- ==========================================
      DAILY ACTIVITY & SHIFT ACCOUNTABILITY
      ========================================== -->
-
+<img src="/assets/daily-activity-accountability.png"
+     alt="Daily Activity and Shift Accountability"
+     class="manager-card-logo"
+     loading="lazy">
+      
 <a
   class="portal-card priority"
   href="daily-activity-access.html"
@@ -550,7 +702,11 @@
       <!-- =========================================
            SECURITY EQUIPMENT
            ========================================= -->
-
+<img src="/assets/security-equipment.png"
+     alt="Security Equipment"
+     class="manager-card-logo"
+     loading="lazy">
+      
       <a
         class="portal-card"
         href="manager.html"
@@ -578,7 +734,11 @@
             <!-- =========================================
            IDENTITYLINK
            ========================================= -->
-
+<img src="/identitylink/identity-link-logo.png"
+     alt="Identitylink"
+     class="manager-card-logo"
+     loading="lazy">
+      
       <a
         class="portal-card"
         href="/identitylink/"
@@ -612,6 +772,7 @@
 <!-- =========================================================
    MANAGER PORTAL - REPORTING CENTER CARD
    ========================================================= -->
+    
       <a
   href="reports-center.html"
   class="management-card"
