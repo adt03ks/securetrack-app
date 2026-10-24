@@ -1744,12 +1744,7 @@ function addSlipFallWitnessRow() {
 
           : null,
 
-      p_dispatch_unit:
-        nullable(
-          document.getElementById(
-            "dispatchUnit"
-          ).value
-        ),
+     p_dispatch_unit: nullable(getDispatchUnitForSubmission()),
 
       p_additional_notes:
         nullable(
@@ -2280,6 +2275,65 @@ async function uploadAllSlipFallEvidence(
 
 }
 
+  // ========================================================
+// DUTY STATION / DISPATCH UNIT
+// ========================================================
+
+const dutyStationSelect = document.getElementById("dispatchUnit");
+const dutyStationOtherWrap =
+  document.getElementById("dispatchUnitOtherWrap");
+const dutyStationOther =
+  document.getElementById("dispatchUnitOther");
+
+function syncDutyStationOther() {
+  const isOther = dutyStationSelect.value === "OTHER";
+
+  dutyStationOtherWrap.hidden = !isOther;
+  dutyStationOther.disabled = !isOther;
+  dutyStationOther.required = isOther;
+
+  if (!isOther) {
+    dutyStationOther.value = "";
+  }
+
+  dutyStationOther.setCustomValidity("");
+}
+
+dutyStationSelect.addEventListener("change", () => {
+  syncDutyStationOther();
+
+  if (dutyStationSelect.value === "OTHER") {
+    dutyStationOther.focus();
+  }
+});
+
+dutyStationOther.addEventListener("input", () => {
+  dutyStationOther.setCustomValidity(
+    dutyStationOther.value.trim()
+      ? ""
+      : "Please specify the duty station / dispatch unit."
+  );
+});
+
+// Wait until the browser has finished resetting the form.
+form.addEventListener("reset", () => {
+  queueMicrotask(syncDutyStationOther);
+});
+
+function getDispatchUnitForSubmission() {
+  if (dutyStationSelect.value === "OTHER") {
+    return dutyStationOther.value.trim();
+  }
+
+  if (!dutyStationSelect.value) {
+    return "";
+  }
+
+  // Save the readable station name in the existing text field.
+  return dutyStationSelect.selectedOptions[0].textContent.trim();
+}
+
+syncDutyStationOther();
 // ========================================================
 // SUBMIT
 // ========================================================
