@@ -3847,6 +3847,294 @@ async function generatePersonnelReport(type, range) {
 
   }
 
+
+  // =========================================================
+  // NOTIFICATION REPORTS
+  // SECURETRACK OP - MANAGER REPORTING CENTER
+  // CURRENT CONFIGURATION SNAPSHOT
+  // =========================================================
+
+  async function generateNotificationReport(type, range) {
+
+    const supportedTypes = [
+      "notification_subscribers",
+      "sms_subscribers",
+      "email_subscribers",
+      "notification_opt_outs"
+    ];
+
+    if (!supportedTypes.includes(type)) {
+      throw new Error("Unsupported Notification report.");
+    }
+
+    // Notification preference reports are snapshots,
+    // not historical delivery or consent-event reports.
+
+    if (shift.value !== "all") {
+      throw new Error(
+        "Select All Shifts for notification reports. " +
+        "Subscription settings are not tied to a shift."
+      );
+    }
+
+    const { data, error } = await db.rpc(
+      "report_notification_subscription_snapshot"
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    const allRecords = data || [];
+
+    const records = allRecords.filter(item =>
+      officer.value === "all" ||
+      item.user_id === officer.value
+    );
+
+    // A channel must be actively configured.
+    // SMS also requires recorded consent.
+
+    const smsActive = item =>
+      item.contact_active === true &&
+      item.sms_enabled === true &&
+      item.sms_consent === true;
+
+    const emailActive = item =>
+      item.contact_active === true &&
+      item.email_enabled === true;
+
+    const pushActive = item =>
+      item.push_enabled === true &&
+      item.push_registered === true;
+
+    const isSubscriber = item =>
+      smsActive(item) ||
+      emailActive(item) ||
+      pushActive(item);
+
+    const smsOptedOut = item =>
+      item.sms_opt_out_at != null &&
+      !smsActive(item);
+
+    const disabledChannels = item => {
+
+      const disabled = [];
+
+      if (
+        item.sms_enabled === false ||
+        item.sms_consent === false
+      ) {
+        disabled.push("SMS");
+      }
+
+      if (item.email_enabled === false) {
+        disabled.push("Email");
+      }
+
+      if (item.push_enabled === false) {
+        disabled.push("Push");
+      }
+
+      return disabled;
+
+    };
+
+    function status(value) {
+      if (value === true) return "Enabled";
+      if (value === false) return "Disabled";
+      return "Not configured";
+    }
+
+    function channelStatus(item) {
+      return [
+        smsActive(item) ? "SMS" : null,
+        emailActive(item) ? "Email" : null,
+        pushActive(item) ? "Push" : null
+      ].filter(Boolean).join(", ") || "None active";
+    }
+
+    function buildRows(items) {
+
+      return items.map(item => ({
+
+        name: item.display_name || "Unnamed Contact",
+
+        sms: item.sms_enabled == null
+          ? "Not configured"
+          : smsActive(item)
+            ? "Enabled / Consented"
+            : item.sms_consent === false
+              ? "Consent not granted"
+              : "Disabled / Not eligible",
+
+        email: item.contact_active === false
+          ? "Inactive contact"
+          : status(item.email_enabled),
+
+        push: status(item.push_enabled),
+
+        registration: item.push_registered
+          ? "Registered device"
+          : "No active registered device",
+
+        channels: channelStatus(item),
+
+        optedOut: disabledChannels(item)
+          .join(", ") || "—",
+
+        smsOptOutDate: item.sms_opt_out_at
+          ? new Date(
+              item.sms_opt_out_at
+            ).toLocaleString()
+          : "—"
+
+      }));
+
+    }
+
+    // =====================================================
+    // ALL NOTIFICATION SUBSCRIBERS
+    // =====================================================
+
+    if (type === "notification_subscribers") {
+
+      const subscribers = records.filter(isSubscriber);
+
+      renderSummary([
+        {
+          label: "Active Subscribers",
+          value: subscribers.length
+        },
+        {
+          label: "SMS Enabled",
+          value: records.filter(smsActive).length
+        },
+        {
+          label: "Email Enabled",
+          value: records.filter(emailActive).length
+        },
+        {
+          label: "Push Registered & Enabled",
+          value: records.filter(pushActive).length
+        }
+      ]);
+
+      renderTable([
+        { key: "name", label: "Employee / Contact" },
+        { key: "channels", label: "Active Channels" },
+        { key: "sms", label: "SMS" },
+        { key: "email", label: "Email" },
+        { key: "push", label: "Push Preference" },
+        {
+          key: "registration",
+          label: "Push Registration"
+        }
+      ], buildRows(subscribers));
+
+      return;
+    }
+
+    // =====================================================
+    // SMS SUBSCRIBERS
+    // =====================================================
+
+    if (type === "sms_subscribers") {
+
+      const subscribers = records.filter(smsActive);
+
+      renderSummary([
+        {
+          label: "SMS Subscribers With Consent",
+          value: subscribers.length
+        }
+      ]);
+
+      renderTable([
+        { key: "name", label: "Employee / Contact" },
+        { key: "sms", label: "SMS Status" }
+      ], buildRows(subscribers));
+
+      return;
+    }
+
+    // =====================================================
+    // EMAIL SUBSCRIBERS
+    // =====================================================
+
+    if (type === "email_subscribers") {
+
+      const subscribers = records.filter(emailActive);
+
+      renderSummary([
+        {
+          label: "Email-Enabled Contacts",
+          value: subscribers.length
+        }
+      ]);
+
+      renderTable([
+        { key: "name", label: "Employee / Contact" },
+        { key: "email", label: "Email Preference" }
+      ], buildRows(subscribers));
+
+      return;
+    }
+
+    // =====================================================
+    // NOTIFICATION OPT-OUTS
+    // =====================================================
+
+    if (type === "notification_opt_outs") {
+
+      // These are current disabled preference states
+      // and current SMS opt-out indicators.
+      // They are not a complete historical event log.
+
+      const optedOut = records.filter(item =>
+        disabledChannels(item).length > 0 ||
+        smsOptedOut(item)
+      );
+
+      renderSummary([
+        {
+          label: "Contacts With Disabled Channels",
+          value: optedOut.length
+        },
+        {
+          label: "Recorded SMS Opt-Outs",
+          value: optedOut.filter(
+            smsOptedOut
+          ).length
+        },
+        {
+          label: "Push Disabled",
+          value: optedOut.filter(
+            item => item.push_enabled === false
+          ).length
+        }
+      ]);
+
+      renderTable([
+        { key: "name", label: "Employee / Contact" },
+        {
+          key: "optedOut",
+          label: "Disabled Channels"
+        },
+        { key: "sms", label: "SMS Preference" },
+        { key: "email", label: "Email Preference" },
+        { key: "push", label: "Push Preference" },
+        {
+          key: "smsOptOutDate",
+          label: "Last Recorded SMS Opt-Out"
+        }
+      ], buildRows(optedOut));
+
+      return;
+    }
+
+  }
+
   
   // =========================================================
   // GENERATE REPORT
@@ -3933,18 +4221,25 @@ async function generatePersonnelReport(type, range) {
     selectedReport,
     range
   );
-
-   } else if (activeModule === "personnel") {
+  
+} else if (activeModule === "personnel") {
 
   await generatePersonnelReport(
     selectedReport,
     range
   );
 
-} else {     
+} else if (activeModule === "notifications") {
+
+  await generateNotificationReport(
+    selectedReport,
+    range
+  );
+
+} else {
 
   throw new Error(
-    `${reportDefinitions[activeModule].title} are ready in the interface but still need to be connected to their SecureTrack database module.`
+    `${reportDefinitions[activeModule].title} SecureTrack database module unavailable.`
   );
 
 }
