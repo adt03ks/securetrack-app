@@ -3220,7 +3220,13 @@ async function loadReportingOfficers() {
     }
 
   }
-
+async function generatePersonnelReport(type, range) {
+  // Six personnel report types
+  // Actual employee records
+  // Date, shift, and officer filters
+  // Management-authorized data access
+}
+  
   // =========================================================
   // GENERATE REPORT
   // =========================================================
@@ -3308,6 +3314,15 @@ async function loadReportingOfficers() {
   );
 
 } else {
+
+   } else if (activeModule === "personnel") {
+
+  await generatePersonnelReport(
+    selectedReport,
+    range
+  );
+
+} else {     
 
   throw new Error(
     `${reportDefinitions[activeModule].title} are ready in the interface but still need to be connected to their SecureTrack database module.`
