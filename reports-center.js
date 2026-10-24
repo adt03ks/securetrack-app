@@ -2589,6 +2589,639 @@ async function loadReportingOfficers() {
 
   
   // =========================================================
+  // SHIFT HANDOFF REPORTS
+  // SECURETRACK OP - MANAGER REPORTING CENTER
+  // READ ONLY
+  // =========================================================
+
+  async function generateShiftHandoffReport(type, range) {
+
+    const supportedTypes = [
+      "handoff_lookup",
+      "incomplete_handoffs",
+      "handoffs_by_shift",
+      "handoffs_by_leader",
+      "carry_forward"
+    ];
+
+    if (!supportedTypes.includes(type)) {
+      throw new Error("Unsupported Shift Handoff report.");
+    }
+
+    // Use local calendar dates for shift_date.
+    function localDate(value) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1)
+        .padStart(2, "0");
+      const day = String(value.getDate())
+        .padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    }
+
+    const fromDate = localDate(range.start);
+    const toDate = localDate(range.end);
+    const today = localDate(new Date());
+
+    const displayTime = value =>
+      value
+        ? new Date(value).toLocaleString()
+        : "—";
+
+    // =====================================================
+    // LOAD SHIFTS FOR SELECTED PERIOD
+    // =====================================================
+
+    let shiftQuery = db
+      .from("shift_instances")
+      .select(`
+        id,
+        shift_date,
+        shift_name,
+        status,
+        handoff_status,
+        handoff_source_report_id,
+        handoff_acknowledged_at,
+        handoff_acknowledged_by_name
+      `)
+      .gte("shift_date", fromDate)
+      .lte("shift_date", toDate)
+      .order("shift_date", {
+        ascending: false
+      });
+
+    if (shift.value !== "all") {
+      shiftQuery = shiftQuery.eq(
+        "shift_name",
+        shift.value
+      );
+    }
+
+    const {
+      data: shiftData,
+      error: shiftError
+    } = await shiftQuery;
+
+    if (shiftError) {
+      throw shiftError;
+    }
+
+    const shifts = shiftData || [];
+    const shiftIds = shifts.map(item => item.id);
+
+    const shiftMap = new Map(
+      shifts.map(item => [item.id, item])
+    );
+
+    // =====================================================
+    // LOAD END-OF-SHIFT REPORTS
+    // =====================================================
+
+    let reports = [];
+
+    if (shiftIds.length) {
+
+      const response = await db
+        .from("end_of_shift_reports")
+        .select(`
+          id,
+          shift_instance_id,
+          status,
+          receiving_shift_name,
+          created_at,
+          published_at,
+          published_by,
+          published_by_name
+        `)
+        .in("shift_instance_id", shiftIds);
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      reports = response.data || [];
+    }
+
+    // =====================================================
+    // LOAD ACKNOWLEDGMENTS
+    // =====================================================
+
+    const reportIds = reports.map(item => item.id);
+
+    let acknowledgments = [];
+
+    if (reportIds.length) {
+
+      const response = await db
+        .from("end_of_shift_report_acknowledgements")
+        .select(`
+          id,
+          report_id,
+          acknowledged_by,
+          acknowledged_by_name,
+          acknowledged_at
+        `)
+        .in("report_id", reportIds);
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      acknowledgments = response.data || [];
+    }
+
+    // Index acknowledgments by report ID.
+
+    const ackMap = new Map();
+
+    acknowledgments.forEach(item => {
+
+      const previous = ackMap.get(item.report_id);
+
+      if (
+        !previous ||
+        (
+          item.acknowledged_at &&
+          (
+            !previous.acknowledged_at ||
+            item.acknowledged_at >
+              previous.acknowledged_at
+          )
+        )
+      ) {
+        ackMap.set(item.report_id, item);
+      }
+
+    });
+
+    // =====================================================
+    // BUILD COMMON REPORT RECORDS
+    // =====================================================
+
+    let records = reports.map(report => {
+
+      const sourceShift =
+        shiftMap.get(report.shift_instance_id);
+
+      const ack = ackMap.get(report.id);
+
+      const isPublished =
+        report.published_at !== null;
+
+      const isAcknowledged =
+        Boolean(ack?.acknowledged_at);
+
+      return {
+        reportId: report.id,
+        shiftId: report.shift_instance_id,
+        date: sourceShift?.shift_date || "—",
+        shift: sourceShift?.shift_name || "—",
+        receiving:
+          report.receiving_shift_name || "—",
+        status: isPublished
+          ? "Published"
+          : report.status || "Draft",
+        handoffStatus:
+          sourceShift?.handoff_status || "—",
+        published:
+          displayTime(report.published_at),
+        publisher:
+          report.published_by_name || "—",
+        publisherId: report.published_by,
+        acknowledged:
+          displayTime(ack?.acknowledged_at),
+        acknowledgedBy:
+          ack?.acknowledged_by_name || "—",
+        acknowledgedById:
+          ack?.acknowledged_by || null,
+        isPublished,
+        isAcknowledged
+      };
+
+    });
+
+    // When an individual officer is selected,
+    // match publisher or acknowledging employee.
+    if (officer.value !== "all") {
+
+      records = records.filter(item =>
+        item.publisherId === officer.value ||
+        item.acknowledgedById === officer.value
+      );
+
+    }
+
+    // =====================================================
+    // 1. SHIFT HANDOFF LOOKUP
+    // =====================================================
+
+    if (type === "handoff_lookup") {
+
+      renderSummary([
+        {
+          label: "Handoff Reports",
+          value: records.length
+        },
+        {
+          label: "Published",
+          value: records.filter(
+            r => r.isPublished
+          ).length
+        },
+        {
+          label: "Acknowledged",
+          value: records.filter(
+            r => r.isAcknowledged
+          ).length
+        },
+        {
+          label: "Drafts",
+          value: records.filter(
+            r => !r.isPublished
+          ).length
+        }
+      ]);
+
+      renderTable(
+        [
+          { key: "date", label: "Shift Date" },
+          { key: "shift", label: "Outgoing Shift" },
+          { key: "receiving", label: "Receiving Shift" },
+          { key: "status", label: "Report Status" },
+          { key: "publisher", label: "Published By" },
+          { key: "published", label: "Published At" },
+          { key: "acknowledgedBy", label: "Acknowledged By" },
+          { key: "acknowledged", label: "Acknowledged At" }
+        ],
+        records
+      );
+
+      return;
+    }
+
+    // =====================================================
+    // 2. INCOMPLETE SHIFT HANDOFFS
+    // =====================================================
+
+    if (type === "incomplete_handoffs") {
+
+      // Published but not acknowledged is a definite
+      // outstanding acknowledgment.
+      //
+      // A draft from a prior shift date is shown
+      // separately as pending publication.
+      //
+      // Do not treat all not_started shift records
+      // as incomplete because some shifts may not
+      // have reached their handoff time.
+
+      const pending = records
+        .filter(item =>
+          (
+            item.isPublished &&
+            !item.isAcknowledged
+          ) ||
+          (
+            !item.isPublished &&
+            item.date < today
+          )
+        )
+        .map(item => ({
+          ...item,
+          requiredAction: item.isPublished
+            ? "Awaiting acknowledgment"
+            : "Draft — publication pending"
+        }));
+
+      renderSummary([
+        {
+          label: "Outstanding Handoffs",
+          value: pending.length
+        },
+        {
+          label: "Awaiting Acknowledgment",
+          value: pending.filter(
+            item => item.isPublished
+          ).length
+        },
+        {
+          label: "Prior-Date Drafts",
+          value: pending.filter(
+            item => !item.isPublished
+          ).length
+        }
+      ]);
+
+      renderTable(
+        [
+          { key: "date", label: "Shift Date" },
+          { key: "shift", label: "Outgoing Shift" },
+          { key: "receiving", label: "Receiving Shift" },
+          { key: "status", label: "Report Status" },
+          { key: "requiredAction", label: "Outstanding Action" },
+          { key: "publisher", label: "Published By" },
+          { key: "published", label: "Published At" }
+        ],
+        pending
+      );
+
+      return;
+    }
+
+    // =====================================================
+    // 3. HANDOFFS BY SHIFT
+    // =====================================================
+
+    if (type === "handoffs_by_shift") {
+
+      const grouped = new Map();
+
+      records.forEach(item => {
+
+        if (!grouped.has(item.shift)) {
+
+          grouped.set(item.shift, {
+            shift: item.shift,
+            reports: 0,
+            published: 0,
+            drafts: 0,
+            acknowledged: 0,
+            pendingAcknowledgment: 0
+          });
+
+        }
+
+        const group = grouped.get(item.shift);
+
+        group.reports++;
+
+        if (item.isPublished) {
+          group.published++;
+        } else {
+          group.drafts++;
+        }
+
+        if (item.isAcknowledged) {
+          group.acknowledged++;
+        }
+
+        if (
+          item.isPublished &&
+          !item.isAcknowledged
+        ) {
+          group.pendingAcknowledgment++;
+        }
+
+      });
+
+      const rows = Array.from(
+        grouped.values()
+      ).sort(
+        (a, b) =>
+          a.shift.localeCompare(b.shift)
+      );
+
+      renderSummary([
+        {
+          label: "Shifts Represented",
+          value: rows.length
+        },
+        {
+          label: "Total Reports",
+          value: records.length
+        },
+        {
+          label: "Published Reports",
+          value: records.filter(
+            r => r.isPublished
+          ).length
+        }
+      ]);
+
+      renderTable(
+        [
+          { key: "shift", label: "Shift" },
+          { key: "reports", label: "Total Reports" },
+          { key: "published", label: "Published" },
+          { key: "drafts", label: "Draft" },
+          { key: "acknowledged", label: "Acknowledged" },
+          {
+            key: "pendingAcknowledgment",
+            label: "Awaiting Acknowledgment"
+          }
+        ],
+        rows
+      );
+
+      return;
+    }
+
+    // =====================================================
+    // 4. HANDOFFS BY TEAM LEAD / SENIOR OFFICER
+    // =====================================================
+
+    if (type === "handoffs_by_leader") {
+
+      // These are the recorded publishing and
+      // acknowledging actors. Their leadership
+      // titles are not inferred from report names.
+
+      const leaders = new Map();
+
+      function addActivity(
+        userId,
+        name,
+        activity
+      ) {
+
+        if (!userId && !name) {
+          return;
+        }
+
+        const key = userId || `name:${name}`;
+
+        if (!leaders.has(key)) {
+
+          leaders.set(key, {
+            leader: name || "Unknown",
+            published: 0,
+            acknowledged: 0
+          });
+
+        }
+
+        const entry = leaders.get(key);
+
+        entry[activity]++;
+
+      }
+
+      records.forEach(item => {
+
+        if (item.isPublished) {
+          addActivity(
+            item.publisherId,
+            item.publisher,
+            "published"
+          );
+        }
+
+        if (item.isAcknowledged) {
+          addActivity(
+            item.acknowledgedById,
+            item.acknowledgedBy,
+            "acknowledged"
+          );
+        }
+
+      });
+
+      const rows = Array.from(
+        leaders.values()
+      ).sort(
+        (a, b) =>
+          (b.published + b.acknowledged) -
+          (a.published + a.acknowledged)
+      );
+
+      renderSummary([
+        {
+          label: "Recorded Participants",
+          value: rows.length
+        },
+        {
+          label: "Publication Actions",
+          value: rows.reduce(
+            (sum, r) => sum + r.published,
+            0
+          )
+        },
+        {
+          label: "Acknowledgment Actions",
+          value: rows.reduce(
+            (sum, r) => sum + r.acknowledged,
+            0
+          )
+        }
+      ]);
+
+      renderTable(
+        [
+          {
+            key: "leader",
+            label: "Recorded Employee"
+          },
+          {
+            key: "published",
+            label: "Reports Published"
+          },
+          {
+            key: "acknowledged",
+            label: "Reports Acknowledged"
+          }
+        ],
+        rows
+      );
+
+      return;
+    }
+
+    // =====================================================
+    // 5. CARRY-FORWARD ITEMS
+    // =====================================================
+
+    if (type === "carry_forward") {
+
+      const filteredReportIds =
+        records.map(item => item.reportId);
+
+      let items = [];
+
+      if (filteredReportIds.length) {
+
+        const response = await db
+          .from("end_of_shift_report_items")
+          .select(`
+            id,
+            report_id,
+            resolution_status,
+            is_carry_forward,
+            created_at
+          `)
+          .in("report_id", filteredReportIds)
+          .eq("is_carry_forward", true);
+
+        if (response.error) {
+          throw response.error;
+        }
+
+        items = response.data || [];
+      }
+
+      const reportMap = new Map(
+        records.map(item => [
+          item.reportId,
+          item
+        ])
+      );
+
+      const rows = items.map(item => {
+
+        const report =
+          reportMap.get(item.report_id);
+
+        return {
+          date: report?.date || "—",
+          shift: report?.shift || "—",
+          receiving: report?.receiving || "—",
+          status: item.resolution_status || "—",
+          publication:
+            report?.status || "—",
+          recorded:
+            displayTime(item.created_at),
+          reference: item.id
+        };
+
+      });
+
+      renderSummary([
+        {
+          label: "Carry-Forward Items",
+          value: rows.length
+        },
+        {
+          label: "Unresolved Items",
+          value: items.filter(item =>
+            item.resolution_status !== "resolved"
+          ).length
+        },
+        {
+          label: "Resolved Items",
+          value: items.filter(item =>
+            item.resolution_status === "resolved"
+          ).length
+        }
+      ]);
+
+      renderTable(
+        [
+          { key: "date", label: "Shift Date" },
+          { key: "shift", label: "Outgoing Shift" },
+          { key: "receiving", label: "Receiving Shift" },
+          { key: "status", label: "Resolution Status" },
+          { key: "publication", label: "Report Status" },
+          { key: "recorded", label: "Recorded At" },
+          { key: "reference", label: "Item Reference" }
+        ],
+        rows
+      );
+
+      return;
+    }
+
+  }
+
+  // =========================================================
   // GENERATE REPORT
   // =========================================================
 
@@ -2663,6 +3296,13 @@ async function loadReportingOfficers() {
 } else if (activeModule === "duty") {
 
   await generateDutyStationReport(
+    selectedReport,
+    range
+  );
+
+} else if (activeModule === "handoff") {
+
+  await generateShiftHandoffReport(
     selectedReport,
     range
   );
