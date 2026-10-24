@@ -1810,6 +1810,327 @@ async function loadReportingOfficers() {
     }
 
 
+    // =====================================================
+    // SAME DEVICE USED MULTIPLE DAYS
+    // SECURETRACK OP - DEVICE REPORTING
+    // =====================================================
+
+    if (type === "repeat_device_checkout") {
+
+      // Checkout transactions do not contain a
+      // verified shift assignment in this report.
+
+      if (shift.value !== "all") {
+        throw new Error(
+          "Select All Shifts for this report. " +
+          "Checkout records cannot currently be " +
+          "attributed reliably to individual shifts."
+        );
+      }
+
+      // Local date helper for distinct checkout days.
+
+      function checkoutDay(timestamp) {
+        const date = new Date(timestamp);
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1)
+          .padStart(2, "0");
+        const day = String(date.getDate())
+          .padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+      }
+
+      // Load all matching checkout transactions.
+      // Pagination prevents the Supabase default
+      // row limit from truncating larger reports.
+
+      const transactions = [];
+      const pageSize = 500;
+      let offset = 0;
+
+      while (true) {
+
+        const { data, error } = await db
+          .from("device_transactions")
+          .select(`
+            device_id,
+            employee_id,
+            occurred_at
+          `)
+          .eq("action", "checkout")
+          .gte("occurred_at", startISO)
+          .lte("occurred_at", endISO)
+          .order("occurred_at", {
+            ascending: true
+          })
+          .range(offset, offset + pageSize - 1);
+
+        if (error) {
+          throw error;
+        }
+
+        const page = data || [];
+
+        transactions.push(...page);
+
+        if (page.length < pageSize) {
+          break;
+        }
+
+        offset += pageSize;
+      }
+
+      // =================================================
+      // RESOLVE OFFICER FILTER
+      // =================================================
+
+      // The Reporting Center Officer dropdown uses
+      // profiles.id (auth user UUID).
+      //
+      // Device transactions use employees.id.
+      // Resolve that relationship through
+      // profiles.employee_id.
+
+      let selectedEmployeeId = null;
+
+      if (officer.value !== "all") {
+
+        const { data, error } = await db
+          .from("profiles")
+          .select("employee_id")
+          .eq("id", officer.value)
+          .maybeSingle();
+
+        if (error) {
+          throw error;
+        }
+
+        selectedEmployeeId = data?.employee_id;
+
+        if (!selectedEmployeeId) {
+
+          renderSummary([
+            {
+              label: "Devices Used Multiple Days",
+              value: 0
+            },
+            {
+              label: "Matching Checkouts",
+              value: 0
+            }
+          ]);
+
+          renderTable([
+            { key: "asset", label: "Device" },
+            { key: "days", label: "Different Days" },
+            { key: "checkouts", label: "Checkouts" },
+            { key: "first", label: "First Use" },
+            { key: "last", label: "Last Use" }
+          ], []);
+
+          return;
+        }
+      }
+
+      const filteredTransactions =
+        selectedEmployeeId
+          ? transactions.filter(item =>
+              item.employee_id === selectedEmployeeId
+            )
+          : transactions;
+
+      // =================================================
+      // GROUP BY DEVICE AND CALENDAR DAY
+      // =================================================
+
+      const deviceUsage = new Map();
+
+      filteredTransactions.forEach(item => {
+
+        if (
+          !item.device_id ||
+          !item.occurred_at
+        ) {
+          return;
+        }
+
+        if (!deviceUsage.has(item.device_id)) {
+
+          deviceUsage.set(item.device_id, {
+            deviceId: item.device_id,
+            days: new Set(),
+            checkouts: 0,
+            first: item.occurred_at,
+            last: item.occurred_at
+          });
+        }
+
+        const record =
+          deviceUsage.get(item.device_id);
+
+        record.days.add(
+          checkoutDay(item.occurred_at)
+        );
+
+        record.checkouts++;
+
+        if (item.occurred_at < record.first) {
+          record.first = item.occurred_at;
+        }
+
+        if (item.occurred_at > record.last) {
+          record.last = item.occurred_at;
+        }
+
+      });
+
+      // A device must have checkouts on at least
+      // two distinct dates to qualify.
+
+      const repeated = Array.from(
+        deviceUsage.values()
+      ).filter(item => item.days.size >= 2);
+
+      // =================================================
+      // LOAD DEVICE ASSET CODES
+      // =================================================
+
+      const deviceMap = new Map();
+
+      const deviceIds = repeated.map(
+        item => item.deviceId
+      );
+
+      for (let i = 0; i < deviceIds.length; i += 100) {
+
+        const batch = deviceIds.slice(i, i + 100);
+
+        const { data, error } = await db
+          .from("devices")
+          .select(`
+            id,
+            asset_code,
+            manufacturer,
+            model
+          `)
+          .in("id", batch);
+
+        if (error) {
+          throw error;
+        }
+
+        (data || []).forEach(device => {
+          deviceMap.set(device.id, device);
+        });
+      }
+
+      // =================================================
+      // BUILD REPORT
+      // =================================================
+
+      const rows = repeated.map(item => {
+
+        const device = deviceMap.get(item.deviceId);
+
+        return {
+          asset: device?.asset_code ||
+            "Unknown Device",
+
+          equipment: [
+            device?.manufacturer,
+            device?.model
+          ].filter(Boolean).join(" ") || "—",
+
+          days: item.days.size,
+
+          checkouts: item.checkouts,
+
+          dates: Array.from(item.days)
+            .sort()
+            .join(", "),
+
+          first: new Date(
+            item.first
+          ).toLocaleString(),
+
+          last: new Date(
+            item.last
+          ).toLocaleString()
+        };
+      });
+
+      rows.sort((a, b) =>
+        b.days - a.days ||
+        b.checkouts - a.checkouts ||
+        a.asset.localeCompare(b.asset)
+      );
+
+      // =================================================
+      // SUMMARY CARDS
+      // =================================================
+
+      renderSummary([
+        {
+          label: "Devices Used Multiple Days",
+          value: rows.length
+        },
+        {
+          label: "Total Repeat-Device Checkouts",
+          value: rows.reduce(
+            (sum, item) => sum + item.checkouts,
+            0
+          )
+        },
+        {
+          label: "Most Days Used",
+          value: rows.length
+            ? Math.max(
+                ...rows.map(item => item.days)
+              )
+            : 0
+        }
+      ]);
+
+      // =================================================
+      // TABLE
+      // =================================================
+
+      renderTable([
+        {
+          key: "asset",
+          label: "Device Asset Number"
+        },
+        {
+          key: "equipment",
+          label: "Equipment"
+        },
+        {
+          key: "days",
+          label: "Different Days Used"
+        },
+        {
+          key: "checkouts",
+          label: "Total Checkouts"
+        },
+        {
+          key: "dates",
+          label: "Checkout Dates"
+        },
+        {
+          key: "first",
+          label: "First Checkout"
+        },
+        {
+          key: "last",
+          label: "Last Checkout"
+        }
+      ], rows);
+
+      return;
+    }
+
     throw new Error(
       "This device report is being added in the next reporting module update."
     );
