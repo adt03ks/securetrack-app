@@ -1043,13 +1043,46 @@
                 Duty Station / Dispatch Unit
               </label>
 
-              <input
-                id="dispatchUnit"
-                type="text"
-                maxlength="180"
-                placeholder="Example: Dispatch, ED, Patrol"
-              >
+             <select id="dispatchUnit" name="dispatchUnit">
+  <option value="">Select duty station / dispatch unit</option>
 
+  <option value="SUPERVISOR">Supervisor</option>
+  <option value="HERMANN-PATROL">Hermann Patrol Officer</option>
+  <option value="HVI">HVI</option>
+  <option value="DISPATCH-2">Dispatch 2</option>
+  <option value="EMS-BAY">EMS Bay</option>
+  <option value="CODE-AGEL">Code Angel / Patrol / Breaks</option>
+  <option value="SAROFIM-PATROL">Sarofim Patrol Officer</option>
+  <option value="CULLEN-TRAFFIC">Cullen Traffic</option>
+  <option value="ED-PATROL-PRIMARY">Emergency Department Patrol</option>
+  <option value="WEAPONS-1">Weapons 1</option>
+  <option value="HVI-CULLEN">HVI/Cullen Pavilion Officer</option>
+  <option value="WEAPONS-2">Weapons 2</option>
+  <option value="DISPATCH-1">Dispatch 1</option>
+  <option value="HERMANN-PAVILION">Hermann Pavilion Officer</option>
+  <option value="JONES-PAVILION">Jones Pavilion Officer</option>
+  <option value="PROPERTY">Property Officer</option>
+  <option value="9-JONES">9 Jones</option>
+  <option value="ED-PATROL-SECONDARY">ED Patrol Officer</option>
+
+  <option value="SPECIAL-DUTY">Special Duty</option>
+  <option value="OTHER">Other</option>
+</select>
+
+<div id="dispatchUnitOtherWrap" hidden style="margin-top: 12px;">
+  <label for="dispatchUnitOther">
+    Please specify duty station / dispatch unit *
+  </label>
+
+  <input
+    id="dispatchUnitOther"
+    name="dispatchUnitOther"
+    type="text"
+    maxlength="180"
+    placeholder="Enter duty station / dispatch unit"
+    disabled
+  >
+</div>
             </div>
 
 
