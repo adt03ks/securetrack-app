@@ -54,9 +54,11 @@ function card(m){const b=node('button','module');b.type='button';b.setAttribute(
 
   const photo = node("div", "photo");
 
-  const imagePath =
-    TRAINING_MODULE_IMAGES[module.id] ||
-    "/assets/securetrack-operations-training.png";
+ 
+const imagePath =
+  TRAINING_MODULE_IMAGES[m.id] ||
+  "/assets/securetrack-operations-training.png";
+
 
   photo.style.backgroundImage =
     `url("${imagePath}")`;
@@ -90,7 +92,7 @@ async function loadReport(){const {data:scope,error:scopeError}=await db.from('s
     [id, String(arr.length),top.length?Math.round(top.reduce((a,b)=>a+b,0)/top.length)+'%':'Not assessed'].forEach(v=>row.append(node('td','',v)));table.append(row)}
   $('report').replaceChildren(table);$('report-wrap').classList.remove('hidden');
 }
-async function init(){if(!db){showNotice('Connect this page to your existing authenticated Supabase client (window.stSupabase).');return}
+async function init(){if(!db){showNotice('SecureTrack authentication is unavailable. Please return to the Operations Hub and sign in.');return}
   const {data:{user:current},error:authError}=await db.auth.getUser();if(authError||!current){showNotice('Please sign in through the Operations Hub before opening training.');return}user=current;
   const [{data:role,error:roleErr},{data:mods,error:modErr},{data:history,error:historyErr}]=await Promise.all([
     db.rpc('st_training_role'),db.from('st_training_modules').select('id,title,description,image_url,lesson_url,passing_score,sort_order').order('sort_order'),db.from('st_training_attempts').select('module_id,score').eq('user_id',user.id)]);
