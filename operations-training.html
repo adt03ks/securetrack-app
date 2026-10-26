@@ -74,80 +74,52 @@
 
     /* FAINT SECURETRACK LOGO */
 
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
 
-      z-index: 0;
-      pointer-events: none;
+  z-index: 0;
+  pointer-events: none;
 
-      background-image:
-        url("/assets/securetrack-logo.png");
+  background-image:
+    url("/assets/securetrack-logo.png");
 
-      background-position: center center;
-      background-repeat: no-repeat;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
 
-      background-size:
-        min(75vw, 800px) auto;
+  /* Make background visible */
+  opacity: 0.20;
 
-      opacity: 0.055;
+  /* Soft, professional appearance */
+  filter: blur(2px);
+}
 
-      filter: blur(3px);
 
-      transform: scale(1.05);
-    }
 
-    /* TECHNOLOGY GRID AND AMBIENT LIGHT */
+This uses the entire technology-themed image as the page background rather than treating it as a small centered logo.
+Step 3 — Adjust the technology overlay
+Your existing body::after adds another grid pattern over the image. Because yo
 
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
+   
+/* SOFT OVERLAY TO PRESERVE READABILITY */
 
-      z-index: 0;
-      pointer-events: none;
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
 
-      background-image:
+  z-index: 0;
+  pointer-events: none;
 
-        radial-gradient(
-          circle at 50% 43%,
-          rgba(214, 170, 112, 0.12),
-          transparent 45%
-        ),
+  background:
+    linear-gradient(
+      rgba(245, 242, 236, 0.72),
+      rgba(245, 242, 236, 0.78)
+    );
+}
 
-        radial-gradient(
-          circle at 15% 25%,
-          rgba(44, 74, 93, 0.08),
-          transparent 36%
-        ),
-
-        radial-gradient(
-          circle at 85% 78%,
-          rgba(201, 166, 105, 0.09),
-          transparent 38%
-        ),
-
-        linear-gradient(
-          rgba(40, 52, 65, 0.06) 1px,
-          transparent 1px
-        ),
-
-        linear-gradient(
-          90deg,
-          rgba(40, 52, 65, 0.06) 1px,
-          transparent 1px
-        );
-
-      background-size:
-        auto,
-        auto,
-        auto,
-        48px 48px,
-        48px 48px;
-
-      opacity: 0.48;
-    }
 
     /* ==========================================
        3. MAIN PAGE CONTAINER
