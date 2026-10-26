@@ -1,86 +1,1026 @@
+
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Operations Training | SecureTrack OP</title>
-  
-<link
-  rel="icon"
-  type="image/png"
-  href="/assets/favicon.png"
->
-<link
-  rel="apple-touch-icon"
-  href="/assets/favicon.png"
->
+<html lang="en">
 
-<style>
-:root{--gold:#c9a669;--ink:#141719;--muted:#626a73;--paper:#faf9f6;--border:#e8e2d8;--good:#208364}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Arial,sans-serif}.shell{max-width:1200px;margin:auto;padding:28px 20px 80px}.top{background:#111819;color:#fff;border-radius:17px;padding:25px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px}.top h1{font-size:26px;margin:8px 0}.top p{color:#dfd8c9;margin:0}.eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:750}.return{border:1px solid #685c46;background:transparent;color:white;padding:10px 14px;border-radius:8px;text-decoration:none}.stats{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin:20px 0}.panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}.kicker{color:var(--muted);font-size:13px;margin-bottom:10px}.value{font-size:28px;font-weight:800}.segments{display:flex;gap:5px;margin:14px 0}.segment{height:14px;background:#e6e5e2;border-radius:4px;flex:1}.segment.done{background:var(--good)}.segment.partial{background:#d8a63e}.muted{color:var(--muted);font-size:13px}.heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 14px}.heading h2{font-size:20px;margin:0}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}.module{min-height:280px;border:0;border-radius:13px;overflow:hidden;text-align:left;position:relative;color:#fff;cursor:pointer;box-shadow:0 7px 18px #0c171a17;background:linear-gradient(135deg,#425865,#131b20)}.module::before{content:'';position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.9),rgba(0,0,0,.2) 80%);z-index:1}
-.module .photo {
-  position: absolute;
-  inset: 0;
+<head>
+  <meta charset="utf-8">
 
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
 
-  transition: transform .25s ease;
-}
-.module:hover .photo{transform:scale(1.05)}.module-content{position:absolute;z-index:2;bottom:0;left:0;right:0;padding:17px}.module h3{font-size:18px;margin:8px 0 5px}.module p{color:#ebe7df;font-size:12px;line-height:1.4;margin:0 0 13px}.pill{display:inline-flex;align-items:center;background:#fff;color:#1a2225;border-radius:6px;padding:5px 8px;font-size:11px;font-weight:750}.pill.good{background:#deeee7;color:#146448}.pill.warn{background:#fff1d0;color:#876117}.label{color:#f2cc8d;font-size:11px;font-weight:700;letter-spacing:.4px}.message{background:#fff5e3;color:#684819;border:1px solid #f4dfb1;padding:14px;border-radius:10px;margin:20px 0}.hidden{display:none!important}.screen{margin-top:22px}.action{background:#141b1d;color:white;border:0;border-radius:8px;padding:11px 16px;cursor:pointer;font-weight:700}.outline{background:white;color:#182326;border:1px solid #dad5cb}.question{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;margin:14px 0}.question legend{font-weight:700;margin-bottom:10px}.question label{display:block;padding:8px;cursor:pointer}.question input{margin-right:9px}.result{font-size:20px;font-weight:800;margin:15px 0}.table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden}.table td,.table th{text-align:left;padding:12px;border-bottom:1px solid var(--border);font-size:13px}.table th{background:#efebe3}.flex{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.footer{color:#687079;font-size:12px;margin-top:35px}
-/* TABLET LAYOUT */
-@media (max-width: 800px) {
-  .cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  <meta
+    name="theme-color"
+    content="#10191e"
+  >
 
-  .stats {
-    grid-template-columns: 1fr 1fr;
-  }
+  <title>
+    Operations Training | SecureTrack OP
+  </title>
 
-  .stats .progress {
-    grid-column: 1 / -1;
-  }
-}
+  <!-- ==========================================
+       SECURETRACK OP FAVICON
+       ========================================== -->
 
-/* MOBILE LAYOUT */
-@media (max-width: 520px) {
-  .cards {
-    grid-template-columns: 1fr;
-  }
+  <link
+    rel="icon"
+    type="image/png"
+    href="/assets/favicon.png"
+  >
 
-  .module {
-    min-height: 260px;
-  }
+  <link
+    rel="apple-touch-icon"
+    href="/assets/favicon.png"
+  >
 
-  .stats {
-    grid-template-columns: 1fr;
-  }
+  <style>
 
-  .stats .progress {
-    grid-column: auto;
-  }
+    /* ==========================================
+       1. SECURETRACK BRAND VARIABLES
+       ========================================== */
 
-  .top {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-{
-.cards {
-  display: grid;
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-  gap: 20px;
-}
-.stats{grid-template-columns:1fr}.stats .progress{grid-column:auto}.top{flex-direction:column;align-items:flex-start}}
-</style></head><body data-page="training">
-<main class="shell">
-<header class="top"><div><span class="eyebrow">SecureTrack OP · Learning Center</span><h1>Operations Training</h1><p>Build confidence. Learn the tools. Track your progress.</p></div><a class="return" href="/hub.html">← Operations Hub</a></header>
-<div id="notice" class="message hidden" role="alert"></div>
-<section class="stats" aria-label="My progress"><div class="panel progress"><div class="kicker">Your training progress</div><strong id="progress-summary">Loading…</strong><div id="segments" class="segments" aria-label="Module completion"></div><div id="progress-pct" class="muted"></div></div><div class="panel"><div class="kicker">Average best quiz score</div><div id="avg" class="value">—</div></div><div class="panel"><div class="kicker">My training role</div><div id="role" class="value" style="font-size:19px">—</div></div></section>
-<section id="list-screen"><div class="heading"><h2>My Learning Modules</h2><span id="count" class="muted"></span></div><div id="modules" class="cards"></div><section id="report-wrap" class="hidden"><div class="heading"><h2>Team Training Report</h2></div><p class="muted">Displays employees explicitly assigned to you by the existing management reporting structure. No quiz approval is required.</p><div id="report"></div></section></section>
-<section id="detail-screen" class="screen hidden"><button class="action outline" id="back">← All modules</button><h2 id="detail-title"></h2><p id="detail-desc" class="muted"></p><div id="lesson"></div><div id="quiz"></div><div id="outcome" role="status"></div></section>
-<p class="footer">PULSE OJT is a separate program and will be available soon. Quiz results are recorded automatically; retakes remain open.</p>
-</main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/config.js" defer></script>
-<script src="/hub-auth.js" defer></script>
-<script src="/operations-training.js" defer></script></body></html>
+    :root {
+      --gold: #c9a669;
+      --ink: #141719;
+      --muted: #626a73;
+      --paper: #f5f2ec;
+      --border: #e8e2d8;
+      --good: #208364;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    /* ==========================================
+       2. PAGE BACKGROUND
+       ========================================== */
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+
+      background: var(--paper);
+      color: var(--ink);
+
+      font-family:
+        Inter,
+        Arial,
+        sans-serif;
+    }
+
+    /* FAINT SECURETRACK LOGO */
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+
+      z-index: 0;
+      pointer-events: none;
+
+      background-image:
+        url("/assets/securetrack-logo.png");
+
+      background-position: center center;
+      background-repeat: no-repeat;
+
+      background-size:
+        min(75vw, 800px) auto;
+
+      opacity: 0.055;
+
+      filter: blur(3px);
+
+      transform: scale(1.05);
+    }
+
+    /* TECHNOLOGY GRID AND AMBIENT LIGHT */
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+
+      z-index: 0;
+      pointer-events: none;
+
+      background-image:
+
+        radial-gradient(
+          circle at 50% 43%,
+          rgba(214, 170, 112, 0.12),
+          transparent 45%
+        ),
+
+        radial-gradient(
+          circle at 15% 25%,
+          rgba(44, 74, 93, 0.08),
+          transparent 36%
+        ),
+
+        radial-gradient(
+          circle at 85% 78%,
+          rgba(201, 166, 105, 0.09),
+          transparent 38%
+        ),
+
+        linear-gradient(
+          rgba(40, 52, 65, 0.06) 1px,
+          transparent 1px
+        ),
+
+        linear-gradient(
+          90deg,
+          rgba(40, 52, 65, 0.06) 1px,
+          transparent 1px
+        );
+
+      background-size:
+        auto,
+        auto,
+        auto,
+        48px 48px,
+        48px 48px;
+
+      opacity: 0.48;
+    }
+
+    /* ==========================================
+       3. MAIN PAGE CONTAINER
+       ========================================== */
+
+    .shell {
+      max-width: 1200px;
+      margin: auto;
+
+      padding:
+        28px 20px 80px;
+
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ==========================================
+       4. TRAINING HEADER
+       ========================================== */
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 20px;
+
+      padding: 25px 28px;
+
+      border-radius: 17px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #081117 0%,
+          #101c22 60%,
+          #13232b 100%
+        );
+
+      color: #ffffff;
+
+      box-shadow:
+        0 14px 32px
+        rgba(10, 18, 24, 0.15);
+
+      position: relative;
+      z-index: 1;
+    }
+
+    .top h1 {
+      font-size: 26px;
+      margin: 8px 0;
+      line-height: 1.2;
+    }
+
+    .top p {
+      color: #dfd8c9;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 2px;
+
+      text-transform: uppercase;
+      color: var(--gold);
+
+      font-weight: 750;
+    }
+
+    .return {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      flex-shrink: 0;
+
+      border:
+        1px solid #685c46;
+
+      background: transparent;
+      color: #ffffff;
+
+      padding: 10px 14px;
+      border-radius: 8px;
+
+      text-decoration: none;
+
+      font-size: 14px;
+
+      transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+    }
+
+    .return:hover {
+      background:
+        rgba(201, 166, 105, 0.12);
+
+      border-color: var(--gold);
+    }
+
+    /* ==========================================
+       5. TRAINING PROGRESS PANELS
+       ========================================== */
+
+    .stats {
+      display: grid;
+
+      grid-template-columns:
+        2fr 1fr 1fr;
+
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .panel {
+      background:
+        rgba(255, 255, 255, 0.89);
+
+      border:
+        1px solid
+        rgba(222, 214, 201, 0.85);
+
+      border-radius: 14px;
+      padding: 18px;
+
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+
+      box-shadow:
+        0 4px 15px
+        rgba(25, 35, 40, 0.025);
+    }
+
+    .kicker {
+      color: var(--muted);
+
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .value {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    /* ==========================================
+       6. SEGMENTED PROGRESS BAR
+       ========================================== */
+
+    .segments {
+      display: flex;
+
+      gap: 5px;
+      margin: 14px 0;
+    }
+
+    .segment {
+      height: 14px;
+      background: #e6e5e2;
+
+      border-radius: 4px;
+      flex: 1;
+    }
+
+    .segment.done {
+      background: var(--good);
+    }
+
+    .segment.partial {
+      background: #d8a63e;
+    }
+
+    .muted {
+      color: var(--muted);
+
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* ==========================================
+       7. MODULE SECTION HEADING
+       ========================================== */
+
+    .heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      flex-wrap: wrap;
+      gap: 10px;
+
+      margin: 26px 0 14px;
+    }
+
+    .heading h2 {
+      font-size: 20px;
+      margin: 0;
+
+      color: #172126;
+    }
+
+    /* ==========================================
+       8. TRAINING MODULE GRID
+       ========================================== */
+
+    .cards {
+      display: grid;
+
+      grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+      gap: 17px;
+    }
+
+    /* ==========================================
+       9. MODULE IMAGE CARDS
+       ========================================== */
+
+    .module {
+      position: relative;
+
+      min-height: 280px;
+      min-width: 0;
+
+      padding: 0;
+      border: 0;
+
+      border-radius: 13px;
+
+      overflow: hidden;
+      text-align: left;
+
+      color: #ffffff;
+      cursor: pointer;
+
+      background:
+        linear-gradient(
+          135deg,
+          #425865,
+          #131b20
+        );
+
+      box-shadow:
+        0 10px 24px
+        rgba(12, 23, 26, 0.14);
+
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .module:hover {
+      transform: translateY(-3px);
+
+      box-shadow:
+        0 15px 32px
+        rgba(12, 23, 26, 0.20);
+    }
+
+    .module:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    /* DARK OVERLAY FOR READABLE TEXT */
+
+    .module::before {
+      content: "";
+
+      position: absolute;
+      inset: 0;
+
+      z-index: 1;
+
+      background:
+        linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.92) 0%,
+          rgba(0, 0, 0, 0.60) 30%,
+          rgba(0, 0, 0, 0.08) 80%
+        );
+
+      pointer-events: none;
+    }
+
+    /* PHOTOGRAPHIC BACKGROUND */
+
+    .module .photo {
+      position: absolute;
+      inset: 0;
+
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+
+      transition:
+        transform 0.25s ease;
+    }
+
+    .module:hover .photo {
+      transform: scale(1.05);
+    }
+
+    /* MODULE TEXT */
+
+    .module-content {
+      position: absolute;
+
+      z-index: 2;
+
+      bottom: 0;
+      left: 0;
+      right: 0;
+
+      padding: 17px;
+    }
+
+    .module h3 {
+      font-size: 18px;
+      line-height: 1.25;
+
+      margin: 8px 0 5px;
+
+      color: #ffffff;
+    }
+
+    .module p {
+      color: #ebe7df;
+
+      font-size: 12px;
+      line-height: 1.4;
+
+      margin: 0 0 13px;
+    }
+
+    .label {
+      color: #f2cc8d;
+
+      font-size: 11px;
+      font-weight: 700;
+
+      letter-spacing: 0.4px;
+    }
+
+    /* ==========================================
+       10. MODULE STATUS LABELS
+       ========================================== */
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+
+      background: #ffffff;
+      color: #1a2225;
+
+      border-radius: 6px;
+
+      padding: 5px 8px;
+
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .pill.good {
+      background: #deeee7;
+      color: #146448;
+    }
+
+    .pill.warn {
+      background: #fff1d0;
+      color: #876117;
+    }
+
+    /* ==========================================
+       11. MESSAGES
+       ========================================== */
+
+    .message {
+      background: #fff5e3;
+      color: #684819;
+
+      border:
+        1px solid #f4dfb1;
+
+      padding: 14px;
+      border-radius: 10px;
+
+      margin: 20px 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ==========================================
+       12. TRAINING LESSON SCREEN
+       ========================================== */
+
+    .screen {
+      margin-top: 22px;
+    }
+
+    .action {
+      background: #141b1d;
+      color: #ffffff;
+
+      border: 0;
+      border-radius: 8px;
+
+      padding: 11px 16px;
+
+      cursor: pointer;
+      font-weight: 700;
+
+      transition:
+        background 0.2s ease;
+    }
+
+    .action:hover {
+      background: #29383c;
+    }
+
+    .outline {
+      background: #ffffff;
+      color: #182326;
+
+      border:
+        1px solid #dad5cb;
+    }
+
+    .outline:hover {
+      background: #f4f0e8;
+    }
+
+    /* ==========================================
+       13. QUIZ QUESTIONS
+       ========================================== */
+
+    .question {
+      background:
+        rgba(255, 255, 255, 0.94);
+
+      border:
+        1px solid var(--border);
+
+      border-radius: 10px;
+      padding: 18px;
+
+      margin: 14px 0;
+    }
+
+    .question legend {
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .question label {
+      display: block;
+
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .question input {
+      margin-right: 9px;
+    }
+
+    .result {
+      font-size: 20px;
+      font-weight: 800;
+
+      margin: 15px 0;
+    }
+
+    /* ==========================================
+       14. MANAGER TRAINING REPORT
+       ========================================== */
+
+    .table {
+      width: 100%;
+
+      border-collapse: collapse;
+
+      background:
+        rgba(255, 255, 255, 0.95);
+
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .table td,
+    .table th {
+      text-align: left;
+      padding: 12px;
+
+      border-bottom:
+        1px solid var(--border);
+
+      font-size: 13px;
+    }
+
+    .table th {
+      background: #efebe3;
+    }
+
+    .flex {
+      display: flex;
+
+      gap: 12px;
+      align-items: center;
+
+      flex-wrap: wrap;
+    }
+
+    /* ==========================================
+       15. PAGE FOOTER
+       ========================================== */
+
+    .footer {
+      color: #687079;
+
+      font-size: 12px;
+      line-height: 1.6;
+
+      margin-top: 35px;
+    }
+
+    /* ==========================================
+       16. TABLET LAYOUT
+       ========================================== */
+
+    @media (max-width: 800px) {
+
+      .cards {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+
+      .stats {
+        grid-template-columns:
+          1fr 1fr;
+      }
+
+      .stats .progress {
+        grid-column: 1 / -1;
+      }
+
+      .module {
+        min-height: 270px;
+      }
+
+    }
+
+    /* ==========================================
+       17. MOBILE LAYOUT
+       ========================================== */
+
+    @media (max-width: 520px) {
+
+      .shell {
+        padding:
+          16px 12px 55px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+
+        gap: 15px;
+      }
+
+      .module {
+        min-height: 260px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .stats .progress {
+        grid-column: auto;
+      }
+
+      .top {
+        flex-direction: column;
+        align-items: flex-start;
+
+        padding: 22px 18px;
+      }
+
+      .top h1 {
+        font-size: 23px;
+      }
+
+      .return {
+        width: 100%;
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .heading h2 {
+        font-size: 19px;
+      }
+
+      body::before {
+        background-size:
+          92vw auto;
+
+        opacity: 0.045;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body data-page="training">
+
+  <main class="shell">
+
+    <!-- ==========================================
+         PAGE HEADER
+         ========================================== -->
+
+    <header class="top">
+
+      <div>
+
+        <span class="eyebrow">
+          SecureTrack OP · Learning Center
+        </span>
+
+        <h1>
+          Operations Training
+        </h1>
+
+        <p>
+          Build confidence. Learn the tools.
+          Track your progress.
+        </p>
+
+      </div>
+
+      <a
+        class="return"
+        href="/hub.html"
+      >
+        ← Operations Hub
+      </a>
+
+    </header>
+
+    <!-- ==========================================
+         NOTICES AND ERRORS
+         ========================================== -->
+
+    <div
+      id="notice"
+      class="message hidden"
+      role="alert"
+    ></div>
+
+    <!-- ==========================================
+         TRAINING PROGRESS DASHBOARD
+         ========================================== -->
+
+    <section
+      class="stats"
+      aria-label="My progress"
+    >
+
+      <!-- PROGRESS BAR -->
+
+      <div class="panel progress">
+
+        <div class="kicker">
+          Your training progress
+        </div>
+
+        <strong id="progress-summary">
+          Loading…
+        </strong>
+
+        <div
+          id="segments"
+          class="segments"
+          aria-label="Module completion"
+        ></div>
+
+        <div
+          id="progress-pct"
+          class="muted"
+        ></div>
+
+      </div>
+
+      <!-- AVERAGE QUIZ SCORE -->
+
+      <div class="panel">
+
+        <div class="kicker">
+          Average best quiz score
+        </div>
+
+        <div
+          id="avg"
+          class="value"
+        >
+          —
+        </div>
+
+      </div>
+
+      <!-- USER TRAINING ROLE -->
+
+      <div class="panel">
+
+        <div class="kicker">
+          My training role
+        </div>
+
+        <div
+          id="role"
+          class="value"
+          style="font-size:19px"
+        >
+          —
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==========================================
+         LEARNING MODULE LIST
+         ========================================== -->
+
+    <section id="list-screen">
+
+      <div class="heading">
+
+        <h2>
+          My Learning Modules
+        </h2>
+
+        <span
+          id="count"
+          class="muted"
+        ></span>
+
+      </div>
+
+      <!-- JAVASCRIPT GENERATES MODULE CARDS HERE -->
+
+      <div
+        id="modules"
+        class="cards"
+      ></div>
+
+      <!-- ========================================
+           MANAGER TRAINING REPORT
+           ======================================== -->
+
+      <section
+        id="report-wrap"
+        class="hidden"
+      >
+
+        <div class="heading">
+
+          <h2>
+            Team Training Report
+          </h2>
+
+        </div>
+
+        <p class="muted">
+          Displays employees explicitly assigned
+          to you by the existing management
+          reporting structure. No quiz approval
+          is required.
+        </p>
+
+        <div id="report"></div>
+
+      </section>
+
+    </section>
+
+    <!-- ==========================================
+         INDIVIDUAL TRAINING MODULE
+         ========================================== -->
+
+    <section
+      id="detail-screen"
+      class="screen hidden"
+    >
+
+      <button
+        class="action outline"
+        id="back"
+        type="button"
+      >
+        ← All modules
+      </button>
+
+      <h2 id="detail-title"></h2>
+
+      <p
+        id="detail-desc"
+        class="muted"
+      ></p>
+
+      <!-- TRAINING MEDIA AND INSTRUCTIONS -->
+
+      <div id="lesson"></div>
+
+      <!-- QUIZ CONTENT -->
+
+      <div id="quiz"></div>
+
+      <!-- QUIZ RESULTS -->
+
+      <div
+        id="outcome"
+        role="status"
+      ></div>
+
+    </section>
+
+    <!-- ==========================================
+         PAGE FOOTER
+         ========================================== -->
+
+    <p class="footer">
+      PULSE OJT is a separate program and
+      will be available soon.
+
+      Quiz results are recorded automatically;
+      retakes remain open.
+    </p>
+
+  </main>
+
+  <!-- ==========================================
+       APPLICATION DEPENDENCIES
+       ========================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    defer
+  ></script>
+
+  <script
+    src="/config.js"
+    defer
+  ></script>
+
+  <script
+    src="/hub-auth.js"
+    defer
+  ></script>
+
+  <script
+    src="/operations-training.js"
+    defer
+  ></script>
+
+</body>
+
+</html>
