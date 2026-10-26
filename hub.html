@@ -194,6 +194,151 @@
       }
 
     }
+
+
+/* ============================================
+   SECURETRACK OP TRAINING CARDS
+   ============================================ */
+
+.st-training-section {
+  margin-top: 38px;
+  margin-bottom: 30px;
+}
+
+.st-training-section[hidden] {
+  display: none !important;
+}
+
+.st-training-heading {
+  margin-bottom: 20px;
+}
+
+.st-training-heading h2 {
+  margin: 8px 0;
+  font-size: 25px;
+}
+
+.st-training-heading p {
+  color: #aeb4b7;
+  font-size: 14px;
+}
+
+.st-training-eyebrow {
+  color: #d3ad74;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.st-training-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.st-training-card {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 250px;
+  overflow: hidden;
+  border-radius: 17px;
+  text-decoration: none;
+  background:
+    linear-gradient(
+      0deg,
+      rgba(0,0,0,.94),
+      rgba(0,0,0,.18)
+    ),
+    url("/assets/hub-device-management.png")
+    center / cover no-repeat,
+    #182227;
+  border: 1px solid rgba(211,173,116,.25);
+  transition: transform .2s ease, border-color .2s ease;
+}
+
+.st-training-card:hover {
+  transform: translateY(-3px);
+  border-color: #d3ad74;
+}
+
+.st-pulse-card {
+  cursor: default;
+  background:
+    linear-gradient(
+      0deg,
+      rgba(0,0,0,.92),
+      rgba(0,0,0,.34)
+    ),
+    url("/assets/hub-security-alerts.png")
+    center / cover no-repeat,
+    #182227;
+}
+
+.st-pulse-card:hover {
+  transform: none;
+}
+
+.st-training-overlay {
+  position: relative;
+  z-index: 1;
+  padding: 26px;
+  color: #ffffff;
+  width: 100%;
+}
+
+.st-training-label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  color: #f0c994;
+}
+
+.st-training-overlay h3 {
+  font-size: 23px;
+  margin: 10px 0;
+  color: #ffffff;
+}
+
+.st-training-overlay p {
+  color: #e8e8e8;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 380px;
+}
+
+.st-training-button {
+  display: inline-flex;
+  margin-top: 15px;
+  padding: 10px 15px;
+  border-radius: 7px;
+  background: #d3ad74;
+  color: #111819;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.st-training-button.coming-soon {
+  background: rgba(255,255,255,.18);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,.25);
+}
+
+@media (max-width: 700px) {
+  .st-training-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .st-training-card {
+    min-height: 210px;
+  }
+
+  .st-training-overlay {
+    padding: 20px;
+  }
+}
+
+    
   </style>
 </head>
 
@@ -660,6 +805,81 @@
       </a>
 
     </section>
+
+<!-- ============================================
+     SECURETRACK OP TRAINING & DEVELOPMENT
+     ============================================ -->
+
+<section
+  id="trainingCards"
+  class="st-training-section"
+  hidden
+>
+  <div class="st-training-heading">
+    <div>
+      <span class="st-training-eyebrow">
+        TRAINING & DEVELOPMENT
+      </span>
+
+      <h2>SecureTrack Learning Center</h2>
+
+      <p>
+        Expand your knowledge and build confidence
+        using SecureTrack OP.
+      </p>
+    </div>
+  </div>
+
+  <div class="st-training-grid">
+
+    <!-- OPERATIONS TRAINING -->
+
+    <a
+      href="operations-training.html"
+      class="st-training-card"
+      data-training="operations"
+    >
+      <div class="st-training-overlay">
+        <span class="st-training-label">
+          OPERATIONS TRAINING
+        </span>
+
+        <h3>SecureTrack OP Training</h3>
+
+        <p>
+          Learn your available tools and monitor
+          your training progress.
+        </p>
+
+        <span class="st-training-button">
+          ACCESS TRAINING →
+        </span>
+      </div>
+    </a>
+
+    <!-- PULSE OJT COMING SOON -->
+
+    <div
+      class="st-training-card st-pulse-card"
+      aria-label="PULSE OJT Training coming soon"
+    >
+      <div class="st-training-overlay">
+        <span class="st-training-label">
+          PROFESSIONAL DEVELOPMENT
+        </span>
+
+        <h3>PULSE OJT</h3>
+
+        <p>Every Step, Every Shift.</p>
+
+        <span class="st-training-button coming-soon">
+          COMING SOON
+        </span>
+      </div>
+    </div>
+
+  </div>
+</section>
 
     <!-- HUB ERRORS -->
 
