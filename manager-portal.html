@@ -618,6 +618,52 @@
 
       </a>
 
+<!-- ==========================================
+     SECURETRACK TRAINING ADMINISTRATION
+     ADMINISTRATOR ACCESS ONLY
+     ========================================== -->
+
+<a
+  id="trainingAdminCard"
+  class="portal-card priority"
+  href="training-admin.html"
+  hidden
+>
+  <div class="portal-image-wrap">
+    <img
+      class="portal-logo"
+      src="/assets/manager-training-guide.png"
+      alt=""
+      loading="lazy"
+    >
+  </div>
+
+  <div class="portal-card-body">
+
+    <div class="eyebrow">
+      Training Development
+    </div>
+
+    <h2>Training Administration</h2>
+
+    <p>
+      Create and manage SecureTrack OP training
+      modules, upload instructional videos and
+      screenshots, organize lessons, and create
+      mastery assessments.
+    </p>
+
+    <span class="portal-badge">
+      Administrator Only
+    </span>
+
+    <span class="portal-arrow">
+      Open Training Content Builder →
+    </span>
+
+  </div>
+</a>
+
       <!-- ==========================================
            MANAGER PORTAL TRAINING GUIDE
            ========================================== -->
@@ -704,6 +750,37 @@
 
   if (!manager) {
     return;
+  }
+
+  // TRAINING ADMINISTRATION CARD
+  // UI visibility only. Database permissions
+  // must independently enforce admin access.
+
+  const trainingAdminCard =
+    document.getElementById("trainingAdminCard");
+
+  if (trainingAdminCard && STM.db) {
+    trainingAdminCard.hidden = true;
+
+    try {
+      const { data: isAdmin, error } =
+        await STM.db.rpc(
+          "st_training_can_access",
+          {
+            roles: ["admin"]
+          }
+        );
+
+      if (error) throw error;
+
+      trainingAdminCard.hidden = isAdmin !== true;
+
+    } catch (error) {
+      console.warn(
+        "Training administration access check failed:",
+        error
+      );
+    }
   }
 
   // Initialize Notification Center
