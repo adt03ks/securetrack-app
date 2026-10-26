@@ -83,6 +83,28 @@
   };
 
   const MODULE_ACCESS = {
+    
+    // OPERATIONS TRAINING — ALL AUTHENTICATED ROLES
+    training: [
+      "officer",
+      "senior_officer",
+      "team_lead",
+      "manager",
+      "director",
+      "admin"
+    ],
+
+    // PULSE OJT — COMING SOON CARD
+    pulseTraining: [
+      "officer",
+      "senior_officer",
+      "team_lead",
+      "manager",
+      "director",
+      "admin"
+    ],
+
+
     devices: [
       "officer",
       "senior_officer",
