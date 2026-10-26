@@ -5,6 +5,35 @@ const db=window.SECURETRACK_DB;
 // Uses the same authenticated Supabase client as the existing Operations Hub.
 const $=id=>document.getElementById(id);
 const modulesEl=$('modules');let modules=[], attempts=[],user=null;
+
+/* ============================================
+   SECURETRACK OP
+   OPERATIONS TRAINING MODULE BACKGROUNDS
+   ============================================ */
+
+const TRAINING_MODULE_IMAGES = {
+  equipment:
+    "/assets/training-equipment-management.png",
+
+  alerts:
+    "/assets/training-security-alerts-reporting.png",
+
+  property:
+    "/assets/training-property-documentation.png",
+
+  overtime:
+    "/assets/training-overtime-requests.png",
+
+  notifications:
+    "/assets/training-notification-hub.png",
+
+  handoff:
+    "/assets/training-end-of-shift-handoff.png",
+
+  assignments:
+    "/assets/training-duty-station-assignment.png"
+};
+
 const ratings=s=>s>=95?'Mastery':s>=85?'Proficient':s>=75?'Competent':s>=60?'Developing':'Needs Improvement';
 const nice=s=>s.replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
 function node(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x}
@@ -18,7 +47,24 @@ function progress(){let done=modules.filter(m=>best(m.id)!==null&&best(m.id)>=m.
   $('count').textContent=modules.length+' assigned modules';
 }
 function card(m){const b=node('button','module');b.type='button';b.setAttribute('aria-label',`Open ${m.title}`);
-  const photo=node('div','photo');if(m.image_url&&/^https:\/\//i.test(m.image_url))photo.style.backgroundImage=`url("${m.image_url.replaceAll('"','%22')}")`;b.append(photo);
+  
+  // ==========================================
+  // LOAD THE CORRECT TRAINING CARD IMAGE
+  // ==========================================
+
+  const photo = node("div", "photo");
+
+  const imagePath =
+    TRAINING_MODULE_IMAGES[module.id] ||
+    "/assets/securetrack-operations-training.png";
+
+  photo.style.backgroundImage =
+    `url("${imagePath}")`;
+
+  photo.style.backgroundSize = "cover";
+  photo.style.backgroundPosition = "center";
+  photo.style.backgroundRepeat = "no-repeat";
+b.append(photo);
   const c=node('div','module-content'),s=best(m.id);c.append(node('span','label','OPERATIONS TRAINING'),node('h3','',m.title),node('p','',m.description));
   const badge=node('span','pill'+(s!==null?(s>=m.passing_score?' good':' warn'):''),s===null?'Begin training':`${s}% · ${ratings(s)}`);c.append(badge);b.append(c);b.addEventListener('click',()=>openModule(m));return b}
 function render(){progress();modulesEl.replaceChildren(...modules.map(card))}
