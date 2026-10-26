@@ -882,6 +882,15 @@
         moduleGrid.hidden = false;
       }
 
+      // Display training after user validation.
+      const trainingCards =
+        document.getElementById("trainingCards");
+
+      if (trainingCards) {
+        trainingCards.hidden = false;
+      }
+
+      
       // =======================================
       // UNIVERSAL NOTIFICATION CENTER
       // ALL AUTHENTICATED ROLES
