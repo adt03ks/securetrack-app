@@ -1,0 +1,311 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Training Administration | SecureTrack OP</title>
+<link rel="icon" href="/assets/favicon.png">
+
+<style>
+:root {
+  font-family: Arial,sans-serif;
+  color:#f7f3ea;
+  background:#090d11;
+}
+* {box-sizing:border-box}
+body {margin:0}
+main {
+  max-width:1100px;
+  margin:auto;
+  padding:28px 20px 80px;
+}
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  border-bottom:1px solid #394049;
+  padding-bottom:18px;
+}
+h1 {margin:8px 0}
+a {color:#f2c68b}
+p,.hint {
+  color:#b4bec8;
+  line-height:1.5;
+}
+.eyebrow {
+  font-size:12px;
+  letter-spacing:2px;
+  color:#e2af70;
+  font-weight:700;
+}
+.box {
+  background:#131a21;
+  border:1px solid #35414b;
+  border-radius:14px;
+  padding:18px;
+  margin:18px 0;
+}
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+.field {
+  display:block;
+  margin:10px 0 5px;
+  font-weight:bold;
+  font-size:13px;
+}
+input,select,textarea {
+  width:100%;
+  padding:11px;
+  border:1px solid #495866;
+  border-radius:8px;
+  background:#090f15;
+  color:white;
+}
+textarea {min-height:95px}
+button {
+  border:0;
+  border-radius:8px;
+  padding:11px 15px;
+  background:#d6aa70;
+  color:#121212;
+  font-weight:800;
+  cursor:pointer;
+  margin:5px 7px 5px 0;
+}
+button.secondary {
+  background:#25323c;
+  color:white;
+}
+button.danger {
+  background:#713b3b;
+  color:white;
+}
+button:disabled {
+  opacity:.5;
+  cursor:not-allowed;
+}
+.item {
+  padding:13px;
+  border:1px solid #394751;
+  border-radius:10px;
+  margin:10px 0;
+}
+.status {
+  border-radius:8px;
+  padding:12px;
+  margin:12px 0;
+  background:#192d29;
+  color:#bcebd9;
+  white-space:pre-wrap;
+}
+.status.error {
+  background:#42252a;
+  color:#ffd2d6;
+}
+.hidden {display:none!important}
+.meta {
+  font-size:12px;
+  color:#a7b6c5;
+}
+img.preview,video.preview {
+  width:100%;
+  max-height:250px;
+  object-fit:contain;
+  background:#000;
+  border-radius:8px;
+  margin:8px 0;
+}
+hr {
+  border:0;
+  border-top:1px solid #37434d;
+  margin:20px 0;
+}
+@media(max-width:720px) {
+  .grid {grid-template-columns:1fr}
+  header {
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+</style>
+</head>
+
+<body data-securetrack-roles="admin">
+
+<main>
+  <header>
+    <div>
+      <div class="eyebrow">
+        SECURETRACK OP · ADMINISTRATOR ONLY
+      </div>
+      <h1>Training Content Builder</h1>
+      <p>
+        Manage Operations Training lessons,
+        media, and quiz questions.
+      </p>
+    </div>
+
+    <a href="/manager-portal.html">
+      ← Manager Portal
+    </a>
+  </header>
+
+  <div id="status" class="status">
+    Verifying administrator access…
+  </div>
+
+  <div id="app" class="hidden">
+
+    <section class="box">
+      <label class="field" for="module">
+        Select training module
+      </label>
+      <select id="module"></select>
+
+      <div class="grid">
+        <div>
+          <label class="field" for="modtitle">
+            Module title
+          </label>
+          <input id="modtitle">
+        </div>
+        <div>
+          <label class="field" for="passing">
+            Passing score (%)
+          </label>
+          <input id="passing" type="number"
+                 min="1" max="100">
+        </div>
+      </div>
+
+      <label class="field" for="moddesc">
+        Description
+      </label>
+      <textarea id="moddesc"></textarea>
+
+      <label>
+        <input id="published"
+               type="checkbox"
+               style="width:auto">
+        Published and visible to eligible learners
+      </label>
+
+      <p class="hint">
+        Leave unpublished until all lessons and
+        quiz questions are ready.
+      </p>
+
+      <button id="save-module">
+        Save module settings
+      </button>
+    </section>
+
+    <div class="grid">
+
+      <section class="box">
+        <h2>Lesson Steps</h2>
+
+        <p class="hint">
+          Each step may include instructions and
+          an uploaded screenshot or video.
+        </p>
+
+        <div id="lessons"></div>
+        <hr>
+
+        <h3 id="lesson-form-title">
+          Add lesson step
+        </h3>
+
+        <label class="field" for="lesson-title">
+          Step title
+        </label>
+        <input id="lesson-title">
+
+        <label class="field" for="lesson-body">
+          Instructions
+        </label>
+        <textarea id="lesson-body"></textarea>
+
+        <label class="field" for="lesson-position">
+          Display order
+        </label>
+        <input id="lesson-position"
+               type="number"
+               value="10" min="1">
+
+        <label class="field" for="lesson-file">
+          Image or video (optional)
+        </label>
+        <input
+          id="lesson-file"
+          type="file"
+          accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"
+        >
+
+        <p class="hint">
+          Max 50 MB. Files are stored privately.
+        </p>
+
+        <button id="save-lesson">
+          Save lesson step
+        </button>
+
+        <button id="clear-lesson" class="secondary">
+          Clear form
+        </button>
+      </section>
+
+      <section class="box">
+        <h2>Quiz Questions</h2>
+
+        <p class="hint">
+          Students can retake quizzes.
+          Correct choices are stored in a
+          restricted database schema.
+        </p>
+
+        <div id="questions"></div>
+        <hr>
+
+        <h3>Add quiz question</h3>
+
+        <label class="field" for="question-prompt">
+          Question
+        </label>
+        <textarea id="question-prompt"></textarea>
+
+        <div id="choice-fields"></div>
+
+        <label class="field" for="correct-index">
+          Correct answer
+        </label>
+
+        <select id="correct-index">
+          <option value="0">Choice A</option>
+          <option value="1">Choice B</option>
+          <option value="2">Choice C</option>
+          <option value="3">Choice D</option>
+        </select>
+
+        <button id="save-question">
+          Add question
+        </button>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/config.js"></script>
+<script src="/secure-page.js"></script>
+<script src="/training-admin.js"></script>
+
+</body>
+</html>
