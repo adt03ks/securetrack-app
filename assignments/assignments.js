@@ -695,34 +695,20 @@ function operationallyConfirmed() {
   // Falls back to saved database attendance.
   // ==========================================================
 
-  function attendanceMarkedPresent(
-    userId
-  ) {
 
-    const checkbox =
-      el.attendanceList
-        ?.querySelector(
-          `input[type="checkbox"][data-user-id="${userId}"]`
-        );
+function attendanceMarkedPresent(userId) {
+  if (!currentShift || !userId) {
+    return false;
+  }
 
+  // Saved attendance is authoritative.
+  // Do not allow an unsaved checkbox change
+  // to override the database record.
+  const savedRecord = attendanceFor(userId);
 
-    if (
-      checkbox
-    ) {
+  return savedRecord?.is_present === true;
+}
 
-      return checkbox.checked;
-
-    }
-
-
-    return Boolean(
-      attendanceFor(
-        userId
-      )
-        ?.is_present
-    );
-
-  } 
 
   function nameForUser(
     userId
@@ -2001,138 +1987,58 @@ function renderSupervisorPanel() {
 
 
 
-  const seniorIds = [
 
-    leadershipConfig
-      ?.senior_officer_1_user_id,
+const seniorIds = [
+  leadershipConfig?.senior_officer_1_user_id,
+  leadershipConfig?.senior_officer_2_user_id
+].filter(Boolean);
 
-    leadershipConfig
-      ?.senior_officer_2_user_id
+let savedPresentCount = 0;
 
-  ].filter(Boolean);
+for (const userId of [...new Set(seniorIds)]) {
+  const savedPresent =
+    attendanceMarkedPresent(userId);
 
+  const officerName =
+    nameForUser(userId);
 
+  const option =
+    document.createElement("option");
 
-  let savedPresentCount =
-    0;
+  option.value = userId;
 
+  // Only saved, present Senior Officers
+  // can be selected.
+  option.disabled = !savedPresent;
 
-
-  for (const userId of seniorIds) {
-
-    const livePresent =
-      attendanceMarkedPresent(
-        userId
-      );
-
-
-    const savedPresent =
-      Boolean(
-        attendanceFor(
-          userId
-        )
-          ?.is_present
-      );
-
-
-    const officerName =
-      nameForUser(
-        userId
-      );
-
-
-    const option =
-      document.createElement(
-        "option"
-      );
-
-
-    option.value =
-      userId;
-
-
-    /*
-      Both configured Seniors remain visible.
-
-      They are only selectable after being marked
-      present on the attendance screen.
-    */
-
-    option.disabled =
-      !livePresent;
-
-
-    if (!livePresent) {
-
-      option.textContent =
-        `${officerName} — Not Marked Present`;
-
-    }
-
-    else if (!savedPresent) {
-
-      option.textContent =
-        `${officerName} — Save Attendance First`;
-
-    }
-
-    else {
-
-      option.textContent =
-        officerName;
-
-
-      savedPresentCount +=
-        1;
-
-    }
-
-
-    el.actingSupervisorSelect
-      .appendChild(
-        option
-      );
-
-  }
-
-
-
-  /*
-    If the leadership configuration itself is missing,
-    make that obvious rather than silently showing
-    an empty dropdown.
-  */
-
-  if (!seniorIds.length) {
-
-    const option =
-      document.createElement(
-        "option"
-      );
-
-
-    option.value =
-      "";
-
-
-    option.disabled =
-      true;
-
-
+  if (savedPresent) {
+    option.textContent = officerName;
+    savedPresentCount += 1;
+  } else {
     option.textContent =
-      "No Senior Officers configured for this shift";
-
-
-    el.actingSupervisorSelect
-      .appendChild(
-        option
-      );
-
+      `${officerName} — Not Marked Present`;
   }
 
+  el.actingSupervisorSelect.appendChild(option);
+}
 
+if (!seniorIds.length) {
+  const option =
+    document.createElement("option");
 
-  el.saveActingSupervisorButton.disabled =
+  option.value = "";
+  option.disabled = true;
+
+  option.textContent =
+    "No Senior Officers configured for this shift";
+
+  el.actingSupervisorSelect.appendChild(option);
+}
+
+el.saveActingSupervisorButton.disabled =
+  !savedPresentCount ||
+  !hasAnyRole(LEADERSHIP);
+
 
     !savedPresentCount
 
