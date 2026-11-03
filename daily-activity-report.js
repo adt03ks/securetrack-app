@@ -9552,6 +9552,17 @@ async function saveConfidentialEntry() {
 
 }
   
+  // Equipment assignment: server-authorized shift list controls button visibility.
+  if (shiftInstanceId) {
+    db.rpc('st_supervisor_equipment_shifts').then(({data,error}) => {
+      const link = document.getElementById('seaDailyLink');
+      if (!error && link && Array.isArray(data) && data.some(s => s.id === shiftInstanceId)) {
+        link.href = 'supervisor-equipment-assignment.html?shiftInstanceId=' + encodeURIComponent(shiftInstanceId);
+        link.hidden = false;
+      }
+    }).catch(console.warn);
+  }
+
   // ==========================================================
   // RETURN LINK
   // ==========================================================

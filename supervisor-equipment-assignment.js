@@ -1,9 +1,11 @@
 (async () => {
  'use strict';
  const $ = id => document.getElementById(id);
- const STM = window.SecureTrackManager;
- // Existing manager helper is used only for its DB client; authorization is enforced by Supabase RPC.
- const db = STM?.db || window.SECURETRACK_DB;
+ const auth = await new Promise(resolve => {
+  if (window.SecureTrackAuth) return resolve(window.SecureTrackAuth);
+  document.addEventListener('securetrack:authorized', event => resolve(event.detail || window.SecureTrackAuth), {once:true});
+ });
+ const db = auth?.db;
  const selected = new Set();
  let context = null;
  const message = (s, error=false) => { $('seaMessage').textContent=s; $('seaMessage').classList.toggle('sea-error',error); };
@@ -47,10 +49,12 @@
   }catch(e){message(e.message||'Equipment assignment failed. Nothing was issued.',true);update();}
  });
  try{
-  if(!db)throw Error('SecureTrack database client not available. Confirm manager-common.js exposes SecureTrackManager.db.');
+  if(!db)throw Error('SecureTrack authentication is unavailable.');
   const shifts=await rpc('st_supervisor_equipment_shifts');const select=$('seaShift');select.replaceChildren(option('','Select a published shift'));
   for(const shift of shifts||[])select.appendChild(option(shift.id,`${shift.name} · ${shift.date}`));
-  if(shifts?.length===1){select.value=shifts[0].id;await loadShift();}
-  if(!shifts?.length)message('No published shift assigned to your account for today.');
+  const requested = new URLSearchParams(location.search).get('shiftInstanceId');
+  if(requested && (shifts||[]).some(s=>s.id===requested)){select.value=requested;await loadShift();}
+  else if(shifts?.length===1){select.value=shifts[0].id;await loadShift();}
+  if(!shifts?.length)message('No authorized published shift found for today.');
  }catch(e){message(e.message||'Unable to load assigned shifts.',true);}
 })();
