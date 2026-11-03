@@ -31,11 +31,11 @@
   </div>
 
   <div>
-    <div class="wordmark">
+    <div "wordmark">
       <span>Secure</span><span>Track</span>
     </div>
 
-    <div class="tagline">
+    <div "tagline">
       Asset Accountability & Device Verification
     </div>
   </div>
@@ -44,7 +44,7 @@
   <!-- OPERATIONS HUB RETURN LINK -->
 
   <a
-    class="back-link"
+    "back-link"
     href="hub.html"
     style="margin-left:auto;"
   >
@@ -53,12 +53,12 @@
 
 </header>
 
-    <section class="panel">
-      <div class="panel-head">
-        <div class="eyebrow">Secure device session</div>
+    <section "panel">
+      <div "panel-head">
+        <div "eyebrow">Secure device session</div>
         <h1>Ready to verify.</h1>
-        <p class="subtle">Ready to verify your device. Tap or scan your device, or enter your device serial number to get started.</p>
-        <div class="status-strip"><span class="status-dot"></span><span id="statusText">Locating device…</span></div>
+        <p "subtle">Ready to verify your device. Tap or scan your device, or enter your device serial number to get started.</p>
+        <div "status-strip"><span "status-dot"></span><span id="statusText">Locating device…</span></div>
       </div>
 
 <!-- =========================================================
@@ -67,13 +67,13 @@
 
 <section
   id="deviceIdentificationSection"
-  class="device-identification"
+  "device-identification"
   hidden
 >
 
-  <div class="identification-heading">
+  <div "identification-heading">
 
-    <div class="eyebrow">
+    <div "eyebrow">
       Step 1
     </div>
 
@@ -81,7 +81,7 @@
       Identify Your Device
     </h2>
 
-    <p class="subtle">
+    <p "subtle">
       Scan the SecureTrack QR code,
       tap the NFC tag, or enter the
       device serial number manually.
@@ -90,20 +90,20 @@
   </div>
 
 
-  <div class="identify-grid">
+  <div "identify-grid">
 
 
     <!-- =========================================
          QR CODE
          ========================================= -->
 
-    <article class="identify-card">
+    <article "identify-card">
 
-      <div class="identify-icon">
+      <div "identify-icon">
         ▦
       </div>
 
-      <div class="eyebrow">
+      <div "eyebrow">
         Camera
       </div>
 
@@ -119,7 +119,7 @@
 
       <button
         id="scanQrButton"
-        class="identify-button"
+        "identify-button"
         type="button"
       >
         Open Camera
@@ -132,13 +132,13 @@
          NFC
          ========================================= -->
 
-    <article class="identify-card">
+    <article "identify-card">
 
-      <div class="identify-icon">
+      <div "identify-icon">
         ◉
       </div>
 
-      <div class="eyebrow">
+      <div "eyebrow">
         Contactless
       </div>
 
@@ -152,7 +152,7 @@
         The device record will open automatically.
       </p>
 
-      <div class="nfc-ready">
+      <div "nfc-ready">
         NFC READY
       </div>
 
@@ -163,13 +163,13 @@
          SERIAL NUMBER
          ========================================= -->
 
-    <article class="identify-card">
+    <article "identify-card">
 
-      <div class="identify-icon">
+      <div "identify-icon">
         #
       </div>
 
-      <div class="eyebrow">
+      <div "eyebrow">
         Manual Entry
       </div>
 
@@ -184,7 +184,7 @@
 
       <form
         id="serialLookupForm"
-        class="serial-lookup-form"
+        "serial-lookup-form"
       >
 
         <label for="serialNumberInput">
@@ -203,7 +203,7 @@
 
         <button
           id="serialLookupButton"
-          class="identify-button"
+          "identify-button"
           type="submit"
         >
           Find Device
@@ -222,15 +222,15 @@
 
   <section
     id="qrScannerPanel"
-    class="qr-scanner-panel"
+    "qr-scanner-panel"
     hidden
   >
 
-    <div class="qr-scanner-head">
+    <div "qr-scanner-head">
 
       <div>
 
-        <div class="eyebrow">
+        <div "eyebrow">
           SecureTrack QR Scanner
         </div>
 
@@ -242,7 +242,7 @@
 
       <button
         id="closeQrScannerButton"
-        class="back-link"
+        "back-link"
         type="button"
       >
         Close Camera
@@ -257,46 +257,46 @@
 
   <div
     id="deviceIdentificationResult"
-    class="result"
+    "result"
   ></div>
 
 </section>
       
       <div
   id="deviceWorkflowSection"
-  class="verify-section"
+  "verify-section"
 >
-        <div id="demoBanner" class="demo-banner">Prototype mode: update <strong>config.js</strong> with Supabase credentials and set demoMode to false for live records.</div>
-        <div class="verify-grid">
-          <article class="device-card">
-            <div class="device-image-wrap"><img id="deviceImage" src="assets/device-placeholder.svg" alt="Scanned equipment"></div>
-            <div class="device-meta">
-              <div class="eyebrow">Scanned device</div>
-              <div class="device-name" id="assetCode">Loading…</div>
-              <div class="device-model" id="deviceModel">Loading model…</div>
-              <span class="device-code">Token: <span id="tokenDisplay" style="margin-left:5px"></span></span>
+        <div id="demoBanner" "demo-banner">Prototype mode: update <strong>config.js</strong> with Supabase credentials and set demoMode to false for live records.</div>
+        <div "verify-grid">
+          <article "device-card">
+            <div "device-image-wrap"><img id="deviceImage" src="assets/device-placeholder.svg" alt="Scanned equipment"></div>
+            <div "device-meta">
+              <div "eyebrow">Scanned device</div>
+              <div "device-name" id="assetCode">Loading…</div>
+              <div "device-model" id="deviceModel">Loading model…</div>
+              <span "device-code">Token: <span id="tokenDisplay" style="margin-left:5px"></span></span>
             </div>
           </article>
 
-          <article class="verify-card">
-            <div class="eyebrow">Step 1</div>
+          <article "verify-card">
+            <div "eyebrow">Step 1</div>
             <h2>Verify the device</h2>
-            <p class="subtle">Confirm this is the equipment you intended to scan before creating an accountability record.</p>
-            <button class="verify-btn" id="verifyBtn">Verify Device</button>
-            <div class="verify-note"><span>🔒</span><span>Checkout, inspection, and issue reporting remain disabled until verification succeeds.</span></div>
-            <div id="errorBox" class="result"></div>
+            <p "subtle">Confirm this is the equipment you intended to scan before creating an accountability record.</p>
+            <button "verify-btn" id="verifyBtn">Verify Device</button>
+            <div "verify-note"><span>🔒</span><span>Checkout, inspection, and issue reporting remain disabled until verification succeeds.</span></div>
+            <div id="errorBox" "result"></div>
           </article>
         </div>
       </div>
 
      <div
   id="deviceActionsSection"
-  class="actions"
+  "actions"
 >
-        <div class="actions-title">
+        <div "actions-title">
 
   <div>
-    <div class="eyebrow">Step 2</div>
+    <div "eyebrow">Step 2</div>
     <h2 style="margin:5px 0 0">
       Choose an action
     </h2>
@@ -304,7 +304,7 @@
 
  <button
   id="changeDeviceAction"
-  class="back-link"
+  "back-link"
   type="button"
   hidden
 >
@@ -372,7 +372,7 @@
 
     <span class="lock-pill">LOCKED</span>
   </a>
-<!-- 4. SUPERVISOR EQUIPMENT ASSIGNMENT -->
+<!-- SUPERVISOR EQUIPMENT ASSIGNMENT -->
 <a
   id="supervisorEquipmentAction"
   class="action-card"
@@ -384,9 +384,8 @@
   <div class="action-copy">
     <h3>Assign Equipment to Officer</h3>
     <p>
-      Assign multiple pieces of available equipment
-      across different categories to officers
-      confirmed present on duty.
+      Assign available equipment to officers
+      currently on duty.
     </p>
   </div>
 
