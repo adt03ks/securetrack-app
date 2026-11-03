@@ -2238,6 +2238,7 @@ el.saveActingSupervisorButton.disabled =
   // ==========================================================
 
   function renderAssignments() {
+    queueMicrotask(refreshEquipmentAssignmentShortcut);
 
     el.assignmentBody.innerHTML =
       "";
@@ -7440,6 +7441,21 @@ el.dailyActivityButton.addEventListener(
   );
 
 
+
+  // Equipment assignment shortcut: only after saved attendance and generated stations.
+  function refreshEquipmentAssignmentShortcut() {
+    const wrap = document.getElementById('seaDutyLinkWrap');
+    const link = document.getElementById('seaDutyLink');
+    if (!wrap || !link) return;
+    const ready = Boolean(currentShift && currentShift.status === 'published' &&
+      attendance.some(row => row.is_present === true) &&
+      assignments.length > 0 &&
+      (isManagement() || isCurrentShiftLead()));
+    wrap.hidden = !ready;
+    if (ready) link.href = '../supervisor-equipment-assignment.html?shiftInstanceId=' + encodeURIComponent(currentShift.id);
+  }
+  document.addEventListener('click', () => setTimeout(refreshEquipmentAssignmentShortcut, 250));
+  refreshEquipmentAssignmentShortcut();
 
   // ----------------------------------------------------------
   // Generate
