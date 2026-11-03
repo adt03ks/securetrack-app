@@ -1,404 +1,657 @@
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
   <meta name="theme-color" content="#080a0c">
-   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
 
-<link rel="icon" type="image/png" sizes="32x32"
-      href="/assets/favicon-32x32.png">
-
-<link rel="icon" type="image/png" sizes="16x16"
-      href="/assets/favicon-16x16.png">
-
-<link rel="apple-touch-icon" sizes="180x180"
-      href="/assets/apple-touch-icon.png">
   <title>SecureTrack | Device Verification</title>
+
   <link
-  rel="icon"
-  type="image/png"
-  href="/assets/favicon.png"
->
+    rel="icon"
+    type="image/png"
+    href="/assets/favicon.png"
+  >
+
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="32x32"
+    href="/assets/favicon-32x32.png"
+  >
+
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="16x16"
+    href="/assets/favicon-16x16.png"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    sizes="180x180"
+    href="/assets/apple-touch-icon.png"
+  >
+
   <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* Preserve HTML visibility controls */
+    [hidden] {
+      display: none !important;
+    }
+
+    /* Supervisor assignment card */
+    #supervisorEquipmentAction:not([hidden]) {
+      display: flex;
+    }
+  </style>
 </head>
-<body data-securetrack-roles="officer,director,senior_officer,team_lead,manager,admin">
-  <main class="shell">
-    <header class="brandbar">
 
-  <div class="logo-mark" aria-hidden="true">
-    <span class="logo-lock"></span>
-  </div>
-
-  <div>
-    <div "wordmark">
-      <span>Secure</span><span>Track</span>
-    </div>
-
-    <div "tagline">
-      Asset Accountability & Device Verification
-    </div>
-  </div>
-
-
-  <!-- OPERATIONS HUB RETURN LINK -->
-
-  <a
-    "back-link"
-    href="hub.html"
-    style="margin-left:auto;"
-  >
-    ← Operations Hub
-  </a>
-
-</header>
-
-    <section "panel">
-      <div "panel-head">
-        <div "eyebrow">Secure device session</div>
-        <h1>Ready to verify.</h1>
-        <p "subtle">Ready to verify your device. Tap or scan your device, or enter your device serial number to get started.</p>
-        <div "status-strip"><span "status-dot"></span><span id="statusText">Locating device…</span></div>
-      </div>
-
-<!-- =========================================================
-     DEVICE IDENTIFICATION
-     ========================================================= -->
-
-<section
-  id="deviceIdentificationSection"
-  "device-identification"
-  hidden
+<body
+  data-securetrack-roles="officer,senior_officer,team_lead,manager,director,admin"
 >
 
-  <div "identification-heading">
+<main class="shell">
 
-    <div "eyebrow">
-      Step 1
+  <!-- ==========================================
+       SECURETRACK HEADER
+       ========================================== -->
+
+  <header class="brandbar">
+
+    <div class="logo-mark" aria-hidden="true">
+      <span class="logo-lock"></span>
     </div>
 
-    <h2>
-      Identify Your Device
-    </h2>
+    <div>
 
-    <p "subtle">
-      Scan the SecureTrack QR code,
-      tap the NFC tag, or enter the
-      device serial number manually.
-    </p>
-
-  </div>
-
-
-  <div "identify-grid">
-
-
-    <!-- =========================================
-         QR CODE
-         ========================================= -->
-
-    <article "identify-card">
-
-      <div "identify-icon">
-        ▦
+      <div class="wordmark">
+        <span>Secure</span><span>Track</span>
       </div>
 
-      <div "eyebrow">
-        Camera
+      <div class="tagline">
+        Asset Accountability &amp; Device Verification
       </div>
 
-      <h3>
-        Scan QR Code
-      </h3>
+    </div>
 
-      <p>
-        Use this phone or tablet's camera
-        to scan the SecureTrack QR code
-        attached to the Taser.
+    <a
+      class="back-link"
+      href="hub.html"
+      style="margin-left:auto;"
+    >
+      ← Operations Hub
+    </a>
+
+  </header>
+
+
+  <!-- ==========================================
+       MAIN DEVICE PANEL
+       ========================================== -->
+
+  <section class="panel">
+
+    <div class="panel-head">
+
+      <div class="eyebrow">
+        Secure device session
+      </div>
+
+      <h1>Ready to verify.</h1>
+
+      <p class="subtle">
+        Ready to verify your device. Tap or scan your
+        device, or enter your device serial number
+        to get started.
       </p>
 
-      <button
-        id="scanQrButton"
-        "identify-button"
-        type="button"
-      >
-        Open Camera
-      </button>
+      <div class="status-strip">
 
-    </article>
+        <span class="status-dot"></span>
 
+        <span id="statusText">
+          Locating device…
+        </span>
 
-    <!-- =========================================
-         NFC
-         ========================================= -->
-
-    <article "identify-card">
-
-      <div "identify-icon">
-        ◉
       </div>
 
-      <div "eyebrow">
-        Contactless
-      </div>
-
-      <h3>
-        Tap NFC Tag
-      </h3>
-
-      <p>
-        Hold your phone near the SecureTrack
-        NFC tag attached to the Taser.
-        The device record will open automatically.
-      </p>
-
-      <div "nfc-ready">
-        NFC READY
-      </div>
-
-    </article>
+    </div>
 
 
-    <!-- =========================================
-         SERIAL NUMBER
-         ========================================= -->
+    <!-- ========================================
+         DEVICE IDENTIFICATION
+         ======================================== -->
 
-    <article "identify-card">
+    <section
+      id="deviceIdentificationSection"
+      class="device-identification"
+      hidden
+    >
 
-      <div "identify-icon">
-        #
-      </div>
+      <div class="identification-heading">
 
-      <div "eyebrow">
-        Manual Entry
-      </div>
-
-      <h3>
-        Enter Serial Number
-      </h3>
-
-      <p>
-        Enter the manufacturer's complete
-        serial number to locate the device.
-      </p>
-
-      <form
-        id="serialLookupForm"
-        "serial-lookup-form"
-      >
-
-        <label for="serialNumberInput">
-          Serial Number
-        </label>
-
-        <input
-          id="serialNumberInput"
-          type="text"
-          autocomplete="off"
-          autocapitalize="characters"
-          spellcheck="false"
-          placeholder="Example: X4001MD6D"
-          required
-        >
-
-        <button
-          id="serialLookupButton"
-          "identify-button"
-          type="submit"
-        >
-          Find Device
-        </button>
-
-      </form>
-
-    </article>
-
-  </div>
-
-
-  <!-- =========================================
-       QR CAMERA
-       ========================================= -->
-
-  <section
-    id="qrScannerPanel"
-    "qr-scanner-panel"
-    hidden
-  >
-
-    <div "qr-scanner-head">
-
-      <div>
-
-        <div "eyebrow">
-          SecureTrack QR Scanner
+        <div class="eyebrow">
+          Step 1
         </div>
 
-        <h3>
-          Point the camera at the device QR code.
-        </h3>
+        <h2>
+          Identify Your Device
+        </h2>
+
+        <p class="subtle">
+          Scan the SecureTrack QR code,
+          tap the NFC tag, or enter the
+          device serial number manually.
+        </p>
 
       </div>
 
-      <button
-        id="closeQrScannerButton"
-        "back-link"
-        type="button"
+
+      <div class="identify-grid">
+
+        <!-- QR CODE -->
+
+        <article class="identify-card">
+
+          <div class="identify-icon">
+            ▦
+          </div>
+
+          <div class="eyebrow">
+            Camera
+          </div>
+
+          <h3>
+            Scan QR Code
+          </h3>
+
+          <p>
+            Use this phone or tablet's camera
+            to scan the SecureTrack QR code
+            attached to the device.
+          </p>
+
+          <button
+            id="scanQrButton"
+            class="identify-button"
+            type="button"
+          >
+            Open Camera
+          </button>
+
+        </article>
+
+
+        <!-- NFC -->
+
+        <article class="identify-card">
+
+          <div class="identify-icon">
+            ◉
+          </div>
+
+          <div class="eyebrow">
+            Contactless
+          </div>
+
+          <h3>
+            Tap NFC Tag
+          </h3>
+
+          <p>
+            Hold your phone near the SecureTrack
+            NFC tag attached to the device.
+            The device record will open automatically
+            when supported.
+          </p>
+
+          <div class="nfc-ready">
+            NFC READY
+          </div>
+
+        </article>
+
+
+        <!-- SERIAL NUMBER -->
+
+        <article class="identify-card">
+
+          <div class="identify-icon">
+            #
+          </div>
+
+          <div class="eyebrow">
+            Manual Entry
+          </div>
+
+          <h3>
+            Enter Serial Number
+          </h3>
+
+          <p>
+            Enter the manufacturer's complete
+            serial number to locate the device.
+          </p>
+
+          <form
+            id="serialLookupForm"
+            class="serial-lookup-form"
+          >
+
+            <label for="serialNumberInput">
+              Serial Number
+            </label>
+
+            <input
+              id="serialNumberInput"
+              type="text"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              placeholder="Example: X4001MD6D"
+              required
+            >
+
+            <button
+              id="serialLookupButton"
+              class="identify-button"
+              type="submit"
+            >
+              Find Device
+            </button>
+
+          </form>
+
+        </article>
+
+      </div>
+
+
+      <!-- QR CAMERA -->
+
+      <section
+        id="qrScannerPanel"
+        class="qr-scanner-panel"
+        hidden
       >
-        Close Camera
-      </button>
+
+        <div class="qr-scanner-head">
+
+          <div>
+
+            <div class="eyebrow">
+              SecureTrack QR Scanner
+            </div>
+
+            <h3>
+              Point the camera at the device QR code.
+            </h3>
+
+          </div>
+
+          <button
+            id="closeQrScannerButton"
+            class="back-link"
+            type="button"
+          >
+            Close Camera
+          </button>
+
+        </div>
+
+        <div id="qrReader"></div>
+
+      </section>
+
+
+      <div
+        id="deviceIdentificationResult"
+        class="result"
+      ></div>
+
+    </section>
+
+
+    <!-- ========================================
+         DEVICE VERIFICATION
+         ======================================== -->
+
+    <div
+      id="deviceWorkflowSection"
+      class="verify-section"
+    >
+
+      <div
+        id="demoBanner"
+        class="demo-banner"
+      >
+        Prototype mode: update
+        <strong>config.js</strong>
+        with Supabase credentials and set
+        demoMode to false for live records.
+      </div>
+
+
+      <div class="verify-grid">
+
+        <!-- DEVICE INFORMATION -->
+
+        <article class="device-card">
+
+          <div class="device-image-wrap">
+
+            <img
+              id="deviceImage"
+              src="assets/device-placeholder.svg"
+              alt="Scanned equipment"
+            >
+
+          </div>
+
+          <div class="device-meta">
+
+            <div class="eyebrow">
+              Scanned device
+            </div>
+
+            <div
+              class="device-name"
+              id="assetCode"
+            >
+              Loading…
+            </div>
+
+            <div
+              class="device-model"
+              id="deviceModel"
+            >
+              Loading model…
+            </div>
+
+            <span class="device-code">
+              Token:
+              <span
+                id="tokenDisplay"
+                style="margin-left:5px"
+              ></span>
+            </span>
+
+          </div>
+
+        </article>
+
+
+        <!-- VERIFY DEVICE -->
+
+        <article class="verify-card">
+
+          <div class="eyebrow">
+            Step 1
+          </div>
+
+          <h2>
+            Verify the device
+          </h2>
+
+          <p class="subtle">
+            Confirm this is the equipment you intended
+            to scan before creating an accountability record.
+          </p>
+
+          <button
+            class="verify-btn"
+            id="verifyBtn"
+            type="button"
+          >
+            Verify Device
+          </button>
+
+          <div class="verify-note">
+
+            <span>🔒</span>
+
+            <span>
+              Checkout, inspection, and issue reporting
+              remain disabled until verification succeeds.
+            </span>
+
+          </div>
+
+          <div
+            id="errorBox"
+            class="result"
+          ></div>
+
+        </article>
+
+      </div>
 
     </div>
 
-    <div id="qrReader"></div>
+
+    <!-- ========================================
+         DEVICE ACTIONS
+         ======================================== -->
+
+    <div
+      id="deviceActionsSection"
+      class="actions"
+    >
+
+      <div class="actions-title">
+
+        <div>
+
+          <div class="eyebrow">
+            Step 2
+          </div>
+
+          <h2 style="margin:5px 0 0">
+            Choose an action
+          </h2>
+
+        </div>
+
+        <button
+          id="changeDeviceAction"
+          class="back-link"
+          type="button"
+          hidden
+        >
+          ← Choose Different Device
+        </button>
+
+      </div>
+
+
+      <div class="action-grid">
+
+        <!-- 1. INSPECTION -->
+
+        <a
+          id="inspectionAction"
+          class="action-card disabled"
+          href="inspection.html"
+          aria-disabled="true"
+        >
+
+          <div class="action-icon">
+            ✓
+          </div>
+
+          <div class="action-copy">
+
+            <h3>
+              Record Inspection
+            </h3>
+
+            <p>
+              Inspect and verify the condition
+              of this equipment before checkout.
+            </p>
+
+          </div>
+
+          <span class="lock-pill">
+            LOCKED
+          </span>
+
+        </a>
+
+
+        <!-- 2. CHECKOUT -->
+
+        <a
+          id="custodyAction"
+          class="action-card disabled"
+          href="checkout.html"
+          aria-disabled="true"
+        >
+
+          <div class="action-icon">
+            ⬡
+          </div>
+
+          <div class="action-copy">
+
+            <h3>
+              Check Out Item
+            </h3>
+
+            <p>
+              Complete a passing inspection before
+              this equipment can be checked out.
+            </p>
+
+          </div>
+
+          <span class="lock-pill">
+            LOCKED
+          </span>
+
+        </a>
+
+
+        <!-- 3. REPORT ISSUE -->
+
+        <a
+          id="issueAction"
+          class="action-card disabled"
+          href="issue.html"
+          aria-disabled="true"
+        >
+
+          <div class="action-icon">
+            !
+          </div>
+
+          <div class="action-copy">
+
+            <h3>
+              Report an Issue
+            </h3>
+
+            <p>
+              Report damage, malfunction,
+              or another equipment concern.
+            </p>
+
+          </div>
+
+          <span class="lock-pill">
+            LOCKED
+          </span>
+
+        </a>
+
+
+        <!-- ==================================
+             4. EQUIPMENT ASSIGNMENT
+             ================================== -->
+
+        <a
+          id="supervisorEquipmentAction"
+          class="action-card"
+          href="supervisor-equipment-assignment.html"
+          hidden
+        >
+
+          <div class="action-icon">
+            ▣
+          </div>
+
+          <div class="action-copy">
+
+            <h3>
+              Assign Equipment to Officer
+            </h3>
+
+            <p>
+              Assign multiple available equipment items
+              to officers confirmed present on duty.
+            </p>
+
+          </div>
+
+          <span class="lock-pill">
+            AUTHORIZED
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <!-- ==================================
+           TRUST FOOTER
+           ================================== -->
+
+      <div class="footer-trust">
+
+        <div>
+
+          <strong>
+            SECURE. ACCOUNTABLE. TRUSTED.
+          </strong>
+
+          <br>
+
+          Every submitted action is tied to the
+          scanned asset and stored in the audit database.
+
+        </div>
+
+        <div>
+          ◉ NFC &nbsp; ▦ QR
+        </div>
+
+      </div>
+
+    </div>
 
   </section>
 
-
-  <div
-    id="deviceIdentificationResult"
-    "result"
-  ></div>
-
-</section>
-      
-      <div
-  id="deviceWorkflowSection"
-  "verify-section"
->
-        <div id="demoBanner" "demo-banner">Prototype mode: update <strong>config.js</strong> with Supabase credentials and set demoMode to false for live records.</div>
-        <div "verify-grid">
-          <article "device-card">
-            <div "device-image-wrap"><img id="deviceImage" src="assets/device-placeholder.svg" alt="Scanned equipment"></div>
-            <div "device-meta">
-              <div "eyebrow">Scanned device</div>
-              <div "device-name" id="assetCode">Loading…</div>
-              <div "device-model" id="deviceModel">Loading model…</div>
-              <span "device-code">Token: <span id="tokenDisplay" style="margin-left:5px"></span></span>
-            </div>
-          </article>
-
-          <article "verify-card">
-            <div "eyebrow">Step 1</div>
-            <h2>Verify the device</h2>
-            <p "subtle">Confirm this is the equipment you intended to scan before creating an accountability record.</p>
-            <button "verify-btn" id="verifyBtn">Verify Device</button>
-            <div "verify-note"><span>🔒</span><span>Checkout, inspection, and issue reporting remain disabled until verification succeeds.</span></div>
-            <div id="errorBox" "result"></div>
-          </article>
-        </div>
-      </div>
-
-     <div
-  id="deviceActionsSection"
-  "actions"
->
-        <div "actions-title">
-
-  <div>
-    <div "eyebrow">Step 2</div>
-    <h2 style="margin:5px 0 0">
-      Choose an action
-    </h2>
-  </div>
-
- <button
-  id="changeDeviceAction"
-  "back-link"
-  type="button"
-  hidden
->
-  ← Choose Different Device
-</button>
-
-</div>
-      <div class="action-grid">
-
-  <!-- 1. INSPECTION -->
-  <a
-    id="inspectionAction"
-    class="action-card disabled"
-    href="inspection.html"
-    aria-disabled="true"
-  >
-    <div class="action-icon">✓</div>
-
-    <div class="action-copy">
-      <h3>Record Inspection</h3>
-      <p>
-        Inspect and verify the condition of this equipment before checkout.
-      </p>
-    </div>
-
-    <span class="lock-pill">LOCKED</span>
-  </a>
+</main>
 
 
-  <!-- 2. CUSTODY -->
-  <a
-    id="custodyAction"
-    class="action-card disabled"
-    href="checkout.html"
-    aria-disabled="true"
-  >
-    <div class="action-icon">⬡</div>
+<!-- ==========================================
+     JAVASCRIPT DEPENDENCIES
+     ========================================== -->
 
-    <div class="action-copy">
-      <h3>Check Out Item</h3>
-      <p>
-        Complete a passing inspection before this equipment can be checked out.
-      </p>
-    </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <span class="lock-pill">LOCKED</span>
-  </a>
-
-
-  <!-- 3. ISSUE -->
-  <a
-    id="issueAction"
-    class="action-card disabled"
-    href="issue.html"
-    aria-disabled="true"
-  >
-    <div class="action-icon">!</div>
-
-    <div class="action-copy">
-      <h3>Report an Issue</h3>
-      <p>
-        Report damage, malfunction, or another equipment concern.
-      </p>
-    </div>
-
-    <span class="lock-pill">LOCKED</span>
-  </a>
-<!-- SUPERVISOR EQUIPMENT ASSIGNMENT -->
-<a
-  id="supervisorEquipmentAction"
-  class="action-card"
-  href="supervisor-equipment-assignment.html"
-  hidden
->
-  <div class="action-icon">▣</div>
-
-  <div class="action-copy">
-    <h3>Assign Equipment to Officer</h3>
-    <p>
-      Assign available equipment to officers
-      currently on duty.
-    </p>
-  </div>
-
-  <span class="lock-pill">AUTHORIZED</span>
-</a>
-</div>
-        <div class="footer-trust"><div><strong>SECURE. ACCOUNTABLE. TRUSTED.</strong><br>Every submitted action is tied to the scanned asset and stored in the audit database.</div><div>◉ NFC &nbsp; ▦ QR</div></div>
-      </div>
-    </section>
-  </main>
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+
 <script src="secure-page.js"></script>
+
 <script src="common.js"></script>
 
 <script
@@ -406,6 +659,9 @@
 ></script>
 
 <script src="index.js"></script>
-  <script src="equipment-assignment-link.js"></script>
+
+<!-- Equipment assignment authorization -->
+<script src="equipment-assignment-link.js"></script>
+
 </body>
 </html>
